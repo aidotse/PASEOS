@@ -14,7 +14,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("."))
-# Pro-tip to add the following line from https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/#fn-841-5
+# Pro-tip to add the following line from
+# https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/#fn-841-5
 sys.path.insert(0, os.path.abspath("../"))
 
 
