@@ -1,0 +1,11 @@
+name: romeos
+channels:
+- conda-forge
+dependencies:
+- loguru
+- pytest
+- python 
+- sphinx
+- sphinx_rtd_theme
+- toml
+- tqdm
