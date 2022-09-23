@@ -48,7 +48,7 @@ jobs:
         $CONDA/bin/conda env update --file environment.yml --name base
     - name: Test with pytest
       run: |
-        cd tests
+        cd romeos/tests
         conda install pytest
         $CONDA/bin/pip3 install pytest-error-for-skips
         $CONDA/bin/pytest -ra --error-for-skips
