@@ -1,3 +1,5 @@
+"""Trivial test to see if model import still succeeds."""
+
 import sys
 
 sys.path.append("../..")
