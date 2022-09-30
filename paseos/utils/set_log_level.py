@@ -13,7 +13,7 @@ def set_log_level(log_level: str):
         sys.stderr,
         colorize=True,
         level=log_level.upper(),
-        format="<green>{time:HH:mm:ss}</green>|ROMEOS-<blue>{level}</blue>| <level>{message}</level>",
-        filter="romeos",
+        format="<green>{time:HH:mm:ss}</green>|PASEOS-<blue>{level}</blue>| <level>{message}</level>",
+        filter="paseos",
     )
     logger.debug(f"Setting LogLevel to {log_level.upper()}")

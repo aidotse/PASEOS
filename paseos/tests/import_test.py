@@ -6,7 +6,7 @@ sys.path.append("../..")
 
 
 def test_import():
-    import romeos  # noqa: F401
+    import paseos  # noqa: F401
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 from loguru import logger
 
 from .utils.set_log_level import set_log_level
-from .romeos import ROMEOS
+from .paseos import PASEOS
 
 set_log_level("DEBUG")
 
@@ -10,7 +10,7 @@ logger.debug("Loaded module.")
 
 def init_sim():
     logger.debug("Initializing simulation.")
-    sim = ROMEOS()
+    sim = PASEOS()
     return sim
 
 

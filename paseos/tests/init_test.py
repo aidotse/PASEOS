@@ -6,9 +6,9 @@ sys.path.append("../..")
 
 
 def test_init():
-    import romeos
+    import paseos
 
-    sim = romeos.init_sim()
+    sim = paseos.init_sim()
     cfg = sim.get_cfg()  # noqa
 
 

@@ -1,6 +1,6 @@
 from loguru import logger
 
-from romeos.actors.base_actor import BaseActor
+from paseos.actors.base_actor import BaseActor
 
 
 class GroundstationActor(BaseActor):

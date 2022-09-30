@@ -1,6 +1,6 @@
-.. ROMEOS documentation master file
+.. PASEOS documentation master file
 
-Welcome to ROMEOS' documentation!
+Welcome to PASEOS' documentation!
 ================================
 
 .. toctree::

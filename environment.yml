@@ -1,4 +1,4 @@
-name: romeos
+name: paseos
 channels:
 - conda-forge
 dependencies:
