@@ -11,7 +11,6 @@ logger.debug("Loaded module.")
 def init_sim():
     logger.debug("Initializing simulation.")
     sim = ROMEOS()
-    sim.init()
     return sim
 
 
