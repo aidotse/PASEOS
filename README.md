@@ -1,2 +1,2 @@
-# ROMEOS
-ROMEOS - ROmeos Models the Environment for Operating Spacecraft swarms
+# PASEOS
+PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
