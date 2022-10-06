@@ -4,6 +4,7 @@ channels:
 dependencies:
 - dotmap
 - loguru
+- pykep
 - pytest
 - python 
 - sphinx
