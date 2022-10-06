@@ -2,6 +2,7 @@ name: paseos
 channels:
 - conda-forge
 dependencies:
+- dotmap
 - loguru
 - pytest
 - python 
