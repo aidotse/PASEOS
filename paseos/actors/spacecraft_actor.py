@@ -5,7 +5,8 @@ from paseos.actors.base_actor import BaseActor
 
 
 class SpacecraftActor(BaseActor):
-    """This class models a spacecraft actor which in addition to pos,velocity also has additional constraints such as power/battery."""
+    """This class models a spacecraft actor which in addition to pos,
+    velocity also has additional constraints such as power/battery."""
 
     # Power constraints
     # TODO
