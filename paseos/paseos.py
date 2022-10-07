@@ -51,6 +51,13 @@ class PASEOS:
             actor (BaseActor): Actor to add
         """
         logger.debug("Adding actor:" + str(actor))
+        # Check for duplicate actors by name
+        for existing_actor in self._state.actors:
+            if existing_actor.name == actor.name:
+                raise ValueError(
+                    "Trying to add actor with already existing name: " + actor.name
+                )
+        # Else add
         self._state.actors.append(actor)
 
     def set_central_body(self, planet: pk.planet):

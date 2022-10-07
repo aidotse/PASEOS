@@ -1,5 +1,6 @@
 dotmap
 loguru
 pykep
+scikit-spatial
 toml
 tqdm
