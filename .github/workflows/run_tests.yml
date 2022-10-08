@@ -46,12 +46,14 @@ jobs:
     - name: Install dependencies
       run: |
         $CONDA/bin/conda env update --file environment.yml --name base
-    - name: Test with pytest
+    - name: romeos tests with pytest
       run: |
         cd romeos/tests
         conda install pytest
         $CONDA/bin/pip3 install pytest-error-for-skips
         $CONDA/bin/pytest -ra --error-for-skips
-        cd ../scatterbrained/tests
+    - name: network tests with pytest 
+      run: |
+        cd scatterbrained/tests
         conda install pytest-asyncio
         $CONDA/bin/pytest -ra --error-for-skips
