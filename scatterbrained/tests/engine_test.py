@@ -1,16 +1,12 @@
-import asyncio
-import attrs
-from turtle import pos
-from unittest.mock import AsyncMock
-
+import sys
 import orjson
 import pytest
-
-import sys
+import asyncio
+import attrs
 sys.path.append("../..")
-import scatterbrained
 from scatterbrained.types import Identity
 from scatterbrained.network.engine import NetworkEngine
+from unittest.mock import AsyncMock
 
 
 # All test coroutines will be treated as marked.
@@ -19,17 +15,29 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture
 def id1():
-    return Identity(id="1", namespace="foo", host="127.0.0.1", port=9002, position=0)
+    return Identity(id="1",
+                    namespace="foo",
+                    host="127.0.0.1",
+                    port=9002,
+                    position=0)
 
 
 @pytest.fixture
 def id2():
-    return Identity(id="2", namespace="bar", host="127.0.0.1", port=9002, position=0)
+    return Identity(id="2",
+                    namespace="bar",
+                    host="127.0.0.1",
+                    port=9002,
+                    position=0)
 
 
 @pytest.fixture
 def id3():
-    return Identity(id="3", namespace="baz", host="127.0.0.1", port=9003, position=0)
+    return Identity(id="3",
+                    namespace="baz",
+                    host="127.0.0.1",
+                    port=9003,
+                    position=0)
 
 
 @pytest.fixture
@@ -209,7 +217,7 @@ async def test_NetworkEngine_send_to(id1, id2):
 
     tx = engine._physical_tx_connections[(id2.host, id2.port)]
     await tx.send.awaited_once_with(orjson.dumps(attrs.asdict(id1)),
-                              b"hello there")
+                                    b"hello there")
 
 
 @pytest.mark.unit

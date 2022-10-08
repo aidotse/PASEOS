@@ -3,7 +3,6 @@ import pytest
 import pytest_asyncio
 import zmq
 import zmq.asyncio
-
 import sys
 sys.path.append("../..")
 from scatterbrained.network.zmq_ip import ZMQReceiver, ZMQTransmitter

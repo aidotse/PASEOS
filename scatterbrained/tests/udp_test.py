@@ -2,10 +2,8 @@ import asyncio
 import socket
 from unittest.mock import AsyncMock
 import pytest
-
 import sys
 sys.path.append("../..")
-import scatterbrained
 from scatterbrained.discovery import udp
 
 
@@ -36,8 +34,7 @@ async def test_UDPBroadcaster_full(event_loop, addr, port):
     assert broadcaster._transport is None and broadcaster._protocol is None
 
     await broadcaster.open()
-    assert (broadcaster._transport is not None and
-            broadcaster._protocol is not None)
+    assert (broadcaster._transport is not None and broadcaster._protocol is not None)
 
     expected = b"hello world"
     await broadcaster.publish(expected)
@@ -62,8 +59,7 @@ async def test_UDPBroadcaster_full_async_with(event_loop, addr, port):
     assert broadcaster._transport is None and broadcaster._protocol is None
 
     async with broadcaster:
-        assert (broadcaster._transport is not None and
-                broadcaster._protocol is not None)
+        assert (broadcaster._transport is not None and broadcaster._protocol is not None)
 
         expected = b"hello world"
         await broadcaster.publish(expected)
@@ -122,8 +118,7 @@ async def test_UDPReceiver_async_with(event_loop, addr, port):
     assert receiver._transport is None and receiver._protocol is None
 
     async with receiver:
-        assert (receiver._transport is not None and
-                receiver._protocol is not None)
+        assert (receiver._transport is not None and receiver._protocol is not None)
 
         cond = asyncio.Condition()
         on_recv = AsyncMock(side_effect=mock_on_recv)
@@ -158,8 +153,7 @@ async def test_UDPReceiver_error(event_loop, addr, port):
     assert receiver._transport is None and receiver._protocol is None
 
     async with receiver:
-        assert (receiver._transport is not None and
-                receiver._protocol is not None)
+        assert (receiver._transport is not None and receiver._protocol is not None)
 
         cond = asyncio.Condition()
         on_recv = AsyncMock(side_effect=mock_on_recv)

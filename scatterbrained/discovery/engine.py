@@ -262,7 +262,7 @@ class DiscoveryEngine:
                 tasks = []
                 to_remove = set()
                 for peer, last_seen in self._last_seen.items():
-                    if ((now-last_seen).total_seconds() >= self._heartbeat*5):
+                    if ((now - last_seen).total_seconds() >= self._heartbeat * 5):
                         self._peers.remove(peer)
                         to_remove.add(peer)
                         task = asyncio.create_task(on_disappear(peer))

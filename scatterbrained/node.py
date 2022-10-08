@@ -222,9 +222,8 @@ class Namespace:
 
         """
         if (
-            self.operating_mode == OperatingMode.LEECHING
-            or self.operating_mode == OperatingMode.OFFLINE
-            or not self.peer_filter(peer)
+            self.operating_mode == OperatingMode.LEECHING or self.operating_mode == OperatingMode.OFFLINE or not
+                self.peer_filter(peer)
         ):
             return False
 
@@ -310,11 +309,7 @@ class Namespace:
         peer_set = set(peers)
 
         def check_fn():
-            return (
-                len(peer_set -
-                    set(v.id for v in self.node._peers_by_namespace[self.name])
-                    ) == 0
-            )
+            return (len(peer_set - set(v.id for v in self.node._peers_by_namespace[self.name])) == 0)
 
         if not check_fn():
             async with self._peer_cond:
@@ -324,7 +319,7 @@ class Namespace:
         peer_set = set(peers)
 
         def check_fn():
-            return len(peer_set-self.node._peers_by_namespace[self.name]) == 0
+            return len(peer_set - self.node._peers_by_namespace[self.name]) == 0
 
         if not check_fn():
             async with self._peer_cond:
