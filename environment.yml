@@ -4,8 +4,13 @@ channels:
 dependencies:
 - loguru
 - pytest
+- pytest-asyncio
 - python 
 - sphinx
 - sphinx_rtd_theme
 - toml
 - tqdm
+- orjson
+- pyzmq
+- rx
+- uvloop

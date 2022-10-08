@@ -6,8 +6,12 @@ from unittest.mock import AsyncMock
 import orjson
 import pytest
 
-from ..types import Identity
-from .engine import NetworkEngine
+import sys
+sys.path.append("../..")
+import scatterbrained
+from scatterbrained.types import Identity
+from scatterbrained.network.engine import NetworkEngine
+
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

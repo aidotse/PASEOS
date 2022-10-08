@@ -2,7 +2,12 @@ import asyncio
 import socket
 from unittest.mock import AsyncMock
 import pytest
-from . import udp
+
+import sys
+sys.path.append("../..")
+import scatterbrained
+from scatterbrained.discovery import udp
+
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

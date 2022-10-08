@@ -1,11 +1,12 @@
 import asyncio
-
 import pytest
 import pytest_asyncio
 import zmq
 import zmq.asyncio
 
-from .zmq_ip import ZMQReceiver, ZMQTransmitter
+import sys
+sys.path.append("../..")
+from scatterbrained.network.zmq_ip import ZMQReceiver, ZMQTransmitter
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio

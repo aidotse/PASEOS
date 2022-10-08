@@ -2,3 +2,7 @@ dotmap
 loguru
 tqdm
 toml
+orjson
+pyzmq
+rx
+uvloop
