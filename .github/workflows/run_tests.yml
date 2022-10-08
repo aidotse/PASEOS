@@ -52,6 +52,6 @@ jobs:
         conda install pytest
         $CONDA/bin/pip3 install pytest-error-for-skips
         $CONDA/bin/pytest -ra --error-for-skips
-        cd scatterbrained/tests
+        cd ../scatterbrained/tests
         conda install pytest-asyncio
         $CONDA/bin/pytest -ra --error-for-skips
