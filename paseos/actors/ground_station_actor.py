@@ -10,7 +10,8 @@ class GroundstationActor(BaseActor):
     def __init__(
         self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
     ) -> None:
-        """Constructor for a groundstation actor
+        """Constructor for a groundstation actor. 
+        Pos / velocity are relative to central body origin.
 
         Args:
             name (str): Name of this actor

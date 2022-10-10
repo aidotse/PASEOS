@@ -23,6 +23,7 @@ def test_adding_sat():
     sim.add_actor(actor)
 
     # check initial positions
+    # r - position vector, v - velocity vector
     r, v = actor.get_position_velocity(pk.epoch(0))
     assert np.isclose(r[0], 1000000)
     assert np.isclose(r[1], 0)
