@@ -24,7 +24,7 @@ jobs:
     - name: Lint with flake8
       run: |
         pip install flake8
-        flake8 . --count --show-source --statistics
+        flake8 . --count --show-source --statistics --max-line-length=127 --ignore=E402,W503
 
   build:
 
@@ -40,7 +40,7 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         pip install flake8
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=127
     #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install dependencies
@@ -48,7 +48,7 @@ jobs:
         $CONDA/bin/conda env update --file environment.yml --name base
     - name: Test with pytest
       run: |
-        cd romeos/tests
+        cd paseos/tests
         conda install pytest
         $CONDA/bin/pip3 install pytest-error-for-skips
         $CONDA/bin/pytest -ra --error-for-skips

@@ -1,2 +1,2 @@
 # PASEOS
-PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft 
