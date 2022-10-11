@@ -18,11 +18,9 @@ class BaseActor(ABC):
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
-    # Constraint for max bandwidth used when comms are available
-    _max_bandwidth_kbps = None
-
     # Earth as a sphere (for now)
     # TODO replace this in the future depending on central body
+    # Note that this needs to be specified in solar reference frame for now
     _central_body_sphere = Sphere([0, 0, 0], 6371000)
 
     def __init__(
@@ -38,6 +36,7 @@ class BaseActor(ABC):
             central_body (pk.planet): pykep central body
         """
         logger.trace("Instantiating Actor.")
+        BaseActor._check_init_value_sensibility(position, velocity)
         super().__init__()
         self.name = name
         self._orbital_parameters = pk.planet.keplerian(
@@ -51,8 +50,26 @@ class BaseActor(ABC):
             name,
         )
 
+    @staticmethod
+    def _check_init_value_sensibility(
+        position,
+        velocity,
+    ):
+        """A function to check user inputs for sensibility
+
+        Args:
+            position (list of floats): [x,y,z]
+            velocity (list of floats): [vx,vy,vz]
+        """
+        logger.trace("Checking constructor values for sensibility.")
+        assert len(position) == 3, "Position has to have 3 elements (x,y,z)"
+        assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
+
     def __str__(self):
         return self._orbital_parameters.name
+
+    def charge(self, t: pk.epoch):
+        pass
 
     def get_position_velocity(self, epoch: pk.epoch):
         logger.trace(

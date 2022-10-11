@@ -18,7 +18,9 @@ def test_init():
 
 def test_adding_sat():
     earth = pk.planet.jpl_lp("earth")
-    actor = SpacecraftActor("sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
+    actor = SpacecraftActor(
+        "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
+    )
     sim = paseos.init_sim()
     sim.add_actor(actor)
 
