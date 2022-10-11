@@ -1,7 +1,6 @@
 """This file provides method for computing whether an actor is currently in eclipse"""
 import pykep as pk
 import numpy as np
-import pykep as pk
 from skspatial.objects import Line
 from loguru import logger
 
