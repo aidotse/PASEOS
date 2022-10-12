@@ -17,13 +17,17 @@ class PASEOS:
     # Stores the simulation state
     _state = None
 
-    # Storing actors as dictionary for easy access
-    actors = None
+    # Storing actors we know as dictionary for easy access
+    # Does not include local actor.
+    known_actors = None
+
+    # The actor of the device this is running on
+    local_actor = None
 
     # Stores registered activities
     _activities = None
 
-    def __new__(self):
+    def __new__(self, local_actor: BaseActor):
         if not hasattr(self, "instance"):
             self.instance = super(PASEOS, self).__new__(self)
         else:
@@ -32,12 +36,13 @@ class PASEOS:
             )
         return self.instance
 
-    def __init__(self):
+    def __init__(self, local_actor: BaseActor):
         logger.trace("Initializing PASEOS")
         self._cfg = load_default_cfg()
         self._state = DotMap(_dynamic=False)
-        self._state.time = 0
-        self.actors = {}
+        self._state.time = self._cfg.sim.start_time
+        self.known_actors = {}
+        self.local_actor = local_actor
         self._activities = {}
 
     def advance_time(self, time_to_advance: float):
@@ -53,33 +58,37 @@ class PASEOS:
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
-            for name, actor in self.actors.items():
-                # TODO double check this modifies inplace
-                actor.charge()
+            # Perform updates for local actor (e.g. charging)
+            # Each actor only updates itself
+            self.local_actor.charge()
 
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
                 dt = self._state.time - target_time
 
             self._state.time += dt
+            self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
 
-    def add_actor(self, actor: BaseActor):
+    def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.
 
         Args:
             actor (BaseActor): Actor to add
         """
         logger.debug("Adding actor:" + str(actor))
-        logger.debug("Current actors: " + str(self.actors.keys()))
+        logger.debug("Current actors: " + str(self.known_actors.keys()))
         # Check for duplicate actors by name
-        if actor.name in self.actors.keys():
+        if actor.name in self.known_actors.keys():
             raise ValueError(
-                "Trying to add actor with already existing name: " + actor.name
+                "Trying to add already existing actor with name: " + actor.name
             )
         # Else add
-        self.actors[actor.name] = actor
+        self.known_actors[actor.name] = actor
+
+    def emtpy_known_actors(self):
+        self.known_actors = {}
 
     def register_activity(
         self,

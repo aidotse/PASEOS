@@ -15,6 +15,9 @@ class BaseActor(ABC):
     # Actor name, has to be unique
     name = None
 
+    # Timestep this actor's info is at (excl. pos/vel)
+    _local_time = None
+
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
@@ -39,6 +42,7 @@ class BaseActor(ABC):
         BaseActor._check_init_value_sensibility(position, velocity)
         super().__init__()
         self.name = name
+        self._local_time = epoch
         self._orbital_parameters = pk.planet.keplerian(
             epoch,
             position,
@@ -67,6 +71,14 @@ class BaseActor(ABC):
 
     def __str__(self):
         return self._orbital_parameters.name
+
+    def set_time(self, t: pk.epoch):
+        """Updates the local time of the actor.
+
+        Args:
+            t (pk.epoch): Local time to set to.
+        """
+        self._local_time = t
 
     def charge(self, t: pk.epoch):
         pass

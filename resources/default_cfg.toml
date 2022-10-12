@@ -1,5 +1,6 @@
 [sim]
-dt = "1" # [s] Internal timestep used for computing charging, etc.
+start_time = 0 # [s] Start time of the simulation in seconds after MJD2000
+dt = 1 # [s] Internal timestep used for computing charging, etc.
 
 [comms]
 

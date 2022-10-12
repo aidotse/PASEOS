@@ -11,18 +11,30 @@ import numpy as np
 
 
 def test_init():
-    sim = paseos.init_sim()
+
+    # Define central body
+    earth = pk.planet.jpl_lp("earth")
+
+    # Define local actor
+    actor = SpacecraftActor(
+        "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
+    )
+
+    # Init sim
+    sim = paseos.init_sim(actor)
     cfg = sim.get_cfg()  # noqa
     print(cfg)
 
 
 def test_adding_sat():
+    # Define central body
     earth = pk.planet.jpl_lp("earth")
+
+    # Define local actor
     actor = SpacecraftActor(
         "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
     )
-    sim = paseos.init_sim()
-    sim.add_actor(actor)
+    sim = paseos.init_sim(actor)
 
     # check initial positions
     # r - position vector, v - velocity vector
