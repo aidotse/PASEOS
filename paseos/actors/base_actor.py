@@ -26,6 +26,9 @@ class BaseActor(ABC):
     # Note that this needs to be specified in solar reference frame for now
     _central_body_sphere = Sphere([0, 0, 0], 6371000)
 
+    # Central body this actor is orbiting
+    _central_body = None
+
     def __init__(
         self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
     ) -> None:
@@ -43,6 +46,7 @@ class BaseActor(ABC):
         super().__init__()
         self.name = name
         self._local_time = epoch
+        self._central_body = central_body
         self._orbital_parameters = pk.planet.keplerian(
             epoch,
             position,
