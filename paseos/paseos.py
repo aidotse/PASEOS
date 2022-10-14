@@ -19,10 +19,10 @@ class PASEOS:
 
     # Storing actors we know as dictionary for easy access
     # Does not include local actor.
-    known_actors = None
+    _known_actors = None
 
     # The actor of the device this is running on
-    local_actor = None
+    _local_actor = None
 
     # Stores registered activities
     _activities = None
@@ -41,9 +41,9 @@ class PASEOS:
         self._cfg = load_default_cfg()
         self._state = DotMap(_dynamic=False)
         self._state.time = self._cfg.sim.start_time
-        self.known_actors = {}
-        self.local_actor = local_actor
-        self._activities = {}
+        self._known_actors = {}
+        self._local_actor = local_actor
+        self._activities = DotMap(_dynamic=False)
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
@@ -58,16 +58,20 @@ class PASEOS:
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
-            # Perform updates for local actor (e.g. charging)
-            # Each actor only updates itself
-            self.local_actor.charge()
-
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
                 dt = self._state.time - target_time
 
+            # Perform updates for local actor (e.g. charging)
+            # Each actor only updates itself
+            # charge from current moment to time after timestep
+            self._local_actor.charge(
+                self._local_actor._local_time,
+                pk.epoch((self._state.time + dt) * pk.SEC2DAY),
+            )
+
             self._state.time += dt
-            self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+            self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
 
@@ -78,46 +82,82 @@ class PASEOS:
             actor (BaseActor): Actor to add
         """
         logger.debug("Adding actor:" + str(actor))
-        logger.debug("Current actors: " + str(self.known_actors.keys()))
+        logger.debug("Current actors: " + str(self._known_actors.keys()))
         # Check for duplicate actors by name
-        if actor.name in self.known_actors.keys():
+        if actor.name in self._known_actors.keys():
             raise ValueError(
                 "Trying to add already existing actor with name: " + actor.name
             )
         # Else add
-        self.known_actors[actor.name] = actor
+        self._known_actors[actor.name] = actor
 
     def emtpy_known_actors(self):
-        self.known_actors = {}
+        self._known_actors = {}
 
     def register_activity(
         self,
         name: str,
         requires_line_of_sight: bool,
-        power_consumption_in_wattseconds=-1.0,
+        power_consumption_in_watt: float = None,
     ):
-        """Registers an activity that can then be performed on any actor.
+        """Registers an activity that can then be performed on the local actor.
 
         Args:
             name (str): Name of the activity
             requires_line_of_sight (bool): Whether this requires line of sight to other node.
-            power_consumption_in_wattseconds (float, optional): Power consumption of performing the activity. Defaults to -1.0.
+            power_consumption_in_watt (float, optional): Power consumption of performing the activity (per second). Defaults to None.
         """
-        # TODO Store activity
-        raise NotImplementedError()
+        if name in self._activities.keys():
+            raise ValueError(
+                "Trying to add already existing activity with name: "
+                + name
+                + ". Already have "
+                + str(self._activities[name])
+            )
+
+        self._activities[name] = DotMap(
+            requires_line_of_sight=requires_line_of_sight,
+            power_consumption_in_watt=power_consumption_in_watt,
+        )
 
     def perform_activity(
-        self, actor_name: str, name: str, power_consumption_in_wattseconds: float = None
+        self,
+        name: str,
+        power_consumption_in_watt: float = None,
+        duration_in_s: float = 1.0,
     ):
-        # Check if activity and actor exist and if it already had consumption specified
+        """Perform the activity and discharge battery accordingly
+
+        Args:
+            name (str): Name of the activity
+            power_consumption_in_watt (float, optional): Power consumption of the activity in seconds if not specified. Defaults to None.
+            duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
+
+        Returns:
+            bool: Whether the activity was performed successfully.
+        """
+        # Check if activity exists and if it already had consumption specified
+        assert name in self._activities.keys(), (
+            "Activity not found. Declared activities are" + self._activities.keys()
+        )
+        if power_consumption_in_watt == None:
+            power_consumption_in_watt = self._activities.power_consumption_in_watt
+
+        assert power_consumption_in_watt > 0, (
+            "Power consumption has to be positive but was either in activity or call specified as "
+            + str(power_consumption_in_watt)
+        )
+
+        assert duration_in_s > 0, "Duration has to be positive."
+
         # TODO
         # Check if line of sight requirement is fulfilled and if enough power available
+
         # TODO
-        # Perform activity
-        # TODO
-        # Return success status
-        # TODO
-        raise NotImplementedError()
+        # Perform activity, maybe we allow the user pass a function to be executed?
+        self._local_actor.discharge(power_consumption_in_watt, duration_in_s)
+
+        return True
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation

@@ -23,7 +23,6 @@ def test_init():
     # Init sim
     sim = paseos.init_sim(actor)
     cfg = sim.get_cfg()  # noqa
-    print(cfg)
 
 
 def test_adding_sat():

@@ -84,8 +84,25 @@ class BaseActor(ABC):
         """
         self._local_time = t
 
-    def charge(self, t: pk.epoch):
+    def charge(self, t0: pk.epoch, t1: pk.epoch):
+        """Charges the actor during that period. Not implemented by default.
+
+        Args:
+            t0 (pk.epoch): Start of the charging interval
+            t1 (pk.epoch): End of the charging interval
+
+        """
         pass
+
+    def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
+        """Discharge battery depending on power consumption. Not implemented by default.
+
+        Args:
+            consumption_rate_in_W (float): Consumption rate of the activity in Watt
+            duration_in_s (float): How long the activity is performed in seconds
+        """
+        pass
+
 
     def get_position_velocity(self, epoch: pk.epoch):
         logger.trace(
@@ -133,7 +150,6 @@ class BaseActor(ABC):
                 other_actor_pos[2] - my_pos[2],
             ],
         )
-        print(line_between_actors)
         if plot:
             from skspatial.plotting import plot_3d
 
