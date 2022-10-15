@@ -9,35 +9,24 @@ from paseos import SpacecraftActor
 import pykep as pk
 import numpy as np
 
+from test_utils import get_default_instance
+
 
 def test_init():
-
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
-
-    # Define local actor
-    actor = SpacecraftActor(
-        "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
-    )
-
-    # Init sim
-    sim = paseos.init_sim(actor)
+    sim, sat1, earth = get_default_instance()  # noqa
     cfg = sim.get_cfg()  # noqa
 
 
 def test_adding_sat():
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
+    sim, _, earth = get_default_instance()
 
-    # Define local actor
-    actor = SpacecraftActor(
+    sat1 = SpacecraftActor(
         "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
     )
-    sim = paseos.init_sim(actor)
 
     # check initial positions
     # r - position vector, v - velocity vector
-    r, v = actor.get_position_velocity(pk.epoch(0))
+    r, v = sat1.get_position_velocity(pk.epoch(0))
     assert np.isclose(r[0], 1000000)
     assert np.isclose(r[1], 0)
     assert np.isclose(r[2], 0)
@@ -46,7 +35,7 @@ def test_adding_sat():
     assert np.isclose(v[2], 0)
 
     # check positions one second later
-    r, v = actor.get_position_velocity(pk.epoch(1 * pk.SEC2DAY))
+    r, v = sat1.get_position_velocity(pk.epoch(1 * pk.SEC2DAY))
     assert np.isclose(r[0], 999800.6897266058)
     assert np.isclose(r[1], 7999.468463301808)
     assert np.isclose(r[2], 0.0)

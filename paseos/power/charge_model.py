@@ -1,4 +1,5 @@
 """This file contains models of the battery charge via e.g. solar power"""
+from loguru import logger
 
 
 def charge(
@@ -16,7 +17,9 @@ def charge(
     Returns:
         SpacecraftActor: Modified actor after charging.
     """
+    logger.trace("Charging actor" + str(actor) + " for " + str(charging_time_in_s) + " seconds using model " + model)
     assert charging_time_in_s > 0, "Charging time has to be positive."
+
     if model == "simple":
         actor.battery_level_in_Ws += actor._charging_rate_in_W * charging_time_in_s
         actor.battery_level_in_Ws = min(

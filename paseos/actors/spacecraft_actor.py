@@ -88,6 +88,7 @@ class SpacecraftActor(BaseActor):
 
         """
         time_interval = (t1.mjd2000 - t0.mjd2000) * pk.DAY2SEC
+        logger.debug(f"Charging actor {self} for {time_interval}s.")
         assert (
             time_interval > 0
         ), "Charging interval has to be positive but t1 was less or equal t0."
@@ -95,6 +96,7 @@ class SpacecraftActor(BaseActor):
         if is_in_eclipse(self, central_body=self._central_body, t=t0) or is_in_eclipse(
             self, central_body=self._central_body, t=t1
         ):
-            return
+            logger.debug("Actor is in eclipse, not charging.")
         else:
             self = charge_model.charge(self, time_interval)
+        logger.debug(f"New battery level is {self.battery_level_in_Ws}")
