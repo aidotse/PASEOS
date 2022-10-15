@@ -103,7 +103,6 @@ class BaseActor(ABC):
         """
         pass
 
-
     def get_position_velocity(self, epoch: pk.epoch):
         logger.trace(
             "Computing "

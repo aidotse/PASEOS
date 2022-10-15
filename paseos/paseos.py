@@ -131,7 +131,8 @@ class PASEOS:
 
         Args:
             name (str): Name of the activity
-            power_consumption_in_watt (float, optional): Power consumption of the activity in seconds if not specified. Defaults to None.
+            power_consumption_in_watt (float, optional): Power consumption of the
+            activity in seconds if not specified. Defaults to None.
             duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
 
         Returns:

@@ -4,7 +4,6 @@ import sys
 
 sys.path.append("../..")
 
-import paseos
 from paseos import SpacecraftActor
 import pykep as pk
 import numpy as np

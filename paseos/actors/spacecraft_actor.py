@@ -80,7 +80,9 @@ class SpacecraftActor(BaseActor):
         self = discharge_model.discharge(self, consumption_rate_in_W * duration_in_s)
 
     def charge(self, t0: pk.epoch, t1: pk.epoch):
-        """Charges the actor during that period. Note that it is only verified the actor is neither at start nor end of the period in eclipse, thus short periods are preferable.
+        """Charges the actor during that period. Note that it is only
+        verified the actor is neither at start nor end of the period in eclipse,
+        thus short periods are preferable.
 
         Args:
             t0 (pk.epoch): Start of the charging interval
