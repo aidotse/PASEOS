@@ -61,6 +61,7 @@ class PASEOS:
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
                 dt = target_time - self._state.time
+            logger.trace(f"Time {self._state.time}, advancing {dt}")
 
             # Perform updates for local actor (e.g. charging)
             # Each actor only updates itself
@@ -122,6 +123,8 @@ class PASEOS:
             _dynamic=False,
         )
 
+        logger.debug(f"Registered activity {self._activities[name]}")
+
     def perform_activity(
         self,
         name: str,
@@ -144,6 +147,7 @@ class PASEOS:
             "Activity not found. Declared activities are" + self._activities.keys()
         )
         activity = self._activities[name]
+        logger.debug(f"Performing activity {activity}")
 
         if power_consumption_in_watt is None:
             power_consumption_in_watt = activity.power_consumption_in_watt
@@ -163,7 +167,11 @@ class PASEOS:
 
         # TODO
         # Perform activity, maybe we allow the user pass a function to be executed?
+
+        # Discharge power for the activity
         self._local_actor.discharge(power_consumption_in_watt, duration_in_s)
+
+        logger.trace(f"Activity {activity} completed.")
 
         return True
 
