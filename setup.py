@@ -1,5 +1,5 @@
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="paseos",
