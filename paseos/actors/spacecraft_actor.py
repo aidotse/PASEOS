@@ -76,7 +76,7 @@ class SpacecraftActor(BaseActor):
         """
         assert duration_in_s > 0, "Duration has to be positive"
         assert consumption_rate_in_W > 0, "Power consumption rate has to be positive"
-        
+
         power_consumption = consumption_rate_in_W * duration_in_s
         logger.debug(f"Discharging {power_consumption}")
 
