@@ -1,4 +1,6 @@
 dotmap
 loguru
-tqdm
+pykep
+scikit-spatial
 toml
+tqdm

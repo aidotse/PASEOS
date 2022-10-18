@@ -1,10 +1,13 @@
-name: romeos
+name: paseos
 channels:
 - conda-forge
 dependencies:
+- dotmap
 - loguru
+- pykep
 - pytest
 - python 
+- scikit-spatial
 - sphinx
 - sphinx_rtd_theme
 - toml
