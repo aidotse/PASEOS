@@ -205,7 +205,7 @@ class BaseActor(ABC):
             dt (float): simulation timestep [s].
             t0 (float): current simulation time [s].
             data_to_send_in_b (int): amount of data to transmit [b].
-            window_timeout_value_in_s (float, optional): timeout value for estimating the communication window. Defaults to 7200.0.
+            window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
         Returns:
             int: remaining amount of data to transmit [b].
             float: length of the remaining communication window [s].
