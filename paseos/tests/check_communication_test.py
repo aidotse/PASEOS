@@ -9,6 +9,7 @@ import pykep as pk
 
 
 def test_communication_link():
+    
     # create satellites where sat1 and sat2 starts from the same point but move along different orbit.
     # At t=1470s they will not be in line of sight anymore.
     earth = pk.planet.jpl_lp("earth")
