@@ -60,7 +60,8 @@ class PASEOS:
         while self._state.time < target_time:
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
-                dt = self._state.time - target_time
+                dt = target_time - self._state.time
+            logger.trace(f"Time {self._state.time}, advancing {dt}")
 
             # Perform updates for local actor (e.g. charging)
             # Each actor only updates itself
@@ -97,15 +98,16 @@ class PASEOS:
     def register_activity(
         self,
         name: str,
-        requires_line_of_sight: bool,
+        requires_line_of_sight_to: list = None,
         power_consumption_in_watt: float = None,
     ):
         """Registers an activity that can then be performed on the local actor.
 
         Args:
             name (str): Name of the activity
-            requires_line_of_sight (bool): Whether this requires line of sight to other node.
-            power_consumption_in_watt (float, optional): Power consumption of performing the activity (per second). Defaults to None.
+            requires_line_of_sight_to (list): List of strings with names of actors which need to be visible for this activity.
+            power_consumption_in_watt (float, optional): Power consumption of performing
+            the activity (per second). Defaults to None.
         """
         if name in self._activities.keys():
             raise ValueError(
@@ -116,9 +118,12 @@ class PASEOS:
             )
 
         self._activities[name] = DotMap(
-            requires_line_of_sight=requires_line_of_sight,
+            requires_line_of_sight_to=requires_line_of_sight_to,
             power_consumption_in_watt=power_consumption_in_watt,
+            _dynamic=False,
         )
+
+        logger.debug(f"Registered activity {self._activities[name]}")
 
     def perform_activity(
         self,
@@ -130,7 +135,8 @@ class PASEOS:
 
         Args:
             name (str): Name of the activity
-            power_consumption_in_watt (float, optional): Power consumption of the activity in seconds if not specified. Defaults to None.
+            power_consumption_in_watt (float, optional): Power consumption of the
+            activity in seconds if not specified. Defaults to None.
             duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
 
         Returns:
@@ -140,8 +146,11 @@ class PASEOS:
         assert name in self._activities.keys(), (
             "Activity not found. Declared activities are" + self._activities.keys()
         )
-        if power_consumption_in_watt == None:
-            power_consumption_in_watt = self._activities.power_consumption_in_watt
+        activity = self._activities[name]
+        logger.debug(f"Performing activity {activity}")
+
+        if power_consumption_in_watt is None:
+            power_consumption_in_watt = activity.power_consumption_in_watt
 
         assert power_consumption_in_watt > 0, (
             "Power consumption has to be positive but was either in activity or call specified as "
@@ -152,10 +161,17 @@ class PASEOS:
 
         # TODO
         # Check if line of sight requirement is fulfilled and if enough power available
+        assert (
+            activity.requires_line_of_sight_to is None
+        ), "Line of Sight for activities is not implemented"
 
         # TODO
         # Perform activity, maybe we allow the user pass a function to be executed?
+
+        # Discharge power for the activity
         self._local_actor.discharge(power_consumption_in_watt, duration_in_s)
+
+        logger.trace(f"Activity {activity} completed.")
 
         return True
 

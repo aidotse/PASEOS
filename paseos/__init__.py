@@ -13,6 +13,14 @@ logger.debug("Loaded module.")
 
 
 def init_sim(local_actor: BaseActor):
+    """Initializes PASEOS
+
+    Args:
+        local_actor (BaseActor): The actor linked to the local device which is required to model anything.
+
+    Returns:
+        PASEOS: Instance of the simulation (only one can exist, singleton)
+    """
     logger.debug("Initializing simulation.")
     sim = PASEOS(local_actor=local_actor)
     return sim

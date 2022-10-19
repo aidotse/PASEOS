@@ -3,26 +3,17 @@ import sys
 
 sys.path.append("../..")
 
-import paseos
 from paseos import SpacecraftActor
 
 import pykep as pk
+
+from test_utils import get_default_instance
 
 
 def test_los():
     """create satellites where sat1 and 2 are in sight of each other (as well as sat 1 and 3)
     but sat 2 and 3 are on opposite sides of the planet"""
-
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
-
-    # Define local actor
-    sat1 = SpacecraftActor(
-        "sat1", [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
-    )
-
-    # init simulation
-    sim = paseos.init_sim(sat1)
+    sim, sat1, earth = get_default_instance()
 
     sat2 = SpacecraftActor(
         "sat2", [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth, 1, 1, 1
