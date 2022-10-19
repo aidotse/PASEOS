@@ -5,6 +5,9 @@ from skspatial.objects import Line, Sphere
 
 from abc import ABC
 
+from dotmap import DotMap
+from ..communication.check_communication_link import check_communication_link
+
 
 class BaseActor(ABC):
     """This (abstract) class is the baseline implementation of an actor
@@ -28,6 +31,9 @@ class BaseActor(ABC):
 
     # Central body this actor is orbiting
     _central_body = None
+
+    # Communication links dictionary
+    _communication_links = DotMap(_dynamic=False)
 
     def __init__(
         self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
@@ -57,6 +63,7 @@ class BaseActor(ABC):
             1.0,
             name,
         )
+        self._communication_links = DotMap(_dynamic=False)
 
     @staticmethod
     def _check_init_value_sensibility(
@@ -102,7 +109,6 @@ class BaseActor(ABC):
             duration_in_s (float): How long the activity is performed in seconds
         """
         pass
-
 
     def get_position_velocity(self, epoch: pk.epoch):
         logger.trace(
@@ -172,3 +178,40 @@ class BaseActor(ABC):
                 )
             return True
         return False
+
+    def add_communication_links(self, name, bandwidth_in_kbps):
+        """Creates a communication link.
+
+        Args:
+            name (str): name of the communication link.
+            bandwidth_in_kbps (float): link bandwidth in kbps.
+        """
+        self._communication_links[name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
+
+    def check_communication_link(
+        self,
+        local_actor_communication_link_name,
+        actor,
+        dt: float,
+        t0: float,
+        data_to_send_in_b: int,
+        window_timeout_value_in_s=7200.0
+    ):
+        """Checks how much data can be transmitted over the communication link and the length of the communication link.
+
+        Args:
+            local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
+            actor (base_actor): other actor.
+            dt (float): simulation timestep [s].
+            t0 (float): current simulation time [s].
+            data_to_send_in_b (int): amount of data to transmit [b].
+            window_timeout_value_in_s (float, optional): timeout value for the estimation of communication window. Defaults to 7200.0.
+            
+
+        Returns:
+            int: remaining amount of data to transmit [b].
+            float: length of the remaining communication window [s].
+        """
+        return check_communication_link(
+            self, local_actor_communication_link_name, actor, dt, t0, data_to_send_in_b, window_timeout_value_in_s
+        )
