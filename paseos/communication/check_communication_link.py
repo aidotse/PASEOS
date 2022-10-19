@@ -3,6 +3,7 @@
 import pykep as pk
 from loguru import logger
 
+
 def check_communication_link(
     local_actor,
     local_actor_communication_link_name,
