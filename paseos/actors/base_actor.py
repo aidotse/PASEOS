@@ -6,7 +6,7 @@ from skspatial.objects import Line, Sphere
 from abc import ABC
 
 from dotmap import DotMap
-from ..communication.check_communication_link import check_communication_link
+from ..communication.get_communication_window import get_communication_window
 
 
 class BaseActor(ABC):
@@ -186,30 +186,42 @@ class BaseActor(ABC):
             name (str): name of the communication link.
             bandwidth_in_kbps (float): link bandwidth in kbps.
         """
+        if name in self._communication_links:
+            raise ValueError(
+                "Trying to add already existing communication link with name: " + name
+            )
+
         self._communication_links[name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
-    def check_communication_link(
+    def get_communication_window(
         self,
         local_actor_communication_link_name,
-        actor,
+        target_actor,
         dt: float,
         t0: float,
         data_to_send_in_b: int,
-        window_timeout_value_in_s=7200.0
+        window_timeout_value_in_s=7200.0,
     ):
         """Checks how much data can be transmitted over the communication link and the length of the communication link.
 
         Args:
             local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
-            actor (base_actor): other actor.
-            dt (float): simulation timestep [s].
-            t0 (float): current simulation time [s].
+            target_actor (base_actor): other actor.
+            dt (float): simulation timestep.
+            t0 (pk.epoch): current simulation time [s].
             data_to_send_in_b (int): amount of data to transmit [b].
             window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
         Returns:
-            int: remaining amount of data to transmit [b].
-            float: length of the remaining communication window [s].
+            pk.epoch: communication window start time.
+            k.epoch: communication window end time.
+            int: data that can be transmitted in the communication window [b].
         """
-        return check_communication_link(
-            self, local_actor_communication_link_name, actor, dt, t0, data_to_send_in_b, window_timeout_value_in_s
+        return get_communication_window(
+            self,
+            local_actor_communication_link_name,
+            target_actor,
+            dt,
+            t0,
+            data_to_send_in_b,
+            window_timeout_value_in_s,
         )
