@@ -5,6 +5,9 @@ from skspatial.objects import Line, Sphere
 
 from abc import ABC
 
+from dotmap import DotMap
+from ..communication.get_communication_window import get_communication_window
+
 
 class BaseActor(ABC):
     """This (abstract) class is the baseline implementation of an actor
@@ -28,6 +31,9 @@ class BaseActor(ABC):
 
     # Central body this actor is orbiting
     _central_body = None
+
+    # Communication links dictionary
+    _communication_links = DotMap(_dynamic=False)
 
     def __init__(
         self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
@@ -57,6 +63,7 @@ class BaseActor(ABC):
             1.0,
             name,
         )
+        self._communication_links = DotMap(_dynamic=False)
 
     @staticmethod
     def _check_init_value_sensibility(
@@ -171,3 +178,50 @@ class BaseActor(ABC):
                 )
             return True
         return False
+
+    def add_communication_links(self, name, bandwidth_in_kbps):
+        """Creates a communication link.
+
+        Args:
+            name (str): name of the communication link.
+            bandwidth_in_kbps (float): link bandwidth in kbps.
+        """
+        if name in self._communication_links:
+            raise ValueError(
+                "Trying to add already existing communication link with name: " + name
+            )
+
+        self._communication_links[name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
+
+    def get_communication_window(
+        self,
+        local_actor_communication_link_name,
+        target_actor,
+        dt: float,
+        t0: float,
+        data_to_send_in_b: int,
+        window_timeout_value_in_s=7200.0,
+    ):
+        """Returning the communication window and the data amount that can be transmitted from the local to the target actor.
+
+        Args:
+            local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
+            target_actor (base_actor): other actor.
+            dt (float): simulation timestep.
+            t0 (pk.epoch): current simulation time [s].
+            data_to_send_in_b (int): amount of data to transmit [b].
+            window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
+        Returns:
+            pk.epoch: communication window start time.
+            k.epoch: communication window end time.
+            int: data that can be transmitted in the communication window [b].
+        """
+        return get_communication_window(
+            self,
+            local_actor_communication_link_name,
+            target_actor,
+            dt,
+            t0,
+            data_to_send_in_b,
+            window_timeout_value_in_s,
+        )
