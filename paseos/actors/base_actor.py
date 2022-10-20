@@ -202,7 +202,7 @@ class BaseActor(ABC):
         data_to_send_in_b: int,
         window_timeout_value_in_s=7200.0,
     ):
-        """Returning the communication window and the amount of data that can be transmitted from the local to the target actor.
+        """Returning the communication window and the data amount that can be transmitted from the local to the target actor.
 
         Args:
             local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
