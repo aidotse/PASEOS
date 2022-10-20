@@ -15,15 +15,19 @@ class BaseActor(ABC):
     # Actor name, has to be unique
     name = None
 
+    # Timestep this actor's info is at (excl. pos/vel)
+    _local_time = None
+
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
-    # Constraint for max bandwidth used when comms are available
-    _max_bandwidth_kbps = None
-
     # Earth as a sphere (for now)
     # TODO replace this in the future depending on central body
+    # Note that this needs to be specified in solar reference frame for now
     _central_body_sphere = Sphere([0, 0, 0], 6371000)
+
+    # Central body this actor is orbiting
+    _central_body = None
 
     def __init__(
         self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
@@ -38,8 +42,11 @@ class BaseActor(ABC):
             central_body (pk.planet): pykep central body
         """
         logger.trace("Instantiating Actor.")
+        BaseActor._check_init_value_sensibility(position, velocity)
         super().__init__()
         self.name = name
+        self._local_time = epoch
+        self._central_body = central_body
         self._orbital_parameters = pk.planet.keplerian(
             epoch,
             position,
@@ -51,8 +58,50 @@ class BaseActor(ABC):
             name,
         )
 
+    @staticmethod
+    def _check_init_value_sensibility(
+        position,
+        velocity,
+    ):
+        """A function to check user inputs for sensibility
+
+        Args:
+            position (list of floats): [x,y,z]
+            velocity (list of floats): [vx,vy,vz]
+        """
+        logger.trace("Checking constructor values for sensibility.")
+        assert len(position) == 3, "Position has to have 3 elements (x,y,z)"
+        assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
+
     def __str__(self):
         return self._orbital_parameters.name
+
+    def set_time(self, t: pk.epoch):
+        """Updates the local time of the actor.
+
+        Args:
+            t (pk.epoch): Local time to set to.
+        """
+        self._local_time = t
+
+    def charge(self, t0: pk.epoch, t1: pk.epoch):
+        """Charges the actor during that period. Not implemented by default.
+
+        Args:
+            t0 (pk.epoch): Start of the charging interval
+            t1 (pk.epoch): End of the charging interval
+
+        """
+        pass
+
+    def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
+        """Discharge battery depending on power consumption. Not implemented by default.
+
+        Args:
+            consumption_rate_in_W (float): Consumption rate of the activity in Watt
+            duration_in_s (float): How long the activity is performed in seconds
+        """
+        pass
 
     def get_position_velocity(self, epoch: pk.epoch):
         logger.trace(
@@ -100,7 +149,6 @@ class BaseActor(ABC):
                 other_actor_pos[2] - my_pos[2],
             ],
         )
-        print(line_between_actors)
         if plot:
             from skspatial.plotting import plot_3d
 
