@@ -12,7 +12,7 @@ class SpacecraftActor(BaseActor):
     velocity also has additional constraints such as power/battery."""
 
     # Power-related properties
-    battery_level_in_Ws = None
+    _battery_level_in_Ws = None
     _max_battery_level_in_Ws = None
     _charging_rate_in_W = None
 
@@ -20,52 +20,25 @@ class SpacecraftActor(BaseActor):
         self,
         name: str,
         position,
-        velocity,
         epoch: pk.epoch,
-        central_body: pk.planet,
-        battery_level_in_Ws: float,
-        max_battery_level_in_Ws: float,
-        charging_rate_in_W: float,
     ) -> None:
         """Constructor for a spacecraft actor
 
         Args:
             name (str): Name of this actor
             position (list of floats): [x,y,z]
-            velocity (list of floats): [vx,vy,vz]
-            epoch (pykep.epoch): Epoch at this pos / velocity
-            central_body (pk.planet): pykep central body
-            battery_level_in_Ws (float): Current battery level in Watt seconds / Joule
-            max_battery_level_in_Ws (float): Maximum battery level in Watt seconds / Joule
-            charging_rate_in_W (float): Charging rate of the battery in Watt
+            epoch (pykep.epoch): Epoch at this pos
         """
         logger.trace("Instantiating SpacecraftActor.")
-        SpacecraftActor._check_init_value_sensibility(
-            battery_level_in_Ws,
-            max_battery_level_in_Ws,
-            charging_rate_in_W,
-        )
-        self.battery_level_in_Ws = battery_level_in_Ws
-        self._max_battery_level_in_Ws = max_battery_level_in_Ws
-        self._charging_rate_in_W = charging_rate_in_W
-        super().__init__(name, position, velocity, epoch, central_body)
+        super().__init__(name, position, epoch)
 
-    def _check_init_value_sensibility(
-        battery_level_in_Ws: float,
-        max_battery_level_in_Ws: float,
-        charging_rate_in_W: float,
-    ):
-        """A function to check user inputs for sensibility
+    def get_battery_level(self):
+        """Get the current battery level.
 
-        Args:
-            battery_level_in_Ws (float): Current battery level in Watt seconds / Joule
-            max_battery_level_in_Ws (float): Maximum battery level in Watt seconds / Joule
-            charging_rate_in_W (float): Charging rate of the battery in Watt
+        Returns:
+            float: current battery level in wattseconds.
         """
-        logger.trace("Checking constructor values for sensibility.")
-        assert battery_level_in_Ws > 0, "Battery level must be non-negative"
-        assert max_battery_level_in_Ws > 0, "Battery level must be non-negative"
-        assert charging_rate_in_W > 0, "Battery level must be non-negative"
+        return self._battery_level_in_Ws
 
     def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
         """Discharge battery depending on power consumption.
@@ -104,4 +77,4 @@ class SpacecraftActor(BaseActor):
             logger.debug("Actor is in eclipse, not charging.")
         else:
             self = charge_model.charge(self, time_interval)
-        logger.debug(f"New battery level is {self.battery_level_in_Ws}")
+        logger.debug(f"New battery level is {self._battery_level_in_Ws}")

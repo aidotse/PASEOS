@@ -4,6 +4,7 @@ import sys
 sys.path.append("../..")
 
 from paseos import SpacecraftActor
+from paseos.communication import is_in_line_of_sight
 
 import pykep as pk
 
@@ -28,6 +29,15 @@ def test_los():
     assert sat1.is_in_line_of_sight(sat2, pk.epoch(0))
     assert sat1.is_in_line_of_sight(sat3, pk.epoch(0))
     assert not sat2.is_in_line_of_sight(sat3, pk.epoch(0))
+
+    # also check the backend function directly
+    # also check reverse case (should be same)
+    assert is_in_line_of_sight(sat1, sat2, pk.epoch(0))
+    assert is_in_line_of_sight(sat2, sat1, pk.epoch(0))
+    assert is_in_line_of_sight(sat1, sat3, pk.epoch(0))
+    assert is_in_line_of_sight(sat3, sat1, pk.epoch(0))
+    assert not is_in_line_of_sight(sat2, sat3, pk.epoch(0))
+    assert not is_in_line_of_sight(sat3, sat2, pk.epoch(0))
 
 
 if __name__ == "__main__":
