@@ -51,6 +51,22 @@ class BaseActor(ABC):
 
         self._communication_devices = DotMap(_dynamic=False)
 
+    def get_local_time(self) -> pk.epoch:
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+
+        Returns:
+            pk.epoch: local time of the actor
+        """
+        return self._local_time
+
+    def get_communication_devices(self) -> DotMap:
+        """Returns the communications devices.
+
+        Returns:
+            DotMap: Dictionary (DotMap) of communication devices.
+        """
+        return self._communication_devices
+
     @staticmethod
     def _check_init_value_sensibility(
         position,
