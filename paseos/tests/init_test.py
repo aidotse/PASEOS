@@ -4,7 +4,7 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor
+from paseos import ActorBuilder
 import pykep as pk
 import numpy as np
 
@@ -17,11 +17,9 @@ def test_init():
 
 
 def test_adding_sat():
-    sim, _, earth = get_default_instance()
+    sim, sat1, earth = get_default_instance()
 
-    sat1 = SpacecraftActor(
-        "sat1", [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 1, 1, 1
-    )
+    ActorBuilder.set_orbit(sat1, [1000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
 
     # check initial positions
     # r - position vector, v - velocity vector

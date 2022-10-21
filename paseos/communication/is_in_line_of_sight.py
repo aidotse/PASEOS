@@ -2,12 +2,8 @@ from loguru import logger
 import pykep as pk
 from skspatial.objects import Line
 
-from paseos.actors.base_actor import BaseActor
 
-
-def is_in_line_of_sight(
-    actor: BaseActor, other_actor: BaseActor, epoch: pk.epoch, plot=False
-):
+def is_in_line_of_sight(actor, other_actor, epoch: pk.epoch, plot=False):
     """Determines whether a position is in line of sight of this actor
 
     Args:

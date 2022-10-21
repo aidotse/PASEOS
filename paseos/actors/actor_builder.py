@@ -1,4 +1,5 @@
 from loguru import logger
+from dotmap import DotMap
 import pykep as pk
 
 from .base_actor import BaseActor
@@ -45,17 +46,25 @@ class ActorBuilder:
         return actor_type(name, position, epoch)
 
     def set_orbit(
-        self,
         actor: BaseActor,
         position,
         velocity,
         epoch: pk.epoch,
         central_body: pk.planet,
     ):
-        # Add checks for sensibility of orbit
+        """Define the orbit of the actor
 
-        self._central_body = central_body
-        self._orbital_parameters = pk.planet.keplerian(
+        Args:
+            actor (BaseActor): The actor to define on
+            position (list of floats): [x,y,z].
+            velocity (list of floats): [vx,vy,vz].
+            epoch (pk.epoch): Time of position / velocity.
+            central_body (pk.planet): Central body around which the actor is orbiting as a pykep planet.
+        """
+        # TODO Add checks for sensibility of orbit
+
+        actor._central_body = central_body
+        actor._orbital_parameters = pk.planet.keplerian(
             epoch,
             position,
             velocity,
@@ -66,8 +75,9 @@ class ActorBuilder:
             actor.name,
         )
 
+        logger.debug(f"Added orbit to actor {actor}")
+
     def set_power_devices(
-        self,
         actor: SpacecraftActor,
         battery_level_in_Ws: float,
         max_battery_level_in_Ws: float,
@@ -99,10 +109,26 @@ class ActorBuilder:
         logger.debug(
             f"Added power device. MaxBattery={max_battery_level_in_Ws}Ws, "
             + f"CurrBattery={battery_level_in_Ws}Ws, "
-            + f"ChargingRate={charging_rate_in_W}W"
+            + f"ChargingRate={charging_rate_in_W}W to actor {actor}"
         )
 
-    def add_comm_device(
-        self, actor: BaseActor, device_name: str, bandwidth_in_kbps: float
-    ):
-        pass
+    def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):
+        """Creates a communication link.
+
+        Args:
+            device_name (str): device_name of the communication device.
+            bandwidth_in_kbps (float): link bandwidth in kbps.
+        """
+        if device_name in actor._communication_devices:
+            raise ValueError(
+                "Trying to add already existing communication link with device_name: "
+                + device_name
+            )
+
+        actor._communication_devices[device_name] = DotMap(
+            bandwidth_in_kbps=bandwidth_in_kbps
+        )
+
+        logger.debug(
+            f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}."
+        )

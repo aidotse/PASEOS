@@ -3,8 +3,8 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor
-from paseos.communication import is_in_line_of_sight
+from paseos import SpacecraftActor, ActorBuilder
+from paseos.communication.is_in_line_of_sight import is_in_line_of_sight
 
 import pykep as pk
 
@@ -16,14 +16,15 @@ def test_los():
     but sat 2 and 3 are on opposite sides of the planet"""
     sim, sat1, earth = get_default_instance()
 
-    sat2 = SpacecraftActor(
-        "sat2", [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth, 1, 1, 1
+    sat2 = ActorBuilder.get_actor_scaffold(
+        "sat2", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
     )
-    sim.add_known_actor(sat2)
-    sat3 = SpacecraftActor(
-        "sat3", [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth, 1, 1, 1
+    ActorBuilder.set_orbit(sat2, [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth)
+
+    sat3 = ActorBuilder.get_actor_scaffold(
+        "sat3", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
     )
-    sim.add_known_actor(sat3)
+    ActorBuilder.set_orbit(sat3, [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth)
 
     # check that LOS is correct
     assert sat1.is_in_line_of_sight(sat2, pk.epoch(0))

@@ -4,6 +4,7 @@ from paseos.actors.base_actor import BaseActor
 
 from .utils.set_log_level import set_log_level
 from .paseos import PASEOS
+from .actors.actor_builder import ActorBuilder
 from .actors.spacecraft_actor import SpacecraftActor
 from .actors.ground_station_actor import GroundstationActor
 
@@ -26,4 +27,4 @@ def init_sim(local_actor: BaseActor):
     return sim
 
 
-__all__ = ["GroundstationActor", "SpacecraftActor"]
+__all__ = ["ActorBuilder", "GroundstationActor", "SpacecraftActor"]

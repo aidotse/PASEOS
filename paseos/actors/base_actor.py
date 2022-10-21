@@ -34,11 +34,9 @@ class BaseActor(ABC):
     _central_body = None
 
     # Communication links dictionary
-    _communication_links = DotMap(_dynamic=False)
+    _communication_devices = DotMap(_dynamic=False)
 
-    def __init__(
-        self, name: str, position, epoch: pk.epoch
-    ) -> None:
+    def __init__(self, name: str, position, epoch: pk.epoch) -> None:
         """Constructor for a base actor
 
         Args:
@@ -50,8 +48,8 @@ class BaseActor(ABC):
         super().__init__()
         self.name = name
         self._local_time = epoch
-        
-        self._communication_links = DotMap(_dynamic=False)
+
+        self._communication_devices = DotMap(_dynamic=False)
 
     @staticmethod
     def _check_init_value_sensibility(
@@ -122,20 +120,6 @@ class BaseActor(ABC):
             bool: true if in line-of-sight.
         """
         return is_in_line_of_sight(self, other_actor, epoch, plot)
-
-    def add_communication_links(self, name, bandwidth_in_kbps):
-        """Creates a communication link.
-
-        Args:
-            name (str): name of the communication link.
-            bandwidth_in_kbps (float): link bandwidth in kbps.
-        """
-        if name in self._communication_links:
-            raise ValueError(
-                "Trying to add already existing communication link with name: " + name
-            )
-
-        self._communication_links[name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
     def get_communication_window(
         self,

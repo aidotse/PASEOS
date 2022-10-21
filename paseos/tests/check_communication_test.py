@@ -3,7 +3,7 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor
+from paseos import SpacecraftActor, ActorBuilder
 
 import pykep as pk
 
@@ -16,29 +16,30 @@ def test_communication_link():
     # create satellites where sat1 and sat2 starts from the same point but move along different orbit.
     # At t=1470s they will not be in line of sight anymore.
     earth = pk.planet.jpl_lp("earth")
-    sat1 = SpacecraftActor(
-        "sat1",
+    sat1 = ActorBuilder.get_actor_scaffold(
+        "sat1", SpacecraftActor, [0, 0, 0], pk.epoch(0)
+    )
+    sat2 = ActorBuilder.get_actor_scaffold(
+        "sat2", SpacecraftActor, [0, 0, 0], pk.epoch(0)
+    )
+
+    ActorBuilder.set_orbit(
+        sat1,
         position=[10000000, 1e-3, 1e-3],
         velocity=[1e-3, 8000, 1e-3],
         epoch=pk.epoch(0),
         central_body=earth,
-        battery_level_in_Ws=1,
-        max_battery_level_in_Ws=1,
-        charging_rate_in_W=1,
     )
-    sat2 = SpacecraftActor(
-        "sat2",
+    ActorBuilder.set_orbit(
+        sat2,
         position=[10000000, 1e-3, 1e-3],
         velocity=[1e-3, -8000, 1e-3],
         epoch=pk.epoch(0),
         central_body=earth,
-        battery_level_in_Ws=1,
-        max_battery_level_in_Ws=1,
-        charging_rate_in_W=1,
     )
 
     # Add communication link
-    sat1.add_communication_links(name="link1", bandwidth_in_kbps=1)
+    ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
 
     # Check communication link at == 0. Satellites shall be in line of sight
     (

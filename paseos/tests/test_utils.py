@@ -4,7 +4,7 @@ import sys
 sys.path.append("../..")
 
 import paseos
-from paseos import SpacecraftActor
+from paseos import ActorBuilder, SpacecraftActor
 
 import pykep as pk
 
@@ -16,10 +16,11 @@ def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):
     earth = pk.planet.jpl_lp("earth")
 
     # Define local actor
-    sat1 = SpacecraftActor(
-        "sat1", [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 500, 10000, 1
+    sat1 = ActorBuilder.get_actor_scaffold(
+        "sat1", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
     )
-
+    ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
+    ActorBuilder.set_power_devices(sat1, 500, 10000, 1)
     # init simulation
     sim = paseos.init_sim(sat1)
 
