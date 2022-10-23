@@ -172,8 +172,12 @@ class SpaceAnimation(Animation):
                     else:
                         obj.positions = np.array(pos_norm)
         self._plot_actors()
+<<<<<<< HEAD
         self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time / pk.SEC2DAY))
         return 
+=======
+        self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time))
+>>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
 
 
 def test_animation():
@@ -189,6 +193,7 @@ def test_animation():
     sim.add_known_actor(sat2)
     sat3 = SpacecraftActor("sat3", [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth, 1, 1, 1)
 
+<<<<<<< HEAD
     space_anim = SpaceAnimation(sim)
 
     import matplotlib.animation as animation
@@ -215,6 +220,17 @@ def test_animation():
         animation.update(sim)
 
         
+=======
+    animation = SpaceAnimation(sim)
+
+    dt = 1 / 1e3
+    for t in range(1, 10000):
+        sim.advance_time(dt)
+        animation.update(sim)
+
+        if t == 10:
+            sim.add_known_actor(sat3)
+>>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
 
         plt.pause(0.1)
 

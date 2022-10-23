@@ -43,6 +43,18 @@ class PASEOS:
         self._local_actor = local_actor
         self._activities = DotMap(_dynamic=False)
 
+    @property
+    def known_actors(self):
+        return self._known_actors
+
+    @property
+    def local_actor(self):
+        return self._local_actor
+
+    @property
+    def state(self):
+        return self._state
+
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
 
