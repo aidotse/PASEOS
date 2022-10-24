@@ -27,11 +27,7 @@ class SpacecraftActor(BaseActor):
             epoch (pykep.epoch): Epoch at this pos
         """
         logger.trace("Instantiating SpacecraftActor.")
-<<<<<<< HEAD
         super().__init__(name, position, epoch)
-=======
-        super().__init__(name, position, velocity, epoch, central_body)
->>>>>>> 8416c75 (Animation added to class)
 
     @property
     def charging_rate_in_W(self):
@@ -59,6 +55,10 @@ class SpacecraftActor(BaseActor):
             float: current battery level ratio in [0,1].
         """
         return self._battery_level_in_Ws / self._max_battery_level_in_Ws
+
+    @property
+    def battery_level(self):
+        return self.battery_level_in_Ws / self._max_battery_level_in_Ws
 
     @property
     def battery_level(self):

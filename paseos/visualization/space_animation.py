@@ -173,12 +173,8 @@ class SpaceAnimation(Animation):
                     else:
                         obj.positions = np.array(pos_norm)
         self._plot_actors()
-<<<<<<< HEAD
         self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time / pk.SEC2DAY))
         return 
-=======
-        self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time))
->>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
 
     def _animate(self, frame_number, sim, dt):
         sim.advance_time(dt * pk.SEC2DAY)
@@ -203,54 +199,10 @@ def test_animation():
     sat2 = SpacecraftActor("sat2", [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth, 1, 1, 1)
     sim.add_known_actor(sat2)
     sat3 = SpacecraftActor("sat3", [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth, 1, 1, 1)
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-    space_anim = SpaceAnimation(sim)
-
-    import matplotlib.animation as animation
-
-    def animate(frame_number):
-        dt = 300
-        sim.advance_time(dt * pk.SEC2DAY)
-        space_anim.update(sim)
-        
-        if frame_number == 20:
-            sim.add_known_actor(sat3)
-        
-        return space_anim.ax.get_children()
-        
-        
-    
-    anim = animation.FuncAnimation(space_anim.fig, animate, frames=400, 
-                               interval=20, blit=True)
-    anim.save('paseos.mp4', writer = 'ffmpeg', fps = 10)
-    
-    dt = 1 
-    for t in range(1, 10000):
-        sim.advance_time(dt * pk.SEC2DAY)
-        animation.update(sim)
-
-        
-=======
-    animation = SpaceAnimation(sim)
-
-    dt = 1 / 1e3
-    for t in range(1, 10000):
-        sim.advance_time(dt)
-        animation.update(sim)
-
-        if t == 10:
-            sim.add_known_actor(sat3)
->>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
-
-        plt.pause(0.1)
-=======
-    sim.add_known_actor(sat3)
     
     space_anim = SpaceAnimation(sim)
     space_anim.animate(sim, 'paseos', 300)
->>>>>>> 8416c75 (Animation added to class)
+
 
 
 if __name__ == "__main__":
