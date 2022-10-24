@@ -1,12 +1,13 @@
 from loguru import logger
 import pykep as pk
 
-from skspatial.objects import Line, Sphere
+from skspatial.objects import Sphere
 
 from abc import ABC
 
 from dotmap import DotMap
 from ..communication.get_communication_window import get_communication_window
+from ..communication.is_in_line_of_sight import is_in_line_of_sight
 
 
 class BaseActor(ABC):
@@ -33,37 +34,40 @@ class BaseActor(ABC):
     _central_body = None
 
     # Communication links dictionary
-    _communication_links = DotMap(_dynamic=False)
+    _communication_devices = DotMap(_dynamic=False)
 
-    def __init__(
-        self, name: str, position, velocity, epoch: pk.epoch, central_body: pk.planet
-    ) -> None:
+    def __init__(self, name: str, position, epoch: pk.epoch) -> None:
         """Constructor for a base actor
 
         Args:
             name (str): Name of this actor
             position (list of floats): [x,y,z]
-            velocity (list of floats): [vx,vy,vz]
             epoch (pykep.epoch): Epoch at this pos / velocity
-            central_body (pk.planet): pykep central body
         """
         logger.trace("Instantiating Actor.")
-        BaseActor._check_init_value_sensibility(position, velocity)
         super().__init__()
         self.name = name
         self._local_time = epoch
-        self._central_body = central_body
-        self._orbital_parameters = pk.planet.keplerian(
-            epoch,
-            position,
-            velocity,
-            central_body.mu_self,
-            1.0,
-            1.0,
-            1.0,
-            name,
-        )
-        self._communication_links = DotMap(_dynamic=False)
+
+        self._communication_devices = DotMap(_dynamic=False)
+
+    @property
+    def local_time(self) -> pk.epoch:
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+
+        Returns:
+            pk.epoch: local time of the actor
+        """
+        return self._local_time
+
+    @property
+    def communication_devices(self) -> DotMap:
+        """Returns the communications devices.
+
+        Returns:
+            DotMap: Dictionary (DotMap) of communication devices.
+        """
+        return self._communication_devices
 
     @staticmethod
     def _check_init_value_sensibility(
@@ -133,65 +137,7 @@ class BaseActor(ABC):
         Returns:
             bool: true if in line-of-sight.
         """
-        logger.debug(
-            "Computing line of sight between actors: "
-            + str(self)
-            + " "
-            + str(other_actor)
-        )
-        my_pos, _ = self.get_position_velocity(epoch)
-        other_actor_pos, _ = other_actor.get_position_velocity(epoch)
-
-        logger.trace(
-            "Computed positions for actors are "
-            + str(my_pos)
-            + " and "
-            + str(other_actor_pos)
-        )
-        line_between_actors = Line(
-            my_pos,
-            [
-                other_actor_pos[0] - my_pos[0],
-                other_actor_pos[1] - my_pos[1],
-                other_actor_pos[2] - my_pos[2],
-            ],
-        )
-        if plot:
-            from skspatial.plotting import plot_3d
-
-        # Currently skspatial throws a ValueError if there is no intersection so we have to use this rather ugly way.
-        try:
-            p1, p2 = self._central_body_sphere.intersect_line(line_between_actors)
-            logger.trace("Intersections observed at " + str(p1) + " and " + str(p2))
-            if plot:
-                plot_3d(
-                    line_between_actors.plotter(t_1=0, t_2=1, c="k"),
-                    self._central_body_sphere.plotter(alpha=0.2),
-                    p1.plotter(c="r", s=100),
-                    p2.plotter(c="r", s=100),
-                )
-        except ValueError:
-            if plot:
-                plot_3d(
-                    line_between_actors.plotter(t_1=0, t_2=1, c="k"),
-                    self._central_body_sphere.plotter(alpha=0.2),
-                )
-            return True
-        return False
-
-    def add_communication_links(self, name, bandwidth_in_kbps):
-        """Creates a communication link.
-
-        Args:
-            name (str): name of the communication link.
-            bandwidth_in_kbps (float): link bandwidth in kbps.
-        """
-        if name in self._communication_links:
-            raise ValueError(
-                "Trying to add already existing communication link with name: " + name
-            )
-
-        self._communication_links[name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
+        return is_in_line_of_sight(self, other_actor, epoch, plot)
 
     def get_communication_window(
         self,

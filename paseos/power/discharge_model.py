@@ -28,7 +28,7 @@ def discharge(
                 + str(power_consumption_in_Ws)
             )
         else:
-            actor.battery_level_in_Ws -= power_consumption_in_Ws
+            actor._battery_level_in_Ws -= power_consumption_in_Ws
             return actor
     else:
         raise NotImplementedError("Unknown battery model " + battery_model)

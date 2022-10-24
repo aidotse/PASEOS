@@ -67,7 +67,7 @@ class PASEOS:
             # Each actor only updates itself
             # charge from current moment to time after timestep
             self._local_actor.charge(
-                self._local_actor._local_time,
+                self._local_actor.local_time,
                 pk.epoch((self._state.time + dt) * pk.SEC2DAY),
             )
 
@@ -92,8 +92,47 @@ class PASEOS:
         # Else add
         self._known_actors[actor.name] = actor
 
+    @property
+    def local_actor(self) -> BaseActor:
+        """Returns the local actor.
+
+        Returns:
+            BaseActor: Local actor
+        """
+        return self._local_actor
+
+    @property
+    def known_actors(self) -> dict:
+        """Returns known actors.
+
+        Returns:
+            dict of BaseActor: Dictionary of the known actors.
+        """
+        return self._known_actors
+
+    @property
+    def known_actor_names(self) -> list:
+        """Returns names of known actors.
+
+        Returns:
+            list: List of names of known actors.
+        """
+        return self._known_actors.keys()
+
     def emtpy_known_actors(self):
+        """Clears the list of known actors."""
         self._known_actors = {}
+
+    def remove_known_actor(self, actor_name: str):
+        """Remove an actor from the list of known actors.
+
+        Args:
+            actor_name (str): name of the actor to remove.
+        """
+        assert (
+            actor_name in self.known_actors
+        ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        del self._known_actors[actor_name]
 
     def register_activity(
         self,
