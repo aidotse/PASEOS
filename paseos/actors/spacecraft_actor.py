@@ -33,6 +33,15 @@ class SpacecraftActor(BaseActor):
         super().__init__(name, position, epoch)
 
     @property
+    def charging_rate_in_W(self):
+        """Get the current charging rate.
+
+        Returns:
+            float: current charging rate in W.
+        """
+        return self._charging_rate_in_W
+
+    @property
     def battery_level_in_Ws(self):
         """Get the current battery level.
 
