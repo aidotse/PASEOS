@@ -1,6 +1,6 @@
-from paseos.actors.base_actor import BaseActor
-from paseos.actors import SpacecraftActor, GroundstationActor, BaseActor, ActorBuilder
-from paseos import PASEOS
+from ..paseos.actors.base_actor import BaseActor
+from ..paseos.actors import SpacecraftActor, GroundstationActor, BaseActor, ActorBuilder
+from ..paseos import PASEOS
 from animation import Animation
 
 import pykep as pk
