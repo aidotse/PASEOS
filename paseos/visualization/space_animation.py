@@ -1,21 +1,23 @@
-from ..paseos.actors.base_actor import BaseActor
-from ..paseos.actors import SpacecraftActor, GroundstationActor, BaseActor, ActorBuilder
-from ..paseos import PASEOS
-from animation import Animation
+from paseos.actors.base_actor import BaseActor
+from paseos.actors.spacecraft_actor import SpacecraftActor
+from paseos.actors.ground_station_actor import GroundstationActor
+from paseos.paseos import PASEOS
+from paseos.visualization.animation import Animation
 
 import pykep as pk
 import numpy as np
 from dotmap import DotMap
-
+from typing import List
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import matplotlib.animation as animation
+from matplotlib.artist import Artist
 
 
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    fp = FontProperties(fname=r"./visualization/FontAwesome.otf")
+    fp = FontProperties(fname=r"./FontAwesome.otf")
     symbols = DotMap(
         battery_100="\uf240",
         battery_75="\uf241",
@@ -43,12 +45,12 @@ class SpaceAnimation(Animation):
         # create figure
         self.fig = plt.figure(figsize=plt.figaspect(0.5) * 1.5)
         self.ax = plt.subplot(projection="3d")
-        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d))
+        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
         self.ax.get_xaxis().set_ticks([])
         self.ax.get_yaxis().set_ticks([])
         self.ax.get_zaxis().set_ticks([])
         self.n_trajectory = 50  # how many samples from histories to visualize
-        self._textbox_offset = 0.05  # how many samples from histories to visualize
+        self._textbox_offset = 0.25  # how many samples from histories to visualize
 
         # plot the objects
         self._plot_central_body()
@@ -57,16 +59,28 @@ class SpaceAnimation(Animation):
         plt.show(block=False)
 
     def _plot_central_body(self) -> None:
+        """Plot the central object as a sphere of radius 1
+        Args:
+            None
+        Returns:
+            None
+        """
         central_body = self._local_actor._central_body
         central_body.radius
 
-        u, v = np.mgrid[0: 2 * np.pi: 30j, 0: np.pi: 20j]
+        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
         x = np.cos(u) * np.sin(v)
         y = np.sin(u) * np.sin(v)
         z = np.cos(v)
         self.ax.plot_surface(x, y, z, color="grey")
 
     def _populate_textbox(self, actor: BaseActor) -> str:
+        """Extracts information from an actor and builds a string
+        Args:
+            actor (BaseActor): an actor
+        Returns:
+            str: text to populate the textbox.
+        """
         if isinstance(actor, SpacecraftActor):
             battery_level = actor.battery_level_ratio * 100
             if battery_level < 12.5:
@@ -91,6 +105,12 @@ class SpaceAnimation(Animation):
         return info_str
 
     def _plot_actors(self) -> None:
+        """Plots all the actors
+        Args:
+            None
+        Returns:
+            None
+        """
         for obj in self.objects:
             data = obj.positions
             if data.ndim == 1:
@@ -117,7 +137,11 @@ class SpaceAnimation(Animation):
                     trajectory = self.ax.plot3D(data[0, 0], data[0, 1], data[0, 2])[0]
                     obj.plot.trajectory = trajectory
                     obj.plot.point = self.ax.plot(
-                        data[0, 0], data[0, 1], data[0, 2], "*", color=trajectory.get_color()
+                        data[0, 0],
+                        data[0, 1],
+                        data[0, 2],
+                        "*",
+                        color=trajectory.get_color(),
                     )[0]
                     actor_info = self._populate_textbox(obj.actor)
                     obj.plot.text = self.ax.text(
@@ -131,28 +155,54 @@ class SpaceAnimation(Animation):
                         clip_on=True,
                     )
 
-        self.ax.set_box_aspect((np.ptp(self.ax.get_xlim()), np.ptp(self.ax.get_ylim()), np.ptp(self.ax.get_zlim())))
+        self.ax.set_box_aspect(
+            (
+                np.ptp(self.ax.get_xlim()),
+                np.ptp(self.ax.get_ylim()),
+                np.ptp(self.ax.get_zlim()),
+            )
+        )
 
-    def _make_actor_list(self, sim):
+    def _make_actor_list(self, sim: PASEOS) -> List[BaseActor]:
+        """Arranges all actors (including the local) into a list
+        Args:
+        sim: simulation object.
+        Returns:
+            List[BaseActor]
+        """
         if len(sim.known_actors) > 0:
             current_actors = [sim.local_actor] + list(sim.known_actors.values())
         else:
             current_actors = [sim.local_actor]
         return current_actors
 
-    def update(self, sim):
-        
-        local_time_d  = self._local_actor.local_time.mjd2000
+    def update(self, sim: PASEOS) -> None:
+        """Updates the animation with the current actor information
+        Args:
+        sim (PASEOS): simulation object.
+        Returns:
+            None
+        """
+        local_time_d = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
         current_actors = set(self._make_actor_list(sim))
 
         objects_to_remove = list(
             objects_in_plot.difference(current_actors)
-        )  # if objects do not exist known actors, remove from plot next update.
+        )  # if objects do not exist in known actors, remove from plot next update.
         objects_to_add = list(
             current_actors.difference(objects_in_plot)
         )  # if known_actor does not exist in objects, add the actors and update in plot
+
+        plot_objects_to_remove = [
+            x for x in self.objects if x.actor in objects_to_remove
+        ]
+        for obj in plot_objects_to_remove:
+            obj.plot.trajectory.remove()
+            obj.plot.point.remove()
+            obj.plot.text.remove()
+
         self.objects = [x for x in self.objects if x.actor not in objects_to_remove]
 
         for obj_to_add in objects_to_add:
@@ -169,20 +219,51 @@ class SpaceAnimation(Animation):
                     else:
                         obj.positions = np.array(pos_norm)
         self._plot_actors()
-        
-        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d))
-        return 
 
-    def _animate(self, frame_number, sim, dt):
+        # Step through trajectories to find max and min values in each direction
+        coords_max = [0, 0, 0]
+        coords_min = [0, 0, 0]
+        for obj in self.objects:
+            coords_max = np.maximum(obj.positions.max(axis=0), coords_max)
+            coords_min = np.minimum(obj.positions.min(axis=0), coords_min)
+        self.ax.set_xlim(coords_min[0], coords_max[0])
+        self.ax.set_ylim(coords_min[1], coords_max[1])
+        self.ax.set_zlim(coords_min[2], coords_max[2])
+
+        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
+        return
+
+    def _animate(self, frame_number: int, sim: PASEOS, dt: float) -> List[Artist]:
+        """Advances the time of sim, updates the plot, and returns the axis objects
+        Args:
+        frame_number: the current frame number of the animation.
+        sim (PASEOS): simulation object.
+        dt: size of time step
+        Returns:
+            List[Artist]: list of Artist objects
+        """
         sim.advance_time(dt)
         self.update(sim)
         return self.ax.get_children()
-    
-    def animate(self, sim:PASEOS, name:str, dt:float):        
-        anim = animation.FuncAnimation(self.fig, self._animate, frames=100, fargs=(sim, dt,), interval=20, blit=True)
-        anim.save(f'{name}.mp4', writer = 'ffmpeg', fps = 10)
-                
 
-
-
-
+    def animate(self, sim: PASEOS, name: str, dt: float, n_frames: int) -> None:
+        """Animates paseos for a given number of frames. Result is saved into "name.mp4"
+        Args:
+        sim (PASEOS): simulation object.
+        dt: size of time step
+        frames: the current frame number of the animation.
+        Returns:
+            None
+        """
+        anim = animation.FuncAnimation(
+            self.fig,
+            self._animate,
+            frames=n_frames,
+            fargs=(
+                sim,
+                dt,
+            ),
+            interval=20,
+            blit=True,
+        )
+        anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)

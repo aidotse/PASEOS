@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from paseos import PASEOS
+from paseos.paseos import PASEOS
 
 
 class Animation(ABC):
