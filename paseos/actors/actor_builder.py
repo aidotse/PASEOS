@@ -113,15 +113,15 @@ class ActorBuilder:
         )
 
     def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):
-        """Creates a communication link.
+        """Creates a communication device.
 
         Args:
             device_name (str): device_name of the communication device.
-            bandwidth_in_kbps (float): link bandwidth in kbps.
+            bandwidth_in_kbps (float): device bandwidth in kbps.
         """
         if device_name in actor._communication_devices:
             raise ValueError(
-                "Trying to add already existing communication link with device_name: "
+                "Trying to add already existing communication device with device_name: "
                 + device_name
             )
 
