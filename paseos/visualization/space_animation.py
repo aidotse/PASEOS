@@ -15,6 +15,7 @@ from dotmap import DotMap
 
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import matplotlib.animation as animation
 
 
 class SpaceAnimation(Animation):
@@ -179,6 +180,16 @@ class SpaceAnimation(Animation):
         self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time))
 >>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
 
+    def _animate(self, frame_number, sim, dt):
+        sim.advance_time(dt * pk.SEC2DAY)
+        self.update(sim)
+        return self.ax.get_children()
+    
+    def animate(self, sim:PASEOS, name:str, dt:float):        
+        anim = animation.FuncAnimation(self.fig, self._animate, frames=400, fargs=(sim, dt,), interval=20, blit=True)
+        anim.save(f'{name}.mp4', writer = 'ffmpeg', fps = 10)
+                
+
 
 def test_animation():
     # Define central body
@@ -192,6 +203,7 @@ def test_animation():
     sat2 = SpacecraftActor("sat2", [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth, 1, 1, 1)
     sim.add_known_actor(sat2)
     sat3 = SpacecraftActor("sat3", [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth, 1, 1, 1)
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     space_anim = SpaceAnimation(sim)
@@ -233,6 +245,12 @@ def test_animation():
 >>>>>>> 6206dd7 (First implementation of visualization for PASEOS)
 
         plt.pause(0.1)
+=======
+    sim.add_known_actor(sat3)
+    
+    space_anim = SpaceAnimation(sim)
+    space_anim.animate(sim, 'paseos', 300)
+>>>>>>> 8416c75 (Animation added to class)
 
 
 if __name__ == "__main__":

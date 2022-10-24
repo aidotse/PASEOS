@@ -27,7 +27,11 @@ class SpacecraftActor(BaseActor):
             epoch (pykep.epoch): Epoch at this pos
         """
         logger.trace("Instantiating SpacecraftActor.")
+<<<<<<< HEAD
         super().__init__(name, position, epoch)
+=======
+        super().__init__(name, position, velocity, epoch, central_body)
+>>>>>>> 8416c75 (Animation added to class)
 
     @property
     def charging_rate_in_W(self):
