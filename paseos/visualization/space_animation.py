@@ -1,12 +1,6 @@
-import sys
-
-sys.path.append("../")
-
 from paseos.actors.base_actor import BaseActor
-from paseos.actors.ground_station_actor import GroundstationActor
-from paseos.actors.spacecraft_actor import SpacecraftActor
-from paseos.paseos import PASEOS
-import paseos
+from paseos.actors import SpacecraftActor, GroundstationActor, BaseActor, ActorBuilder
+from paseos import PASEOS
 from animation import Animation
 
 import pykep as pk
@@ -40,15 +34,16 @@ class SpaceAnimation(Animation):
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
 
+        local_time_d = self._local_actor.local_time.mjd2000
         for known_actor in current_actors:
-            pos, _ = known_actor.get_position_velocity(pk.epoch(sim.state.time))
+            pos, _ = known_actor.get_position_velocity(pk.epoch(local_time_d))
             pos_norm = [x / self._norm_coeff for x in pos]
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
         # create figure
         self.fig = plt.figure(figsize=plt.figaspect(0.5) * 1.5)
         self.ax = plt.subplot(projection="3d")
-        self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time))
+        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d))
         self.ax.get_xaxis().set_ticks([])
         self.ax.get_yaxis().set_ticks([])
         self.ax.get_zaxis().set_ticks([])
@@ -73,7 +68,7 @@ class SpaceAnimation(Animation):
 
     def _populate_textbox(self, actor: BaseActor) -> str:
         if isinstance(actor, SpacecraftActor):
-            battery_level = actor.battery_level * 100
+            battery_level = actor.battery_level_ratio * 100
             if battery_level < 12.5:
                 battery_icon = self.symbols.battery_0
             elif battery_level < 37.5:
@@ -146,7 +141,8 @@ class SpaceAnimation(Animation):
         return current_actors
 
     def update(self, sim):
-
+        
+        local_time_d  = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
         current_actors = set(self._make_actor_list(sim))
@@ -166,44 +162,27 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos, _ = known_actor.get_position_velocity(pk.epoch(sim.state.time))
+                    pos, _ = known_actor.get_position_velocity(pk.epoch(local_time_d))
                     pos_norm = [x / self._norm_coeff for x in pos]
                     if "positions" in obj:
                         obj.positions = np.vstack((obj.positions, pos_norm))
                     else:
                         obj.positions = np.array(pos_norm)
         self._plot_actors()
-        self.ax.set_title(self._sec_to_ddhhmmss(sim.state.time / pk.SEC2DAY))
+        
+        self.ax.set_title(self._sec_to_ddhhmmss(local_time_d))
         return 
 
     def _animate(self, frame_number, sim, dt):
-        sim.advance_time(dt * pk.SEC2DAY)
+        sim.advance_time(dt)
         self.update(sim)
         return self.ax.get_children()
     
     def animate(self, sim:PASEOS, name:str, dt:float):        
-        anim = animation.FuncAnimation(self.fig, self._animate, frames=400, fargs=(sim, dt,), interval=20, blit=True)
+        anim = animation.FuncAnimation(self.fig, self._animate, frames=100, fargs=(sim, dt,), interval=20, blit=True)
         anim.save(f'{name}.mp4', writer = 'ffmpeg', fps = 10)
                 
 
 
-def test_animation():
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
-
-    # Define local actor
-    sat1 = SpacecraftActor("sat1", [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth, 8000, 10000, 1)
-    # init simulation
-    sim = paseos.init_sim(sat1)
-
-    sat2 = SpacecraftActor("sat2", [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth, 1, 1, 1)
-    sim.add_known_actor(sat2)
-    sat3 = SpacecraftActor("sat3", [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth, 1, 1, 1)
-    
-    space_anim = SpaceAnimation(sim)
-    space_anim.animate(sim, 'paseos', 300)
 
 
-
-if __name__ == "__main__":
-    test_animation()

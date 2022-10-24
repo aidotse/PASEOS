@@ -11,6 +11,10 @@ class Animation(ABC):
         self.objects = list()
 
     def _sec_to_ddhhmmss(self, time: float) -> str:
+        """Convert seconds to ddhhmmss format
+        Returns:
+            str: time in ddhhmmss.
+        """
         m, s = divmod(time, 60)
         h, m = divmod(m, 60)
         d, h = divmod(h, 24)

@@ -27,4 +27,4 @@ def init_sim(local_actor: BaseActor):
     return sim
 
 
-__all__ = ["ActorBuilder", "GroundstationActor", "SpacecraftActor"]
+__all__ = ["ActorBuilder", "GroundstationActor", "SpacecraftActor", "SpaceAnimation"]
