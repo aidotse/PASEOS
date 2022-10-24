@@ -55,6 +55,10 @@ class SpacecraftActor(BaseActor):
         """
         return self._battery_level_in_Ws / self._max_battery_level_in_Ws
 
+    @property
+    def battery_level(self):
+        return self.battery_level_in_Ws / self._max_battery_level_in_Ws
+
     def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
         """Discharge battery depending on power consumption.
         Args:
@@ -79,9 +83,7 @@ class SpacecraftActor(BaseActor):
         """
         time_interval = (t1.mjd2000 - t0.mjd2000) * pk.DAY2SEC
         logger.debug(f"Charging actor {self} for {time_interval}s.")
-        assert (
-            time_interval > 0
-        ), "Charging interval has to be positive but t1 was less or equal t0."
+        assert time_interval > 0, "Charging interval has to be positive but t1 was less or equal t0."
 
         if is_in_eclipse(self, central_body=self._central_body, t=t0) or is_in_eclipse(
             self, central_body=self._central_body, t=t1
