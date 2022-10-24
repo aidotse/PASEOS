@@ -119,7 +119,7 @@ class ActorBuilder:
             device_name (str): device_name of the communication device.
             bandwidth_in_kbps (float): device bandwidth in kbps.
         """
-        if device_name in actor._communication_devices:
+        if device_name in actor.communication_devices:
             raise ValueError(
                 "Trying to add already existing communication device with device_name: "
                 + device_name

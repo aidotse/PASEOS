@@ -18,12 +18,12 @@ def discharge(
     """
 
     if battery_model == "simple":
-        if actor._battery_level_in_Ws < power_consumption_in_Ws:
+        if actor.battery_level_in_Ws < power_consumption_in_Ws:
             raise ValueError(
                 "Insufficient Battery. Actor "
                 + str(actor)
                 + " has battery level: "
-                + str(actor._battery_level_in_Ws)
+                + str(actor.battery_level_in_Ws)
                 + " - trying to discharge "
                 + str(power_consumption_in_Ws)
             )

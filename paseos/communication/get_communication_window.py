@@ -29,11 +29,11 @@ def get_communication_window(
         int: data that can be transmitted in the communication window [b].
     """
 
-    assert local_actor_communication_link_name in local_actor._communication_devices, (
+    assert local_actor_communication_link_name in local_actor.communication_devices, (
         "Trying to use a not-existing communication link with the name: "
-        + local_actor._communication_devices
+        + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor._communication_devices[
+    local_actor_comm_link = local_actor.communication_devices[
         local_actor_communication_link_name
     ]
 

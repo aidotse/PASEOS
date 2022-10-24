@@ -30,7 +30,7 @@ def charge(
     if model == "simple":
         actor._battery_level_in_Ws += actor._charging_rate_in_W * charging_time_in_s
         actor._battery_level_in_Ws = min(
-            actor._battery_level_in_Ws, actor._max_battery_level_in_Ws
+            actor.battery_level_in_Ws, actor._max_battery_level_in_Ws
         )
         return actor
     else:

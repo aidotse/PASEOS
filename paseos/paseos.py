@@ -67,7 +67,7 @@ class PASEOS:
             # Each actor only updates itself
             # charge from current moment to time after timestep
             self._local_actor.charge(
-                self._local_actor._local_time,
+                self._local_actor.local_time,
                 pk.epoch((self._state.time + dt) * pk.SEC2DAY),
             )
 
@@ -92,7 +92,8 @@ class PASEOS:
         # Else add
         self._known_actors[actor.name] = actor
 
-    def get_local_actor(self) -> BaseActor:
+    @property
+    def local_actor(self) -> BaseActor:
         """Returns the local actor.
 
         Returns:
@@ -100,7 +101,8 @@ class PASEOS:
         """
         return self._local_actor
 
-    def get_known_actors(self) -> dict:
+    @property
+    def known_actors(self) -> dict:
         """Returns known actors.
 
         Returns:
@@ -108,7 +110,8 @@ class PASEOS:
         """
         return self._known_actors
 
-    def get_known_actor_names(self) -> list:
+    @property
+    def known_actor_names(self) -> list:
         """Returns names of known actors.
 
         Returns:
@@ -127,8 +130,8 @@ class PASEOS:
             actor_name (str): name of the actor to remove.
         """
         assert (
-            actor_name in self._known_actors
-        ), f"Actor {actor_name} is not in known. Available are {self._known_actors.keys()}"
+            actor_name in self.known_actors
+        ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
         del self._known_actors[actor_name]
 
     def register_activity(

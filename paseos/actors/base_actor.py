@@ -51,7 +51,8 @@ class BaseActor(ABC):
 
         self._communication_devices = DotMap(_dynamic=False)
 
-    def get_local_time(self) -> pk.epoch:
+    @property
+    def local_time(self) -> pk.epoch:
         """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
 
         Returns:
@@ -59,7 +60,8 @@ class BaseActor(ABC):
         """
         return self._local_time
 
-    def get_communication_devices(self) -> DotMap:
+    @property
+    def communication_devices(self) -> DotMap:
         """Returns the communications devices.
 
         Returns:

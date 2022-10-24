@@ -32,13 +32,23 @@ class SpacecraftActor(BaseActor):
         logger.trace("Instantiating SpacecraftActor.")
         super().__init__(name, position, epoch)
 
-    def get_battery_level(self):
+    @property
+    def battery_level_in_Ws(self):
         """Get the current battery level.
 
         Returns:
             float: current battery level in wattseconds.
         """
         return self._battery_level_in_Ws
+
+    @property
+    def battery_level_ratio(self):
+        """Get the current battery level as ratio of maximum.
+
+        Returns:
+            float: current battery level ratio in [0,1].
+        """
+        return self._battery_level_in_Ws / self._max_battery_level_in_Ws
 
     def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
         """Discharge battery depending on power consumption.
@@ -77,4 +87,4 @@ class SpacecraftActor(BaseActor):
             logger.debug("Actor is in eclipse, not charging.")
         else:
             self = charge_model.charge(self, time_interval)
-        logger.debug(f"New battery level is {self._battery_level_in_Ws}")
+        logger.debug(f"New battery level is {self.battery_level_in_Ws}")
