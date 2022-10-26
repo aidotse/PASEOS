@@ -3,6 +3,7 @@ from loguru import logger
 import pykep as pk
 
 from paseos.actors.base_actor import BaseActor
+from paseos.activities.activity_manager import ActivityManager
 
 from .utils.load_default_cfg import load_default_cfg
 
@@ -24,8 +25,8 @@ class PASEOS:
     # The actor of the device this is running on
     _local_actor = None
 
-    # Stores registered activities
-    _activities = None
+    # Handles registered activities
+    _activity_manager = None
 
     def __new__(self, local_actor: BaseActor):
         if not hasattr(self, "instance"):
@@ -43,7 +44,7 @@ class PASEOS:
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
-        self._activities = DotMap(_dynamic=False)
+        self._activity_manager = ActivityManager()
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
@@ -148,21 +149,11 @@ class PASEOS:
             power_consumption_in_watt (float, optional): Power consumption of performing
             the activity (per second). Defaults to None.
         """
-        if name in self._activities.keys():
-            raise ValueError(
-                "Trying to add already existing activity with name: "
-                + name
-                + ". Already have "
-                + str(self._activities[name])
-            )
-
-        self._activities[name] = DotMap(
+        self._activity_manager.register_activity(
+            name=name,
             requires_line_of_sight_to=requires_line_of_sight_to,
             power_consumption_in_watt=power_consumption_in_watt,
-            _dynamic=False,
         )
-
-        logger.debug(f"Registered activity {self._activities[name]}")
 
     def perform_activity(
         self,
@@ -181,38 +172,12 @@ class PASEOS:
         Returns:
             bool: Whether the activity was performed successfully.
         """
-        # Check if activity exists and if it already had consumption specified
-        assert name in self._activities.keys(), (
-            "Activity not found. Declared activities are" + self._activities.keys()
+        return self._activity_manager.perform_activity(
+            name=name,
+            local_actor=self.local_actor,
+            power_consumption_in_watt=power_consumption_in_watt,
+            duration_in_s=duration_in_s,
         )
-        activity = self._activities[name]
-        logger.debug(f"Performing activity {activity}")
-
-        if power_consumption_in_watt is None:
-            power_consumption_in_watt = activity.power_consumption_in_watt
-
-        assert power_consumption_in_watt > 0, (
-            "Power consumption has to be positive but was either in activity or call specified as "
-            + str(power_consumption_in_watt)
-        )
-
-        assert duration_in_s > 0, "Duration has to be positive."
-
-        # TODO
-        # Check if line of sight requirement is fulfilled and if enough power available
-        assert (
-            activity.requires_line_of_sight_to is None
-        ), "Line of Sight for activities is not implemented"
-
-        # TODO
-        # Perform activity, maybe we allow the user pass a function to be executed?
-
-        # Discharge power for the activity
-        self._local_actor.discharge(power_consumption_in_watt, duration_in_s)
-
-        logger.trace(f"Activity {activity} completed.")
-
-        return True
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation
