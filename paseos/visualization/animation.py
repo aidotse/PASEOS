@@ -25,5 +25,5 @@ class Animation(ABC):
         pass
 
     @abstractmethod
-    def update(self, sim: PASEOS) -> None:
+    def _update(self, sim: PASEOS) -> None:
         pass

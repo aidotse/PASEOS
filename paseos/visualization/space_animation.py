@@ -1,9 +1,4 @@
-from paseos.actors.base_actor import BaseActor
-from paseos.actors.spacecraft_actor import SpacecraftActor
-from paseos.actors.ground_station_actor import GroundstationActor
-from paseos.paseos import PASEOS
-from paseos.visualization.animation import Animation
-
+import os
 import pykep as pk
 import numpy as np
 from dotmap import DotMap
@@ -12,12 +7,24 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import matplotlib.animation as animation
 from matplotlib.artist import Artist
+from loguru import logger
+
+from paseos.actors.base_actor import BaseActor
+from paseos.actors.spacecraft_actor import SpacecraftActor
+from paseos.actors.ground_station_actor import GroundstationActor
+from paseos.paseos import PASEOS
+from paseos.visualization.animation import Animation
+
+
 
 
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    fp = FontProperties(fname=r"./FontAwesome.otf")
+    path = os.path.join(
+        os.path.dirname(__file__) + "/../../resources/", "FontAwesome.otf"
+    )
+    fp = FontProperties(fname=path)
     symbols = DotMap(
         battery_100="\uf240",
         battery_75="\uf241",
@@ -31,7 +38,7 @@ class SpaceAnimation(Animation):
     def __init__(self, sim: PASEOS) -> None:
 
         super().__init__(sim)
-
+        logger.trace('Initializing animation')
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
@@ -116,9 +123,9 @@ class SpaceAnimation(Animation):
             if data.ndim == 1:
                 data = data[..., np.newaxis].T
             n_points = np.minimum(data.shape[0], self.n_trajectory)
-
+        
             if "plot" in obj.keys():
-                # only spacecraft actor moves in aninmation
+                # spacecraft and ground stations behave differently and are plotted separately
                 if isinstance(obj.actor, SpacecraftActor):
                     # update trajectory
                     obj.plot.trajectory.set_data(data[-n_points:, :2].T)
@@ -131,7 +138,10 @@ class SpaceAnimation(Animation):
                     actor_info = self._populate_textbox(obj.actor)
                     obj.plot.text.set_position_3d(data[-1, :] + self._textbox_offset)
                     obj.plot.text.set_text(actor_info)
-
+                    
+                elif isinstance(obj.actor, GroundstationActor):
+                    # TODO: implement update of groundstation object
+                    pass
             else:
                 if isinstance(obj.actor, SpacecraftActor):
                     trajectory = self.ax.plot3D(data[0, 0], data[0, 1], data[0, 2])[0]
@@ -149,11 +159,15 @@ class SpaceAnimation(Animation):
                         data[0, 1] + self._textbox_offset,
                         data[0, 2] + self._textbox_offset,
                         actor_info,
-                        #fontproperties=self.fp,
+                        fontproperties=self.fp,
                         bbox=dict(facecolor="white"),
                         verticalalignment="bottom",
                         clip_on=True,
                     )
+                    
+                elif isinstance(obj.actor, GroundstationActor):
+                    # TODO: implement initial rendering of groundstation object
+                    pass
 
         self.ax.set_box_aspect(
             (
@@ -176,13 +190,14 @@ class SpaceAnimation(Animation):
             current_actors = [sim.local_actor]
         return current_actors
 
-    def update(self, sim: PASEOS) -> None:
+    def _update(self, sim: PASEOS) -> None:
         """Updates the animation with the current actor information
         Args:
         sim (PASEOS): simulation object.
         Returns:
             None
         """
+        logger.debug('Updating animation')
         local_time_d = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
@@ -231,39 +246,45 @@ class SpaceAnimation(Animation):
         self.ax.set_zlim(coords_min[2], coords_max[2])
 
         self.ax.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
+        
         return
 
-    def _animate(self, frame_number: int, sim: PASEOS, dt: float) -> List[Artist]:
+    def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
         """Advances the time of sim, updates the plot, and returns the axis objects
         Args:
-        frame_number: the current frame number of the animation.
         sim (PASEOS): simulation object.
         dt: size of time step
         Returns:
             List[Artist]: list of Artist objects
         """
         sim.advance_time(dt)
-        self.update(sim)
+        self._update(sim)
         return self.ax.get_children()
-
-    def animate(self, sim: PASEOS, name: str, dt: float, n_frames: int) -> None:
-        """Animates paseos for a given number of frames. Result is saved into "name.mp4"
+    
+    def _animation_wrapper(self, step:int, sim:PASEOS, dt:float) -> List[Artist]:
+        """wrapper to allow for frame numbers from animation
         Args:
+        steps: current frame number of the animation
         sim (PASEOS): simulation object.
         dt: size of time step
-        frames: the current frame number of the animation.
+        Returns:
+            List[Artist]: list of Artist objects
+        """
+        return self._animate(sim, dt)
+
+    def animate(self, sim: PASEOS,  dt: float, steps: int=1, name:str=None, save_file:bool=False) -> None:
+        """Animates paseos for a given number of steps with dt in each step. If save=True, result is saved into "{name}.mp4"
+        Args:
+        sim (PASEOS): simulation object.
+        dt(float): size of time step
+        steps (int): number of steps to animate
+        name (str): filename to save animation 
+        save_file (bool): should animation be saved
         Returns:
             None
         """
-        anim = animation.FuncAnimation(
-            self.fig,
-            self._animate,
-            frames=n_frames,
-            fargs=(
-                sim,
-                dt,
-            ),
-            interval=20,
-            blit=True,
-        )
-        anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)
+        if save_file is False:
+            self._animate(sim, dt)
+        else:
+            anim = animation.FuncAnimation(self.fig, self._animation_wrapper, frames=steps, fargs=(sim,dt,), interval=20, blit=True,)
+            anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)
