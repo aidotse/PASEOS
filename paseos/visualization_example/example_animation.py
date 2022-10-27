@@ -1,8 +1,10 @@
 import sys
+
 sys.path.append("../..")
 
 from utils import test_setup
 from paseos.visualization.space_animation import SpaceAnimation
+
 
 def animation():
     sim, _, _, _ = test_setup()

@@ -2,7 +2,6 @@ from paseos import ActorBuilder, SpacecraftActor
 import paseos
 
 import pykep as pk
-import matplotlib.pyplot as plt
 
 
 def test_setup():

@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../..")
 
 from paseos import ActorBuilder, SpacecraftActor
@@ -24,7 +25,7 @@ def interactive_plot():
 
     anim = SpaceAnimation(sim)
 
-    dt = 100 # time step in seconds
+    dt = 100  # time step in seconds
     for t in range(100):
         if t == 25:
             sim.add_known_actor(sat4)

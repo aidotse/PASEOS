@@ -1,10 +1,8 @@
-import os
 import pykep as pk
 import numpy as np
 from dotmap import DotMap
 from typing import List
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
 import matplotlib.animation as animation
 from matplotlib.artist import Artist
 from loguru import logger
@@ -16,29 +14,13 @@ from paseos.paseos import PASEOS
 from paseos.visualization.animation import Animation
 
 
-
-
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
-
-    path = os.path.join(
-        os.path.dirname(__file__) + "/../../resources/", "FontAwesome.otf"
-    )
-    fp = FontProperties(fname=path)
-    symbols = DotMap(
-        battery_100="\uf240",
-        battery_75="\uf241",
-        battery_50="\uf242",
-        battery_25="\uf243",
-        battery_0="\uf244",
-        battery_charging="\uf376",
-        communication="\uf1eb",
-    )
 
     def __init__(self, sim: PASEOS) -> None:
 
         super().__init__(sim)
-        logger.trace('Initializing animation')
+        logger.trace("Initializing animation")
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
@@ -75,7 +57,7 @@ class SpaceAnimation(Animation):
         central_body = self._local_actor._central_body
         central_body.radius
 
-        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
+        u, v = np.mgrid[0:2 * np.pi:30j, 0:np.pi:20j]
         x = np.cos(u) * np.sin(v)
         y = np.sin(u) * np.sin(v)
         z = np.cos(v)
@@ -89,27 +71,12 @@ class SpaceAnimation(Animation):
             str: text to populate the textbox.
         """
         if isinstance(actor, SpacecraftActor):
-            battery_level = actor.battery_level_ratio * 100
-            if battery_level < 12.5:
-                battery_icon = self.symbols.battery_0
-            elif battery_level < 37.5:
-                battery_icon = self.symbols.battery_25
-            elif battery_level < 62.5:
-                battery_icon = self.symbols.battery_50
-            elif battery_level < 87.5:
-                battery_icon = self.symbols.battery_75
-            else:
-                battery_icon = self.symbols.battery_100
-            
             # TODO: enable both text and icons in textbox
-            #info_str = f"{actor.name} \n{battery_level:.0f}% {battery_icon} \n{self.symbols.communication}"
-            
-            # no icons included
-            info_str = f"{actor.name} \nbat: {battery_level:.0f}%" 
+            battery_level = actor.battery_level_ratio * 100
+            info_str = f"{actor.name} \nbat: {battery_level:.0f}%"
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
-                info_str += f'\n{name}: {info.bandwidth_in_kbps} kbps'
-        
+                info_str += f"\n{name}: {info.bandwidth_in_kbps} kbps"
 
         elif isinstance(actor, GroundstationActor):
             # TODO: implement textbox for groundstation
@@ -129,7 +96,7 @@ class SpaceAnimation(Animation):
             if data.ndim == 1:
                 data = data[..., np.newaxis].T
             n_points = np.minimum(data.shape[0], self.n_trajectory)
-        
+
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
                 if isinstance(obj.actor, SpacecraftActor):
@@ -144,7 +111,7 @@ class SpaceAnimation(Animation):
                     actor_info = self._populate_textbox(obj.actor)
                     obj.plot.text.set_position_3d(data[-1, :] + self._textbox_offset)
                     obj.plot.text.set_text(actor_info)
-                    
+
                 elif isinstance(obj.actor, GroundstationActor):
                     # TODO: implement update of groundstation object
                     pass
@@ -165,13 +132,11 @@ class SpaceAnimation(Animation):
                         data[0, 1] + self._textbox_offset,
                         data[0, 2] + self._textbox_offset,
                         actor_info,
-                        #fontproperties=self.fp,
                         bbox=dict(facecolor="white"),
                         verticalalignment="bottom",
                         clip_on=True,
                     )
-                    
-                    
+
                 elif isinstance(obj.actor, GroundstationActor):
                     # TODO: implement initial rendering of groundstation object
                     pass
@@ -204,7 +169,7 @@ class SpaceAnimation(Animation):
         Returns:
             None
         """
-        logger.debug('Updating animation')
+        logger.debug("Updating animation")
         local_time_d = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
@@ -253,7 +218,7 @@ class SpaceAnimation(Animation):
         self.ax.set_zlim(coords_min[2], coords_max[2])
 
         self.ax.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
-        
+
         return
 
     def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
@@ -267,8 +232,8 @@ class SpaceAnimation(Animation):
         sim.advance_time(dt)
         self._update(sim)
         return self.ax.get_children()
-    
-    def _animation_wrapper(self, step:int, sim:PASEOS, dt:float) -> List[Artist]:
+
+    def _animation_wrapper(self, step: int, sim: PASEOS, dt: float) -> List[Artist]:
         """wrapper to allow for frame numbers from animation
         Args:
         steps: current frame number of the animation
@@ -279,13 +244,21 @@ class SpaceAnimation(Animation):
         """
         return self._animate(sim, dt)
 
-    def animate(self, sim: PASEOS,  dt: float, steps: int=1, name:str=None, save_file:bool=False) -> None:
-        """Animates paseos for a given number of steps with dt in each step. If save=True, result is saved into "{name}.mp4"
+    def animate(
+        self,
+        sim: PASEOS,
+        dt: float,
+        steps: int = 1,
+        name: str = None,
+        save_file: bool = False,
+    ) -> None:
+        """Animates paseos for a given number of steps with dt in each step.
+        If save=True, result is saved into "{name}.mp4"
         Args:
         sim (PASEOS): simulation object.
         dt(float): size of time step
         steps (int): number of steps to animate
-        name (str): filename to save animation 
+        name (str): filename to save animation
         save_file (bool): should animation be saved
         Returns:
             None
@@ -293,5 +266,15 @@ class SpaceAnimation(Animation):
         if save_file is False:
             self._animate(sim, dt)
         else:
-            anim = animation.FuncAnimation(self.fig, self._animation_wrapper, frames=steps, fargs=(sim,dt,), interval=20, blit=True,)
+            anim = animation.FuncAnimation(
+                self.fig,
+                self._animation_wrapper,
+                frames=steps,
+                fargs=(
+                    sim,
+                    dt,
+                ),
+                interval=20,
+                blit=True,
+            )
             anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)

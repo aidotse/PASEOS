@@ -7,6 +7,7 @@ from paseos.visualization.space_animation import SpaceAnimation
 from test_utils import get_default_instance
 import pykep as pk
 
+
 def test_animation():
     sim, sat1, earth = get_default_instance()
 
@@ -18,7 +19,7 @@ def test_animation():
     sim.add_known_actor(sat2)
 
     anim = SpaceAnimation(sim)
-    
+
     dt = 100
     for t in range(10):
         anim.animate(sim, dt)
