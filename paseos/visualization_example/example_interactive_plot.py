@@ -12,6 +12,7 @@ from utils import test_setup
 
 def interactive_plot():
     sim, sat1, sat2, sat3 = test_setup()
+    ActorBuilder.add_comm_device(sat1, "com_dev", 1)
 
     sat4 = ActorBuilder.get_actor_scaffold(
         "sat4", SpacecraftActor, [0, -8000000, -10000000], pk.epoch(0)

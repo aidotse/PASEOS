@@ -100,10 +100,16 @@ class SpaceAnimation(Animation):
                 battery_icon = self.symbols.battery_75
             else:
                 battery_icon = self.symbols.battery_100
-
-            # TODO: insert communication link info
-
-            info_str = f"{actor.name} \n{battery_level:.0f}% {battery_icon} \n{self.symbols.communication}"
+            
+            # TODO: enable both text and icons in textbox
+            #info_str = f"{actor.name} \n{battery_level:.0f}% {battery_icon} \n{self.symbols.communication}"
+            
+            # no icons included
+            info_str = f"{actor.name} \nbat: {battery_level:.0f}%" 
+            for name in actor.communication_devices.keys():
+                info = actor.communication_devices[name]
+                info_str += f'\n{name}: {info.bandwidth_in_kbps} kbps'
+        
 
         elif isinstance(actor, GroundstationActor):
             # TODO: implement textbox for groundstation
@@ -159,11 +165,12 @@ class SpaceAnimation(Animation):
                         data[0, 1] + self._textbox_offset,
                         data[0, 2] + self._textbox_offset,
                         actor_info,
-                        fontproperties=self.fp,
+                        #fontproperties=self.fp,
                         bbox=dict(facecolor="white"),
                         verticalalignment="bottom",
                         clip_on=True,
                     )
+                    
                     
                 elif isinstance(obj.actor, GroundstationActor):
                     # TODO: implement initial rendering of groundstation object

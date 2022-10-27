@@ -22,3 +22,16 @@ This project is currently under development. Use at your own risk. :)
     Description of PASEOS workflow on an individual device
   </p>
 </p>
+
+## Visualising PASEOS
+navigate to paseos/visualization_example to find minimal examples of how to visualize PASEOS.
+Visualization can be done in interactive mode or as an animation that is saved to disc.
+
+<p align="center">
+  <a href="https://github.com/aidotse/PASEOS/">
+    <img src="resources/images/animation.png" alt="Scheme"  width="910" height="459">
+  </a>
+  <p align="center">
+    Snapshot of PASEOS visualization
+  </p>
+</p>
