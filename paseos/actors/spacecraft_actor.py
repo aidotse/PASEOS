@@ -55,10 +55,6 @@ class SpacecraftActor(BaseActor):
         """
         return self._battery_level_in_Ws / self._max_battery_level_in_Ws
 
-    @property
-    def battery_level(self):
-        return self.battery_level_in_Ws / self._max_battery_level_in_Ws
-
     def discharge(self, consumption_rate_in_W: float, duration_in_s: float):
         """Discharge battery depending on power consumption.
         Args:

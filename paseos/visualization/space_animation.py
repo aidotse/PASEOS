@@ -149,7 +149,7 @@ class SpaceAnimation(Animation):
                         data[0, 1] + self._textbox_offset,
                         data[0, 2] + self._textbox_offset,
                         actor_info,
-                        fontproperties=self.fp,
+                        #fontproperties=self.fp,
                         bbox=dict(facecolor="white"),
                         verticalalignment="bottom",
                         clip_on=True,
