@@ -1,3 +1,5 @@
+import types
+
 from dotmap import DotMap
 from loguru import logger
 import pykep as pk
@@ -28,6 +30,9 @@ class PASEOS:
     # Handles registered activities
     _activity_manager = None
 
+    # Use automatic clock (default on for now)
+    use_automatic_clock = True
+
     def __new__(self, local_actor: BaseActor):
         if not hasattr(self, "instance"):
             self.instance = super(PASEOS, self).__new__(self)
@@ -44,7 +49,7 @@ class PASEOS:
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
-        self._activity_manager = ActivityManager()
+        self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep)
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
@@ -138,45 +143,32 @@ class PASEOS:
     def register_activity(
         self,
         name: str,
-        requires_line_of_sight_to: list = None,
-        power_consumption_in_watt: float = None,
+        activity_function: types.FunctionType,
+        power_consumption_in_watt: float,
+        check_termination_function: types.FunctionType = None,
+        constraint_function: types.FunctionType = None,
     ):
-        """Registers an activity that can then be performed on the local actor.
-
-        Args:
-            name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which need to be visible for this activity.
-            power_consumption_in_watt (float, optional): Power consumption of performing
-            the activity (per second). Defaults to None.
-        """
         self._activity_manager.register_activity(
             name=name,
-            requires_line_of_sight_to=requires_line_of_sight_to,
+            activity_function=activity_function,
             power_consumption_in_watt=power_consumption_in_watt,
+            check_termination_function=check_termination_function,
+            constraint_function=constraint_function,
         )
 
     def perform_activity(
         self,
         name: str,
-        power_consumption_in_watt: float = None,
-        duration_in_s: float = 1.0,
+        activity_func_args: list = None,
+        termination_func_args: list = None,
+        constraint_func_args: list = None,
     ):
-        """Perform the activity and discharge battery accordingly
-
-        Args:
-            name (str): Name of the activity
-            power_consumption_in_watt (float, optional): Power consumption of the
-            activity in seconds if not specified. Defaults to None.
-            duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
-
-        Returns:
-            bool: Whether the activity was performed successfully.
-        """
         return self._activity_manager.perform_activity(
             name=name,
             local_actor=self.local_actor,
-            power_consumption_in_watt=power_consumption_in_watt,
-            duration_in_s=duration_in_s,
+            activity_func_args=activity_func_args,
+            termination_func_args=termination_func_args,
+            constraint_func_args=constraint_func_args,
         )
 
     def set_central_body(self, planet: pk.planet):

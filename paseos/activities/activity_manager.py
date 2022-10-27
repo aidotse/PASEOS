@@ -1,13 +1,18 @@
+import types
+import asyncio
+
 from loguru import logger
 from dotmap import DotMap
 
 from paseos.actors.base_actor import BaseActor
+from paseos.activities.activity_processor import ActivityProcessor
 
 
 class ActivityManager:
-    """This class is used to handle registering, performing and collection of activities. There can only be one instance of it and each paseos instance has one."""
+    """This class is used to handle registering, performing and collection of activities.
+    There can only be one instance of it and each paseos instance has one."""
 
-    def __new__(self):
+    def __new__(self, paseos_instance, paseos_update_interval: float):
         if not hasattr(self, "instance"):
             self.instance = super(ActivityManager, self).__new__(self)
         else:
@@ -16,21 +21,35 @@ class ActivityManager:
             )
         return self.instance
 
-    def __init__(self):
+    def __init__(self, paseos_instance, paseos_update_interval: float):
+        """Creates a new activity manager. Singleton, so only one instance allowed.
+
+        Args:
+            paseos_instance (PASEOS): The main paseos instance.
+            paseos_update_interval (float): Update interval for paseos.
+        """
         logger.trace("Initializing ActivityManager")
+        assert (
+            paseos_update_interval > 1e-4
+        ), f"Too small paseos update interval. Should not be less than 1e-4, was {paseos_update_interval}"
         self._activities = DotMap(_dynamic=False)
+        self._paseos_update_interval = paseos_update_interval
+        self._paseos_instance = paseos_instance
 
     def register_activity(
         self,
         name: str,
-        requires_line_of_sight_to: list = None,
-        power_consumption_in_watt: float = None,
+        activity_function: types.FunctionType,
+        power_consumption_in_watt: float,
+        check_termination_function: types.FunctionType,
+        constraint_function: types.FunctionType,
     ):
         """Registers an activity that can then be performed on the local actor.
 
         Args:
             name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which need to be visible for this activity.
+            requires_line_of_sight_to (list): List of strings with names of actors which
+            need to be visible for this activity.
             power_consumption_in_watt (float, optional): Power consumption of performing
             the activity (per second). Defaults to None.
         """
@@ -43,8 +62,10 @@ class ActivityManager:
             )
 
         self._activities[name] = DotMap(
-            requires_line_of_sight_to=requires_line_of_sight_to,
+            activity_function=activity_function,
             power_consumption_in_watt=power_consumption_in_watt,
+            check_termination_function=check_termination_function,
+            constraint_function=constraint_function,
             _dynamic=False,
         )
 
@@ -54,8 +75,9 @@ class ActivityManager:
         self,
         name: str,
         local_actor: BaseActor,
-        power_consumption_in_watt: float = None,
-        duration_in_s: float = 1.0,
+        activity_func_args: list = None,
+        termination_func_args: list = None,
+        constraint_func_args: list = None,
     ):
         """Perform the activity and discharge battery accordingly
 
@@ -76,28 +98,33 @@ class ActivityManager:
         activity = self._activities[name]
         logger.debug(f"Performing activity {activity}")
 
-        if power_consumption_in_watt is None:
-            power_consumption_in_watt = activity.power_consumption_in_watt
-
-        assert power_consumption_in_watt > 0, (
-            "Power consumption has to be positive but was either in activity or call specified as "
-            + str(power_consumption_in_watt)
+        assert (
+            activity.power_consumption_in_watt > 0
+        ), "Power consumption has to be positive but was specified as " + str(
+            activity.power_consumption_in_watt
         )
 
-        assert duration_in_s > 0, "Duration has to be positive."
+        processor = ActivityProcessor(
+            update_interval=self._paseos_update_interval,
+            power_consumption_in_watt=activity.power_consumption_in_watt,
+            paseos_instance=self._paseos_instance,
+            advance_paseos_clock=self._paseos_instance.use_automatic_clock,
+        )
 
-        # TODO
-        # Check if line of sight requirement is fulfilled and if enough power available
-        assert (
-            activity.requires_line_of_sight_to is None
-        ), "Line of Sight for activities is not implemented"
+        # Define async functions to run the activity and processor
+        async def run_activity(activity, args):
+            await activity(args)
+            await processor.stop()
 
-        # TODO
-        # Perform activity, maybe we allow the user pass a function to be executed?
+        async def job():
+            await asyncio.gather(
+                processor.start(),
+                run_activity(activity.activity_function, activity_func_args),
+            )
 
-        # Discharge power for the activity
-        local_actor.discharge(power_consumption_in_watt, duration_in_s)
+        # Run activity and processor
+        asyncio.run(job())
 
-        logger.trace(f"Activity {activity} completed.")
+        logger.debug(f"Activity {activity} completed.")
 
         return True
