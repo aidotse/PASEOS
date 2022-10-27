@@ -137,7 +137,7 @@ class PASEOS:
         """Registers an activity that can then be performed on the local actor.
         Args:
             name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which 
+            requires_line_of_sight_to (list): List of strings with names of actors which
             need to be visible for this activity.
             power_consumption_in_watt (float, optional): Power consumption of performing
             the activity (per second). Defaults to None.
