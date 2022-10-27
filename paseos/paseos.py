@@ -31,7 +31,9 @@ class PASEOS:
         if not hasattr(self, "instance"):
             self.instance = super(PASEOS, self).__new__(self)
         else:
-            logger.warning("Tried to create another instance of PASEOS simulation.Keeping original one...")
+            logger.warning(
+                "Tried to create another instance of PASEOS simulation.Keeping original one..."
+            )
         return self.instance
 
     def __init__(self, local_actor: BaseActor):
@@ -82,7 +84,9 @@ class PASEOS:
         logger.debug("Current actors: " + str(self._known_actors.keys()))
         # Check for duplicate actors by name
         if actor.name in self._known_actors.keys():
-            raise ValueError("Trying to add already existing actor with name: " + actor.name)
+            raise ValueError(
+                "Trying to add already existing actor with name: " + actor.name
+            )
         # Else add
         self._known_actors[actor.name] = actor
 
@@ -133,7 +137,8 @@ class PASEOS:
         """Registers an activity that can then be performed on the local actor.
         Args:
             name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which need to be visible for this activity.
+            requires_line_of_sight_to (list): List of strings with names of actors which 
+            need to be visible for this activity.
             power_consumption_in_watt (float, optional): Power consumption of performing
             the activity (per second). Defaults to None.
         """
@@ -169,24 +174,27 @@ class PASEOS:
             bool: Whether the activity was performed successfully.
         """
         # Check if activity exists and if it already had consumption specified
-        assert name in self._activities.keys(), "Activity not found. Declared activities are" + self._activities.keys()
+        assert name in self._activities.keys(), (
+            "Activity not found. Declared activities are" + self._activities.keys()
+        )
         activity = self._activities[name]
         logger.debug(f"Performing activity {activity}")
 
         if power_consumption_in_watt is None:
             power_consumption_in_watt = activity.power_consumption_in_watt
 
-        assert (
-            power_consumption_in_watt > 0
-        ), "Power consumption has to be positive but was either in activity or call specified as " + str(
-            power_consumption_in_watt
+        assert power_consumption_in_watt > 0, (
+            "Power consumption has to be positive but was either in activity or call specified as "
+            + str(power_consumption_in_watt)
         )
 
         assert duration_in_s > 0, "Duration has to be positive."
 
         # TODO
         # Check if line of sight requirement is fulfilled and if enough power available
-        assert activity.requires_line_of_sight_to is None, "Line of Sight for activities is not implemented"
+        assert (
+            activity.requires_line_of_sight_to is None
+        ), "Line of Sight for activities is not implemented"
 
         # TODO
         # Perform activity, maybe we allow the user pass a function to be executed?
