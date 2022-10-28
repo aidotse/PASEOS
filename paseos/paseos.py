@@ -152,10 +152,15 @@ class PASEOS:
 
         Args:
             name (str): Name of the activity.
-            activity_function (types.FunctionType): Function to execute during the activity. Needs to be async. Can accept a list of arguments to be specified later.
+            activity_function (types.FunctionType): Function to execute during the activity.
+            Needs to be async. Can accept a list of arguments to be specified later.
             power_consumption_in_watt (float): Power consumption of the activity in W (per second).
-            on_termination_function (types.FunctionType): Function to execute when the activities stops (either due to completion or constraint not being satisfied anymore). Needs to be async. Can accept a list of arguments to be specified later.
-            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid. Should return True if constraints are valid, False if they aren't. Needs to be async. Can accept a list of arguments to be specified later.
+            on_termination_function (types.FunctionType): Function to execute when the activities stops
+            (either due to completion or constraint not being satisfied anymore). Needs to be async.
+            Can accept a list of arguments to be specified later.
+            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid.
+            Should return True if constraints are valid, False if they aren't. Needs to be async.
+            Can accept a list of arguments to be specified later.
         """
         self._activity_manager.register_activity(
             name=name,

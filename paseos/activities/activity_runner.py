@@ -22,10 +22,14 @@ class ActivityRunner:
         Args:
             name (str): Name of the activity.
             activity_func (types.FunctionType): Function to execute for the activity.
-            constraint_func (types.FunctionType, optional): Constraint function of the activity. See Activity Manager for more details. Defaults to None.
-            termination_func (types.FunctionType, optional): Termination function of the activity. See Activity Manager for more details. Defaults to None.
-            termination_args (list, optional): Termination arguments of the activity. See Activity Manager for more details. Defaults to None.
-            constraint_args (list, optional): Constraint arguments of the activity. See Activity Manager for more details. Defaults to None.
+            constraint_func (types.FunctionType, optional): Constraint function of the activity.
+            See Activity Manager for more details. Defaults to None.
+            termination_func (types.FunctionType, optional): Termination function of the activity.
+            See Activity Manager for more details. Defaults to None.
+            termination_args (list, optional): Termination arguments of the activity. See Activity
+            Manager for more details. Defaults to None.
+            constraint_args (list, optional): Constraint arguments of the activity. See Activity
+            Manager for more details. Defaults to None.
         """
         logger.trace(f"Initalized activity {name}")
         self.name = name
@@ -41,7 +45,7 @@ class ActivityRunner:
         Returns:
             bool: True if specified.
         """
-        return not self._constraint_func is None
+        return self._constraint_func is not None
 
     async def _run(self, args):
         try:
@@ -66,7 +70,7 @@ class ActivityRunner:
         """Stops the activity execution and calls the termination function."""
 
         logger.trace(f"Stopping activity {self.name}.")
-        if not self._termination_func is None:
+        if self._termination_func is not None:
             logger.debug(f"Calling termination function of activity {self.name}")
             try:
                 await self._termination_func(self._termination_args)

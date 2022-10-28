@@ -24,8 +24,10 @@ class ActivityProcessor:
             update_interval (float): Interval at which we process (in s)
             power_consumption_in_watt (float): Power consumption of the activity. Used to discharge local actor.
             paseos_instance (PASEOS): Local paseos instance.
-            activity_runner (ActivityRunner): Runner of the activity that is performed. Needed check if constraints are still valid.
-            advance_paseos_clock (bool, optional): Whether to advanced the local time of the actor and thus local simulation. Defaults to True.
+            activity_runner (ActivityRunner): Runner of the activity that is performed.
+            Needed check if constraints are still valid.
+            advance_paseos_clock (bool, optional): Whether to advanced the local time of
+            the actor and thus local simulation. Defaults to True.
         """
         logger.trace("Initalized ActivityProcessor.")
         assert update_interval > 0, "Update update_interval has to be positive."

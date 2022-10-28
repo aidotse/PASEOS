@@ -4,7 +4,6 @@ import asyncio
 from loguru import logger
 from dotmap import DotMap
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
 
@@ -49,10 +48,15 @@ class ActivityManager:
 
         Args:
             name (str): Name of the activity.
-            activity_function (types.FunctionType): Function to execute during the activity. Needs to be async. Can accept a list of arguments to be specified later.
+            activity_function (types.FunctionType): Function to execute during the activity.
+            Needs to be async. Can accept a list of arguments to be specified later.
             power_consumption_in_watt (float): Power consumption of the activity in W (per second).
-            on_termination_function (types.FunctionType): Function to execute when the activities stops (either due to completion or constraint not being satisfied anymore). Needs to be async. Can accept a list of arguments to be specified later.
-            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid. Should return True if constraints are valid, False if they aren't. Needs to be async. Can accept a list of arguments to be specified later.
+            on_termination_function (types.FunctionType): Function to execute when the activities
+            stops (either due to completion or constraint not being satisfied anymore).
+            Needs to be async. Can accept a list of arguments to be specified later.
+            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid.
+            Should return True if constraints are valid, False if they aren't. Needs to be async.
+            Can accept a list of arguments to be specified later.
         """
 
         if name in self._activities.keys():
