@@ -211,8 +211,8 @@ class SpaceAnimation(Animation):
         self._plot_actors()
 
         # Step through trajectories to find max and min values in each direction
-        coords_max = [0, 0, 0]
-        coords_min = [0, 0, 0]
+        coords_max = [self.ax.get_xlim()[1], self.ax.get_ylim()[1], self.ax.get_zlim()[1]]
+        coords_min = [self.ax.get_xlim()[0], self.ax.get_ylim()[0], self.ax.get_zlim()[0]]
         for obj in self.objects:
             coords_max = np.maximum(obj.positions.max(axis=0), coords_max)
             coords_min = np.minimum(obj.positions.min(axis=0), coords_min)

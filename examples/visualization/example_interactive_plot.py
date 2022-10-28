@@ -7,7 +7,7 @@ from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.actor_builder import ActorBuilder
 import pykep as pk
 import time
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 def interactive_plot():
     """Animate two satellites in orbit around earth in interactive mode
@@ -37,7 +37,7 @@ def interactive_plot():
     for t in range(100):
         anim.animate(sim, dt)
         plt.pause(0.05)
-    plt.show()
+
 
 if __name__ == "__main__":
     interactive_plot()
