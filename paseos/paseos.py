@@ -145,14 +145,23 @@ class PASEOS:
         name: str,
         activity_function: types.FunctionType,
         power_consumption_in_watt: float,
-        check_termination_function: types.FunctionType = None,
+        on_termination_function: types.FunctionType = None,
         constraint_function: types.FunctionType = None,
     ):
+        """Registers an activity that can then be performed on the local actor.
+
+        Args:
+            name (str): Name of the activity.
+            activity_function (types.FunctionType): Function to execute during the activity. Needs to be async. Can accept a list of arguments to be specified later.
+            power_consumption_in_watt (float): Power consumption of the activity in W (per second).
+            on_termination_function (types.FunctionType): Function to execute when the activities stops (either due to completion or constraint not being satisfied anymore). Needs to be async. Can accept a list of arguments to be specified later.
+            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid. Should return True if constraints are valid, False if they aren't. Needs to be async. Can accept a list of arguments to be specified later.
+        """
         self._activity_manager.register_activity(
             name=name,
             activity_function=activity_function,
             power_consumption_in_watt=power_consumption_in_watt,
-            check_termination_function=check_termination_function,
+            on_termination_function=on_termination_function,
             constraint_function=constraint_function,
         )
 
@@ -163,6 +172,14 @@ class PASEOS:
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
+        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
+
+        Args:
+            name (str): Name of the activity to perform.
+            activity_func_args (list, optional): Arguments for the activity function. Defaults to None.
+            termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
+            constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
+        """
         return self._activity_manager.perform_activity(
             name=name,
             local_actor=self.local_actor,
