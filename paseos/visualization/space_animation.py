@@ -18,7 +18,11 @@ class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
     def __init__(self, sim: PASEOS) -> None:
+        """Initialize the space animation object
 
+        Args:
+            sim (PASEOS): simulation object
+        """        
         super().__init__(sim)
         logger.trace("Initializing animation")
         # Create list of objects to be plotted
@@ -49,11 +53,7 @@ class SpaceAnimation(Animation):
 
     def _plot_central_body(self) -> None:
         """Plot the central object as a sphere of radius 1
-        Args:
-            None
-        Returns:
-            None
-        """
+        """        
         central_body = self._local_actor._central_body
         central_body.radius
 
@@ -65,15 +65,21 @@ class SpaceAnimation(Animation):
 
     def _populate_textbox(self, actor: BaseActor) -> str:
         """Extracts information from an actor and builds a string
+
         Args:
             actor (BaseActor): an actor
+
         Returns:
             str: text to populate the textbox.
-        """
+        """        
+        info_str = f"{actor.name}"
         if isinstance(actor, SpacecraftActor):
             # TODO: enable both text and icons in textbox
-            battery_level = actor.battery_level_ratio * 100
-            info_str = f"{actor.name} \nbat: {battery_level:.0f}%"
+            
+            if actor.battery_level_in_Ws is not None:
+                battery_level = actor.battery_level_ratio * 100
+                info_str += f"\nbat: {battery_level:.0f}%"
+            
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
                 info_str += f"\n{name}: {info.bandwidth_in_kbps} kbps"
@@ -86,11 +92,7 @@ class SpaceAnimation(Animation):
 
     def _plot_actors(self) -> None:
         """Plots all the actors
-        Args:
-            None
-        Returns:
-            None
-        """
+        """        
         for obj in self.objects:
             data = obj.positions
             if data.ndim == 1:
@@ -151,11 +153,13 @@ class SpaceAnimation(Animation):
 
     def _make_actor_list(self, sim: PASEOS) -> List[BaseActor]:
         """Arranges all actors (including the local) into a list
+
         Args:
-        sim: simulation object.
+            sim (PASEOS): simulation object.
+
         Returns:
-            List[BaseActor]
-        """
+            List[BaseActor]: list of all the actors known to local actor (including itself)
+        """        
         if len(sim.known_actors) > 0:
             current_actors = [sim.local_actor] + list(sim.known_actors.values())
         else:
@@ -164,12 +168,11 @@ class SpaceAnimation(Animation):
 
     def _update(self, sim: PASEOS) -> None:
         """Updates the animation with the current actor information
+
         Args:
-        sim (PASEOS): simulation object.
-        Returns:
-            None
-        """
-        logger.debug("Updating animation")
+            sim (PASEOS): simulation object.
+        """        
+        logger.trace("Updating animation")
         local_time_d = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
@@ -223,25 +226,29 @@ class SpaceAnimation(Animation):
 
     def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
         """Advances the time of sim, updates the plot, and returns the axis objects
+
         Args:
-        sim (PASEOS): simulation object.
-        dt: size of time step
+            sim (PASEOS): simulation object.
+            dt (float): size of time step
+
         Returns:
             List[Artist]: list of Artist objects
-        """
+        """        
         sim.advance_time(dt)
         self._update(sim)
         return self.ax.get_children()
 
     def _animation_wrapper(self, step: int, sim: PASEOS, dt: float) -> List[Artist]:
-        """wrapper to allow for frame numbers from animation
+        """Wrapper to allow for frame numbers from animation
+
         Args:
-        steps: current frame number of the animation
-        sim (PASEOS): simulation object.
-        dt: size of time step
+            step (int): current frame number of the animation
+            sim (PASEOS): simulation object.
+            dt (float): size of time step
+
         Returns:
             List[Artist]: list of Artist objects
-        """
+        """        
         return self._animate(sim, dt)
 
     def animate(
@@ -249,21 +256,17 @@ class SpaceAnimation(Animation):
         sim: PASEOS,
         dt: float,
         steps: int = 1,
-        name: str = None,
-        save_file: bool = False,
+        name: str = None
     ) -> None:
         """Animates paseos for a given number of steps with dt in each step.
-        If save=True, result is saved into "{name}.mp4"
+
         Args:
-        sim (PASEOS): simulation object.
-        dt(float): size of time step
-        steps (int): number of steps to animate
-        name (str): filename to save animation
-        save_file (bool): should animation be saved
-        Returns:
-            None
-        """
-        if save_file is False:
+            sim (PASEOS): simulation object.
+            dt (float): size of time step
+            steps (int, optional): number of steps to animate. Defaults to 1.
+            name (str, optional): filename to save the animation. Defaults to None.
+        """        
+        if name is None:
             self._animate(sim, dt)
         else:
             anim = animation.FuncAnimation(
@@ -275,6 +278,6 @@ class SpaceAnimation(Animation):
                     dt,
                 ),
                 interval=20,
-                blit=True,
-            )
+                blit=True, 
+            ) # blit means to only redraw parts that changed
             anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)
