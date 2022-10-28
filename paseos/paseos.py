@@ -187,7 +187,6 @@ class PASEOS:
         """
         return self._activity_manager.perform_activity(
             name=name,
-            local_actor=self.local_actor,
             activity_func_args=activity_func_args,
             termination_func_args=termination_func_args,
             constraint_func_args=constraint_func_args,
