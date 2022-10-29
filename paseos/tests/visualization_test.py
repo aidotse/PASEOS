@@ -9,8 +9,7 @@ import pykep as pk
 
 
 def test_animation():
-    """Simple test to verify that the animation executes without errors.
-    """    
+    """Simple test to verify that the animation executes without errors."""
     sim, sat1, earth = get_default_instance()
 
     sat2 = ActorBuilder.get_actor_scaffold(

@@ -6,11 +6,11 @@ class Animation(ABC):
     """Abstract class for visualization."""
 
     def __init__(self, sim: PASEOS) -> None:
-        """Initialize the animation 
+        """Initialize the animation
 
         Args:
             sim (PASEOS): simulation object
-        """        
+        """
         self._local_actor = sim.local_actor
         self._other_actors = sim.known_actors
         self.objects = list()
@@ -23,7 +23,7 @@ class Animation(ABC):
 
         Returns:
             str: time in ddhhmmss.
-        """        
+        """
         m, s = divmod(time, 60)
         h, m = divmod(m, 60)
         d, h = divmod(h, 24)
@@ -31,8 +31,7 @@ class Animation(ABC):
 
     @abstractmethod
     def _plot_actors(self) -> None:
-        """Function to plot all the actors
-        """        
+        """Function to plot all the actors"""
         pass
 
     @abstractmethod
@@ -41,5 +40,5 @@ class Animation(ABC):
 
         Args:
             sim (PASEOS): simulation object
-        """        
+        """
         pass
