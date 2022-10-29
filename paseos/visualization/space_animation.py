@@ -70,7 +70,7 @@ class SpaceAnimation(Animation):
         central_body = self._local_actor._central_body
         central_body.radius
 
-        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
+        u, v = np.mgrid[0:2 * np.pi:30j, 0:np.pi:20j]
         x = np.cos(u) * np.sin(v)
         y = np.sin(u) * np.sin(v)
         z = np.cos(v)
@@ -89,7 +89,7 @@ class SpaceAnimation(Animation):
         los_matrix = np.identity(len(current_actors))
 
         for i, a1 in enumerate(current_actors):
-            for j, a2 in enumerate(current_actors[i + 1 :]):
+            for j, a2 in enumerate(current_actors[i + 1:]):
                 if a1.is_in_line_of_sight(a2, local_time) is True:
                     los_matrix[i, j + i + 1] = 1.0
 
