@@ -27,7 +27,7 @@ class PASEOS:
     # Stores registered activities
     _activities = None
 
-    def __new__(self, local_actor: BaseActor):
+    def __new__(self, local_actor: BaseActor, cfg):
         if not hasattr(self, "instance"):
             self.instance = super(PASEOS, self).__new__(self)
         else:
@@ -36,9 +36,12 @@ class PASEOS:
             )
         return self.instance
 
-    def __init__(self, local_actor: BaseActor):
+    def __init__(self, local_actor: BaseActor, cfg=None):
         logger.trace("Initializing PASEOS")
-        self._cfg = load_default_cfg()
+        if cfg is not None:
+            self._cfg = cfg
+        else:
+            self._cfg = load_default_cfg()
         self._state = DotMap(_dynamic=False)
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}

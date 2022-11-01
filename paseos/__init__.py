@@ -13,17 +13,17 @@ set_log_level("DEBUG")
 logger.debug("Loaded module.")
 
 
-def init_sim(local_actor: BaseActor):
+def init_sim(local_actor: BaseActor, cfg):
     """Initializes PASEOS
 
     Args:
         local_actor (BaseActor): The actor linked to the local device which is required to model anything.
-
+        cfg (DotMap): configuration file.
     Returns:
         PASEOS: Instance of the simulation (only one can exist, singleton)
     """
     logger.debug("Initializing simulation.")
-    sim = PASEOS(local_actor=local_actor)
+    sim = PASEOS(local_actor=local_actor, cfg=cfg)
     return sim
 
 
