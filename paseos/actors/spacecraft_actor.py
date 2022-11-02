@@ -62,7 +62,7 @@ class SpacecraftActor(BaseActor):
             duration_in_s (float): How long the activity is performed in seconds
         """
         assert duration_in_s > 0, "Duration has to be positive"
-        assert consumption_rate_in_W > 0, "Power consumption rate has to be positive"
+        assert consumption_rate_in_W >= 0, "Power consumption rate has to be positive"
 
         power_consumption = consumption_rate_in_W * duration_in_s
         logger.debug(f"Discharging {power_consumption}")
