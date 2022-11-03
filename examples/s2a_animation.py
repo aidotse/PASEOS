@@ -38,9 +38,17 @@ sentinel2B = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
 #Calculating S2B ephemerides.
 sentinel2B_eph=sentinel2B.eph(today)
 
+# Define local actor
+S2B = ActorBuilder.get_actor_scaffold(
+    "Sentinel2", SpacecraftActor, [0,0,0], today
+)
+
+
 #Adding orbits around Earth based on previously calculated ephemerides
 ActorBuilder.set_orbit(S2A, sentinel2A_eph[0], sentinel2A_eph[1], today, earth)
-ActorBuilder.set_orbit(S2B, sentinel2B_eph[0], sentinel2B_eph[1], today, earth)
+
+# To enable the communication between S2A and S2B, the velocity vector is multiplied by - 1 making the satellite to orbit with opposite direction.
+ActorBuilder.set_orbit(S2B, sentinel2B_eph[0], [-sentinel2B_eph[1][0], -sentinel2B_eph[1][1],-sentinel2B_eph[1][2]], today, earth)
 
 #Adding power devices
 ActorBuilder.set_power_devices(S2A, 500, 10000, 1)
