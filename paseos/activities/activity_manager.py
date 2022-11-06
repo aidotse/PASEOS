@@ -6,7 +6,7 @@ from dotmap import DotMap
 
 from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
-
+from paseos.utils.is_notebook import is_notebook
 
 class ActivityManager:
     """This class is used to handle registering, performing and collection of activities.
@@ -128,7 +128,10 @@ class ActivityManager:
                 activity_runner.start(activity_func_args),
             )
 
-        # Run activity and processor
-        asyncio.run(job())
+        if is_notebook(): #Workaround to avoid error when executed in a Jupyter notebook.
+            return job()
+        else:
+            # Run activity and processor
+            asyncio.run(job())
 
         logger.info(f"Activity {activity} completed.")
