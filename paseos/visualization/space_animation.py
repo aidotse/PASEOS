@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.artist import Artist
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib import gridspec
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
@@ -18,7 +20,7 @@ from paseos.visualization.animation import Animation
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    def __init__(self, sim: PASEOS, n_trajectory: int = 50) -> None:
+    def __init__(self, sim: PASEOS, n_trajectory: int = 10) -> None:
         """Initialize the space animation object
 
         Args:
@@ -38,23 +40,34 @@ class SpaceAnimation(Animation):
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
         # create figures
+        # create grid for different subplots
+        spec = gridspec.GridSpec(
+            ncols=2,
+            nrows=1,
+            width_ratios=[2.5, 1],
+            wspace=0.5,
+            hspace=0.5,
+            height_ratios=[1],
+        )
+
         # Create figure for 3d animation
-        self.fig = plt.figure(figsize=plt.figaspect(0.5) * 1.5)
-        self.ax_3d = plt.subplot(1, 2, 1, projection="3d")
+        self.fig = plt.figure(figsize=plt.figaspect(0.5) * 2)
+        self.ax_3d = plt.subplot(spec[0], projection="3d")
         self.ax_3d.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
         self.ax_3d.get_xaxis().set_ticks([])
         self.ax_3d.get_yaxis().set_ticks([])
         self.ax_3d.get_zaxis().set_ticks([])
         self.n_trajectory = n_trajectory  # how many samples from histories to visualize
-        self._textbox_offset = 0.25  # how many samples from histories to visualize
+        self._textbox_offset = 0.1  # how many samples from histories to visualize
 
         # Create figure for LOS
-        self.ax_los = plt.subplot(1, 2, 2)
+        self.ax_los = plt.subplot(spec[1])
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
         self.ax_los.set_yticks(xaxis)
         self.ax_los.set_xticklabels(current_actors)
         self.ax_los.set_yticklabels(current_actors)
+        self.ax_los.figure.set_size_inches(10, 10)
 
         # plot the objects
         self._plot_central_body()
@@ -70,11 +83,11 @@ class SpaceAnimation(Animation):
         central_body = self._local_actor._central_body
         central_body.radius
 
-        u, v = np.mgrid[0:2 * np.pi:30j, 0:np.pi:20j]
+        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
         x = np.cos(u) * np.sin(v)
         y = np.sin(u) * np.sin(v)
         z = np.cos(v)
-        self.ax_3d.plot_surface(x, y, z, color="grey")
+        self.ax_3d.plot_surface(x, y, z, color="grey", alpha=0.4)
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
         """Compute line-of-sight (LOS) between all actors
@@ -89,7 +102,7 @@ class SpaceAnimation(Animation):
         los_matrix = np.identity(len(current_actors))
 
         for i, a1 in enumerate(current_actors):
-            for j, a2 in enumerate(current_actors[i + 1:]):
+            for j, a2 in enumerate(current_actors[i + 1 :]):
                 if a1.is_in_line_of_sight(a2, local_time) is True:
                     los_matrix[i, j + i + 1] = 1.0
 
@@ -112,11 +125,11 @@ class SpaceAnimation(Animation):
 
             if actor.battery_level_in_Ws is not None:
                 battery_level = actor.battery_level_ratio * 100
-                info_str += f"\nbat: {battery_level:.0f}%"
+                info_str += f"\nBattery: {battery_level:.0f}%"
 
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
-                info_str += f"\n{name}: {info.bandwidth_in_kbps} kbps"
+                info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
 
         elif isinstance(actor, GroundstationActor):
             # TODO: implement textbox for groundstation
@@ -134,8 +147,12 @@ class SpaceAnimation(Animation):
         colors = [(255, 0, 0), (255, 255, 255), (0, 255, 0)]
         new_map = LinearSegmentedColormap.from_list("new_map", colors, N=3)
         self._los_plot = self.ax_los.matshow(los_matrix, cmap=new_map, vmin=0, vmax=1)
-        cbar = self.fig.colorbar(self._los_plot, ticks=[0, 1])
-        cbar.ax.set_yticklabels(["No LOS", "LOS"])
+
+        divider = make_axes_locatable(self.ax_los)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+
+        cbar = self.fig.colorbar(self._los_plot, ticks=[0, 1], cax=cax)
+        cbar.ax.set_yticklabels(["no signal", "signal"])
 
     def _plot_actors(self) -> None:
         """Plots all the actors"""
@@ -177,15 +194,27 @@ class SpaceAnimation(Animation):
                         color=trajectory.get_color(),
                     )[0]
                     actor_info = self._populate_textbox(obj.actor)
-                    obj.plot.text = self.ax_3d.text(
-                        data[0, 0] + self._textbox_offset,
-                        data[0, 1] + self._textbox_offset,
-                        data[0, 2] + self._textbox_offset,
-                        actor_info,
-                        bbox=dict(facecolor="white"),
-                        verticalalignment="bottom",
-                        clip_on=True,
-                    )
+                    if obj.actor == self._local_actor:
+                        obj.plot.text = self.ax_3d.text(
+                            data[0, 0] + self._textbox_offset,
+                            data[0, 1] + self._textbox_offset,
+                            data[0, 2] + self._textbox_offset,
+                            actor_info,
+                            bbox=dict(facecolor="mediumspringgreen"),
+                            verticalalignment="bottom",
+                            clip_on=True,
+                        )
+
+                    else:
+                        obj.plot.text = self.ax_3d.text(
+                            data[0, 0] + self._textbox_offset,
+                            data[0, 1] + self._textbox_offset,
+                            data[0, 2] + self._textbox_offset,
+                            actor_info,
+                            bbox=dict(facecolor="white"),
+                            verticalalignment="bottom",
+                            clip_on=True,
+                        )
 
                 elif isinstance(obj.actor, GroundstationActor):
                     # TODO: implement initial rendering of groundstation object
@@ -291,7 +320,12 @@ class SpaceAnimation(Animation):
         self.ax_los.set_yticklabels(current_actors)
         self.fig.canvas.draw_idle()
 
-        self.ax_3d.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
+        # TODO: understand why we sometimes get
+        # "RuntimeError: bad lexical cast: source type value could not be interpreted as target"
+        try:
+            self.ax_3d.set_title(self._local_actor.local_time)
+        except:
+            logger.trace("Animation title could not be updated")
 
     def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
         """Advances the time of sim, updates the plot, and returns the axis objects

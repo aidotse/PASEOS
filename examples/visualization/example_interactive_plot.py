@@ -7,7 +7,6 @@ from paseos.visualization.space_animation import SpaceAnimation
 from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.actor_builder import ActorBuilder
 import pykep as pk
-import matplotlib.pyplot as plt
 from loguru import logger
 
 
