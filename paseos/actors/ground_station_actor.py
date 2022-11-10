@@ -7,9 +7,7 @@ from paseos.actors.base_actor import BaseActor
 class GroundstationActor(BaseActor):
     """This class models a groundstation actor."""
 
-    def __init__(
-        self, name: str, position, epoch: pk.epoch
-    ) -> None:
+    def __init__(self, name: str, position, epoch: pk.epoch) -> None:
         """Constructor for a groundstation actor.
 
         Args:

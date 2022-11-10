@@ -320,10 +320,12 @@ class SpaceAnimation(Animation):
         self.ax_los.set_yticklabels(current_actors)
         self.fig.canvas.draw_idle()
 
+        # TODO: understand why we sometimes get
+        # "RuntimeError: bad lexical cast: source type value could not be interpreted as target"
         try:
             self.ax_3d.set_title(self._local_actor.local_time)
         except:
-            pass
+            logger.trace("Animation title could not be updated")
 
     def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
         """Advances the time of sim, updates the plot, and returns the axis objects

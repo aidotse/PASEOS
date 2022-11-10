@@ -29,7 +29,7 @@ Visualization can be done in interactive mode or as an animation that is saved t
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/animation.png" alt="Scheme"  width="500" height="500">
+    <img src="resources/images/animation.png" alt="Scheme"  width="900" height="500">
   </a>
   <p align="center">
     Snapshot of PASEOS visualization
