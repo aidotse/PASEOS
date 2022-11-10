@@ -14,4 +14,4 @@ def is_notebook() -> bool:
         else:
             return False  # Other type (?)
     except NameError:
-        return False 
+        return False

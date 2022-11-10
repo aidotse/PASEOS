@@ -56,6 +56,7 @@ class PASEOS:
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
+
         Args:
             time_to_advance (float): Time to advance in seconds.
         """
@@ -86,6 +87,7 @@ class PASEOS:
 
     def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.
+
         Args:
             actor (BaseActor): Actor to add
         """
@@ -129,6 +131,7 @@ class PASEOS:
 
     def remove_known_actor(self, actor_name: str):
         """Remove an actor from the list of known actors.
+
         Args:
             actor_name (str): name of the actor to remove.
         """
@@ -146,6 +149,7 @@ class PASEOS:
         constraint_function: types.FunctionType = None,
     ):
         """Registers an activity that can then be performed on the local actor.
+
         Args:
 
             name (str): Name of the activity.
@@ -175,12 +179,18 @@ class PASEOS:
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
+<<<<<<< HEAD
         """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
+=======
+        """Perform the activity and discharge battery accordingly
+
+>>>>>>> visual_implementation
         Args:
             name (str): Name of the activity
             power_consumption_in_watt (float, optional): Power consumption of the
             activity in seconds if not specified. Defaults to None.
             duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
+
         Returns:
             bool: Whether the activity was performed successfully.
         """
@@ -193,6 +203,7 @@ class PASEOS:
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation
+
         Args:
             planet (pk.planet): The central body as a pykep planet
         """
