@@ -179,12 +179,8 @@ class PASEOS:
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
-<<<<<<< HEAD
         """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
-=======
-        """Perform the activity and discharge battery accordingly
 
->>>>>>> visual_implementation
         Args:
             name (str): Name of the activity
             power_consumption_in_watt (float, optional): Power consumption of the
