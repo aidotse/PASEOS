@@ -28,7 +28,7 @@ class SpaceAnimation(Animation):
             n_trajectory (int): number of samples in tail of actor
         """
         super().__init__(sim)
-        logger.trace("Initializing animation")
+        logger.debug("Initializing animation")
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
@@ -77,6 +77,7 @@ class SpaceAnimation(Animation):
 
         plt.ion()
         plt.show()
+        plt.pause(0.0001)
 
     def _plot_central_body(self) -> None:
         """Plot the central object as a sphere of radius 1"""
@@ -156,15 +157,20 @@ class SpaceAnimation(Animation):
 
     def _plot_actors(self) -> None:
         """Plots all the actors"""
+        logger.trace("Updating actors.")
+
         for obj in self.objects:
             data = obj.positions
             if data.ndim == 1:
                 data = data[..., np.newaxis].T
             n_points = np.minimum(data.shape[0], self.n_trajectory)
 
+            logger.trace(f"Position for object: {data}")
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
                 if isinstance(obj.actor, SpacecraftActor):
+                    logger.trace("Updating SpacecraftActor.")
+
                     # update trajectory
                     obj.plot.trajectory.set_data(data[-n_points:, :2].T)
                     obj.plot.trajectory.set_3d_properties(data[-n_points:, 2].T)
@@ -250,17 +256,15 @@ class SpaceAnimation(Animation):
             sim (PASEOS): simulation object.
         """
         logger.trace("Updating animation")
-        local_time_d = self._local_actor.local_time.mjd2000
         # NOTE: the actors in sim are unique so make use of sets
         objects_in_plot = set([obj.actor for obj in self.objects])
         current_actors = set(self._make_actor_list(sim))
 
-        objects_to_remove = list(
-            objects_in_plot.difference(current_actors)
-        )  # if objects do not exist in known actors, remove from plot next update.
-        objects_to_add = list(
-            current_actors.difference(objects_in_plot)
-        )  # if known_actor does not exist in objects, add the actors and update in plot
+        # if objects do not exist in known actors, remove from plot next update.
+        objects_to_remove = list(objects_in_plot.difference(current_actors))
+
+        # if known_actor does not exist in objects, add the actors and update in plot
+        objects_to_add = list(current_actors.difference(objects_in_plot))
 
         plot_objects_to_remove = [
             x for x in self.objects if x.actor in objects_to_remove
@@ -279,7 +283,9 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos, _ = known_actor.get_position_velocity(pk.epoch(local_time_d))
+                    pos, _ = known_actor.get_position_velocity(
+                        self._local_actor.local_time
+                    )
                     pos_norm = [x / self._norm_coeff for x in pos]
                     if "positions" in obj:
                         if obj.positions.shape[0] > self.n_trajectory:
@@ -318,8 +324,10 @@ class SpaceAnimation(Animation):
         self.ax_los.set_yticks(xaxis)
         self.ax_los.set_xticklabels(current_actors)
         self.ax_los.set_yticklabels(current_actors)
-        self.fig.canvas.draw_idle()
+        self.fig.canvas.draw()
+        plt.pause(0.0001)
 
+        logger.debug("Plot updated.")
         # TODO: understand why we sometimes get
         # "RuntimeError: bad lexical cast: source type value could not be interpreted as target"
         try:
