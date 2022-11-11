@@ -20,7 +20,7 @@ from paseos.visualization.animation import Animation
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    def __init__(self, sim: PASEOS, n_trajectory: int = 10) -> None:
+    def __init__(self, sim: PASEOS, n_trajectory: int = 32) -> None:
         """Initialize the space animation object
 
         Args:
@@ -33,51 +33,74 @@ class SpaceAnimation(Animation):
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
 
-        local_time_d = self._local_actor.local_time.mjd2000
         for known_actor in current_actors:
-            pos, _ = known_actor.get_position_velocity(pk.epoch(local_time_d))
+            pos, _ = known_actor.get_position_velocity(self._local_actor.local_time)
             pos_norm = [x / self._norm_coeff for x in pos]
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
-        # create figures
-        # create grid for different subplots
-        spec = gridspec.GridSpec(
-            ncols=2,
-            nrows=1,
-            width_ratios=[2.5, 1],
-            wspace=0.5,
-            hspace=0.5,
-            height_ratios=[1],
-        )
+        with plt.style.context("dark_background"):
 
-        # Create figure for 3d animation
-        self.fig = plt.figure(figsize=plt.figaspect(0.5) * 2)
-        self.ax_3d = plt.subplot(spec[0], projection="3d")
-        self.ax_3d.set_title(self._sec_to_ddhhmmss(local_time_d / pk.SEC2DAY))
-        self.ax_3d.get_xaxis().set_ticks([])
-        self.ax_3d.get_yaxis().set_ticks([])
-        self.ax_3d.get_zaxis().set_ticks([])
-        self.n_trajectory = n_trajectory  # how many samples from histories to visualize
-        self._textbox_offset = 0.1  # how many samples from histories to visualize
+            # Create figure for 3d animation
+            self.fig, _ = plt.subplots(
+                1,
+                2,
+                figsize=(10, 5),
+                facecolor="black",
+                dpi=100,
+                layout="constrained",
+                gridspec_kw={"width_ratios": [3.5, 1]},
+            )
 
-        # Create figure for LOS
-        self.ax_los = plt.subplot(spec[1])
-        xaxis = np.arange(len(current_actors))
-        self.ax_los.set_xticks(xaxis)
-        self.ax_los.set_yticks(xaxis)
-        self.ax_los.set_xticklabels(current_actors)
-        self.ax_los.set_yticklabels(current_actors)
-        self.ax_los.figure.set_size_inches(10, 10)
+            self.ax_3d = plt.subplot(121, projection="3d")
 
-        # plot the objects
-        self._plot_central_body()
-        self._plot_actors()
-        los_matrix = self._get_los_matrix(current_actors)
-        self._plot_los(los_matrix)
+            # Get rid of the panes
+            self.ax_3d.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 
-        plt.ion()
-        plt.show()
-        plt.pause(0.0001)
+            # Get rid of the spines
+            self.ax_3d.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.get_xaxis().set_ticks([])
+            self.ax_3d.get_yaxis().set_ticks([])
+            self.ax_3d.get_zaxis().set_ticks([])
+
+            # how many samples from histories to visualize
+            self.n_trajectory = n_trajectory
+            self._textbox_offset = 0.1
+
+            # Create figure for LOS
+            self.ax_los = plt.subplot(122)
+            xaxis = np.arange(len(current_actors))
+            self.ax_los.set_position([0.75, 0.7, 0.2, 0.2])
+            self.ax_los.set_xticks(xaxis)
+            self.ax_los.set_yticks(xaxis)
+            self.ax_los.set_xticklabels(current_actors, fontsize=8)
+            self.ax_los.set_yticklabels(current_actors, fontsize=8)
+
+            # plot the objects
+            self._plot_central_body()
+            self._plot_actors()
+            los_matrix = self._get_los_matrix(current_actors)
+            self._plot_los(los_matrix)
+
+            # Write text labels
+            self.date_label = plt.annotate(
+                self._local_actor.local_time,
+                xy=(0.01, 0.01),
+                xycoords="figure fraction",
+            )
+            self.time_label = plt.annotate(
+                f"t={sim._state.time:<10.2e}",
+                xy=(0.99, 0.01),
+                xycoords="figure fraction",
+                horizontalalignment="right",
+            )
+
+            plt.ion()
+            plt.show()
+            plt.pause(0.0001)
 
     def _plot_central_body(self) -> None:
         """Plot the central object as a sphere of radius 1"""
@@ -88,7 +111,7 @@ class SpaceAnimation(Animation):
         x = np.cos(u) * np.sin(v)
         y = np.sin(u) * np.sin(v)
         z = np.cos(v)
-        self.ax_3d.plot_surface(x, y, z, color="grey", alpha=0.4)
+        self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
         """Compute line-of-sight (LOS) between all actors
@@ -145,7 +168,7 @@ class SpaceAnimation(Animation):
             los_matrix (np.ndarray): matrix telling what satellites can see each other.
         """
         # Create new colormap, with white for two
-        colors = [(255, 0, 0), (255, 255, 255), (0, 255, 0)]
+        colors = [(255, 0, 0), (0, 0, 0), (0, 255, 0)]
         new_map = LinearSegmentedColormap.from_list("new_map", colors, N=3)
         self._los_plot = self.ax_los.matshow(los_matrix, cmap=new_map, vmin=0, vmax=1)
 
@@ -196,7 +219,7 @@ class SpaceAnimation(Animation):
                         data[0, 0],
                         data[0, 1],
                         data[0, 2],
-                        "*",
+                        "x",
                         color=trajectory.get_color(),
                     )[0]
                     actor_info = self._populate_textbox(obj.actor)
@@ -206,9 +229,10 @@ class SpaceAnimation(Animation):
                             data[0, 1] + self._textbox_offset,
                             data[0, 2] + self._textbox_offset,
                             actor_info,
-                            bbox=dict(facecolor="mediumspringgreen"),
+                            # bbox=dict(facecolor="mediumspringgreen"),
                             verticalalignment="bottom",
                             clip_on=True,
+                            fontsize=8,
                         )
 
                     else:
@@ -217,9 +241,11 @@ class SpaceAnimation(Animation):
                             data[0, 1] + self._textbox_offset,
                             data[0, 2] + self._textbox_offset,
                             actor_info,
-                            bbox=dict(facecolor="white"),
+                            # bbox=dict(facecolor="white"),
+                            color="lightskyblue",
                             verticalalignment="bottom",
                             clip_on=True,
+                            fontsize=8,
                         )
 
                 elif isinstance(obj.actor, GroundstationActor):
@@ -322,18 +348,18 @@ class SpaceAnimation(Animation):
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
         self.ax_los.set_yticks(xaxis)
-        self.ax_los.set_xticklabels(current_actors)
-        self.ax_los.set_yticklabels(current_actors)
+        self.ax_los.set_xticklabels(current_actors, fontsize=8)
+        self.ax_los.set_yticklabels(current_actors, fontsize=8)
+
         self.fig.canvas.draw()
+        # TODO use below for animation
+        # self.fig.canvas.draw_idle()
         plt.pause(0.0001)
 
+        self.date_label.set_text(self._local_actor.local_time)
+        self.time_label.set_text(f"t={sim._state.time:<10.2e}")
+
         logger.debug("Plot updated.")
-        # TODO: understand why we sometimes get
-        # "RuntimeError: bad lexical cast: source type value could not be interpreted as target"
-        try:
-            self.ax_3d.set_title(self._local_actor.local_time)
-        except:
-            logger.trace("Animation title could not be updated")
 
     def _animate(self, sim: PASEOS, dt: float) -> List[Artist]:
         """Advances the time of sim, updates the plot, and returns the axis objects
@@ -385,4 +411,4 @@ class SpaceAnimation(Animation):
                 interval=20,
                 blit=True,
             )  # blit means to only redraw parts that changed
-            anim.save(f"{name}.mp4", writer="ffmpeg", fps=10)
+            anim.save(f"{name}.mp4", writer="ffmpeg", fps=30)
