@@ -16,12 +16,7 @@ build:
   os: ubuntu-20.04
   tools:
     python: "3.10"
-
-# Optionally set the version of Python and requirements required to build your docs
-python:
-  install:
-    - method: setuptools
-      path: .
+    python: "mambaforge-4.10"
 
 conda:
   environment: environment.yml
