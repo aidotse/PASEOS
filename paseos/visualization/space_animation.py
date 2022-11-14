@@ -397,16 +397,18 @@ class SpaceAnimation(Animation):
         """
         return self._animate(sim, dt)
 
-    def animate(self, sim: PASEOS, dt: float, steps: int = 1, name: str = None) -> None:
+    def animate(
+        self, sim: PASEOS, dt: float, steps: int = 1, save_to_file: str = None
+    ) -> None:
         """Animates paseos for a given number of steps with dt in each step.
 
         Args:
             sim (PASEOS): simulation object.
             dt (float): size of time step
             steps (int, optional): number of steps to animate. Defaults to 1.
-            name (str, optional): filename to save the animation. Defaults to None.
+            save_to_file (str, optional): filename to save the animation. Defaults to None.
         """
-        if name is None:
+        if save_to_file is None:
             self._animate(sim, dt)
         else:
             anim = animation.FuncAnimation(
@@ -420,4 +422,4 @@ class SpaceAnimation(Animation):
                 interval=20,
                 blit=True,
             )  # blit means to only redraw parts that changed
-            anim.save(f"{name}.mp4", writer="ffmpeg", fps=30)
+            anim.save(f"{save_to_file}.mp4", writer="ffmpeg", fps=30)
