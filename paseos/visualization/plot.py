@@ -1,5 +1,4 @@
 from enum import Enum
-from loguru import logger
 
 from ..paseos import PASEOS
 from .space_animation import SpaceAnimation

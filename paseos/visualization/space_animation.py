@@ -39,7 +39,7 @@ class SpaceAnimation(Animation):
         with plt.style.context("dark_background"):
 
             # Create figure for 3d animation
-            self.fig, _ = plt.subplots(
+            self.fig, default_ax = plt.subplots(
                 1,
                 2,
                 figsize=(10, 5),
@@ -49,17 +49,19 @@ class SpaceAnimation(Animation):
                 gridspec_kw={"width_ratios": [3.5, 1]},
             )
 
+            # Removing defaultax to add projection
+            default_ax[0].remove()
             self.ax_3d = plt.subplot(121, projection="3d")
 
             # Get rid of the panes
-            self.ax_3d.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-            self.ax_3d.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-            self.ax_3d.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 
             # Get rid of the spines
-            self.ax_3d.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
-            self.ax_3d.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
-            self.ax_3d.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+            self.ax_3d.zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
             self.ax_3d.get_xaxis().set_ticks([])
             self.ax_3d.get_yaxis().set_ticks([])
             self.ax_3d.get_zaxis().set_ticks([])
@@ -69,6 +71,7 @@ class SpaceAnimation(Animation):
             self._textbox_offset = 0.1
 
             # Create figure for LOS
+            default_ax[1].remove()
             self.ax_los = plt.subplot(122)
             xaxis = np.arange(len(current_actors))
             self.ax_los.set_position([0.75, 0.7, 0.2, 0.2])
@@ -253,7 +256,7 @@ class SpaceAnimation(Animation):
                     # TODO: implement initial rendering of groundstation object
                     raise NotImplementedError(
                         "SpacePlot is currently not implemented for actor type"
-                        + type(actor)
+                        + type(obj.actor)
                     )
 
         self.ax_3d.set_box_aspect(
@@ -378,7 +381,7 @@ class SpaceAnimation(Animation):
             List[Artist]: list of Artist objects
         """
         sim.advance_time(dt)
-        self.update(sim,creating_animation=True)
+        self.update(sim, creating_animation=True)
         return self.ax_3d.get_children() + self.ax_los.get_children()
 
     def _animation_wrapper(self, step: int, sim: PASEOS, dt: float) -> List[Artist]:
