@@ -8,6 +8,7 @@ from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
 from paseos.utils.is_notebook import is_notebook
 
+
 class ActivityManager:
     """This class is used to handle registering, performing and collection of activities.
     There can only be one instance of it and each paseos instance has one."""
@@ -128,7 +129,7 @@ class ActivityManager:
                 activity_runner.start(activity_func_args),
             )
 
-        if is_notebook(): #Workaround to avoid error when executed in a Jupyter notebook.
+        if is_notebook():  # Workaround to avoid error when executed in a Jupyter notebook.
             return job()
         else:
             # Run activity and processor
