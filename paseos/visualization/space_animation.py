@@ -1,4 +1,3 @@
-import pykep as pk
 import numpy as np
 from dotmap import DotMap
 from typing import List
@@ -6,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.artist import Artist
 from matplotlib.colors import LinearSegmentedColormap
-from matplotlib import gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from loguru import logger
 
@@ -145,8 +143,6 @@ class SpaceAnimation(Animation):
         """
         info_str = f"{actor.name}"
         if isinstance(actor, SpacecraftActor):
-            # TODO: enable both text and icons in textbox
-
             if actor.battery_level_in_Ws is not None:
                 battery_level = actor.battery_level_ratio * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
@@ -154,10 +150,15 @@ class SpaceAnimation(Animation):
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
                 info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
-
         elif isinstance(actor, GroundstationActor):
             # TODO: implement textbox for groundstation
-            pass
+            raise NotImplementedError(
+                "SpacePlot is currently not implemented for actor type" + type(actor)
+            )
+        else:
+            raise NotImplementedError(
+                "SpacePlot is currently not implemented for actor type" + type(actor)
+            )
 
         return info_str
 
@@ -167,7 +168,7 @@ class SpaceAnimation(Animation):
         Args:
             los_matrix (np.ndarray): matrix telling what satellites can see each other.
         """
-        # Create new colormap, with white for two
+        # Create new colormap, with black for two
         colors = [(255, 0, 0), (0, 0, 0), (0, 255, 0)]
         new_map = LinearSegmentedColormap.from_list("new_map", colors, N=3)
         self._los_plot = self.ax_los.matshow(los_matrix, cmap=new_map, vmin=0, vmax=1)
@@ -250,7 +251,10 @@ class SpaceAnimation(Animation):
 
                 elif isinstance(obj.actor, GroundstationActor):
                     # TODO: implement initial rendering of groundstation object
-                    pass
+                    raise NotImplementedError(
+                        "SpacePlot is currently not implemented for actor type"
+                        + type(actor)
+                    )
 
         self.ax_3d.set_box_aspect(
             (
@@ -275,11 +279,12 @@ class SpaceAnimation(Animation):
             current_actors = [sim.local_actor]
         return current_actors
 
-    def _update(self, sim: PASEOS) -> None:
+    def update(self, sim: PASEOS, creating_animation=False) -> None:
         """Updates the animation with the current actor information
 
         Args:
             sim (PASEOS): simulation object.
+            creating_animation (bool): If currently creating an animation. Then draw_idle will be used. Defaults to False.
         """
         logger.trace("Updating animation")
         # NOTE: the actors in sim are unique so make use of sets
@@ -351,9 +356,10 @@ class SpaceAnimation(Animation):
         self.ax_los.set_xticklabels(current_actors, fontsize=8)
         self.ax_los.set_yticklabels(current_actors, fontsize=8)
 
-        self.fig.canvas.draw()
-        # TODO use below for animation
-        # self.fig.canvas.draw_idle()
+        if creating_animation:
+            self.fig.canvas.draw_idle()
+        else:
+            self.fig.canvas.draw()
         plt.pause(0.0001)
 
         self.date_label.set_text(self._local_actor.local_time)
@@ -372,7 +378,7 @@ class SpaceAnimation(Animation):
             List[Artist]: list of Artist objects
         """
         sim.advance_time(dt)
-        self._update(sim)
+        self.update(sim,creating_animation=True)
         return self.ax_3d.get_children() + self.ax_los.get_children()
 
     def _animation_wrapper(self, step: int, sim: PASEOS, dt: float) -> List[Artist]:

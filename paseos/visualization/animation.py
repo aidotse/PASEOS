@@ -35,7 +35,7 @@ class Animation(ABC):
         pass
 
     @abstractmethod
-    def _update(self, sim: PASEOS) -> None:
+    def update(self, sim: PASEOS) -> None:
         """Function to update all the objects in the animation
 
         Args:
