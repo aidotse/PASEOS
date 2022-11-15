@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.abspath("."))
 # Pro-tip to add the following line from
 # https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/#fn-841-5
 sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../.."))
 
 
 # -- Project information -----------------------------------------------------
@@ -37,6 +38,7 @@ release = "v0.1.0"
 extensions = [
     "sphinx.ext.autodoc",  # for autodocs
     "sphinx.ext.napoleon",  # for numpy style documentation
+    "myst_parser"  # for markdown support
     # "sphinx.ext.viewcode",
     # "sphinx.ext.imgmath",
 ]
