@@ -4,7 +4,7 @@ import rasterio
 
 # [1] Massimetti, Francesco, et al. ""Volcanic hot-spot detection using SENTINEL-2:
 # a comparison with MODIS–MIROVA thermal data series."" Remote Sensing 12.5 (2020):820."
-
+# The code of the function "s2pix_detector" and its subfunctions was taken and reimplemented by using numpy from the project "sentinel2_l0" dataset, which will be released soon
 
 def acquire_data(file_name):
     """Read an L1C Sentinel-2 image from a cropped TIF. The image is represented as TOA reflectance.
@@ -28,35 +28,32 @@ def acquire_data(file_name):
     return sentinel_img
 
 
-def s2pix_detector(
-    sentinel_img,
-    alpha_thr=[1.4, 1.2, 0.15],
-    beta_thr=[2, 0.5, 0.5],
-    S_thr=[1.2, 1, 1.5, 1],
-    gamma_thr=[1, 1, 0.5],
-):
-    """Implements the first step of the one described in [1] by proving a filtered alert-map.
+def check_surrounded(img):
+    """Function to check for each pixel if all the surrounding pixels are hot pixel. Please, check [1].
 
     Args:
-        sentinel_img (numpy.array): sentinel image
-        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1, 0.5].
+        img (np.array): sentinel2 L1C image.
 
     Returns:
-        numpy.array: filtered alert_matrix threshold map.
-        list: list of bounding boxes.
+        np.array: binary map whose unitary pixels are those for which the surrounding conditions is true.
     """
+    weight = np.array([[1.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]])
 
-    def get_thresholds(
+    img_pad = np.pad(img, ((1, 1),), mode="constant", constant_values=(1, 1))
+    surrounded = scipy.signal.convolve2d(img_pad, weight, mode="valid")
+    surrounded[surrounded < 8] = 0
+    surrounded[surrounded == 8] = 1
+
+    return surrounded
+
+def get_thresholds(
         sentinel_img,
         alpha_thr=[1.4, 1.2, 0.15],
         beta_thr=[2, 0.5, 0.5],
         S_thr=[1.2, 1, 1.5, 1],
         gamma_thr=[1, 1, 0.5],
     ):
-        """It returns the alpha, beta, gamma and S threshold maps for each band as described in [1]
+        """It returns the alpha, beta, gamma and S threshold maps for each band as described in [1].
 
         Args:
             sentinel_img (np.arraya): sentinel image
@@ -71,16 +68,6 @@ def s2pix_detector(
             np.array: S threshold map.
             np.array: gamma threshold map.
         """
-
-        def check_surrounded(img):
-            weight = np.array([[1.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]])
-
-            img_pad = np.pad(img, ((1, 1),), mode="constant", constant_values=(1, 1))
-            surrounded = scipy.signal.convolve2d(img_pad, weight, mode="valid")
-            surrounded[surrounded < 8] = 0
-            surrounded[surrounded == 8] = 1
-
-            return surrounded
 
         alpha = np.logical_and(
             np.where(sentinel_img[:, :, 2] >= alpha_thr[2], 1, 0),
@@ -125,7 +112,7 @@ def s2pix_detector(
         )
         return alpha, beta, S, gamma
 
-    def get_alert_matrix_and_thresholds(
+def get_alert_matrix_and_thresholds(
         sentinel_img,
         alpha_thr=[1.4, 1.2, 0.15],
         beta_thr=[2, 0.5, 0.5],
@@ -157,22 +144,44 @@ def s2pix_detector(
         )
         return alert_matrix, alpha, beta, S, gamma
 
-    def cluster_9px(img):
-        """It performs the convolution to detect clusters of 9 hot pixels (current pixel and 8 surrounding pixels) are at 1.
+def cluster_9px(img):
+    """It performs a simplified 9 pixel clustering to filter the hotmap and reduce false-positives by performing a convolution (current pixel and 8 surrounding pixels).
 
-        Args:
-            img (numpy.array): input alert-matrix
+    Args:
+        img (numpy.array): input alert-matrix
 
-        Returns:
-            numpy.array: convoluted alert-map
-        """
+    Returns:
+        numpy.array: convoluted alert-map
+    """
 
-        weight = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
+    weight = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
 
-        img_pad = np.pad(img, ((1, 1),), mode="constant", constant_values=(0, 0))
-        surrounded = scipy.signal.convolve2d(img_pad, weight, mode="valid")
+    img_pad = np.pad(img, ((1, 1),), mode="constant", constant_values=(0, 0))
+    surrounded = scipy.signal.convolve2d(img_pad, weight, mode="valid")
 
-        return surrounded
+    return surrounded
+
+def s2pix_detector(
+    sentinel_img,
+    alpha_thr=[1.4, 1.2, 0.15],
+    beta_thr=[2, 0.5, 0.5],
+    S_thr=[1.2, 1, 1.5, 1],
+    gamma_thr=[1, 1, 0.5],
+):
+    """Implements the first step of the one described in [1] by proving a filtered alert-map.
+
+    Args:
+        sentinel_img (numpy.array): sentinel2 L1C image
+        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1, 0.5].
+
+    Returns:
+        numpy.array: filtered alert_matrix threshold map.
+        list: list of bounding boxes.
+    """
+
 
     alert_matrix, _, _, _, _ = get_alert_matrix_and_thresholds(
         sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
