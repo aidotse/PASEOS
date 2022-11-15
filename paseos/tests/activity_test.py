@@ -42,6 +42,33 @@ def test_activity():
     assert sat1.battery_level_in_Ws > 480 and sat1.battery_level_in_Ws < 490
 
 
+def test_running_two_activities():
+    """This test ensures that you cannot run two activities at the same time."""
+    sim, sat1, earth = get_default_instance()
+
+    # Declare two activities, one calls the other
+    test_value = [0]
+
+    async def act1(args):
+        args[0][0] = 42  # this gets executed
+        sim.perform_activity("act2")
+        await asyncio.sleep(0.1)
+
+    async def act2(args):
+        args[0][0] = -1  # this won't
+        await asyncio.sleep(0.1)
+
+    # Register both activities
+    sim.register_activity("act1", activity_function=act1, power_consumption_in_watt=10)
+    sim.register_activity("act2", activity_function=act2, power_consumption_in_watt=10)
+
+    # try running it
+    sim.perform_activity("act1", activity_func_args=[test_value])
+
+    # Value should be 42 as first activity is started but then an error occurs trying the second
+    assert test_value[0] == 42
+
+
 def test_activity_constraints():
     """Tests if creating a constraint function to be satisfied during an activity works.
     Here we start a function that counts up until we stop charging our solar panels and then prints the value.
@@ -67,7 +94,7 @@ def test_activity_constraints():
 
     # On termination print the value and make test_value2 the same.
     async def on_termination(args):
-        print(args)
+        # print(args)
         args[1][0] = args[0][0]
 
     # Register an activity that draws no power per second
@@ -92,5 +119,6 @@ def test_activity_constraints():
 
 
 if __name__ == "__main__":
+    test_running_two_activities()
     test_activity()
     test_activity_constraints()

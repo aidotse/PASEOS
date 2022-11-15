@@ -124,11 +124,12 @@ class ActivityManager:
 
         async def job():
             await asyncio.gather(
-                processor.start(),
+                processor.start(),  # noqa: F821
                 activity_runner.start(activity_func_args),
             )
 
         # Run activity and processor
         asyncio.run(job())
-
+        del processor  # processor is a singleton
+        self._paseos_instance._is_running_activity = False
         logger.info(f"Activity {activity} completed.")

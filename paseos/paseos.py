@@ -31,6 +31,9 @@ class PASEOS:
     # Handles registered activities
     _activity_manager = None
 
+    # Semaphore to track if an activity is currently running
+    _is_running_activity = False
+
     # Use automatic clock (default on for now)
     use_automatic_clock = True
 
@@ -100,6 +103,15 @@ class PASEOS:
         self._known_actors[actor.name] = actor
 
     @property
+    def is_running_activity(self):
+        """Allows checking whether there is currently an activity running.
+
+        Returns:
+            bool: Yes if running an activity.
+        """
+        return self._is_running_activity
+
+    @property
     def local_actor(self) -> BaseActor:
         """Returns the local actor.
 
@@ -165,15 +177,24 @@ class PASEOS:
         """
 
         # Check provided functions are coroutines
-        error = "The Activity function needs to be a coroutine. For more information see https://docs.python.org/3/library/asyncio-task.html"
+        error = (
+            "The activity function needs to be a coroutine."
+            "For more information see https://docs.python.org/3/library/asyncio-task.html"
+        )
         assert asyncio.iscoroutinefunction(activity_function), error
 
         if constraint_function is not None:
-            error = "The constraint function needs to be a coroutine. For more information see https://docs.python.org/3/library/asyncio-task.html"
+            error = (
+                "The constraint function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
             assert asyncio.iscoroutinefunction(constraint_function), error
 
         if on_termination_function is not None:
-            error = "The Activity function needs to be a coroutine. For more information see https://docs.python.org/3/library/asyncio-task.html"
+            error = (
+                "The on_termination function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
             assert asyncio.iscoroutinefunction(on_termination_function), error
 
         self._activity_manager.register_activity(
@@ -199,12 +220,17 @@ class PASEOS:
             termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
             constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
-        return self._activity_manager.perform_activity(
-            name=name,
-            activity_func_args=activity_func_args,
-            termination_func_args=termination_func_args,
-            constraint_func_args=constraint_func_args,
-        )
+        if self._is_running_activity:
+            raise RuntimeError("PASEOS is already running an activity. Please wait for it to finish. "
+                "To perform activities in parallen encasulate them in one, single joint activity.")
+        else:
+            self._is_running_activity = True
+            return self._activity_manager.perform_activity(
+                name=name,
+                activity_func_args=activity_func_args,
+                termination_func_args=termination_func_args,
+                constraint_func_args=constraint_func_args,
+            )
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation
