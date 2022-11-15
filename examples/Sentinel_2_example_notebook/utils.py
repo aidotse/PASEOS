@@ -4,7 +4,9 @@ import rasterio
 
 # [1] Massimetti, Francesco, et al. ""Volcanic hot-spot detection using SENTINEL-2:
 # a comparison with MODIS–MIROVA thermal data series."" Remote Sensing 12.5 (2020):820."
-# The code of the function "s2pix_detector" and its subfunctions was taken and reimplemented by using numpy from the project "sentinel2_l0" dataset, which will be released soon
+# The code of the function "s2pix_detector" and its subfunctions was taken and reimplemented by using numpy
+# from the project "sentinel2_l0" dataset, which will be released soon
+
 
 def acquire_data(file_name):
     """Read an L1C Sentinel-2 image from a cropped TIF. The image is represented as TOA reflectance.
@@ -46,106 +48,105 @@ def check_surrounded(img):
 
     return surrounded
 
+
 def get_thresholds(
-        sentinel_img,
-        alpha_thr=[1.4, 1.2, 0.15],
-        beta_thr=[2, 0.5, 0.5],
-        S_thr=[1.2, 1, 1.5, 1],
-        gamma_thr=[1, 1, 0.5],
-    ):
-        """It returns the alpha, beta, gamma and S threshold maps for each band as described in [1].
+    sentinel_img,
+    alpha_thr=[1.4, 1.2, 0.15],
+    beta_thr=[2, 0.5, 0.5],
+    S_thr=[1.2, 1, 1.5, 1],
+    gamma_thr=[1, 1, 0.5],
+):
+    """It returns the alpha, beta, gamma and S threshold maps for each band as described in [1].
 
-        Args:
-            sentinel_img (np.arraya): sentinel image
-            alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-            beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-            S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-            gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1 , 0.5].
+    Args:
+        sentinel_img (np.arraya): sentinel image
+        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1 , 0.5].
 
-        Returns:
-            np.array: alpha threshold map.
-            np.array: beta threshold map.
-            np.array: S threshold map.
-            np.array: gamma threshold map.
-        """
+    Returns:
+        np.array: alpha threshold map.
+        np.array: beta threshold map.
+        np.array: S threshold map.
+        np.array: gamma threshold map.
+    """
 
-        alpha = np.logical_and(
-            np.where(sentinel_img[:, :, 2] >= alpha_thr[2], 1, 0),
-            np.logical_and(
-                np.where(
-                    sentinel_img[:, :, 2] / sentinel_img[:, :, 1] >= alpha_thr[0], 1, 0
-                ),
-                np.where(
-                    sentinel_img[:, :, 2] / sentinel_img[:, :, 0] >= alpha_thr[1], 1, 0
-                ),
-            ),
-        )
-        beta = np.logical_and(
+    alpha = np.logical_and(
+        np.where(sentinel_img[:, :, 2] >= alpha_thr[2], 1, 0),
+        np.logical_and(
             np.where(
-                sentinel_img[:, :, 1] / sentinel_img[:, :, 0] >= beta_thr[0], 1, 0
+                sentinel_img[:, :, 2] / sentinel_img[:, :, 1] >= alpha_thr[0], 1, 0
             ),
+            np.where(
+                sentinel_img[:, :, 2] / sentinel_img[:, :, 0] >= alpha_thr[1], 1, 0
+            ),
+        ),
+    )
+    beta = np.logical_and(
+        np.where(sentinel_img[:, :, 1] / sentinel_img[:, :, 0] >= beta_thr[0], 1, 0),
+        np.logical_and(
+            np.where(sentinel_img[:, :, 1] >= beta_thr[1], 1, 0),
+            np.where(sentinel_img[:, :, 2] >= beta_thr[2], 1, 0),
+        ),
+    )
+    S = np.logical_or(
+        np.logical_and(
+            np.where(sentinel_img[:, :, 2] >= S_thr[0], 1, 0),
+            np.where(sentinel_img[:, :, 0] <= S_thr[1], 1, 0),
+        ),
+        np.logical_and(
+            np.where(sentinel_img[:, :, 1] >= S_thr[2], 1, 0),
+            np.where(sentinel_img[:, :, 0] >= S_thr[3], 1, 0),
+        ),
+    )
+    alpha_beta_logical_surrounded = check_surrounded(np.logical_or(alpha, beta))
+    gamma = np.logical_and(
+        np.logical_and(
             np.logical_and(
-                np.where(sentinel_img[:, :, 1] >= beta_thr[1], 1, 0),
-                np.where(sentinel_img[:, :, 2] >= beta_thr[2], 1, 0),
+                np.where(sentinel_img[:, :, 2] >= gamma_thr[0], 1, 0),
+                np.where(sentinel_img[:, :, 2] >= gamma_thr[1], 1, 0),
             ),
-        )
-        S = np.logical_or(
-            np.logical_and(
-                np.where(sentinel_img[:, :, 2] >= S_thr[0], 1, 0),
-                np.where(sentinel_img[:, :, 0] <= S_thr[1], 1, 0),
-            ),
-            np.logical_and(
-                np.where(sentinel_img[:, :, 1] >= S_thr[2], 1, 0),
-                np.where(sentinel_img[:, :, 0] >= S_thr[3], 1, 0),
-            ),
-        )
-        alpha_beta_logical_surrounded = check_surrounded(np.logical_or(alpha, beta))
-        gamma = np.logical_and(
-            np.logical_and(
-                np.logical_and(
-                    np.where(sentinel_img[:, :, 2] >= gamma_thr[0], 1, 0),
-                    np.where(sentinel_img[:, :, 2] >= gamma_thr[1], 1, 0),
-                ),
-                np.where(sentinel_img[:, :, 0] >= gamma_thr[2], 1, 0),
-            ),
-            alpha_beta_logical_surrounded,
-        )
-        return alpha, beta, S, gamma
+            np.where(sentinel_img[:, :, 0] >= gamma_thr[2], 1, 0),
+        ),
+        alpha_beta_logical_surrounded,
+    )
+    return alpha, beta, S, gamma
+
 
 def get_alert_matrix_and_thresholds(
-        sentinel_img,
-        alpha_thr=[1.4, 1.2, 0.15],
-        beta_thr=[2, 0.5, 0.5],
-        S_thr=[1.2, 1, 1.5, 1],
-        gamma_thr=[1, 1, 0.5],
-    ):
-        """It calculates the alert-matrix for a certain image.
+    sentinel_img,
+    alpha_thr=[1.4, 1.2, 0.15],
+    beta_thr=[2, 0.5, 0.5],
+    S_thr=[1.2, 1, 1.5, 1],
+    gamma_thr=[1, 1, 0.5],
+):
+    """It calculates the alert-matrix for a certain image.
 
-        Args:
-            sentinel_img (numpy.array): sentinel image
-            alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-            beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-            S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-            gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1, 0.5].
+    Args:
+        sentinel_img (numpy.array): sentinel image
+        alpha_thr (list, optional): pixel-level value for alpha threshold map calculation. Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for beta threshold map calculation. Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for S threshold map calculation. Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for gamma threshold map calculation. Defaults to [1, 1, 0.5].
 
-        Returns:
-            numpy.array: alert_matrix threshold map.
-            numpy.array: alpha threshold map.
-            numpy.array: beta threshold map.
-            numpy.array: S threshold map.
-            numpy.array: gamma threshold map.
-        """
+    Returns:
+        numpy.array: alert_matrix threshold map.
+        numpy.array: alpha threshold map.
+        numpy.array: beta threshold map.
+        numpy.array: S threshold map.
+        numpy.array: gamma threshold map.
+    """
 
-        alpha, beta, S, gamma = get_thresholds(
-            sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
-        )
-        alert_matrix = np.logical_or(
-            np.logical_or(np.logical_or(alpha, beta), gamma), S
-        )
-        return alert_matrix, alpha, beta, S, gamma
+    alpha, beta, S, gamma = get_thresholds(
+        sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
+    )
+    alert_matrix = np.logical_or(np.logical_or(np.logical_or(alpha, beta), gamma), S)
+    return alert_matrix, alpha, beta, S, gamma
+
 
 def cluster_9px(img):
-    """It performs a simplified 9 pixel clustering to filter the hotmap and reduce false-positives by performing a convolution (current pixel and 8 surrounding pixels).
+    """It performs a simplified 9-pixel clustering to filter the hotmap by performing a convolution.
 
     Args:
         img (numpy.array): input alert-matrix
@@ -161,6 +162,7 @@ def cluster_9px(img):
 
     return surrounded
 
+
 def s2pix_detector(
     sentinel_img,
     alpha_thr=[1.4, 1.2, 0.15],
@@ -172,8 +174,8 @@ def s2pix_detector(
 
     Args:
         sentinel_img (numpy.array): sentinel2 L1C image
-        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
+        alpha_thr (list, optional): pixel-level value for alpha threshold map calculation. Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for beta threshold map calculation. Defaults to [2, 0.5, 0.5].
         S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
         gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1, 0.5].
 
@@ -181,7 +183,6 @@ def s2pix_detector(
         numpy.array: filtered alert_matrix threshold map.
         list: list of bounding boxes.
     """
-
 
     alert_matrix, _, _, _, _ = get_alert_matrix_and_thresholds(
         sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
