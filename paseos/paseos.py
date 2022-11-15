@@ -221,8 +221,10 @@ class PASEOS:
             constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
         if self._is_running_activity:
-            raise RuntimeError("PASEOS is already running an activity. Please wait for it to finish. "
-                "To perform activities in parallen encasulate them in one, single joint activity.")
+            raise RuntimeError(
+                "PASEOS is already running an activity. Please wait for it to finish. "
+                + "To perform activities in parallen encasulate them in one, single joint activity."
+            )
         else:
             self._is_running_activity = True
             return self._activity_manager.perform_activity(
