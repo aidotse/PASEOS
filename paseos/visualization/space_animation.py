@@ -365,7 +365,12 @@ class SpaceAnimation(Animation):
             self.fig.canvas.draw()
         plt.pause(0.0001)
 
-        self.date_label.set_text(self._local_actor.local_time)
+        # on some systems the below line throws an error. presumably due to pykep?
+        try:
+            self.date_label.set_text(self._local_actor.local_time)
+        except RuntimeError:
+            logger.trace("Animation date label could not be updated.")
+
         self.time_label.set_text(f"t={sim._state.time:<10.2e}")
 
         logger.debug("Plot updated.")
