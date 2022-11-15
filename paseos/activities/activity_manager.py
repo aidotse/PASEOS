@@ -39,22 +39,22 @@ class ActivityManager:
     def register_activity(
         self,
         name: str,
-        activity_function: types.FunctionType,
+        activity_function: types.CoroutineType,
         power_consumption_in_watt: float,
-        on_termination_function: types.FunctionType,
-        constraint_function: types.FunctionType,
+        on_termination_function: types.CoroutineType,
+        constraint_function: types.CoroutineType,
     ):
         """Registers an activity that can then be performed on the local actor.
 
         Args:
             name (str): Name of the activity.
-            activity_function (types.FunctionType): Function to execute during the activity.
+            activity_function (types.CoroutineType): Function to execute during the activity.
             Needs to be async. Can accept a list of arguments to be specified later.
             power_consumption_in_watt (float): Power consumption of the activity in W (per second).
-            on_termination_function (types.FunctionType): Function to execute when the activities
+            on_termination_function (types.CoroutineType): Function to execute when the activities
             stops (either due to completion or constraint not being satisfied anymore).
             Needs to be async. Can accept a list of arguments to be specified later.
-            constraint_function (types.FunctionType): Function to evaluate if constraints are still valid.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
             Should return True if constraints are valid, False if they aren't. Needs to be async.
             Can accept a list of arguments to be specified later.
         """
