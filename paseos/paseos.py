@@ -49,6 +49,8 @@ class PASEOS:
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
+        # Update local actor time to simulation start time.
+        self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
         self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep)
 
     def advance_time(self, time_to_advance: float):
