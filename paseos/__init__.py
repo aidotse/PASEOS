@@ -4,7 +4,7 @@ from paseos.actors.base_actor import BaseActor
 
 from .utils.set_log_level import set_log_level
 from .paseos import PASEOS
-from .visualization.space_animation import SpaceAnimation
+from .visualization.plot import plot, PlotType
 from .actors.actor_builder import ActorBuilder
 from .actors.spacecraft_actor import SpacecraftActor
 from .actors.ground_station_actor import GroundstationActor
@@ -29,4 +29,10 @@ def init_sim(local_actor: BaseActor):
     return sim
 
 
-__all__ = ["ActorBuilder", "GroundstationActor", "SpacecraftActor", "SpaceAnimation"]
+__all__ = [
+    "ActorBuilder",
+    "GroundstationActor",
+    "plot",
+    "PlotType",
+    "SpacecraftActor",
+]
