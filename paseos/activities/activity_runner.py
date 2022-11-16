@@ -11,9 +11,9 @@ class ActivityRunner:
     def __init__(
         self,
         name: str,
-        activity_func: types.FunctionType,
-        constraint_func: types.FunctionType = None,
-        termination_func: types.FunctionType = None,
+        activity_func: types.CoroutineType,
+        constraint_func: types.CoroutineType = None,
+        termination_func: types.CoroutineType = None,
         termination_args: list = None,
         constraint_args: list = None,
     ):
@@ -21,10 +21,10 @@ class ActivityRunner:
 
         Args:
             name (str): Name of the activity.
-            activity_func (types.FunctionType): Function to execute for the activity.
-            constraint_func (types.FunctionType, optional): Constraint function of the activity.
+            activity_func (types.CoroutineType): Function to execute for the activity.
+            constraint_func (types.CoroutineType, optional): Constraint function of the activity.
             See Activity Manager for more details. Defaults to None.
-            termination_func (types.FunctionType, optional): Termination function of the activity.
+            termination_func (types.CoroutineType, optional): Termination function of the activity.
             See Activity Manager for more details. Defaults to None.
             termination_args (list, optional): Termination arguments of the activity. See Activity
             Manager for more details. Defaults to None.
