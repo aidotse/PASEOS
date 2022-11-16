@@ -8,6 +8,7 @@ from abc import ABC
 from dotmap import DotMap
 from ..communication.get_communication_window import get_communication_window
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
+from ..power.is_in_eclipse import is_in_eclipse
 
 
 class BaseActor(ABC):
@@ -138,6 +139,16 @@ class BaseActor(ABC):
             bool: true if in line-of-sight.
         """
         return is_in_line_of_sight(self, other_actor, epoch, plot)
+
+    def is_in_eclipse(self, t: pk.epoch = None):
+        """Checks if the actors is in eclipse at the specified time.
+
+        Args:
+            t (pk.epoch, optional): Time to check, if None will use current local actor time.
+        """
+        if t is None:
+            t = self._local_time
+        return is_in_eclipse(self, self._central_body, t)
 
     def get_communication_window(
         self,

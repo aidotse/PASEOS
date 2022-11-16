@@ -1,4 +1,5 @@
 import types
+import asyncio
 
 from dotmap import DotMap
 from loguru import logger
@@ -29,6 +30,9 @@ class PASEOS:
 
     # Handles registered activities
     _activity_manager = None
+
+    # Semaphore to track if an activity is currently running
+    _is_running_activity = False
 
     # Use automatic clock (default on for now)
     use_automatic_clock = True
@@ -101,6 +105,15 @@ class PASEOS:
         self._known_actors[actor.name] = actor
 
     @property
+    def is_running_activity(self):
+        """Allows checking whether there is currently an activity running.
+
+        Returns:
+            bool: Yes if running an activity.
+        """
+        return self._is_running_activity
+
+    @property
     def local_actor(self) -> BaseActor:
         """Returns the local actor.
 
@@ -145,16 +158,52 @@ class PASEOS:
     def register_activity(
         self,
         name: str,
-        activity_function: types.FunctionType,
+        activity_function: types.CoroutineType,
         power_consumption_in_watt: float,
-        check_termination_function: types.FunctionType = None,
-        constraint_function: types.FunctionType = None,
+        on_termination_function: types.CoroutineType = None,
+        constraint_function: types.CoroutineType = None,
     ):
+        """Registers an activity that can then be performed on the local actor.
+
+        Args:
+            name (str): Name of the activity.
+            activity_function (types.CoroutineType): Function to execute during the activity.
+            Needs to be async. Can accept a list of arguments to be specified later.
+            power_consumption_in_watt (float): Power consumption of the activity in W (per second).
+            on_termination_function (types.CoroutineType): Function to execute when the activities stops
+            (either due to completion or constraint not being satisfied anymore). Needs to be async.
+            Can accept a list of arguments to be specified later.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
+            Should return True if constraints are valid, False if they aren't. Needs to be async.
+            Can accept a list of arguments to be specified later.
+        """
+
+        # Check provided functions are coroutines
+        error = (
+            "The activity function needs to be a coroutine."
+            "For more information see https://docs.python.org/3/library/asyncio-task.html"
+        )
+        assert asyncio.iscoroutinefunction(activity_function), error
+
+        if constraint_function is not None:
+            error = (
+                "The constraint function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
+            assert asyncio.iscoroutinefunction(constraint_function), error
+
+        if on_termination_function is not None:
+            error = (
+                "The on_termination function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
+            assert asyncio.iscoroutinefunction(on_termination_function), error
+
         self._activity_manager.register_activity(
             name=name,
             activity_function=activity_function,
             power_consumption_in_watt=power_consumption_in_watt,
-            check_termination_function=check_termination_function,
+            on_termination_function=on_termination_function,
             constraint_function=constraint_function,
         )
 
@@ -165,13 +214,27 @@ class PASEOS:
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
-        return self._activity_manager.perform_activity(
-            name=name,
-            local_actor=self.local_actor,
-            activity_func_args=activity_func_args,
-            termination_func_args=termination_func_args,
-            constraint_func_args=constraint_func_args,
-        )
+        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
+
+        Args:
+            name (str): Name of the activity to perform.
+            activity_func_args (list, optional): Arguments for the activity function. Defaults to None.
+            termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
+            constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
+        """
+        if self._is_running_activity:
+            raise RuntimeError(
+                "PASEOS is already running an activity. Please wait for it to finish. "
+                + "To perform activities in parallen encasulate them in one, single joint activity."
+            )
+        else:
+            self._is_running_activity = True
+            return self._activity_manager.perform_activity(
+                name=name,
+                activity_func_args=activity_func_args,
+                termination_func_args=termination_func_args,
+                constraint_func_args=constraint_func_args,
+            )
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation

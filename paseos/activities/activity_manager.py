@@ -4,8 +4,8 @@ import asyncio
 from loguru import logger
 from dotmap import DotMap
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_processor import ActivityProcessor
+from paseos.activities.activity_runner import ActivityRunner
 
 
 class ActivityManager:
@@ -39,20 +39,26 @@ class ActivityManager:
     def register_activity(
         self,
         name: str,
-        activity_function: types.FunctionType,
+        activity_function: types.CoroutineType,
         power_consumption_in_watt: float,
-        check_termination_function: types.FunctionType,
-        constraint_function: types.FunctionType,
+        on_termination_function: types.CoroutineType,
+        constraint_function: types.CoroutineType,
     ):
         """Registers an activity that can then be performed on the local actor.
 
         Args:
-            name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which
-            need to be visible for this activity.
-            power_consumption_in_watt (float, optional): Power consumption of performing
-            the activity (per second). Defaults to None.
+            name (str): Name of the activity.
+            activity_function (types.CoroutineType): Function to execute during the activity.
+            Needs to be async. Can accept a list of arguments to be specified later.
+            power_consumption_in_watt (float): Power consumption of the activity in W (per second).
+            on_termination_function (types.CoroutineType): Function to execute when the activities
+            stops (either due to completion or constraint not being satisfied anymore).
+            Needs to be async. Can accept a list of arguments to be specified later.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
+            Should return True if constraints are valid, False if they aren't. Needs to be async.
+            Can accept a list of arguments to be specified later.
         """
+
         if name in self._activities.keys():
             raise ValueError(
                 "Trying to add already existing activity with name: "
@@ -64,7 +70,7 @@ class ActivityManager:
         self._activities[name] = DotMap(
             activity_function=activity_function,
             power_consumption_in_watt=power_consumption_in_watt,
-            check_termination_function=check_termination_function,
+            on_termination_function=on_termination_function,
             constraint_function=constraint_function,
             _dynamic=False,
         )
@@ -74,57 +80,56 @@ class ActivityManager:
     def perform_activity(
         self,
         name: str,
-        local_actor: BaseActor,
         activity_func_args: list = None,
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
-        """Perform the activity and discharge battery accordingly
+        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
 
         Args:
-            name (str): Name of the activity
-            local_actor (BaseActor): The local actor that is performing the activity.
-            power_consumption_in_watt (float, optional): Power consumption of the
-            activity in seconds if not specified. Defaults to None.
-            duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
-
-        Returns:
-            bool: Whether the activity was performed successfully.
+            name (str): Name of the activity to perform.
+            activity_func_args (list, optional): Arguments for the activity function. Defaults to None.
+            termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
+            constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
         # Check if activity exists and if it already had consumption specified
-        assert name in self._activities.keys(), (
-            "Activity not found. Declared activities are" + self._activities.keys()
-        )
+        assert (
+            name in self._activities.keys()
+        ), f"Activity not found. Declared activities are {self._activities.keys()}"
         activity = self._activities[name]
         logger.debug(f"Performing activity {activity}")
 
         assert (
-            activity.power_consumption_in_watt > 0
+            activity.power_consumption_in_watt >= 0
         ), "Power consumption has to be positive but was specified as " + str(
             activity.power_consumption_in_watt
+        )
+
+        activity_runner = ActivityRunner(
+            name=name,
+            activity_func=activity.activity_function,
+            constraint_func=activity.constraint_function,
+            termination_func=activity.on_termination_function,
+            termination_args=termination_func_args,
+            constraint_args=constraint_func_args,
         )
 
         processor = ActivityProcessor(
             update_interval=self._paseos_update_interval,
             power_consumption_in_watt=activity.power_consumption_in_watt,
             paseos_instance=self._paseos_instance,
+            activity_runner=activity_runner,
             advance_paseos_clock=self._paseos_instance.use_automatic_clock,
         )
 
-        # Define async functions to run the activity and processor
-        async def run_activity(activity, args):
-            await activity(args)
-            await processor.stop()
-
         async def job():
             await asyncio.gather(
-                processor.start(),
-                run_activity(activity.activity_function, activity_func_args),
+                processor.start(),  # noqa: F821
+                activity_runner.start(activity_func_args),
             )
 
         # Run activity and processor
         asyncio.run(job())
-
-        logger.debug(f"Activity {activity} completed.")
-
-        return True
+        del processor  # processor is a singleton
+        self._paseos_instance._is_running_activity = False
+        logger.info(f"Activity {activity} completed.")
