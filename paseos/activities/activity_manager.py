@@ -115,23 +115,19 @@ class ActivityManager:
             constraint_args=constraint_func_args,
         )
 
-        processor = ActivityProcessor(
-            update_interval=self._paseos_update_interval,
-            power_consumption_in_watt=activity.power_consumption_in_watt,
-            paseos_instance=self._paseos_instance,
-            activity_runner=activity_runner,
-            advance_paseos_clock=self._paseos_instance.use_automatic_clock,
-        )
-
         async def job():
-            await asyncio.gather(
-                processor.start(),  # noqa: F821
-                activity_runner.start(activity_func_args),
+            processor = ActivityProcessor(
+                update_interval=self._paseos_update_interval,
+                power_consumption_in_watt=activity.power_consumption_in_watt,
+                paseos_instance=self._paseos_instance,
+                activity_runner=activity_runner,
+                advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
             del processor  # processor is a singleton
             self._paseos_instance._is_running_activity = False
 
-        if is_notebook():  # Workaround to avoid error when executed in a Jupyter notebook.
+        # Workaround to avoid error when executed in a Jupyter notebook.
+        if is_notebook():
             return job()
         else:
             # Run activity and processor
