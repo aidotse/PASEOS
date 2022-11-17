@@ -126,8 +126,8 @@ class ActivityManager:
 
             await asyncio.wait(
                 [
-                    processor.start(),  # noqa: F821
-                    activity_runner.start(activity_func_args),
+                    asyncio.create_task(processor.start()),
+                    asyncio.create_task(activity_runner.start(activity_func_args)),
                 ],
                 return_when=asyncio.ALL_COMPLETED,
             )
