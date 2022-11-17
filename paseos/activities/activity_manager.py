@@ -123,6 +123,11 @@ class ActivityManager:
                 activity_runner=activity_runner,
                 advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
+            await asyncio.wait(
+                [processor.start(),  # noqa: F821
+                activity_runner.start(activity_func_args)],
+                return_when=asyncio.ALL_COMPLETED
+            )
             del processor  # processor is a singleton
             self._paseos_instance._is_running_activity = False
 
