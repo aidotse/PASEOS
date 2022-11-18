@@ -21,7 +21,7 @@ def is_in_eclipse(
     Returns:
         bool: True if actor is in eclipse
     """
-    logger.debug(f"Checking whether {actor} is in eclipse at {t.mjd2000/pk.SEC2DAY}.")
+    logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
 
     # Compute central body position in solar reference frame
     r_central_body_heliocentric, _ = np.array(central_body.eph(t))
