@@ -26,7 +26,7 @@ This project is currently under development. Use at your own risk. :)
 ## Visualising PASEOS
 Navigate to paseos/visualization to find a jupyter notebook containing examples of how to visualize PASEOS.
 Visualization can be done in interactive mode or as an animation that is saved to disc.
-In the figure below, earth is visualized in the center as a blue sphere with different space crafts in orbit.
+In the figure below, Earth is visualized in the center as a blue sphere with different spacecraft in orbit.
 Each space craft has a name and if provided, a battery level and a communications device.
 The local device is illustrated with white text.
 In the upper-right corner, the status of the communications between each satellite is shown.
