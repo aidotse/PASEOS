@@ -1,15 +1,16 @@
 .. PASEOS documentation master file
 
 Welcome to PASEOS' documentation!
-================================
+=================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   autodoc
 
-.. include:: ../README.md
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
 
 
 Indices and tables

@@ -31,6 +31,7 @@ __all__ = [
     "ActorBuilder",
     "BaseActor",
     "GroundstationActor",
+    "PASEOS",
     "set_log_level",
     "SpacecraftActor",
 ]
