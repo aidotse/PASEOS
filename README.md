@@ -29,7 +29,7 @@ Visualization can be done in interactive mode or as an animation that is saved t
 In the figure below, Earth is visualized in the center as a blue sphere with different spacecraft in orbit.
 Each spacecraft has a name and if provided, a battery level and a communications device.
 The local device is illustrated with white text.
-In the upper-right corner, the status of the communications between each satellite is shown.
+In the upper-right corner, the status of the communication link between each spacecraft is shown.
 Finally, the time in the lower left and lower right corners correspond to the global time and the Paseos local time.
 
 <p align="center">
