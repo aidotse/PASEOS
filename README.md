@@ -30,7 +30,7 @@ In the figure below, Earth is visualized in the center as a blue sphere with dif
 Each spacecraft has a name and if provided, a battery level and a communications device.
 The local device is illustrated with white text.
 In the upper-right corner, the status of the communication link between each spacecraft is shown.
-Finally, the time in the lower left and lower right corners correspond to the global time and the Paseos local time.
+Finally, the time in the lower left and lower right corners correspond to the epoch and the PASEOS local simulation time.
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
