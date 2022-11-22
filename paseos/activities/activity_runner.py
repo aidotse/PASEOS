@@ -38,6 +38,7 @@ class ActivityRunner:
         self._termination_func = termination_func
         self._termination_args = termination_args
         self._constraint_args = constraint_args
+        self._was_stopped = False
 
     def has_constraint(self):
         """Whether this activity has a constraint function specified.
@@ -61,10 +62,12 @@ class ActivityRunner:
             args (list): Arguments for the activity function.
         """
         logger.trace(f"Running activity {self.name}.")
+        self._was_stopped = False
         self._task = asyncio.create_task(self._run(args))
         with suppress(asyncio.CancelledError):
             await self._task
-        await self.stop()
+        if not self._was_stopped:
+            await self.stop()
 
     async def stop(self):
         """Stops the activity execution and calls the termination function."""
@@ -84,6 +87,7 @@ class ActivityRunner:
         self._task.cancel()
         with suppress(asyncio.CancelledError):
             await self._task
+        self._was_stopped = True
 
     async def check_constraint(self):
         """Checks whether the activities constraints are still valid.
@@ -91,19 +95,25 @@ class ActivityRunner:
         Returns:
             bool: True if still valid.
         """
-        logger.trace(f"Checking activity {self.name} constraints")
-        try:
-            is_satisfied = await self._constraint_func(self._constraint_args)
-        except Exception as e:
-            logger.error(
-                f"An exception occurred running the checking the activity's {self.name} constraint."
+        if self.has_constraint():
+            logger.trace(f"Checking activity {self.name} constraints")
+            try:
+                is_satisfied = await self._constraint_func(self._constraint_args)
+            except Exception as e:
+                logger.error(
+                    f"An exception occurred running the checking the activity's {self.name} constraint."
+                )
+                logger.error(str(e))
+                return False
+            if not is_satisfied or is_satisfied is None:
+                logger.debug(
+                    f"Constraint of activity {self.name} is no longer satisfied, cancelling."
+                )
+                if not self._was_stopped:
+                    await self.stop()
+                return False
+        else:
+            logger.warning(
+                f"Checking activity {self.name} constraints even though activity has no constraints."
             )
-            logger.error(str(e))
-            return False
-        if not is_satisfied:
-            logger.debug(
-                f"Constraint of activity {self.name} is no longer satisfied, cancelling."
-            )
-            await self.stop()
-            return False
         return True

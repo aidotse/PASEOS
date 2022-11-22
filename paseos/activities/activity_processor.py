@@ -57,7 +57,7 @@ class ActivityProcessor:
 
         self._power_consumption_in_watt = power_consumption_in_watt
         self.update_interval = update_interval
-        self.is_started = False
+        self._is_started = False
         self._task = None
         self._paseos_instance = paseos_instance
         self._activity_runner = activity_runner
@@ -65,27 +65,28 @@ class ActivityProcessor:
 
     async def start(self):
         """Starts the processor."""
-        if not self.is_started:
+        if not self._is_started:
             logger.trace("Starting ActivityProcessor.")
             # Remember when we start
             self.start_time = timer()
-            self.is_started = True
+            self._is_started = True
             # Start task to call func periodically:
-            self._task = asyncio.ensure_future(self._run())
+            self._task = asyncio.create_task(self._run())
 
     async def stop(self):
         """Stops the processor."""
-        if self.is_started:
+        if self._is_started:
             logger.trace("Stopping ActivityProcessor.")
             # Calculate elapsed time since last update
             elapsed_time = timer() - self.start_time
             # Perform final update
             await self._update(elapsed_time)
-            self.is_started = False
+            self._is_started = False
             # Stop task and await it stopped:
             self._task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._task
+            logger.trace("Processor stopped.")
 
     async def _update(self, elapsed_time: float):
         """Updates the processor and optionally local actor.
