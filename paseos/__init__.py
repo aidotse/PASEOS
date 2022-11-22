@@ -1,6 +1,6 @@
 from loguru import logger
 
-from paseos.actors.base_actor import BaseActor
+from .actors.base_actor import BaseActor
 
 from .utils.set_log_level import set_log_level
 from .paseos import PASEOS
