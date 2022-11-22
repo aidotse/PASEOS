@@ -29,6 +29,12 @@ setup(
     ],
     packages=[
         "paseos",
+        "paseos.activities",
+        "paseos.actors",
+        "paseos.communication",
+        "paseos.power",
+        "paseos.utils",
+        "paseos.visualization",
     ],
     python_requires=">=3.8,<3.9",
     project_urls={
