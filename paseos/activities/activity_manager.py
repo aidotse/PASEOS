@@ -6,6 +6,7 @@ from dotmap import DotMap
 
 from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
+from paseos.utils.is_notebook import is_notebook
 
 
 class ActivityManager:
@@ -114,22 +115,30 @@ class ActivityManager:
             constraint_args=constraint_func_args,
         )
 
-        processor = ActivityProcessor(
-            update_interval=self._paseos_update_interval,
-            power_consumption_in_watt=activity.power_consumption_in_watt,
-            paseos_instance=self._paseos_instance,
-            activity_runner=activity_runner,
-            advance_paseos_clock=self._paseos_instance.use_automatic_clock,
-        )
-
         async def job():
-            await asyncio.gather(
-                processor.start(),  # noqa: F821
-                activity_runner.start(activity_func_args),
+            processor = ActivityProcessor(
+                update_interval=self._paseos_update_interval,
+                power_consumption_in_watt=activity.power_consumption_in_watt,
+                paseos_instance=self._paseos_instance,
+                activity_runner=activity_runner,
+                advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
 
-        # Run activity and processor
-        asyncio.run(job())
-        del processor  # processor is a singleton
-        self._paseos_instance._is_running_activity = False
+            await asyncio.wait(
+                [
+                    asyncio.create_task(processor.start()),
+                    asyncio.create_task(activity_runner.start(activity_func_args)),
+                ],
+                return_when=asyncio.ALL_COMPLETED,
+            )
+            self._paseos_instance._is_running_activity = False
+            del processor
+
+        # Workaround to avoid error when executed in a Jupyter notebook.
+        if is_notebook():
+            return job()
+        else:
+            # Run activity and processor
+            asyncio.run(job())
+
         logger.info(f"Activity {activity} completed.")

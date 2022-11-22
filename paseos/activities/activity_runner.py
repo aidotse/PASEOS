@@ -38,6 +38,7 @@ class ActivityRunner:
         self._termination_func = termination_func
         self._termination_args = termination_args
         self._constraint_args = constraint_args
+        self._was_stopped = False
 
     def has_constraint(self):
         """Whether this activity has a constraint function specified.
@@ -61,10 +62,12 @@ class ActivityRunner:
             args (list): Arguments for the activity function.
         """
         logger.trace(f"Running activity {self.name}.")
+        self._was_stopped = False
         self._task = asyncio.create_task(self._run(args))
         with suppress(asyncio.CancelledError):
             await self._task
-        await self.stop()
+        if not self._was_stopped:
+            await self.stop()
 
     async def stop(self):
         """Stops the activity execution and calls the termination function."""
@@ -84,6 +87,7 @@ class ActivityRunner:
         self._task.cancel()
         with suppress(asyncio.CancelledError):
             await self._task
+        self._was_stopped = True
 
     async def check_constraint(self):
         """Checks whether the activities constraints are still valid.
@@ -104,6 +108,7 @@ class ActivityRunner:
             logger.debug(
                 f"Constraint of activity {self.name} is no longer satisfied, cancelling."
             )
-            await self.stop()
+            if not self._was_stopped:
+                await self.stop()
             return False
         return True

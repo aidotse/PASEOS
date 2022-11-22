@@ -14,13 +14,12 @@ def test_activity():
     assert sat1.battery_level_in_Ws == 500
 
     # Out test case is a function that increments a value, genius.
-    # (needs a list so increase the actual value by reference and don't create a copy)
+    # (needs a list to increase the actual value by reference and not create a copy)
     test_value = [0]
 
     async def func(args):
         for _ in range(10):
             args[0][0] += 1
-            # print(args)
             await asyncio.sleep(0.2)
 
     # Register an activity that draws 10 watt per second
