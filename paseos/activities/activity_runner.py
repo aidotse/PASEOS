@@ -95,20 +95,25 @@ class ActivityRunner:
         Returns:
             bool: True if still valid.
         """
-        logger.trace(f"Checking activity {self.name} constraints")
-        try:
-            is_satisfied = await self._constraint_func(self._constraint_args)
-        except Exception as e:
-            logger.error(
-                f"An exception occurred running the checking the activity's {self.name} constraint."
+        if self.has_constraint():
+            logger.trace(f"Checking activity {self.name} constraints")
+            try:
+                is_satisfied = await self._constraint_func(self._constraint_args)
+            except Exception as e:
+                logger.error(
+                    f"An exception occurred running the checking the activity's {self.name} constraint."
+                )
+                logger.error(str(e))
+                return False
+            if not is_satisfied or is_satisfied is None:
+                logger.debug(
+                    f"Constraint of activity {self.name} is no longer satisfied, cancelling."
+                )
+                if not self._was_stopped:
+                    await self.stop()
+                return False
+        else:
+            logger.warning(
+                f"Checking activity {self.name} constraints even though activity has no constraints."
             )
-            logger.error(str(e))
-            return False
-        if not is_satisfied:
-            logger.debug(
-                f"Constraint of activity {self.name} is no longer satisfied, cancelling."
-            )
-            if not self._was_stopped:
-                await self.stop()
-            return False
         return True

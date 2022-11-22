@@ -131,6 +131,7 @@ class ActivityManager:
                 ],
                 return_when=asyncio.ALL_COMPLETED,
             )
+            await asyncio.wait([asyncio.create_task(processor.stop())])
             self._paseos_instance._is_running_activity = False
             del processor
 

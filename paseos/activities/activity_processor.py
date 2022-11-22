@@ -86,6 +86,7 @@ class ActivityProcessor:
             self._task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._task
+            logger.trace("Processor stopped.")
 
     async def _update(self, elapsed_time: float):
         """Updates the processor and optionally local actor.
