@@ -1,9 +1,9 @@
 from loguru import logger
 
-from .actors.base_actor import BaseActor
 
 from .utils.set_log_level import set_log_level
 from .paseos import PASEOS
+from .actors.base_actor import BaseActor
 from .actors.actor_builder import ActorBuilder
 from .actors.spacecraft_actor import SpacecraftActor
 from .actors.ground_station_actor import GroundstationActor
@@ -27,4 +27,4 @@ def init_sim(local_actor: BaseActor):
     return sim
 
 
-__all__ = ["ActorBuilder", "GroundstationActor", "SpacecraftActor"]
+__all__ = ["ActorBuilder", "BaseActor", "GroundstationActor", "SpacecraftActor"]
