@@ -4,3 +4,4 @@ pykep
 scikit-spatial
 toml
 tqdm
+matplotlib

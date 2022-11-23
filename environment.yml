@@ -2,14 +2,15 @@ name: paseos
 channels:
   - conda-forge
 dependencies:
-  - dotmap
-  - loguru
-  - myst-parser
-  - pykep
-  - pytest
-  - python
-  - scikit-spatial
-  - sphinx
-  - sphinx_rtd_theme
-  - toml
-  - tqdm
+- dotmap
+- loguru
+- matplotlib
+- myst-parser
+- pykep
+- pytest
+- python 
+- scikit-spatial
+- sphinx
+- sphinx_rtd_theme
+- toml
+- tqdm

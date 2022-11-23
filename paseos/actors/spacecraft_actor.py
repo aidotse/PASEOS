@@ -82,7 +82,6 @@ class SpacecraftActor(BaseActor):
         Args:
             t0 (pk.epoch): Start of the charging interval
             t1 (pk.epoch): End of the charging interval
-
         """
         time_interval = (t1.mjd2000 - t0.mjd2000) * pk.DAY2SEC
         logger.debug(f"Charging actor {self} for {time_interval}s.")

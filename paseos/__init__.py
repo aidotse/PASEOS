@@ -7,6 +7,8 @@ from .actors.actor_builder import ActorBuilder
 from .actors.spacecraft_actor import SpacecraftActor
 from .actors.ground_station_actor import GroundstationActor
 from .utils.set_log_level import set_log_level
+from .visualization.plot import plot, PlotType
+
 
 set_log_level("DEBUG")
 
@@ -32,6 +34,8 @@ __all__ = [
     "BaseActor",
     "GroundstationActor",
     "PASEOS",
+    "plot",
+    "PlotType",
     "set_log_level",
     "SpacecraftActor",
 ]
