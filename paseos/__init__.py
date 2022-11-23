@@ -9,8 +9,6 @@ from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
 
 
-
-
 set_log_level("DEBUG")
 
 logger.debug("Loaded module.")

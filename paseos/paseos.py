@@ -169,7 +169,6 @@ class PASEOS:
         """Registers an activity that can then be performed on the local actor.
 
         Args:
-
             name (str): Name of the activity.
             activity_function (types.CoroutineType): Function to execute during the activity.
             Needs to be async. Can accept a list of arguments to be specified later.
@@ -180,7 +179,6 @@ class PASEOS:
             constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
             Should return True if constraints are valid, False if they aren't. Needs to be async.
             Can accept a list of arguments to be specified later.
-
         """
 
         # Check provided functions are coroutines
