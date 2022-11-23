@@ -4,16 +4,12 @@ import numpy as np
 from skspatial.objects import LineSegment, Line, Sphere
 from loguru import logger
 
-from paseos.actors.base_actor import BaseActor
 
-
-def is_in_eclipse(
-    actor: BaseActor, central_body: pk.planet, t: pk.epoch, plot=False
-) -> bool:
+def is_in_eclipse(actor, central_body: pk.planet, t: pk.epoch, plot=False) -> bool:
     """Checks whether the actor is currently in eclipse of central body.
 
     Args:
-        actor (BaseActor): Actor to check
+        actor: Actor to check
         central_body (pk.planet): Central body of the actor
         t (pk.epoch): Current time to check at
         plot (bool, optional): If true will plot visualization. Defaults to False.
@@ -21,7 +17,11 @@ def is_in_eclipse(
     Returns:
         bool: True if actor is in eclipse
     """
-    logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
+    # on OSX this can throw an error it seems.
+    try:
+        logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
+    except RuntimeError:
+        logger.debug(f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000).")
 
     # Compute central body position in solar reference frame
     r_central_body_heliocentric, _ = np.array(central_body.eph(t))

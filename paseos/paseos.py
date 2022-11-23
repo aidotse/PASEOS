@@ -1,8 +1,12 @@
+import types
+import asyncio
+
 from dotmap import DotMap
 from loguru import logger
 import pykep as pk
 
 from paseos.actors.base_actor import BaseActor
+from paseos.activities.activity_manager import ActivityManager
 
 from .utils.load_default_cfg import load_default_cfg
 
@@ -24,8 +28,14 @@ class PASEOS:
     # The actor of the device this is running on
     _local_actor = None
 
-    # Stores registered activities
-    _activities = None
+    # Handles registered activities
+    _activity_manager = None
+
+    # Semaphore to track if an activity is currently running
+    _is_running_activity = False
+
+    # Use automatic clock (default on for now)
+    use_automatic_clock = True
 
     def __new__(self, local_actor: BaseActor):
         if not hasattr(self, "instance"):
@@ -43,7 +53,9 @@ class PASEOS:
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
-        self._activities = DotMap(_dynamic=False)
+        # Update local actor time to simulation start time.
+        self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
+        self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep)
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
@@ -93,6 +105,15 @@ class PASEOS:
         self._known_actors[actor.name] = actor
 
     @property
+    def is_running_activity(self):
+        """Allows checking whether there is currently an activity running.
+
+        Returns:
+            bool: Yes if running an activity.
+        """
+        return self._is_running_activity
+
+    @property
     def local_actor(self) -> BaseActor:
         """Returns the local actor.
 
@@ -137,83 +158,83 @@ class PASEOS:
     def register_activity(
         self,
         name: str,
-        requires_line_of_sight_to: list = None,
-        power_consumption_in_watt: float = None,
+        activity_function: types.CoroutineType,
+        power_consumption_in_watt: float,
+        on_termination_function: types.CoroutineType = None,
+        constraint_function: types.CoroutineType = None,
     ):
         """Registers an activity that can then be performed on the local actor.
 
         Args:
-            name (str): Name of the activity
-            requires_line_of_sight_to (list): List of strings with names of actors which
-            need to be visible for this activity.
-            power_consumption_in_watt (float, optional): Power consumption of performing
-            the activity (per second). Defaults to None.
+            name (str): Name of the activity.
+            activity_function (types.CoroutineType): Function to execute during the activity.
+            Needs to be async. Can accept a list of arguments to be specified later.
+            power_consumption_in_watt (float): Power consumption of the activity in W (per second).
+            on_termination_function (types.CoroutineType): Function to execute when the activities stops
+            (either due to completion or constraint not being satisfied anymore). Needs to be async.
+            Can accept a list of arguments to be specified later.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
+            Should return True if constraints are valid, False if they aren't. Needs to be async.
+            Can accept a list of arguments to be specified later.
         """
-        if name in self._activities.keys():
-            raise ValueError(
-                "Trying to add already existing activity with name: "
-                + name
-                + ". Already have "
-                + str(self._activities[name])
-            )
 
-        self._activities[name] = DotMap(
-            requires_line_of_sight_to=requires_line_of_sight_to,
-            power_consumption_in_watt=power_consumption_in_watt,
-            _dynamic=False,
+        # Check provided functions are coroutines
+        error = (
+            "The activity function needs to be a coroutine."
+            "For more information see https://docs.python.org/3/library/asyncio-task.html"
         )
+        assert asyncio.iscoroutinefunction(activity_function), error
 
-        logger.debug(f"Registered activity {self._activities[name]}")
+        if constraint_function is not None:
+            error = (
+                "The constraint function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
+            assert asyncio.iscoroutinefunction(constraint_function), error
+
+        if on_termination_function is not None:
+            error = (
+                "The on_termination function needs to be a coroutine."
+                "For more information see https://docs.python.org/3/library/asyncio-task.html"
+            )
+            assert asyncio.iscoroutinefunction(on_termination_function), error
+
+        self._activity_manager.register_activity(
+            name=name,
+            activity_function=activity_function,
+            power_consumption_in_watt=power_consumption_in_watt,
+            on_termination_function=on_termination_function,
+            constraint_function=constraint_function,
+        )
 
     def perform_activity(
         self,
         name: str,
-        power_consumption_in_watt: float = None,
-        duration_in_s: float = 1.0,
+        activity_func_args: list = None,
+        termination_func_args: list = None,
+        constraint_func_args: list = None,
     ):
-        """Perform the activity and discharge battery accordingly
+        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
 
         Args:
-            name (str): Name of the activity
-            power_consumption_in_watt (float, optional): Power consumption of the
-            activity in seconds if not specified. Defaults to None.
-            duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
-
-        Returns:
-            bool: Whether the activity was performed successfully.
+            name (str): Name of the activity to perform.
+            activity_func_args (list, optional): Arguments for the activity function. Defaults to None.
+            termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
+            constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
-        # Check if activity exists and if it already had consumption specified
-        assert name in self._activities.keys(), (
-            "Activity not found. Declared activities are" + self._activities.keys()
-        )
-        activity = self._activities[name]
-        logger.debug(f"Performing activity {activity}")
-
-        if power_consumption_in_watt is None:
-            power_consumption_in_watt = activity.power_consumption_in_watt
-
-        assert power_consumption_in_watt > 0, (
-            "Power consumption has to be positive but was either in activity or call specified as "
-            + str(power_consumption_in_watt)
-        )
-
-        assert duration_in_s > 0, "Duration has to be positive."
-
-        # TODO
-        # Check if line of sight requirement is fulfilled and if enough power available
-        assert (
-            activity.requires_line_of_sight_to is None
-        ), "Line of Sight for activities is not implemented"
-
-        # TODO
-        # Perform activity, maybe we allow the user pass a function to be executed?
-
-        # Discharge power for the activity
-        self._local_actor.discharge(power_consumption_in_watt, duration_in_s)
-
-        logger.trace(f"Activity {activity} completed.")
-
-        return True
+        if self._is_running_activity:
+            raise RuntimeError(
+                "PASEOS is already running an activity. Please wait for it to finish. "
+                + "To perform activities in parallen encasulate them in one, single joint activity."
+            )
+        else:
+            self._is_running_activity = True
+            return self._activity_manager.perform_activity(
+                name=name,
+                activity_func_args=activity_func_args,
+                termination_func_args=termination_func_args,
+                constraint_func_args=constraint_func_args,
+            )
 
     def set_central_body(self, planet: pk.planet):
         """Sets the central body of the simulation for the orbit simulation
