@@ -123,6 +123,7 @@ class ActivityManager:
                 activity_runner=activity_runner,
                 advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
+
             await asyncio.wait(
                 [
                     asyncio.create_task(processor.start()),
@@ -132,6 +133,7 @@ class ActivityManager:
             )
             await asyncio.wait([asyncio.create_task(processor.stop())])
             self._paseos_instance._is_running_activity = False
+            del processor
 
         # Workaround to avoid error when executed in a Jupyter notebook.
         if is_notebook():
