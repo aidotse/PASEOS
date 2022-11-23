@@ -8,8 +8,6 @@ import pykep as pk
 from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
 
-from .utils.load_default_cfg import load_default_cfg
-
 
 class PASEOS:
     """This class serves as the main interface with the user. It is designed
@@ -47,11 +45,14 @@ class PASEOS:
         return self.instance
 
     def __init__(self, local_actor: BaseActor, cfg=None):
+        """Initalize PASEOS
+
+        Args:
+            local_actor (BaseActor): local actor.
+            cfg (DotMap, optional): simulation configuration. Defaults to None.
+        """
         logger.trace("Initializing PASEOS")
-        if cfg is not None:
-            self._cfg = cfg
-        else:
-            self._cfg = load_default_cfg()
+        self._cfg = cfg
         self._state = DotMap(_dynamic=False)
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
