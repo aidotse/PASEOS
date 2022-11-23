@@ -19,7 +19,7 @@ def init_sim(local_actor: BaseActor, cfg=None):
 
     Args:
         local_actor (BaseActor): The actor linked to the local device which is required to model anything.
-        cfg (DotMap, optional): configuration file. If None, default configuration will be used. Defaults to None
+        cfg (DotMap, optional): Configuration file. If None, default configuration will be used. Defaults to None.
     Returns:
         PASEOS: Instance of the simulation (only one can exist, singleton)
     """
