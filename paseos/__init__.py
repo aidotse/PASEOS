@@ -24,9 +24,7 @@ def init_sim(local_actor: BaseActor, cfg=None):
         PASEOS: Instance of the simulation (only one can exist, singleton)
     """
     logger.debug("Initializing simulation.")
-    if cfg is not None:
-        cfg = cfg
-    else:
+    if cfg is None:
         cfg = load_default_cfg()
     sim = PASEOS(local_actor=local_actor, cfg=cfg)
     return sim
