@@ -119,6 +119,7 @@ class PASEOS:
     @property
     def local_actor(self) -> BaseActor:
         """Returns the local actor.
+
         Returns:
             BaseActor: Local actor
         """
@@ -127,6 +128,7 @@ class PASEOS:
     @property
     def known_actors(self) -> dict:
         """Returns known actors.
+
         Returns:
             dict of BaseActor: Dictionary of the known actors.
         """
@@ -135,6 +137,7 @@ class PASEOS:
     @property
     def known_actor_names(self) -> list:
         """Returns names of known actors.
+
         Returns:
             list: List of names of known actors.
         """
@@ -252,6 +255,7 @@ class PASEOS:
 
     def get_cfg(self) -> DotMap:
         """Returns the current cfg of the simulation
+
         Returns:
             DotMap: cfg
         """

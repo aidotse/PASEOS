@@ -17,11 +17,7 @@ def is_in_eclipse(actor, central_body: pk.planet, t: pk.epoch, plot=False) -> bo
     Returns:
         bool: True if actor is in eclipse
     """
-    # on OSX this can throw an error it seems.
-    try:
-        logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
-    except RuntimeError:
-        logger.debug(f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000).")
+    logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
 
     # Compute central body position in solar reference frame
     r_central_body_heliocentric, _ = np.array(central_body.eph(t))

@@ -33,6 +33,8 @@ __all__ = [
     "BaseActor",
     "GroundstationActor",
     "PASEOS",
-    "set_log_level",
+    "plot",
+    "PlotType",
+    "set_log_level"
     "SpacecraftActor",
 ]
