@@ -142,5 +142,4 @@ class ActivityManager:
             # Run activity and processor
             asyncio.gather(job())
 
-            # asyncio.run_coroutine_threadsafe(job(), loop)
         logger.info(f"Activity {activity} completed.")
