@@ -7,7 +7,7 @@ This project is currently under development. Use at your own risk. :)
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/datastructure.svg" alt="Scheme"  width="910" height="459">
+    <img src="paseos/resources/images/datastructure.svg" alt="Scheme"  width="910" height="459">
   </a>
   <p align="center">
     Description of PASEOS data structure
@@ -16,7 +16,7 @@ This project is currently under development. Use at your own risk. :)
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/flowchart.svg" alt="Scheme"  width="910" height="459">
+    <img src="paseos/resources/images/flowchart.svg" alt="Scheme"  width="910" height="459">
   </a>
   <p align="center">
     Description of PASEOS workflow on an individual device
@@ -34,7 +34,7 @@ Finally, the time in the lower left and lower right corners correspond to the ep
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/animation.png" alt="Scheme"  width="900" height="500">
+    <img src="paseos/resources/images/animation.png" alt="Scheme"  width="900" height="500">
   </a>
   <p align="center">
     Snapshot of PASEOS visualization
