@@ -1,11 +1,17 @@
 """Simple test of starting an activity"""
 from test_utils import get_default_instance
-import pytest
+
 from paseos import SpacecraftActor
-
 import asyncio
+import pytest
 
 
+async def wait_for_activity(sim):
+    while sim._is_running_activity is True:
+        await asyncio.sleep(0.1)
+
+
+@pytest.mark.asyncio
 async def test_activity():
     """Test if performing activity consumes power as expected"""
     sim, sat1, earth = get_default_instance()
@@ -15,24 +21,24 @@ async def test_activity():
 
     # Out test case is a function that increments a value, genius.
     # (needs a list to increase the actual value by reference and not create a copy)
-
-    # Register an activity that draws 10 watt per second
     test_val = [0]
 
     async def func(args):
         for _ in range(10):
             args[0][0] += 1
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
+    # Register an activity that draws 10 watt per second
     sim.register_activity(
         "Testing", activity_function=func, power_consumption_in_watt=10
     )
 
     # Run the activity
-    sim.perform_activity("Testing", [test_val])
+    sim.perform_activity("Testing", activity_func_args=[test_val])
+    await wait_for_activity(sim)
 
     # Check activity result
-    assert test_val == 10
+    assert test_val[0] == 10
 
     # Check power was depleted as expected
     # Activity should run roughly 2s
@@ -42,7 +48,8 @@ async def test_activity():
     assert sat1.battery_level_in_Ws > 480 and sat1.battery_level_in_Ws < 490
 
 
-async def test_running_two_activities(event_loop):
+@pytest.mark.asyncio
+async def test_running_two_activities():
     """This test ensures that you cannot run two activities at the same time."""
     sim, sat1, earth = get_default_instance()
 
@@ -64,12 +71,14 @@ async def test_running_two_activities(event_loop):
 
     # try running it
     sim.perform_activity("act1", activity_func_args=[test_value])
+    await wait_for_activity(sim)
 
     # Value should be 42 as first activity is started but then an error occurs trying the second
     assert test_value[0] == 42
 
 
-async def test_activity_constraints(event_loop):
+@pytest.mark.asyncio
+async def test_activity_constraints():
     """Tests if creating a constraint function to be satisfied during an activity works.
     Here we start a function that counts up until we stop charging our solar panels and then prints the value.
     """
@@ -113,21 +122,7 @@ async def test_activity_constraints(event_loop):
         constraint_func_args=[sat1],
         termination_func_args=[test_value, test_value2],
     )
+    await wait_for_activity(sim)
 
     assert test_value == test_value2
     assert sat1.battery_level_in_Ws >= 505
-
-
-def test_example(func):
-    loop = asyncio.new_event_loop()
-    try:
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(test_activity())
-    finally:
-        loop.close()
-
-
-if __name__ == "__main__":
-    test_example(test_activity)
-    test_example(test_running_two_activities)
-    test_example(test_activity_constraints)

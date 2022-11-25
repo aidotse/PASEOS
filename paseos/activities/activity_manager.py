@@ -140,10 +140,7 @@ class ActivityManager:
             return job()
         else:
             # Run activity and processor
-            try:
-                loop = asyncio.get_event_loop()
-                loop.create_task(job())
-            except:
-                a = 1
+            asyncio.gather(job())
 
+            # asyncio.run_coroutine_threadsafe(job(), loop)
         logger.info(f"Activity {activity} completed.")
