@@ -45,7 +45,7 @@ jobs:
           cache-downloads: true
       - name: Test with pytest
         run: |
-          mamba activate paseos
+          /home/runner/micromamba-bin/micromamba activate paseos
           cd paseos/tests
           conda install pytest
           $CONDA/bin/pip3 install pytest-error-for-skips
