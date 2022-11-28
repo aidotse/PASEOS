@@ -38,11 +38,11 @@ jobs:
           pip install flake8
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=127
       - name: provision-with-micromamba
-          uses: mamba-org/provision-with-micromamba@v14
-          with:
-            environment-file: environment.yml
-            environment-name: base
-            cache-downloads: true
+        uses: mamba-org/provision-with-micromamba@v14
+        with:
+          environment-file: environment.yml
+          environment-name: base
+          cache-downloads: true
       - name: Test with pytest
         run: |
           cd paseos/tests
