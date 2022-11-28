@@ -43,11 +43,10 @@ jobs:
           environment-file: environment.yml
           environment-name: paseos
           cache-downloads: true
-          cache-env: true
       - name: Test with pytest
+        shell: bash -l {0}
         run: |
-          eval "$(micromamba shell hook --shell=bash)"
-          /home/runner/micromamba-bin/micromamba activate paseos
+          micromamba activate paseos
           cd paseos/tests
           conda install pytest
           $CONDA/bin/pip3 install pytest-error-for-skips
