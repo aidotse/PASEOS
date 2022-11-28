@@ -1,0 +1,2 @@
+include paseos/resources/default_cfg.toml
+include README.md

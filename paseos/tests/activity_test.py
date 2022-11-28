@@ -11,6 +11,7 @@ async def wait_for_activity(sim):
         await asyncio.sleep(0.1)
 
 
+# tell pytest to create an event loop and execute the tests using the event loop
 @pytest.mark.asyncio
 async def test_activity():
     """Test if performing activity consumes power as expected"""
