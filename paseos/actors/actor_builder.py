@@ -22,14 +22,13 @@ class ActorBuilder:
     def __init__(self):
         logger.trace("Initializing ActorBuilder")
 
-    def get_actor_scaffold(name: str, actor_type: object, position, epoch: pk.epoch):
+    def get_actor_scaffold(name: str, actor_type: object, epoch: pk.epoch):
         """Initiates an actor with minimal properties.
 
         Args:
             name (str): Name of the actor.
             actor_type (object): Type of the actor (e.g. SpacecraftActor)
-            position (list of floats): Starting position of the actor [x,y,z]
-            epoch (pykep.epoch): Epoch at this position
+            epoch (pykep.epoch): Current local time of the actor.
 
         Returns:
             Created actor
@@ -43,7 +42,7 @@ class ActorBuilder:
 
         logger.trace(f"Creating an actor blueprint with name {name}")
 
-        return actor_type(name, position, epoch)
+        return actor_type(name, epoch)
 
     def set_orbit(
         actor: BaseActor,
@@ -76,6 +75,20 @@ class ActorBuilder:
         )
 
         logger.debug(f"Added orbit to actor {actor}")
+
+    def set_position(actor: BaseActor, position: list):
+        """Sets the actors position. Use this if you do not want the actor to have a keplerian orbit around a central body.
+
+        Args:
+            actor (BaseActor): Actor set the position on.
+            position (list): [x,y,z] position.
+        """
+        assert len(position) == 3, "Position has to be list of 3 floats."
+        assert all(
+            [isinstance(val, float) for val in position]
+        ), "Position has to be list of 3 floats."
+        actor._position = position
+        logger.debug(f"Setting position {position} on actor {actor}")
 
     def set_power_devices(
         actor: SpacecraftActor,
