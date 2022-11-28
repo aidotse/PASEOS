@@ -45,6 +45,7 @@ jobs:
           cache-downloads: true
       - name: Test with pytest
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
           /home/runner/micromamba-bin/micromamba activate paseos
           cd paseos/tests
           conda install pytest
