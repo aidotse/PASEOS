@@ -40,7 +40,7 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=127
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda install mamba
+          $CONDA/bin/conda install mamba -c conda-forge
           mamba env update --file environment.yml --name base
       - name: Test with pytest
         run: |
