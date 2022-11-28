@@ -16,9 +16,7 @@ def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):
     earth = pk.planet.jpl_lp("earth")
 
     # Define local actor
-    sat1 = ActorBuilder.get_actor_scaffold(
-        "sat1", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
-    )
+    sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
     ActorBuilder.set_power_devices(sat1, 500, 10000, 1)
     # init simulation

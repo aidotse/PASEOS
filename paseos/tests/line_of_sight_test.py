@@ -14,15 +14,15 @@ from test_utils import get_default_instance
 def test_los():
     """create satellites where sat1 and 2 are in sight of each other (as well as sat 1 and 3)
     but sat 2 and 3 are on opposite sides of the planet"""
-    sim, sat1, earth = get_default_instance()
+    _, sat1, earth = get_default_instance()
 
     sat2 = ActorBuilder.get_actor_scaffold(
-        "sat2", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
+        "sat2", SpacecraftActor, pk.epoch(0)
     )
     ActorBuilder.set_orbit(sat2, [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth)
 
     sat3 = ActorBuilder.get_actor_scaffold(
-        "sat3", SpacecraftActor, [10000000, 0, 0], pk.epoch(0)
+        "sat3", SpacecraftActor, pk.epoch(0)
     )
     ActorBuilder.set_orbit(sat3, [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth)
 

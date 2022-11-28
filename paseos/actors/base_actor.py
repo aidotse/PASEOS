@@ -36,13 +36,12 @@ class BaseActor(ABC):
     # Communication links dictionary
     _communication_devices = DotMap(_dynamic=False)
 
-    def __init__(self, name: str, position, epoch: pk.epoch) -> None:
+    def __init__(self, name: str, epoch: pk.epoch) -> None:
         """Constructor for a base actor
 
         Args:
             name (str): Name of this actor
-            position (list of floats): [x,y,z]
-            epoch (pykep.epoch): Epoch at this pos / velocity
+            epoch (pykep.epoch): Current local time of the actor.
         """
         logger.trace("Instantiating Actor.")
         super().__init__()
@@ -114,7 +113,37 @@ class BaseActor(ABC):
         """
         pass
 
+    def get_position(self, epoch: pk.epoch):
+        logger.trace(
+            "Computing "
+            + self._orbital_parameters.name
+            + " position at time "
+            + str(epoch.mjd2000)
+            + " (mjd2000)."
+        )
+
+        if self._orbital_parameters is not None and self._position is not None:
+            raise ValueError(
+                "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
+            )
+
+        # If the actor has no orbit, return position
+        if self._orbital_parameters is None:
+            if self._position is not None:
+                return self._position
+        else:
+            return self._orbital_parameters.eph(epoch)
+
+        raise NotImplementedError(
+            "No suitable way added to determine actor position. Either set an orbit or position with ActorBuilder."
+        )
+
     def get_position_velocity(self, epoch: pk.epoch):
+        if self._orbital_parameters is None:
+            raise NotImplementedError(
+                "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
+            )
+
         logger.trace(
             "Computing "
             + self._orbital_parameters.name

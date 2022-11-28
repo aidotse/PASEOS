@@ -4,7 +4,7 @@ from test_utils import get_default_instance
 
 def test_activity():
     """Test if performing activity consumes power as expected"""
-    sim, sat1, earth = get_default_instance()
+    sim, sat1, _ = get_default_instance()
 
     # Initial power is 500
     assert sat1.battery_level_in_Ws == 500

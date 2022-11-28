@@ -12,7 +12,7 @@ from test_utils import get_default_instance
 
 def test_eclipse():
     """Get the default satellite and see if is in eclipse and getting out of it"""
-    sim, sat1, earth = get_default_instance()
+    _, sat1, earth = get_default_instance()
 
     assert not is_in_eclipse(sat1, earth, pk.epoch(0), plot=True)
     assert is_in_eclipse(sat1, earth, pk.epoch(0.5), plot=True)

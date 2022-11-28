@@ -19,18 +19,16 @@ class SpacecraftActor(BaseActor):
     def __init__(
         self,
         name: str,
-        position,
         epoch: pk.epoch,
     ) -> None:
         """Constructor for a spacecraft actor
 
         Args:
             name (str): Name of this actor
-            position (list of floats): [x,y,z]
             epoch (pykep.epoch): Epoch at this pos
         """
         logger.trace("Instantiating SpacecraftActor.")
-        super().__init__(name, position, epoch)
+        super().__init__(name, epoch)
 
     @property
     def charging_rate_in_W(self):
