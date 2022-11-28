@@ -41,10 +41,11 @@ jobs:
         uses: mamba-org/provision-with-micromamba@v14
         with:
           environment-file: environment.yml
-          environment-name: base
+          environment-name: paseos
           cache-downloads: true
       - name: Test with pytest
         run: |
+          mamba activate paseos
           cd paseos/tests
           conda install pytest
           $CONDA/bin/pip3 install pytest-error-for-skips
