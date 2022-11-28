@@ -140,6 +140,6 @@ class ActivityManager:
             return job()
         else:
             # Run activity and processor
-            asyncio.run(job())
+            asyncio.gather(job())
 
         logger.info(f"Activity {activity} completed.")

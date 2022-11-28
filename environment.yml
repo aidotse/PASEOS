@@ -8,6 +8,7 @@ dependencies:
 - myst-parser
 - pykep
 - pytest
+- pytest-asyncio
 - python 
 - scikit-spatial
 - sphinx
