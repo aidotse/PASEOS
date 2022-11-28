@@ -37,6 +37,9 @@ class BaseActor(ABC):
     # Communication links dictionary
     _communication_devices = DotMap(_dynamic=False)
 
+    # Tracks the current activity
+    _current_activity = None
+
     def __init__(self, name: str, position, epoch: pk.epoch) -> None:
         """Constructor for a base actor
 
