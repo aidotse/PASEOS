@@ -48,6 +48,5 @@ jobs:
         run: |
           micromamba activate paseos
           cd paseos/tests
-          conda install pytest
-          $CONDA/bin/pip3 install pytest-error-for-skips
-          $CONDA/bin/pytest -ra --error-for-skips
+          micromamba install pytest
+          pytest
