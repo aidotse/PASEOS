@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 import rasterio
+from skimage.measure import label, regionprops
 
 # [1] Massimetti, Francesco, et al. ""Volcanic hot-spot detection using SENTINEL-2:
 # a comparison with MODIS–MIROVA thermal data series."" Remote Sensing 12.5 (2020):820."
@@ -29,16 +30,25 @@ def acquire_data(file_name):
 
     Returns:
         np.array: array containing B8A, B11, B12 of a Seintel-2 L1C cropped tif.
+        dictionary: dictionary containing lat and lon for every image point.
     """
 
     with rasterio.open(file_name) as raster:
         img_np = raster.read()
         sentinel_img = img_np.astype(np.float32)
+        height = sentinel_img.shape[1]
+        width = sentinel_img.shape[2]
+        cols, rows = np.meshgrid(np.arange(width), np.arange(height))
+        xs, ys = rasterio.transform.xy(raster.transform, rows, cols)
+        lons = np.array(ys)
+        lats = np.array(xs)
+        coords_dict = {"lat": lats, "lon": lons}
 
     sentinel_img = (
         sentinel_img.transpose(1, 2, 0) / 10000 + 1e-13
     )  # Diving for the default quantification value
-    return sentinel_img
+
+    return sentinel_img, coords_dict
 
 
 def check_surrounded(img):
@@ -174,8 +184,37 @@ def cluster_9px(img):
     return surrounded
 
 
+def get_event_bounding_box(event_hotmap, coords_dict):
+    """Returns the bounding box and their top-left, bottom-right corners coordinates for each cluster of 1 in the event_hotmap.
+
+    Args:
+        event_hotmap (torch.tensor): event hotmap. Pixels = 1 indicate event.
+        coords_dict (dict): {"lat" : lat, lon : "lon"}, containing coordinates for each pixel in the hotmap.
+
+    Returns:
+        skimage.bb: bounding box.
+        list: list of coordinates of top-left, bottom-right corners for each cluster of events in the hotmap.
+    """
+
+    lbl = label(event_hotmap)
+    props = regionprops(lbl)
+    event_bbox_coordinates_list = []
+    for prop in props:
+        lat = np.array(coords_dict["lat"])
+        lon = np.array(coords_dict["lon"])
+
+        bbox_coordinates = [
+            [lat[prop.bbox[0], prop.bbox[1]], lon[prop.bbox[0], prop.bbox[1]]],
+            [lat[prop.bbox[2], prop.bbox[3]], lon[prop.bbox[2], prop.bbox[3]]],
+        ]
+        event_bbox_coordinates_list.append(bbox_coordinates)
+
+    return props, event_bbox_coordinates_list
+
+
 def s2pix_detector(
     sentinel_img,
+    coords_dict,
     alpha_thr=[1.4, 1.2, 0.15],
     beta_thr=[2, 0.5, 0.5],
     S_thr=[1.2, 1, 1.5, 1],
@@ -184,15 +223,15 @@ def s2pix_detector(
     """Implements the first step of the one described in [1] by proving a filtered alert-map.
 
     Args:
-        sentinel_img (numpy.array): sentinel2 L1C image
+        sentinel_img (numpy.array): sentinel2 L1C image.
+        dictionary: dictionary containing lat and lon for every image point.
         alpha_thr (list, optional): pixel-level value for alpha threshold map calculation. Defaults to [1.4, 1.2, 0.15].
         beta_thr (list, optional): pixel-level value for beta threshold map calculation. Defaults to [2, 0.5, 0.5].
         S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
         gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1, 1, 0.5].
 
     Returns:
-        numpy.array: filtered alert_matrix threshold map.
-        list: list of bounding boxes.
+        list: [list of bounding boxes objects, list of bounding boxes coordinates]
     """
 
     alert_matrix, _, _, _, _ = get_alert_matrix_and_thresholds(
@@ -201,5 +240,6 @@ def s2pix_detector(
     filtered_alert_matrix = cluster_9px(alert_matrix)
     filtered_alert_matrix[filtered_alert_matrix < 9] = 0
     filtered_alert_matrix[filtered_alert_matrix == 9] = 1
+    bbox_info = get_event_bounding_box(filtered_alert_matrix, coords_dict)
 
-    return filtered_alert_matrix
+    return bbox_info
