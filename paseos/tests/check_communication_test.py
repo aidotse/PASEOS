@@ -16,12 +16,8 @@ def test_communication_link():
     # create satellites where sat1 and sat2 starts from the same point but move along different orbit.
     # At t=1470s they will not be in line of sight anymore.
     earth = pk.planet.jpl_lp("earth")
-    sat1 = ActorBuilder.get_actor_scaffold(
-        "sat1", SpacecraftActor, [0, 0, 0], pk.epoch(0)
-    )
-    sat2 = ActorBuilder.get_actor_scaffold(
-        "sat2", SpacecraftActor, [0, 0, 0], pk.epoch(0)
-    )
+    sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
+    sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
 
     ActorBuilder.set_orbit(
         sat1,

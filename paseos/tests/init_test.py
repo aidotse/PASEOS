@@ -8,8 +8,8 @@ from test_utils import get_default_instance
 
 
 def test_init():
-    sim, sat1, earth = get_default_instance()  # noqa
-    cfg = sim.get_cfg()  # noqa
+    sim, _, _ = get_default_instance()  # noqa
+    _ = sim.get_cfg()  # noqa
 
 
 if __name__ == "__main__":
