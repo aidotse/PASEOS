@@ -153,6 +153,7 @@ class SpaceAnimation(Animation):
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
                 info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
+
         elif isinstance(actor, GroundstationActor):
             # TODO: implement textbox for groundstation
             raise NotImplementedError(
@@ -162,6 +163,10 @@ class SpaceAnimation(Animation):
             raise NotImplementedError(
                 "SpacePlot is currently not implemented for actor type" + type(actor)
             )
+
+        cur_act = actor._current_activity
+        if cur_act is not None:
+            info_str += f"\n({cur_act})"
 
         return info_str
 

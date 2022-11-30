@@ -133,9 +133,11 @@ class ActivityManager:
             )
             await asyncio.wait([asyncio.create_task(processor.stop())])
             self._paseos_instance._is_running_activity = False
+            self._paseos_instance._local_actor._current_activity = None
             del processor
 
         # Workaround to avoid error when executed in a Jupyter notebook.
+        self._paseos_instance._local_actor._current_activity = name
         if is_notebook():
             return job()
         else:
