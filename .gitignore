@@ -130,3 +130,6 @@ dmypy.json
 
 my_notebooks
 .vscode
+examples/Sentinel_2_example_notebook/Etna_00.tif
+examples/Sentinel_2_example_notebook/Mayon_02.tif
+examples/Sentinel_2_example_notebook/La_Palma_02.tif

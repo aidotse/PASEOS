@@ -8,8 +8,6 @@ import pykep as pk
 from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
 
-from .utils.load_default_cfg import load_default_cfg
-
 
 class PASEOS:
     """This class serves as the main interface with the user. It is designed
@@ -37,7 +35,7 @@ class PASEOS:
     # Use automatic clock (default on for now)
     use_automatic_clock = True
 
-    def __new__(self, local_actor: BaseActor):
+    def __new__(self, local_actor: BaseActor, cfg):
         if not hasattr(self, "instance"):
             self.instance = super(PASEOS, self).__new__(self)
         else:
@@ -46,9 +44,15 @@ class PASEOS:
             )
         return self.instance
 
-    def __init__(self, local_actor: BaseActor):
+    def __init__(self, local_actor: BaseActor, cfg=None):
+        """Initalize PASEOS
+
+        Args:
+            local_actor (BaseActor): local actor.
+            cfg (DotMap, optional): simulation configuration. Defaults to None.
+        """
         logger.trace("Initializing PASEOS")
-        self._cfg = load_default_cfg()
+        self._cfg = cfg
         self._state = DotMap(_dynamic=False)
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
@@ -217,10 +221,13 @@ class PASEOS:
         """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
 
         Args:
-            name (str): Name of the activity to perform.
-            activity_func_args (list, optional): Arguments for the activity function. Defaults to None.
-            termination_func_args (list, optional): Arguments for the termination function. Defaults to None.
-            constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
+            name (str): Name of the activity
+            power_consumption_in_watt (float, optional): Power consumption of the
+            activity in seconds if not specified. Defaults to None.
+            duration_in_s (float, optional): Time to perform this activity. Defaults to 1.0.
+
+        Returns:
+            bool: Whether the activity was performed successfully.
         """
         if self._is_running_activity:
             raise RuntimeError(
