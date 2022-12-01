@@ -91,7 +91,7 @@ class BaseActor(ABC):
         assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
 
     def __str__(self):
-        return self._orbital_parameters.name
+        return self.name
 
     def set_time(self, t: pk.epoch):
         """Updates the local time of the actor.
@@ -147,7 +147,7 @@ class BaseActor(ABC):
             if self._position is not None:
                 return self._position
         else:
-            return self._orbital_parameters.eph(epoch)
+            return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
             "No suitable way added to determine actor position. Either set an orbit or position with ActorBuilder."
@@ -177,19 +177,29 @@ class BaseActor(ABC):
         return self._orbital_parameters.eph(epoch)
 
     def is_in_line_of_sight(
-        self, other_actor: "BaseActor", epoch: pk.epoch, plot=False
+        self,
+        other_actor: "BaseActor",
+        epoch: pk.epoch,
+        minimum_altitude_angle: float = None,
+        plot=False,
     ):
         """Determines whether a position is in line of sight of this actor
 
         Args:
             other_actor (BaseActor): The actor to check line of sight with
             epoch (pk,.epoch): Epoch at which to check the line of sight
+            minimum_altitude_angle(float): The altitude angle (in degree) at which the actor
+            has to be in relation to the surface, has to be between 0 and 90.
+            to be visible from this ground station. Has to be > 0 and < 90.
+            Only relevant if one of the actors is a ground station.
             plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
             bool: true if in line-of-sight.
         """
-        return is_in_line_of_sight(self, other_actor, epoch, plot)
+        return is_in_line_of_sight(
+            self, other_actor, epoch, minimum_altitude_angle, plot
+        )
 
     def is_in_eclipse(self, t: pk.epoch = None):
         """Checks if the actors is in eclipse at the specified time.
