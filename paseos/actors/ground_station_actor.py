@@ -1,6 +1,5 @@
 from loguru import logger
 import pykep as pk
-import numpy as np
 from skyfield.api import load
 
 from paseos.actors.base_actor import BaseActor
