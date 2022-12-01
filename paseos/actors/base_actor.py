@@ -26,6 +26,9 @@ class BaseActor(ABC):
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
+    # Position if not defined by orbital parameters
+    _position = None
+
     # Earth as a sphere (for now)
     # TODO replace this in the future depending on central body
     # Note that this needs to be specified in solar reference frame for now
@@ -115,6 +118,14 @@ class BaseActor(ABC):
         pass
 
     def get_position(self, epoch: pk.epoch):
+        """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
+
+        Args:
+            epoch (pk.epoch): Time as pykep epoch
+
+        Returns:
+            np.array: [x,y,z] in meters
+        """
         logger.trace(
             "Computing "
             + self._orbital_parameters.name
@@ -140,6 +151,14 @@ class BaseActor(ABC):
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
+        """Compute the position / velocity of this actor at a specific time. Requires orbital parameters set.
+
+        Args:
+            epoch (pk.epoch): Time as pykep epoch.
+
+        Returns:
+            np.array: [x,y,z] in meters
+        """
         if self._orbital_parameters is None:
             raise NotImplementedError(
                 "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
