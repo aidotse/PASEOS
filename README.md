@@ -14,7 +14,11 @@ This project is currently under development. Use at your own risk. :)
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#examples">Examaples</a></li>
     <ul>
-    <a href="#visualising-paseos">Visualising PASEOS</a></li>
+    <li><a href="#create-a-paseos-actor">Create a PASEOS actor</a></li>
+    <li><a href="#set-an-orbit-for-a-paseos-spacecraftactor">Set an orbit for a PASEOS SpacecraftActor</a></li>
+    <li><a href="#how-to-instantiate-paseos">How to instantiate PASEOS</a></li>
+    <li><a href="#adding-other-actors-to-PASEOS">Adding other actors to PASEOS</a></li>
+    <li><a href="#visualising-paseos">Visualising PASEOS</a></li>
     </ul>
     <li><a href="#system-design-of-paseos">System Design of PASEOS</a></li>
     <li><a href="#glossary">Glossary</a></li>
@@ -69,6 +73,50 @@ To contribute, please proceed as follow:
 5. Open a Pull Request
 
 ## Examples
+
+### Create a PASEOS actor
+The code snippet below shows how to create a `PASEOS` [actor](#actor) named **local_actor** of type [SpacecraftActor](#spacecraftactor). [pykep](https://esa.github.io/pykep/) is used to define the satellite [epoch](https://en.wikipedia.org/wiki/Epoch_(astronomy)) in format [mjd2000](https://en.wikipedia.org/wiki/Julian_day) format. 
+ 
+```py 
+import pykep as pk
+import paseos
+from paseos import ActorBuilder, SpacecraftActor
+# Define an actor pf type SpacecraftActor of name my_first_actor
+local_actor = ActorBuilder.get_actor_scaffold(name="local_actor", actor_type=SpacecraftActor, epoch=pk.epoch(0))
+```
+
+### Set an orbit for a PASEOS SpacecraftActor
+Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign an orbit to it.
+```py 
+#Let's define the date of today (09/12/2022) as pk.epoch
+#please, refer to https://esa.github.io/pykep/documentation/core.html#pykep.epoch
+#Using this will overwrite the previously set epoch
+today = pk.epoch_from_string('2022-12-09 12:00:00.000')
+
+# Define the central body as Earth by using pykep APIs.
+earth = pk.planet.jpl_lp("earth")
+
+#Actor position [m] and velocity [m/s]
+spacecraft_position=[-6912275.638799771, -1753638.1454079857, 734768.7737737056]
+spacecraft_velocity=[-1015.9539197253205, 894.2090554272667, -7334.877725365646]
+
+#Lets set the SpacecraftActor orbit.
+ActorBuilder.set_orbit(actor=local_actor, 
+                       position=spacecraft_position, 
+                       velocity=spacecraft_velocity, 
+                       epoch=today, central_body=earth)
+```
+
+### How to instantiate PASEOS
+We will now show how to create an instance of `PASEOS`. The actor `local_actor` will be used as [local actor](#local-actor).
+```py 
+cfg=load_default_cfg() # loading cfg to modify defaults
+cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC # convert epoch to seconds.
+sim = paseos.init_sim(local_actor, cfg) # initialize PASEOS simulation.
+```
+### Adding other actors to PASEOS
+....
+
 ### Visualising PASEOS
 Navigate to paseos/visualization to find a jupyter notebook containing examples of how to visualize PASEOS.
 Visualization can be done in interactive mode or as an animation that is saved to disc.
@@ -109,18 +157,18 @@ Finally, the time in the lower left and lower right corners correspond to the ep
 
 ## Glossary
 * ### Activity
-  Any operation performed by a [Spacecraft-actor](#spacecraftactor) that shall be implemented in `PASEOS`. Activities might include data transmission, house-keeping operations, onboard data acquisition and processing, and others.
+  Any operation performed by a [SpacecraftActor](#spacecraftactor) that shall be implemented in `PASEOS`. Activities might include data transmission, house-keeping operations, onboard data acquisition and processing, and others.
 
 * ### Actor
   Since `PASEOS` is fully-decentralised, each node of a `PASEOS` constellation shall run an instance of `PASEOS` modelling all the nodes of  that constellation.  The abstraction of a constellation node inside a `PASEOS` instace is a `PASEOS` `actor`. 
- 
+
 * ### Local actor
   The `actor` in a `PASEOS` instance that models the behavior and the status of the node that runs that `PASEOS` instance is called `local actor`. 
 
-* ### Ground station-actor
+* ### Ground stationActor
   `PASEOS actor` emulating a ground station.  
 
-* ### Spacecraft-actor
+* ### SpacecraftActor
   `PASEOS actor` emulating a spacecraft or a satellite. 
 
 
