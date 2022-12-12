@@ -30,6 +30,9 @@ class GroundstationActor(BaseActor):
 
     def get_position(self, epoch: pk.epoch):
         """Compute the position of this ground station at a specific time.
+        Positions are in J2000 geocentric reference frame, same reference frame as
+        for the spacecraft actors. Since the Earth is rotating, ground stations have
+        a non-constant position depending on time.
 
         Args:
             epoch (pk.epoch): Time as pykep epoch

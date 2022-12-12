@@ -57,10 +57,11 @@ class ActorBuilder:
             actor (GroundstationActor): Actor to update.
             latitude (float): Latitude of the ground station in degrees.
             longitude (float): Longitude of the ground station in degrees.
-            elevation (float): Elevation of the ground station in meters. Defaults to 0.
+            elevation (float): A distance specifying elevation above (positive) 
+            or below (negative) the surface of the Earth
+            ellipsoid specified by the WSG84 model in meters. Defaults to 0.
         """
-        assert elevation >= 0, "Elevation has to be non-negative."
-        assert latitude >= -180 and latitude <= 180, "Latitude is -180 <= lat <= 180"
+        assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
