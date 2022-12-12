@@ -43,7 +43,7 @@ class ActivityManager:
         Args:
             name (str): _description_
         """
-        if not name in self._activities.keys():
+        if name not in self._activities.keys():
             raise ValueError(
                 "Trying to remove non-existing activity with name: " + name
             )

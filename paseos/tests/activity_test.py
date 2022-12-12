@@ -51,7 +51,7 @@ async def test_activity():
     # test removing the activity
     assert "Testing" in sim._activity_manager._activities.keys()
     sim.remove_activity("Testing")
-    assert not "Testing" in sim._activity_manager._activities.keys()
+    assert "Testing" not in sim._activity_manager._activities.keys()
 
 
 @pytest.mark.asyncio
