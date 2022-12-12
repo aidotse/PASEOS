@@ -82,7 +82,7 @@ To contribute, please proceed as follow:
 `PASEOS` allow simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in `PASEOS`.
 
 ## Examples
-![Alt Text](PASEOS_example.png)
+![Alt Text](PASEOS_Example.png)
 
 The next examples will introduce you to the use of `PASEOS` through the case study shown in the image above. This is a general scenario made of two [SpacecraftActors](#spacecraftactor) (`SatelliteA` and `SatelliteB`) and one [GroundstationActor](#ground-stationactor). You can assume to execute the following code snippets onboard `SatelliteA`. In general, there is no a theoretical limitation on the number of satellites or ground stations used. Single-device simulations can be also implemented.
 
