@@ -57,7 +57,7 @@ class ActorBuilder:
             actor (GroundstationActor): Actor to update.
             latitude (float): Latitude of the ground station in degrees.
             longitude (float): Longitude of the ground station in degrees.
-            elevation (float): A distance specifying elevation above (positive) 
+            elevation (float): A distance specifying elevation above (positive)
             or below (negative) the surface of the Earth
             ellipsoid specified by the WSG84 model in meters. Defaults to 0.
         """
