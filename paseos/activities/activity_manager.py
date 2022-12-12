@@ -37,6 +37,19 @@ class ActivityManager:
         self._paseos_update_interval = paseos_update_interval
         self._paseos_instance = paseos_instance
 
+    def remove_activity(self, name: str):
+        """Removes a registered activity
+
+        Args:
+            name (str): _description_
+        """
+        if not name in self._activities.keys():
+            raise ValueError(
+                "Trying to remove non-existing activity with name: " + name
+            )
+        else:
+            del self._activities[name]
+
     def register_activity(
         self,
         name: str,
