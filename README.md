@@ -17,9 +17,13 @@ This project is currently under development. Use at your own risk. :)
     <li><a href="#create-a-paseos-actor">Create a PASEOS actor</a></li>
     <li><a href="#set-an-orbit-for-a-paseos-spacecraftactor">Set an orbit for a PASEOS SpacecraftActor</a></li>
     <li><a href="#how-to-instantiate-paseos">How to instantiate PASEOS</a></li>
-    <li><a href="#adding-other-actors-to-PASEOS">Adding other actors to PASEOS</a></li>
+    <li><a href="#how-to-add-a-communication-device">How to add a communication device</a></li>
+    <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
+    <li><a href="#adding-other-actors-to-paseos">Adding other actors to PASEOS</a></li>
+    <li><a href="#how-to-register-an-activity">How to register an activity</a></li>
     <li><a href="#visualising-paseos">Visualising PASEOS</a></li>
     </ul>
+    <li><a href="#paseos-space-environment-simulation">PASEOS space environment simulation</a></li>
     <li><a href="#system-design-of-paseos">System Design of PASEOS</a></li>
     <li><a href="#glossary">Glossary</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -27,6 +31,7 @@ This project is currently under development. Use at your own risk. :)
 </details>
 
 ## About the project
+
 `PASEOS` is a `Python` module that simulates the environment to operate multiple specraft. In particular, `PASEOS` offers the user some utilities to run their own [activities](#activity) by taking into account both operational and onboard (e.g. limited-power-budget, radiation and thermal effects) constraints. <br>  `PASEOS` is designed to:
 
 * **open-source**: the source of `PASEOS` are available at this [GitHub](https://github.com/aidotse/PASEOS.git) repository. 
@@ -72,50 +77,161 @@ To contribute, please proceed as follow:
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+## PASEOS space environment simulation
+![Alt Text](PASEOS_constraints.png)
+`PASEOS` allow simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in `PASEOS`.
+
 ## Examples
+![Alt Text](PASEOS_example.png)
+
+The next examples will introduce you to the use of `PASEOS` through the case study shown in the image above. This is a general scenario made of two [SpacecraftActors](#spacecraftactor) (`SatelliteA` and `SatelliteB`) and one [GroundstationActor](#ground-stationactor). You can assume to execute the following code snippets onboard `SatelliteA`. In general, there is no a theoretical limitation on the number of satellites or ground stations used. Single-device simulations can be also implemented.
 
 ### Create a PASEOS actor
-The code snippet below shows how to create a `PASEOS` [actor](#actor) named **local_actor** of type [SpacecraftActor](#spacecraftactor). [pykep](https://esa.github.io/pykep/) is used to define the satellite [epoch](https://en.wikipedia.org/wiki/Epoch_(astronomy)) in format [mjd2000](https://en.wikipedia.org/wiki/Julian_day) format. 
+The code snippet below shows how to create a `PASEOS` [actor](#actor) named **SatA** of type [SpacecraftActor](#spacecraftactor). [pykep](https://esa.github.io/pykep/) is used to define the satellite [epoch](https://en.wikipedia.org/wiki/Epoch_(astronomy)) in format [mjd2000](https://en.wikipedia.org/wiki/Julian_day) format. 
  
 ```py 
 import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 # Define an actor pf type SpacecraftActor of name my_first_actor
-local_actor = ActorBuilder.get_actor_scaffold(name="local_actor", actor_type=SpacecraftActor, epoch=pk.epoch(0))
+SatA = ActorBuilder.get_actor_scaffold(name="SatA", actor_type=SpacecraftActor, epoch=pk.epoch(0))
 ```
 
 ### Set an orbit for a PASEOS SpacecraftActor
-Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign an orbit to it.
+Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign an orbit to it. To this aim, you need to specify the position and the velocity of the spacecraft with respect to an [Earth-centered_inertial](https://en.wikipedia.org/wiki/Earth-centered_inertial) reference frame and a date. In this case, `satA` central body is `Earth`.
+
 ```py 
-#Let's define the date of today (09/12/2022) as pk.epoch
+#Let's define the date of today (27/10/2022) as pk.epoch
 #please, refer to https://esa.github.io/pykep/documentation/core.html#pykep.epoch
 #Using this will overwrite the previously set epoch
-today = pk.epoch_from_string('2022-12-09 12:00:00.000')
+today = pk.epoch_from_string('2022-10-27 12:00:00.000')
 
 # Define the central body as Earth by using pykep APIs.
 earth = pk.planet.jpl_lp("earth")
 
 #Actor position [m] and velocity [m/s]
-spacecraft_position=[-6912275.638799771, -1753638.1454079857, 734768.7737737056]
-spacecraft_velocity=[-1015.9539197253205, 894.2090554272667, -7334.877725365646]
+satA_position=[-6912275.638799771, -1753638.1454079857, 734768.7737737056]
+satA_velocity=[-1015.9539197253205, 894.2090554272667, -7334.877725365646]
 
 #Lets set the SpacecraftActor orbit.
-ActorBuilder.set_orbit(actor=local_actor, 
-                       position=spacecraft_position, 
-                       velocity=spacecraft_velocity, 
+ActorBuilder.set_orbit(actor=SatA, 
+                       position=satA_position, 
+                       velocity=satA_velocity, 
                        epoch=today, central_body=earth)
+```
+### How to add a communication device
+The following code snippet shows how to add a communication device to `SatA`. 
+
+```py
+ActorBuilder.add_comm_device(actor=SatA, 
+                             device_name="my_communication_device", # Communication device name
+                             bandwidth_in_kbps=100000) # Bandwidth in kbps. 
+```
+
+### How to add a power device
+The following code snippet shows how to add a power device to `SatA`. 
+
+```py
+ActorBuilder.set_power_devices(actor=SatA, 
+                               battery_level_in_Ws=100, # Battery level at the start of the simulation in Ws
+                               max_battery_level_in_Ws=2000, # Max battery level in Ws
+                               charging_rate_in_W=10) # Charging rate in W
 ```
 
 ### How to instantiate PASEOS
-We will now show how to create an instance of `PASEOS`. The actor `local_actor` will be used as [local actor](#local-actor).
+We will now show how to create an instance of `PASEOS`. As previously described, you can image to instantiate this simulation onboard `SatA`. In this case, `SatA` is the [local actor](#local-actor).
 ```py 
 cfg=load_default_cfg() # loading cfg to modify defaults
 cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC # convert epoch to seconds.
 sim = paseos.init_sim(local_actor, cfg) # initialize PASEOS simulation.
 ```
 ### Adding other actors to PASEOS
-....
+Once you have instantiated a `PASEOS` simulation, yu can can now add the other satellites as actors to the simulation. Let's start with `SatB`. The actor `SatB` will be placed in the same orbit of `SatA`, with 180 degree phase difference and moving in the opposite direction, to emulate the behaviour of `SatelliteA` and `SatelliteB` in the image above.
+
+```py 
+
+satB = ActorBuilder.get_actor_scaffold(name="SatB", actor_type=SpacecraftActor, epoch=pk.epoch(0))
+
+#Actor position [m] and velocity [m/s]
+satB_position=[6903448.606615168, 1765298.4893694564, -804473.4057320235]
+satB_velocity=[1070.5779954343407, -879.0974287694968, 7326.987310088407]
+
+#Lets set the SpacecraftActor orbit.
+ActorBuilder.set_orbit(actor=SatB, 
+                       position=satB_position, 
+                       velocity=satB_velocity, 
+                       epoch=today, central_body=earth)
+
+# Adding SatB to PASEOS.  
+sim.add_known_actor(satB)                     
+```
+
+Let's add now the ground station actor (`grndStation`) at coordinates `(lat,lon)=(79.002723, 14.642972)` and elevation of 0 m.
+
+```py 
+
+#Create GroundstationActor
+grndStation = GroundstationActor(name="grndStation", epoch=today)
+
+#Set the ground station at lat long 79.002723 / 14.642972 and ith elevation 0m
+ActorBuilder.set_ground_station_location(grndStation, latitude=79.002723, longitude=14.642972, elevation=0)
+
+# Adding SatB to PASEOS.  
+sim.add_known_actor(grndStation)    
+```
+### How to register an activity
+`PASEOS` will enable the user to register their [activities](#activity) that will be executed on the `local actor`. In this case, since we are assuming to run this instance of `PASEOS` on `SatelliteA` that is modelled through the [SpacecraftActor](#spacecraftactor) `satA`, the latter is the `local actor`. <br> 
+To register an activity, it is first necessary to define an asynchronous [activity function](#activity-function). The following code snippet shows how to create an [activity function](#activity-function) `activity_function_A` that takes the as input an argument and returns it's values multiplied by two. Then it waits 0.1 s before concluding the activity. <br>
+Please, notice that the output value is placed in `args[1][0]`, which is returned as reference.
+
+```py 
+
+#Activity function
+async def activity_function_A(args):
+  activity_in=args[0]
+  activity_out=activity_in * 2
+  args[1][0]=activity_out
+  await asyncio.sleep(0.1) #Await is needed inside an async function.
+```
+
+It is possible to associate a [constraint function](#constraint-function) with each [activity](#activity) to ensure that some particular constraints are met during the [activity](#activity) execution. When constraints are not met, the activity is interrupted. 
+The next code snippet shows how to create a [constraint function](#constraint-function) that returns `True` when its input is positive and `False` otherwise.
+
+```py 
+
+#Activity function
+async def constraint_function_A(args):
+  constraint_in=args[0]
+  return (constraint_in > 0)
+
+```
+
+It is also possible to define an [on termination](#on-termination-function) to perform some specific operations when on termination of the [activity](#activity). The next code snippet shows how to create an [on termination](#on-termination-function) that prints "activity ended" on termination. 
+
+```py 
+
+#Activity function
+async def on_termination_function_A(args):
+  print("Satellite ready to acquire data again.")
+
+```
+
+Finally, you can register an activity `activity_A` by using the previously defined [activity function](#activity-function), [constraint function](#constraint-function) and [on termination](#on-termination-function). The user needs to specify the power consumption associated with the activity. 
+
+```py 
+
+# Register an activity that emulate event detection
+sim.register_activity(
+    "activity_A", 
+    activity_function=activity_function_A, 
+    power_consumption_in_watt=10, 
+    constraint_function=constraint_function_A,
+    on_termination_function=on_termination_function_A
+)
+
+```
+
+
 
 ### Visualising PASEOS
 Navigate to paseos/visualization to find a jupyter notebook containing examples of how to visualize PASEOS.
@@ -157,16 +273,27 @@ Finally, the time in the lower left and lower right corners correspond to the ep
 
 ## Glossary
 * ### Activity
-  Any operation performed by a [SpacecraftActor](#spacecraftactor) that shall be implemented in `PASEOS`. Activities might include data transmission, house-keeping operations, onboard data acquisition and processing, and others.
+  An activity is the abstraction that `PASEOS` uses to keep track of specific actions performed by a [SpacecraftActor](#spacecraftactor) upon a request from the user. To register an activity, an user shall first create an [activity function](#activity-function), which describes the operation to be performed, and provide information on the power-consumption due to the activity execution. <br>`PASEOS`is responsible for the execution of the activity and for updating the system status depending on the effects of the activity (e.g., by discharging they satellite battery).<br>
+  When registering an activity, the user can specify a [constraint-function](#constraint-function) to specify constraints to be met during the execution of the activity and an an [on termination](#on-termination) function to specify additional operations to performed by `PASEOS` on termination of the activity function.
+
+
+* ### Activity function
+  User-defined function emulating any operation to be executed in a `PASEOS` a [SpacecraftActor](#spacecraftactor). Activity functions are necessayr to register [activities](#activity). Activity functions might include data transmission, house-keeping operations, onboard data acquisition and processing, and others.
 
 * ### Actor
   Since `PASEOS` is fully-decentralised, each node of a `PASEOS` constellation shall run an instance of `PASEOS` modelling all the nodes of  that constellation.  The abstraction of a constellation node inside a `PASEOS` instace is a `PASEOS` `actor`. 
 
-* ### Local actor
-  The `actor` in a `PASEOS` instance that models the behavior and the status of the node that runs that `PASEOS` instance is called `local actor`. 
+* ### Constraint-function
+  A constraint function is an asynchronous function that can be used by the `PASEOS` user to specify some constraints that shall be met during the execution of an activity.
 
 * ### Ground stationActor
   `PASEOS actor` emulating a ground station.  
+
+* ### Local actor
+  The `local actor` in a `PASEOS` instance is the `actor` that models the behavior and the status of the node that runs that `PASEOS` instance.
+
+* ### On-termination function
+  A on-termination function is an asynchronous function that can be used by the `PASEOS` user to specify some operations to be executed on termination of predefied `PASEOS` user.
 
 * ### SpacecraftActor
   `PASEOS actor` emulating a spacecraft or a satellite. 
