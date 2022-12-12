@@ -11,6 +11,9 @@ async def wait_for_activity(sim):
         await asyncio.sleep(0.1)
 
 
+# Below test can be used to check what happens when you formulate an invalid constraint function.
+# It is temporarily commented out as it doesn't really check right now because I could not figure
+# out a way to get an exception raised from the async code.
 # @pytest.mark.asyncio
 # async def test_faulty_constraint_function():
 #     """Check whether specifying a wrong constraint function leads to an error"""

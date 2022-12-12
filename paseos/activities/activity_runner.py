@@ -103,7 +103,7 @@ class ActivityRunner:
                 if is_satisfied is None:
                     logger.error(
                         f"An exception occurred running the checking the activity {self.name} constraint."
-                        + f" The constraint function failed to return True or False."
+                        + " The constraint function failed to return True or False."
                     )
             except Exception as e:
                 logger.error(
