@@ -32,7 +32,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
 
 ## About the project
 
-`PASEOS` is a `Python` module that simulates the environment to operate multiple specraft. In particular, `PASEOS` offers the user some utilities to run their own [activities](#activity) by taking into account both operational and onboard (e.g. limited-power-budget, radiation and thermal effects) constraints. <br>  `PASEOS` is designed to:
+`PASEOS` is a `Python` module that simulates the environment to operate multiple specraft. In particular, `PASEOS` offers the user some utilities to run their own [activities](#activity) by taking into account both operational and onboard (e.g. limited-power-budget, radiation and thermal effects) constraints. <br>  `PASEOS` is designed to be:
 
 * **open-source**: the source of `PASEOS` are available at this [GitHub](https://github.com/aidotse/PASEOS.git) repository. 
 * **fully-decentralised**:  one instance of `PASEOS` shall be executed in every node of the emulated spacecraft swarm. Each instance of `PASEOS` is responsible of the user [activities](#activity) executed in that node while keeping track of the status of the other nodes. In this way, the design of `PASEOS` is completely decentralised and independent on the number of nodes of the constellation. Because of that, both single-node and multi-node scenarios are possibles.
