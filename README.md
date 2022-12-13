@@ -3,7 +3,7 @@ PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
 
 ![Alt Text](sat_gif.gif)
 
-This project is currently under development. Use at your own risk. :)
+Disclaimer: This project is currently under development. Use at your own risk.
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
