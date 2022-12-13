@@ -2,6 +2,7 @@
 start_time = 0 # [s] Start time of the simulation in seconds after MJD2000
 dt = 10 # [s] Maximal Internal timestep used for computing charging, etc.
 activity_timestep = 1 # [s] Internal timestep at which activities update, try to charge and discharge etc. 
+time_multiplier = 1.0 # [unitless] Defines how much real time passes 
 
 [power]
 
