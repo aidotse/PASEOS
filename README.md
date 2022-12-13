@@ -181,7 +181,7 @@ sim.add_known_actor(grndStation)
 ```
 ### How to register an activity
 `PASEOS` will enable the user to register their [activities](#activity) that will be executed on the `local actor`. In this case, since we are assuming to run this instance of `PASEOS` on `SatelliteA` that is modelled through the [SpacecraftActor](#spacecraftactor) `satA`, the latter is the `local actor`. <br> 
-To register an activity, it is first necessary to define an asynchronous [activity function](#activity-function). The following code snippet shows how to create an [activity function](#activity-function) `activity_function_A` that takes the as input an argument and returns it's values multiplied by two. Then it waits 0.1 s before concluding the activity. <br>
+To register an activity, it is first necessary to define an asynchronous [activity function](#activity-function). The following code snippet shows how to create an [activity function](#activity-function) `activity_function_A` that takes an input argument and returns its value multiplied by two. Then it waits 0.1 s before concluding the activity. <br>
 Please, notice that the output value is placed in `args[1][0]`, which is returned as reference.
 
 ```py 
