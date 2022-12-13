@@ -146,7 +146,7 @@ cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC # convert epoch to seconds.
 sim = paseos.init_sim(local_actor, cfg) # initialize PASEOS simulation.
 ```
 ### Adding other actors to PASEOS
-Once you have instantiated a `PASEOS` simulation, yu can can now add the other satellites as actors to the simulation. Let's start with `SatB`. The actor `SatB` will be placed in the same orbit of `SatA`, with 180 degree phase difference and moving in the opposite direction, to emulate the behaviour of `SatelliteA` and `SatelliteB` in the image above.
+Once you have instantiated a `PASEOS` simulation, you can add other spacecraft or ground stations as actors to the simulation. Let's start with `SatB`.
 
 ```py 
 
