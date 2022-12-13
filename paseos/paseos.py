@@ -59,7 +59,9 @@ class PASEOS:
         self._local_actor = local_actor
         # Update local actor time to simulation start time.
         self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
-        self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep,self._cfg.sim.time_multiplier)
+        self._activity_manager = ActivityManager(
+            self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
+        )
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
