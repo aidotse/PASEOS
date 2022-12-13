@@ -36,23 +36,25 @@ Disclaimer: This project is currently under development. Use at your own risk.
 PASEOS is a `Python` module that simulates the environment to operate multiple specraft. In particular, PASEOS offers the user some utilities to run their own [activities](#activity) by taking into account both operational and onboard (e.g. limited-power-budget, radiation and thermal effects) constraints. <br>  PASEOS is designed to be:
 
 * **open-source**: the source code of PASEOS is available under a GPL license.
-* **fully-decentralised**:  one instance of PASEOS shall be executed in every node of the emulated spacecraft swarm. Each instance of PASEOS is responsible of the user [activities](#activity) executed in that node while keeping track of the status of the other nodes. In this way, the design of PASEOS is completely decentralised and independent on the number of nodes of the constellation. Because of that, both single-node and multi-node scenarios are possibles.
-* **application-agnostic**: each user operation that has to be executed in a node is modelled as an [activity](#activity). The user is required to provide the code and some parameters (e.g., power-consumption) for each [activity](#activity) that shall be executed in a PASEOS node. In this way, PASEOS is completely application-agnostic.
+* **fully-decentralised**:  one instance of `PASEOS` shall be executed in every node, i.e. individual spacecraft (actor), of the emulated spacecraft. Each instance of `PASEOS` is responsible for handling the user [activities](#activity) executed on that node (the local actor) while keeping track of the status of the other nodes. In this way, the design of `PASEOS` is completely decentralised and independent of the number of nodes of the constellation. Because of that, both single-node and multi-node scenarios are possibles.
+* **application-agnostic**: each user operation that has to be executed on a node is modelled as an [activity](#activity). The user is only required to provide the code to run and some parameters (e.g., power-consumption) for each [activity](#activity). Thus, activities can be any code the user wants to simulate running on a spacecraft and thereby `PASEOS` is completely application-agnostic. Conceivable applications range from modelling constellation to training machine learning methods.
 
-<br> The project was developed by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden) in the frame of the collbaboration between [AI Sweden](https://www.ai.se/en/) and the [European Space Agency](https://www.esa.int/) to explore distributed edge learning for space applications. For more information on PASEOS and $\Phi$-lab@Sweden, please take a look at the recordings on the $\Phi$-lab@Sweden [kick-off event](https://www.youtube.com/watch?v=KuFRCcNxLgo&t=2365s).
+<br> The project is being developed by [$\Phi$-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden) in the frame of a collaboration between [AI Sweden](https://www.ai.se/en/) and the [European Space Agency](https://www.esa.int/) to explore distributed edge learning for space applications. For more information on `PASEOS` and $\Phi$-lab@Sweden, please take a look at the recording of the $\Phi$-lab@Sweden [kick-off event](https://www.youtube.com/watch?v=KuFRCcNxLgo&t=2365s).
 
 ## PASEOS space environment simulation
 ![Alt Text](PASEOS_constraints.png)
 PASEOS allow simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in PASEOS.
 
 ## Installation
-First of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
+`pip` and `conda` support will follow in the near future.
+
+For now, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
 
 ```
 git clone https://github.com/aidotse/PASEOS.git
 ```
 
-To install PASEOS you can use [conda](https://docs.conda.io/en/latest/) as follow:
+To install PASEOS you can use [conda](https://docs.conda.io/en/latest/) as follows:
 
 ```
 cd PASEOS
@@ -75,35 +77,38 @@ pip install -e .
 ## Examples
 ![Alt Text](PASEOS_Example.png)
 
-The next examples will introduce you to the use of PASEOS through the case study shown in the image above. This is a general scenario made of two [SpacecraftActors](#spacecraftactor) (`SatelliteA` and `SatelliteB`) and one [GroundstationActor](#ground-stationactor). You can assume to execute the following code snippets onboard `SatelliteA`. In general, there is no a theoretical limitation on the number of satellites or ground stations used. Single-device simulations can be also implemented.
+The next examples will introduce you to the use of `PASEOS` through the case study shown in the image above. This is a general scenario made of two [SpacecraftActors](#spacecraftactor) (`SatelliteA` and `SatelliteB`) and one [GroundstationActor](#ground-stationactor). You can assume to execute the following code snippets onboard `SatelliteA`. In general, there is no a theoretical limitation on the number of satellites or ground stations used. Single-device simulations can be also implemented.
 
 ### Create a PASEOS actor
-The code snippet below shows how to create a PASEOS [actor](#actor) named **satA** of type [SpacecraftActor](#spacecraftactor). [pykep](https://esa.github.io/pykep/) is used to define the satellite [epoch](https://en.wikipedia.org/wiki/Epoch_(astronomy)) in format [mjd2000](https://en.wikipedia.org/wiki/Julian_day) format. 
+The code snippet below shows how to create a `PASEOS` [actor](#actor) named **SatA** of type [SpacecraftActor](#spacecraftactor). [pykep](https://esa.github.io/pykep/) is used to define the satellite [epoch](https://en.wikipedia.org/wiki/Epoch_(astronomy)) in format [mjd2000](https://en.wikipedia.org/wiki/Julian_day) format. <br>
+[actors](#actor) are created by using an `ActorBuilder`. The latter is used to define the [actor](#actor) `scaffold` that includes the [actor](#actor) minimal properties. In this way, [actors](#actor) are build in a modular fashion that enable their use also for non-space applications.  
  
 ```py 
 import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-# Define an actor pf type SpacecraftActor of name my_first_actor
-satA = ActorBuilder.get_actor_scaffold(name="SatA", actor_type=SpacecraftActor, epoch=pk.epoch(0))
+# Define an actor of type SpacecraftActor of name SatA
+satA = ActorBuilder.get_actor_scaffold(name="SatA", 
+                                       actor_type=SpacecraftActor, 
+                                       epoch=pk.epoch(0))
 ```
 
 ### Set an orbit for a PASEOS SpacecraftActor
-Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign an orbit to it. To this aim, you need to specify the position and the velocity of the spacecraft with respect to an [Earth-centered_inertial](https://en.wikipedia.org/wiki/Earth-centered_inertial) reference frame and a date. In this case, `satA` central body is `Earth`.
+Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [Keplerian orbit](https://en.wikipedia.org/wiki/Kepler_orbit) to it. To this aim, you need to define central body the [SpacecraftActor](#spacecraftactor) is orbiting around and specify its position and velocity (in the central body's [inertial frame](https://en.wikipedia.org/wiki/Inertial_frame_of_reference) and an epoch. In this case, `satA` central body is `Earth`.
 
 ```py 
 
 # Define the central body as Earth by using pykep APIs.
 earth = pk.planet.jpl_lp("earth")
 
-#Lets set the SpacecraftActor orbit.
+# Let's set the SpacecraftActor orbit.
 ActorBuilder.set_orbit(actor=satA, 
                        position=[10000000, 0, 0], 
                        velocity=[0, 8000.0, 0], 
                        epoch=pk.epoch(0), central_body=earth)
 ```
 ### How to add a communication device
-The following code snippet shows how to add a communication device to `SatA`. 
+The following code snippet shows how to add a communication device to `SatA`. A communication device is needed to model the communication between [SpacecraftActors] (#spacecraftactor) or a [SpacecraftActor](#spacecraftactor) and [GroundstationActor](#ground-stationactor). Currently, given the maximum transmission data-rate of a communication device, PASEOS calculates the maximum data that can be transmitted by multiplying the transmission data-rate by the length of the communication window. The latter, is calculated by taking into account the period for which two actors are in line-of-sight.
 
 ```py
 ActorBuilder.add_comm_device(actor=satA, 
