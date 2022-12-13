@@ -139,7 +139,7 @@ ActorBuilder.set_power_devices(actor=SatA,
 ```
 
 ### How to instantiate PASEOS
-We will now show how to create an instance of `PASEOS`. As previously described, you can image to instantiate this simulation onboard `SatA`. In this case, `SatA` is the [local actor](#local-actor).
+We will now show how to create an instance of `PASEOS`. In this case, `SatA` is the [local actor](#local-actor).
 ```py 
 cfg=load_default_cfg() # loading cfg to modify defaults
 cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC # convert epoch to seconds.
