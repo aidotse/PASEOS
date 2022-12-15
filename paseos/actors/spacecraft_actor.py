@@ -16,6 +16,8 @@ class SpacecraftActor(BaseActor):
     _max_battery_level_in_Ws = None
     _charging_rate_in_W = None
 
+    _thermal_model = None
+
     def __init__(
         self,
         name: str,
