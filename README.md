@@ -35,7 +35,7 @@ paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos insta
 
 # Performing activities, running the simulation (...)
 
-sim.save_status_log_csv("output.csv")
+paseos_instance.save_status_log_csv("output.csv")
 ```
 
 ## Visualising PASEOS
