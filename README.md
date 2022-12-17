@@ -164,7 +164,8 @@ sim = paseos.init_sim(local_actor)
 ```
 ### Adding other actors to PASEOS
 Once you have instantiated a PASEOS simulation, you can add other PASEOS [actors](#actor) to the simulation. <br>
-The next code snippet will add both a [SpacecraftActor](#spacecraftactor) and a  [GroundstationActor](#ground-stationactor) (`other_sat`). The latter (`grndStation`) will be placed at coordinates `(lat,lon)=(79.002723, 14.642972)` and elevation of 0 m. <br> You cannot add a power device and an orbit to a `GroundstationActor`.
+The next code snippet will add both a [SpacecraftActor](#spacecraftactor) and a  [GroundstationActor](#ground-stationactor) (`other_sat`). An orbit is set for `other_sat`, which is placed around Earth at position `(x,y,z)=(-10000,0,0)` and velocity `(vx,vy,vz)=(0,-8000,0)` at epoch `epoch=pk.epoch(0)`. Please, notice that an orbit shall be placed for a [SpacecraftActor](#spacecraftactor) before being added to a PASEOS instance. <br>
+ The latter (`grndStation`) will be placed at coordinates `(lat,lon)=(79.002723, 14.642972)` and elevation of 0 m. <br> You cannot add a power device and an orbit to a `GroundstationActor`.
 
 ```py 
 import pykep as pk
@@ -175,6 +176,12 @@ local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor, 
                                        epoch=pk.epoch(0))
 
+# Let's set the orbit of local_actor.
+ActorBuilder.set_orbit(actor=local_actor, 
+                       position=[10000000, 0, 0], 
+                       velocity=[0, 8000.0, 0], 
+                       epoch=pk.epoch(0), central_body=earth)
+
 # Initialize PASEOS simulation
 sim = paseos.init_sim(local_actor) 
 
@@ -182,6 +189,13 @@ sim = paseos.init_sim(local_actor)
 other_spacraft_actor = ActorBuilder.get_actor_scaffold(name="other_sat", 
                                       actor_type=SpacecraftActor, 
                                       epoch=pk.epoch(0))
+
+# Let's set the orbit of other_spacraft_actor.
+ActorBuilder.set_orbit(actor=other_spacraft_actor, 
+                       position=[-10000000, 0, 0], 
+                       velocity=[0, -8000.0, 0], 
+                       epoch=pk.epoch(0), central_body=earth)
+
 #Create GroundstationActor
 grndStation = GroundstationActor(name="grndStation", epoch=today)
 
