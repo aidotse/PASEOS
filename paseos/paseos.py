@@ -163,7 +163,7 @@ class PASEOS:
         """Removes a registered activity
 
         Args:
-            name (str): _description_
+            name (str): Name of the activity.
         """
         self._activity_manager.remove_activity(name=name)
 

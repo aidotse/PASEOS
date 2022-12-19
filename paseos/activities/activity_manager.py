@@ -41,7 +41,7 @@ class ActivityManager:
         """Removes a registered activity
 
         Args:
-            name (str): _description_
+            name (str): Name of the activity.
         """
         if name not in self._activities.keys():
             raise ValueError(
