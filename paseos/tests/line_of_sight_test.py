@@ -48,6 +48,8 @@ def test_los_sat_to_ground_station_equatorial():
     _, sat1, earth = get_default_instance()
 
     # Put the sat over the equator
+    # Velocity 0, so it's angle to Earth doesn't change, only ground station
+    # movement due to Earth's rotation will impact visibility short-term this way
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 0, 0], t, earth)
 
     # Not in vision initially.
@@ -77,6 +79,8 @@ def test_los_sat_to_ground_station_polar():
     _, sat1, earth = get_default_instance()
 
     # Put the sat over the north pole
+    # Velocity 0, so it's angle to Earth doesn't change, only ground station
+    # movement due to Earth's rotation will impact visibility short-term this way
     ActorBuilder.set_orbit(sat1, [0, 0, 10000000], [0, 0, 0], t, earth)
 
     # Not in vision at this height
@@ -115,6 +119,8 @@ def test_los_sat_to_ground_station_elevation():
     _, sat1, earth = get_default_instance()
 
     # Put the sat over the equator
+    # Velocity 0, so it's angle to Earth doesn't change, only ground station
+    # movement due to Earth's rotation will impact visibility short-term this way
     ActorBuilder.set_orbit(sat1, [100000000, 0, 0], [0, 0, 0], t, earth)
 
     # Not in vision at this height initially
