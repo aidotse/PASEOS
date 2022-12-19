@@ -23,7 +23,7 @@ async def test_thermal():
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_power_devices(sat1, 500, 10000, 1)
+    ActorBuilder.set_power_devices(sat1, 50000, 1000000, 1000)
     ActorBuilder.set_thermal_model(
         actor=sat1,
         actor_mass=50.0,

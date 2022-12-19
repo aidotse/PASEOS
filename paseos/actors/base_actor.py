@@ -190,7 +190,7 @@ class BaseActor(ABC):
             + " (mjd2000)."
         )
 
-        if self._orbital_parameters is not None and hasattr(self, "_position"):
+        if self._orbital_parameters is not None and self._position is not None:
             raise ValueError(
                 "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
             )
