@@ -11,6 +11,36 @@ async def wait_for_activity(sim):
         await asyncio.sleep(0.1)
 
 
+# Below test can be used to check what happens when you formulate an invalid constraint function.
+# It is temporarily commented out as it doesn't really check right now because I could not figure
+# out a way to get an exception raised from the async code.
+# @pytest.mark.asyncio
+# async def test_faulty_constraint_function():
+#     """Check whether specifying a wrong constraint function leads to an error"""
+
+#     sim, _, _ = get_default_instance()
+
+#     # A pointless activity
+#     async def func(args):
+#         await asyncio.sleep(1.5)
+
+#     # A constraint function that fails to return True or False
+#     async def constraint(args):
+#         pass
+
+#     # Register an activity that draws 10 watt per second
+#     sim.register_activity(
+#         "Testing",
+#         activity_function=func,
+#         constraint_function=constraint,
+#         power_consumption_in_watt=10,
+#     )
+
+#     # Run the activity
+#     sim.perform_activity("Testing")
+#     await wait_for_activity(sim)
+
+
 # tell pytest to create an event loop and execute the tests using the event loop
 @pytest.mark.asyncio
 async def test_activity():
@@ -47,6 +77,11 @@ async def test_activity():
     # And discharge 10W per second
     # So should be roughly 20W - 6W consumed from starting 500
     assert sat1.battery_level_in_Ws > 480 and sat1.battery_level_in_Ws < 490
+
+    # test removing the activity
+    assert "Testing" in sim._activity_manager._activities.keys()
+    sim.remove_activity("Testing")
+    assert "Testing" not in sim._activity_manager._activities.keys()
 
 
 @pytest.mark.asyncio
