@@ -48,6 +48,11 @@ async def test_activity():
     # So should be roughly 20W - 6W consumed from starting 500
     assert sat1.battery_level_in_Ws > 480 and sat1.battery_level_in_Ws < 490
 
+    # test removing the activity
+    assert "Testing" in sim._activity_manager._activities.keys()
+    sim.remove_activity("Testing")
+    assert "Testing" not in sim._activity_manager._activities.keys()
+
 
 @pytest.mark.asyncio
 async def test_running_two_activities():

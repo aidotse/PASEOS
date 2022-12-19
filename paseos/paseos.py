@@ -159,6 +159,14 @@ class PASEOS:
         ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
         del self._known_actors[actor_name]
 
+    def remove_activity(self, name: str):
+        """Removes a registered activity
+
+        Args:
+            name (str): Name of the activity.
+        """
+        self._activity_manager.remove_activity(name=name)
+
     def register_activity(
         self,
         name: str,
