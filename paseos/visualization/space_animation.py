@@ -150,6 +150,9 @@ class SpaceAnimation(Animation):
                 battery_level = actor.battery_level_ratio * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
+            if actor._thermal_model is not None:
+                info_str += f"\nTemperature: {actor.temperature_in_K}K,{actor.temperature_in_K-273.15}C"
+
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
                 info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
