@@ -1,3 +1,6 @@
+from loguru import logger
+
+
 class ThermalModel:
     """This model describes the thermal evolution of a spacecraft actor.
     For the moment, it is a slightly simplified version
@@ -46,6 +49,7 @@ class ThermalModel:
         body_reflectance: float = 0.3,
         power_consumption_to_heat_ratio: float = 0.5,
     ) -> None:
+        logger.trace("Initializing thermal model.")
         self._actor = local_actor
         self._body_radius = self._actor._central_body.radius
 
@@ -55,7 +59,7 @@ class ThermalModel:
         self._actor_sun_absorptance = actor_sun_absorptance
         self._actor_infrared_absorptance = actor_infrared_absorptance
         self._actor_sun_facing_area = actor_sun_facing_area
-        self._actor_central_body_facing = actor_central_body_facing_area
+        self._actor_central_body_facing_area = actor_central_body_facing_area
         self._actor_emissive_area = actor_emissive_area
         self._actor_thermal_capacity = actor_thermal_capacity
 
@@ -68,11 +72,14 @@ class ThermalModel:
 
     def _initialize_constant_vars(self):
         """This function initializes a bunch of values which will remain constant over actor operations."""
+        logger.trace("Initializing thermal model constants.")
+
         self._C_solar_input = (
             self._actor_sun_absorptance
             * self._actor_sun_facing_area
             * self._body_solar_irradiance
         )
+        logger.trace(f"self._C_solar_input={self._C_solar_input}")
 
         self._C_albedo_input = (
             self._actor_sun_absorptance
@@ -80,6 +87,7 @@ class ThermalModel:
             * self._body_reflectance
             * self._body_solar_irradiance
         )
+        logger.trace(f"self._C_albedo_input={self._C_albedo_input}")
 
         self._C_body_emission = (
             self._actor_infrared_absorptance
@@ -88,12 +96,14 @@ class ThermalModel:
             * self._bolzmann_constant
             * self._body_surface_temperature_in_K**4
         )
+        logger.trace(f"self._C_body_emission={self._C_body_emission}")
 
         self._C_actor_emission = (
             self._actor_infrared_absorptance
             * self._actor_emissive_area
             * self._bolzmann_constant
         )
+        logger.trace(f"self._C_actor_emission={self._C_actor_emission}")
 
     def _compute_body_view_from_actor(self) -> None:
         h = self._actor.altitude / self._body_radius
@@ -102,22 +112,34 @@ class ThermalModel:
     def _compute_solar_input(self):
         # Computes solar input
         # TODO in the future we should consider changing altitude here as well
-        return self._constant_term_solar_input * (1.0 - self._actor.is_in_eclipse())
+        solar_input = self._C_solar_input * (1.0 - self._actor.is_in_eclipse())
+
+        logger.trace(f"Solar input is {solar_input}W")
+        return solar_input
 
     def _compute_albedo_input(self):
         # Compute albedo input as
         # TODO consider phi, for now we assume constant albedo if not in eclipse
-        return self._C_albedo_input * 0.5 * (1.0 - self._actor.is_in_eclipse())
+        albedo_input = self._C_albedo_input * 0.5 * (1.0 - self._actor.is_in_eclipse())
+        logger.trace(f"Albedo input is {albedo_input}W")
+        return albedo_input
 
     def _compute_central_body_IR_emission(self):
         # Compute IR emissions of the central body as absorpted by the actor
-        return self._C_body_emission * self._compute_body_view_from_actor()
+        emission = self._C_body_emission * self._compute_body_view_from_actor()
+        logger.trace(f"Central body emission is {emission}W")
+        return emission
 
     def _compute_actor_emission(self):
         # Compute amount of IR emitted by the spacecraft to space
-        return self._C_actor_emission * self._actor_temperature_in_K**4
+        emission = self._C_actor_emission * self._actor_temperature_in_K**4
+        logger.trace(f"Actor emission is {emission}W")
+        return emission
 
     def update_temperature(self, dt: float, current_power_consumption: float = 0):
+        logger.debug(
+            f"Updating temperature after {dt} seconds with {current_power_consumption}W being consumed."
+        )
         total_change_in_W = (
             self._compute_solar_input()
             + self._compute_albedo_input()
@@ -125,11 +147,19 @@ class ThermalModel:
             + self._compute_actor_emission()
             + self._power_consumption_to_heat_ratio * current_power_consumption
         )
-        self._actor_temperature_in_K = self._actor_temperature_in_K + ...
-        (dt * total_change_in_W) / (self._actor.mass * self._actor_thermal_capacity)
+
+        logger.debug(f"Actor's old temperature was {self._actor_temperature_in_K}.")
+        logger.trace(f"Actor in eclipse: {self._actor.is_in_eclipse()}")
+        logger.trace(f"Actor altitude: {self._actor.altitude}")
+
+        self._actor_temperature_in_K = self._actor_temperature_in_K + (
+            dt * total_change_in_W
+        ) / (self._actor.mass * self._actor_thermal_capacity)
 
         # Ensure value cannot go below 0
         self._actor_temperature_in_K = max(0.0, self._actor_temperature_in_K)
+
+        logger.debug(f"Actor's new temperature is {self._actor_temperature_in_K}.")
 
     @property
     def temperature_in_K(self) -> float:

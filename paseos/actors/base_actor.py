@@ -149,23 +149,25 @@ class BaseActor(ABC):
     @property
     def altitude(
         self,
-        t0: pk.epoch,
+        t0: pk.epoch = None,
     ) -> float:
         """Returns altitude above [0,0,0]. Will only compute if not computed for this timestep.
 
         Args:
-            t0 (pk.epoch): Epoch to get altitude at
+            t0 (pk.epoch): Epoch to get altitude at. Defaults to local time.
 
         Returns:
             float: Altitude in meters.
         """
+        if t0 is None:
+            t0 = self._local_time
         if (
             t0.mjd2000 == self._time_of_last_position
             and self._last_altitude is not None
         ):
             return self._last_altitude
         else:
-            self._last_altitude = np.sqrt(np.sum(np.power(self._last_position, 2)))
+            self._last_altitude = np.sqrt(np.sum(np.power(self.get_position(t0), 2)))
             return self._last_altitude
 
     def get_position(self, epoch: pk.epoch):
@@ -177,7 +179,7 @@ class BaseActor(ABC):
             + " (mjd2000)."
         )
 
-        if self._orbital_parameters is not None and self._position is not None:
+        if self._orbital_parameters is not None and hasattr(self, "_position"):
             raise ValueError(
                 "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
             )
@@ -189,7 +191,7 @@ class BaseActor(ABC):
                 self._time_of_last_position = epoch.mjd2000
                 return self._position
         else:
-            return self._orbital_parameters.eph(epoch)
+            return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
             "No suitable way added to determine actor position. Either set an orbit or position with ActorBuilder."

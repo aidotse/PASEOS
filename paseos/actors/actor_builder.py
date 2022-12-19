@@ -128,6 +128,7 @@ class ActorBuilder:
 
     def set_thermal_model(
         actor: SpacecraftActor,
+        actor_mass: float,
         actor_initial_temperature_in_K: float,
         actor_sun_absorptance: float,
         actor_infrared_absorptance: float,
@@ -136,7 +137,7 @@ class ActorBuilder:
         actor_emissive_area: float,
         actor_thermal_capacity: float,
         body_solar_irradiance: float = 1360,
-        body_surface_temperature_in_K: float = 288**4,
+        body_surface_temperature_in_K: float = 288,
         body_emissivity: float = 0.6,
         body_reflectance: float = 0.3,
         power_consumption_to_heat_ratio: float = 0.5,
@@ -145,6 +146,8 @@ class ActorBuilder:
         assert isinstance(
             actor, SpacecraftActor
         ), "Thermal models are only supported for SpacecraftActors"
+
+        assert actor_mass > 0, "Actor mass has to be positive."
 
         assert (
             0 <= power_consumption_to_heat_ratio
@@ -178,6 +181,7 @@ class ActorBuilder:
             0 <= body_reflectance and body_reflectance <= 1.0
         ), "Body reflectance has to be 0 to 1"
 
+        actor._mass = actor_mass
         actor._thermal_model = ThermalModel(
             local_actor=actor,
             actor_initial_temperature_in_K=actor_initial_temperature_in_K,
