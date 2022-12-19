@@ -138,6 +138,49 @@ ActorBuilder.set_power_devices(actor=satA,
                                charging_rate_in_W=10) # Charging rate in W
 ```
 
+## Thermal Modelling
+To model thermal constraints on spacecraft we utilize a model inspired by the one-node model described in [Martínez - Spacecraft Thermal Modelling and Test](http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf). Thus, we model the change in temperature as 
+
+$mc \, \frac{dT}{dt} = \dot{Q}_{solar} + \dot{Q}_{albedo} + \dot{Q}_{central_body_IR} - \dot{Q}_{dissipated} + \dot{Q}_{activity}.$
+
+This means your spacecraft will heat up due to being in sunlight, albedo reflections, infrared radiation emitted by the central body as well as due to power consumption of activities. It will cool down due to heat dissipation.
+
+The model is only available for a [SpacecraftActor](#spacecraftactor) and (like all the physical models) only evaluated for the [local actor](#local-actor).
+
+The following parameters have to be specified for this:
+* Spacecraft mass [kg], initial temperature [K], emissive area (for heat disspiation) and thermal capacity [J / (kg * K)]
+* Spacecraft absorptance of Sun light, infrared light. [0 to 1]
+* Spacecraft area [m^2] facing Sun and central body, respectively
+* Solar irradiance in this orbit [W] (defaults to 1360W)
+* Central body surface temperature [k] (defaults to 288K)
+* Central body emissivity and reflectance [0 to 1] (defaults to 0.6 and 0.3)
+* Ratio of power converted to heat (defaults to 0.5)
+
+To use it, simply equip your [SpacecraftActor](#spacecraftactor) with a thermal model with:
+
+```py
+from paseos import SpacecraftActor, ActorBuilder
+my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch(0))
+ActorBuilder.set_thermal_model(
+    actor=my_actor,
+    actor_mass=50.0, # Setting mass to 50kg
+    actor_initial_temperature_in_K=273.15, # Setting initialtemperature to 0°C
+    actor_sun_absorptance=1.0, # Depending on material, define absorptance
+    actor_infrared_absorptance=1.0, # Depending on material, define absorptance
+    actor_sun_facing_area=1.0, # Area in m2
+    actor_central_body_facing_area=1.0, # Area in m2
+    actor_emissive_area=1.0, # Area in m2
+    actor_thermal_capacity=1000, # Capacity in J / (kg * K)
+    # ... leaving out default valued parameters, see docs for details
+)
+```
+
+The model is evaluated automatically during [activities](#activity). You can check the spacecraft temperature with:
+
+```py
+print(my_actor.temperature)
+```
+
 ### How to instantiate PASEOS
 
 We will now show how to create an instance of PASEOS. In this case, `satA` is the [local actor](#local-actor).
