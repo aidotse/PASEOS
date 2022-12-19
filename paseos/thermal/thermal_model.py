@@ -26,9 +26,38 @@ class ThermalModel:
 
     _bolzmann_constant = 5.670374419e-8  # in W m^-2 K^-4
 
-    def __init__(self, local_actor) -> None:
+    def __init__(
+        self,
+        local_actor,
+        actor_sun_absorptance: float,
+        actor_infrared_absorptance: float,
+        actor_sun_facing_area: float,
+        actor_central_body_facing_area: float,
+        actor_emissive_area: float,
+        actor_thermal_capacity: float,
+        body_solar_irradiance: float,
+        body_surface_temperature: float,
+        body_emissivity: float,
+        body_reflectance: float,
+    ) -> None:
         self._actor = local_actor
         self._body_radius = self._actor._central_body.radius
+
+        # TODO add sensibility checks on input params
+
+        self._actor_sun_absorptance = actor_sun_absorptance
+        self._actor_infrared_absorptance = actor_infrared_absorptance
+        self._actor_sun_facing_area = actor_sun_facing_area
+        self._actor_central_body_facing = actor_central_body_facing_area
+        self._actor_emissive_area = actor_emissive_area
+        self._actor_thermal_capacity = actor_thermal_capacity
+
+        self._body_emissivity = body_emissivity
+        self._body_solar_irradiance = body_solar_irradiance
+        self._body_surface_temperature = body_surface_temperature
+        self._body_reflectance = body_reflectance
+
+        self._initialize_constant_vars
 
     def _initialize_constant_vars(self):
         """This function initializes a bunch of values which will remain constant over actor operations."""
@@ -65,6 +94,7 @@ class ThermalModel:
 
     def _compute_solar_input(self):
         # Computes solar input
+        # TODO in the future we should consider changing altitude here as well
         return self._constant_term_solar_input * (1.0 - self._actor.is_in_eclipse())
 
     def _compute_albedo_input(self):
