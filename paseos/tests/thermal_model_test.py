@@ -22,7 +22,7 @@ async def test_thermal():
 
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
-    ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
+    ActorBuilder.set_orbit(sat1, [7000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
     ActorBuilder.set_power_devices(sat1, 50000, 1000000, 1000)
     ActorBuilder.set_thermal_model(
         actor=sat1,
@@ -38,17 +38,17 @@ async def test_thermal():
 
     # init simulation
     cfg = load_default_cfg()  # loading cfg to modify defaults
-    cfg.sim.dt = 0.1  # setting lower timestep to run things quickly
-    cfg.sim.activity_timestep = 0.1
-    cfg.io.logging_interval = 0.25  # log every 0.25 seconds
-    cfg.sim.time_multiplier = 50  # speed up execution for convenience
+    cfg.sim.dt = 5.0  # setting lower timestep to run things quickly
+    cfg.sim.activity_timestep = 1.0
+    cfg.io.logging_interval = 10.0  # log every 0.25 seconds
+    cfg.sim.time_multiplier = 200  # speed up execution for convenience
     sim = paseos.init_sim(sat1, cfg)
 
     # Initial temperature is 0C / 273.15K
     assert sat1.temperature_in_K == 273.15
 
     async def func(args):
-        await asyncio.sleep(3.0)
+        await asyncio.sleep(16.0)
 
     # Register an activity that draws 10 watt per second
     sim.register_activity(
@@ -58,7 +58,7 @@ async def test_thermal():
     # Run the activity
     sim.perform_activity("Activity_1")
     await wait_for_activity(sim)
-    raise (1)
+    sim.save_status_log_csv("thermal_test.csv")
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ class OperationsMonitor:
         self._log.timesteps = []
         self._log.current_activity = []
         self._log.battery_ratio = []
+        self._log.temperature = []
         self._log.is_in_eclipse = []
         self._log.known_actors = []
         self._log.position = []
@@ -50,6 +51,10 @@ class OperationsMonitor:
         self._log.known_actors.append(known_actors)
         if isinstance(local_actor, SpacecraftActor):
             self._log.battery_ratio.append(local_actor.battery_level_ratio)
+            if local_actor._thermal_model is not None:
+                self._log.temperature.append(local_actor.temperature_in_K)
+            else:
+                self._log.temperature.append(-1)
         else:
             self._log.battery_ratio.append(1.0)
 
@@ -76,6 +81,7 @@ class OperationsMonitor:
                     "velocity": self._log.velocity[i],
                     "known_actors": self._log.known_actors[i],
                     "battery_ratio": self._log.battery_ratio[i],
+                    "temperature": self._log.temperature[i],
                     "is_in_eclipse": self._log.is_in_eclipse[i],
                 }
                 w.writerow(row)

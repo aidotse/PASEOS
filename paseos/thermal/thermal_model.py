@@ -144,7 +144,7 @@ class ThermalModel:
             self._compute_solar_input()
             + self._compute_albedo_input()
             + self._compute_central_body_IR_emission()
-            + self._compute_actor_emission()
+            - self._compute_actor_emission()
             + self._power_consumption_to_heat_ratio * current_power_consumption
         )
 
