@@ -22,7 +22,7 @@ class OperationsMonitor:
         self._log = DotMap(_dynamic=False)
         self._log.timesteps = []
         self._log.current_activity = []
-        self._log.battery_ratio = []
+        self._log.state_of_charge = []
         self._log.is_in_eclipse = []
         self._log.known_actors = []
         self._log.position = []
@@ -49,9 +49,9 @@ class OperationsMonitor:
         self._log.velocity.append(local_actor._last_velocity)
         self._log.known_actors.append(known_actors)
         if isinstance(local_actor, SpacecraftActor):
-            self._log.battery_ratio.append(local_actor.battery_level_ratio)
+            self._log.state_of_charge.append(local_actor.state_of_charge)
         else:
-            self._log.battery_ratio.append(1.0)
+            self._log.state_of_charge.append(1.0)
 
         if local_actor._last_eclipse_status is None:
             self._log.is_in_eclipse.append(False)
@@ -75,7 +75,7 @@ class OperationsMonitor:
                     "position": self._log.position[i],
                     "velocity": self._log.velocity[i],
                     "known_actors": self._log.known_actors[i],
-                    "battery_ratio": self._log.battery_ratio[i],
+                    "state_of_charge": self._log.state_of_charge[i],
                     "is_in_eclipse": self._log.is_in_eclipse[i],
                 }
                 w.writerow(row)
