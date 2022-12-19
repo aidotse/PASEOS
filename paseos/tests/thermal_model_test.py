@@ -58,6 +58,8 @@ async def test_thermal():
     # Run the activity
     sim.perform_activity("Activity_1")
     await wait_for_activity(sim)
+    assert sat1.temperature_in_K > 285
+    assert sat1.temperature_in_K < 300
     sim.save_status_log_csv("thermal_test.csv")
 
 

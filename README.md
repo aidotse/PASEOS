@@ -178,7 +178,7 @@ ActorBuilder.set_thermal_model(
 The model is evaluated automatically during [activities](#activity). You can check the spacecraft temperature with:
 
 ```py
-print(my_actor.temperature)
+print(my_actor.temperature_in_K)
 ```
 
 ### How to instantiate PASEOS
