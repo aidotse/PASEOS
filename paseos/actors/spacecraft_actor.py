@@ -51,6 +51,15 @@ class SpacecraftActor(BaseActor):
         return self._battery_level_in_Ws
 
     @property
+    def temperature_in_K(self) -> float:
+        """Returns the current temperature of the actor in K.
+
+        Returns:
+            float: Temperature in Kelvin.
+        """
+        return self._thermal_model.temperature_in_K
+
+    @property
     def battery_level_ratio(self):
         """Get the current battery level as ratio of maximum.
 

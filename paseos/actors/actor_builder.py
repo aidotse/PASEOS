@@ -5,6 +5,7 @@ import pykep as pk
 from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
 from .ground_station_actor import GroundstationActor
+from ..thermal.thermal_model import ThermalModel
 
 
 class ActorBuilder:
@@ -123,6 +124,74 @@ class ActorBuilder:
             f"Added power device. MaxBattery={max_battery_level_in_Ws}Ws, "
             + f"CurrBattery={battery_level_in_Ws}Ws, "
             + f"ChargingRate={charging_rate_in_W}W to actor {actor}"
+        )
+
+    def set_thermal_model(
+        actor: SpacecraftActor,
+        actor_initial_temperature_in_K: float,
+        actor_sun_absorptance: float,
+        actor_infrared_absorptance: float,
+        actor_sun_facing_area: float,
+        actor_central_body_facing_area: float,
+        actor_emissive_area: float,
+        actor_thermal_capacity: float,
+        body_solar_irradiance: float = 1360,
+        body_surface_temperature_in_K: float = 288**4,
+        body_emissivity: float = 0.6,
+        body_reflectance: float = 0.3,
+        power_consumption_to_heat_ratio: float = 0.5,
+    ):
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Thermal models are only supported for SpacecraftActors"
+
+        assert (
+            0 <= power_consumption_to_heat_ratio
+            and power_consumption_to_heat_ratio <= 1.0
+        ), "Heat ratio has to be 0 to 1."
+
+        logger.trace("Checking actor thermal values for sensibility.")
+        assert (
+            0 <= actor_initial_temperature_in_K
+        ), "Actor initial temperature cannot be below 0K."
+        assert (
+            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
+        ), "Absorptance has to be 0 to 1."
+        assert (
+            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
+        ), "Absorptance has to be 0 to 1."
+        assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
+        assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
+        assert 0 < actor_emissive_area, "Actor emissive area has to be > 0."
+        assert 0 < actor_thermal_capacity, "Thermal capacity has to be > 0"
+
+        logger.trace("Checking body thermal values for sensibility.")
+        assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
+        assert (
+            0 <= body_surface_temperature_in_K
+        ), "Body surface temperature cannot be below 0K."
+        assert (
+            0 <= body_emissivity and body_emissivity <= 1.0
+        ), "Body emissivity has to be 0 to 1"
+        assert (
+            0 <= body_reflectance and body_reflectance <= 1.0
+        ), "Body reflectance has to be 0 to 1"
+
+        actor._thermal_model = ThermalModel(
+            local_actor=actor,
+            actor_initial_temperature_in_K=actor_initial_temperature_in_K,
+            actor_sun_absorptance=actor_sun_absorptance,
+            actor_infrared_absorptance=actor_infrared_absorptance,
+            actor_sun_facing_area=actor_sun_facing_area,
+            actor_central_body_facing_area=actor_central_body_facing_area,
+            actor_emissive_area=actor_emissive_area,
+            actor_thermal_capacity=actor_thermal_capacity,
+            body_solar_irradiance=body_solar_irradiance,
+            body_surface_temperature_in_K=body_surface_temperature_in_K,
+            body_emissivity=body_emissivity,
+            body_reflectance=body_reflectance,
+            power_consumption_to_heat_ratio=power_consumption_to_heat_ratio,
         )
 
     def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):

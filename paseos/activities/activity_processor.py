@@ -97,8 +97,19 @@ class ActivityProcessor:
         assert elapsed_time > 0, "Elapsed time cannot be negative."
         logger.debug("Running ActivityProcessor update.")
         logger.debug(f"Time since last update: {elapsed_time}s")
+
+        # First update position and time
         if self._advance_paseos_clock:
             self._paseos_instance.advance_time(elapsed_time)
+
+        # Update actor temperature
+        if (
+            hasattr(self._paseos_instance.local_actor, "_thermal_model")
+            and self._paseos_instance.local_actor._thermal_model is not None
+        ):
+            self._paseos_instance.local_actor._thermal_model.update_temperature(
+                elapsed_time, self._power_consumption_in_watt
+            )
 
         self._paseos_instance.local_actor.discharge(
             self._power_consumption_in_watt, elapsed_time

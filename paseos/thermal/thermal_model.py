@@ -1,50 +1,57 @@
 class ThermalModel:
-    """This model describes the thermal evolution of a spacecraft actor. For the moment, it is a linearized version
+    """This model describes the thermal evolution of a spacecraft actor.
+    For the moment, it is a slightly simplified version
     of the single node model from "Spacecraft Thermal Control" by Prof. Isidoro Martínez
     available at http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf
 
-    As simplifications, we assume spacecraft to be spherical black-bodies
+    As simplifications, we assume spacecraft to be spherical black-bodies.
     """
 
     _actor = None
 
     # Spacecraft parameters
-    _actor_sun_absorptance = None
-    _actor_infrared_absorptance = None
-    _actor_sun_facing_area = None
-    _actor_central_body_facing_area = None
-    _actor_emissive_area = None
-    _actor_temperature = None
+    _actor_sun_absorptance = None  # 0 to 1, for solar input
+    _actor_infrared_absorptance = None  # 0 to 1, for body IR input
+    _actor_sun_facing_area = None  # for solar input
+    _actor_central_body_facing_area = None  # for body IR input
+    _actor_emissive_area = None  # to compute heat dissipation
+    _actor_temperature_in_K = None  # current operating temperature
     _actor_thermal_capacity = None  # in J / (kg * K)
 
     # Central body parameters
-    _body_reflectance = None
-    _body_solar_irradiance = None
-    _body_radius = None
-    _body_emissivity = None
-    _body_surface_temperature = None
+    _body_reflectance = None  # for albedo input
+    _body_solar_irradiance = None  # for solar input
+    _body_radius = None  # for body IR input
+    _body_emissivity = None  # for body IR input
+    _body_surface_temperature_in_K = None  # for body IR input
+
+    # Ratio at which activities generate heat
+    _power_consumption_to_heat_ratio = None
 
     _bolzmann_constant = 5.670374419e-8  # in W m^-2 K^-4
 
     def __init__(
         self,
         local_actor,
+        actor_initial_temperature_in_K: float,
         actor_sun_absorptance: float,
         actor_infrared_absorptance: float,
         actor_sun_facing_area: float,
         actor_central_body_facing_area: float,
         actor_emissive_area: float,
         actor_thermal_capacity: float,
-        body_solar_irradiance: float,
-        body_surface_temperature: float,
-        body_emissivity: float,
-        body_reflectance: float,
+        body_solar_irradiance: float = 1360,
+        body_surface_temperature_in_K: float = 288**4,
+        body_emissivity: float = 0.6,
+        body_reflectance: float = 0.3,
+        power_consumption_to_heat_ratio: float = 0.5,
     ) -> None:
         self._actor = local_actor
         self._body_radius = self._actor._central_body.radius
 
-        # TODO add sensibility checks on input params
+        self._power_consumption_to_heat_ratio = power_consumption_to_heat_ratio
 
+        self._actor_temperature_in_K = actor_initial_temperature_in_K
         self._actor_sun_absorptance = actor_sun_absorptance
         self._actor_infrared_absorptance = actor_infrared_absorptance
         self._actor_sun_facing_area = actor_sun_facing_area
@@ -54,10 +61,10 @@ class ThermalModel:
 
         self._body_emissivity = body_emissivity
         self._body_solar_irradiance = body_solar_irradiance
-        self._body_surface_temperature = body_surface_temperature
+        self._body_surface_temperature_in_K = body_surface_temperature_in_K
         self._body_reflectance = body_reflectance
 
-        self._initialize_constant_vars
+        self._initialize_constant_vars()
 
     def _initialize_constant_vars(self):
         """This function initializes a bunch of values which will remain constant over actor operations."""
@@ -79,7 +86,7 @@ class ThermalModel:
             * self._body_emissivity
             * self._actor_central_body_facing_area
             * self._bolzmann_constant
-            * self._body_surface_temperature**4
+            * self._body_surface_temperature_in_K**4
         )
 
         self._C_actor_emission = (
@@ -108,18 +115,22 @@ class ThermalModel:
 
     def _compute_actor_emission(self):
         # Compute amount of IR emitted by the spacecraft to space
-        return self._C_actor_emission * self._actor_temperature**4
+        return self._C_actor_emission * self._actor_temperature_in_K**4
 
-    def update_temperature(self, dt: float):
+    def update_temperature(self, dt: float, current_power_consumption: float = 0):
         total_change_in_W = (
             self._compute_solar_input()
             + self._compute_albedo_input()
             + self._compute_central_body_IR_emission()
             + self._compute_actor_emission()
+            + self._power_consumption_to_heat_ratio * current_power_consumption
         )
-        self._actor_temperature = self._actor_temperature + ...
+        self._actor_temperature_in_K = self._actor_temperature_in_K + ...
         (dt * total_change_in_W) / (self._actor.mass * self._actor_thermal_capacity)
 
+        # Ensure value cannot go below 0
+        self._actor_temperature_in_K = max(0.0, self._actor_temperature_in_K)
+
     @property
-    def temperature(self) -> float:
-        return self._actor_temperature
+    def temperature_in_K(self) -> float:
+        return self._actor_temperature_in_K
