@@ -65,7 +65,9 @@ class PASEOS:
         self._local_actor = local_actor
         # Update local actor time to simulation start time.
         self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
-        self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep)
+        self._activity_manager = ActivityManager(
+            self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
+        )
         self._operations_monitor = OperationsMonitor(self._local_actor.name)
 
     def save_status_log_csv(self, filename) -> None:

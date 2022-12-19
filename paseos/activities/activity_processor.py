@@ -34,6 +34,7 @@ class ActivityProcessor:
         power_consumption_in_watt: float,
         paseos_instance,
         activity_runner: ActivityRunner,
+        time_multiplier: float = 1,
         advance_paseos_clock=True,
     ):
         """Initializes the ActivityProcessor.
@@ -44,6 +45,7 @@ class ActivityProcessor:
             paseos_instance (PASEOS): Local paseos instance.
             activity_runner (ActivityRunner): Runner of the activity that is performed.
             Needed check if constraints are still valid.
+            time_multiplier (float): Specifies the rate at which times passes to allow faster-than-real time modeling.
             advance_paseos_clock (bool, optional): Whether to advanced the local time of
             the actor and thus local simulation. Defaults to True.
         """
@@ -56,7 +58,10 @@ class ActivityProcessor:
         )
 
         self._power_consumption_in_watt = power_consumption_in_watt
+        assert update_interval > 0, "update_interval has to be > 0"
         self.update_interval = update_interval
+        assert time_multiplier > 0, "time_multiplier has to be > 0"
+        self._time_multiplier = time_multiplier
         self._is_started = False
         self._task = None
         self._paseos_instance = paseos_instance
@@ -97,8 +102,8 @@ class ActivityProcessor:
         assert elapsed_time > 0, "Elapsed time cannot be negative."
         logger.debug("Running ActivityProcessor update.")
         logger.debug(f"Time since last update: {elapsed_time}s")
-
-        # First update position and time
+        logger.trace(f"Applying time multiplier of {self._time_multiplier}")
+        elapsed_time *= self._time_multiplier
         if self._advance_paseos_clock:
             self._paseos_instance.advance_time(elapsed_time)
 
@@ -111,6 +116,7 @@ class ActivityProcessor:
                 elapsed_time, self._power_consumption_in_watt
             )
 
+        # Update state of charge
         self._paseos_instance.local_actor.discharge(
             self._power_consumption_in_watt, elapsed_time
         )

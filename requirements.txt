@@ -2,6 +2,7 @@ dotmap
 loguru
 pykep
 scikit-spatial
+skyfield
 toml
 tqdm
 matplotlib

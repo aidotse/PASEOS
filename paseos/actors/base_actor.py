@@ -29,6 +29,9 @@ class BaseActor(ABC):
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
+    # Position if not defined by orbital parameters
+    _position = None
+
     # Earth as a sphere (for now)
     # TODO replace this in the future depending on central body
     # Note that this needs to be specified in solar reference frame for now
@@ -117,7 +120,7 @@ class BaseActor(ABC):
         assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
 
     def __str__(self):
-        return self._orbital_parameters.name
+        return self.name
 
     def set_time(self, t: pk.epoch):
         """Updates the local time of the actor.
@@ -171,6 +174,14 @@ class BaseActor(ABC):
             return self._last_altitude
 
     def get_position(self, epoch: pk.epoch):
+        """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
+
+        Args:
+            epoch (pk.epoch): Time as pykep epoch
+
+        Returns:
+            np.array: [x,y,z] in meters
+        """
         logger.trace(
             "Computing "
             + self._orbital_parameters.name
@@ -198,6 +209,14 @@ class BaseActor(ABC):
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
+        """Compute the position / velocity of this actor at a specific time. Requires orbital parameters set.
+
+        Args:
+            epoch (pk.epoch): Time as pykep epoch.
+
+        Returns:
+            np.array: [x,y,z] in meters
+        """
         if self._orbital_parameters is None:
             raise NotImplementedError(
                 "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
@@ -217,19 +236,28 @@ class BaseActor(ABC):
         return pos, vel
 
     def is_in_line_of_sight(
-        self, other_actor: "BaseActor", epoch: pk.epoch, plot=False
+        self,
+        other_actor: "BaseActor",
+        epoch: pk.epoch,
+        minimum_altitude_angle: float = None,
+        plot=False,
     ):
         """Determines whether a position is in line of sight of this actor
 
         Args:
             other_actor (BaseActor): The actor to check line of sight with
             epoch (pk,.epoch): Epoch at which to check the line of sight
+            minimum_altitude_angle(float): The altitude angle (in degree) at which the actor has
+            to be in relation to the ground station position to be visible. It has to be between 0 and 90.
+            Only relevant if one of the actors is a ground station.
             plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
             bool: true if in line-of-sight.
         """
-        return is_in_line_of_sight(self, other_actor, epoch, plot)
+        return is_in_line_of_sight(
+            self, other_actor, epoch, minimum_altitude_angle, plot
+        )
 
     def is_in_eclipse(self, t: pk.epoch = None):
         """Checks if the actors is in eclipse at the specified time.
