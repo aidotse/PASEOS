@@ -104,9 +104,8 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
         spacecraft (SpacecraftActor): The actor to check line of sight with
         epoch (pk,.epoch): Epoch at which to check the line of sight
         minimum_altitude_angle(float): The altitude angle (in degree) at which the actor
-        has to be in relation to the surface, has to be between 0 and 90.
-        to be visible from this ground station. Has to be > 0 and < 90.
-        Only relevant if one of the actors is a ground station.
+        has to be in relation to the ground station position to be visible.
+        It has to be between 0 and 90. Only relevant if one of the actors is a ground station.
         plot (bool): Whether to plot a diagram illustrating the positions.
 
     Returns:
@@ -204,6 +203,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "GroundstationActor"
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -211,6 +212,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "GroundstationActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = other_actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )

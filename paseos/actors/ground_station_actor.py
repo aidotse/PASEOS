@@ -14,6 +14,9 @@ class GroundstationActor(BaseActor):
     # Timescale object to convert from pykep epoch to skyfield time
     _skyfield_timescale = load.timescale()
 
+    # Minimum angle to communicate with this ground station
+    _minimum_altitude_angle = None
+
     def __init__(
         self,
         name: str,
