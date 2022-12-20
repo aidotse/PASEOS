@@ -3,16 +3,76 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor, ActorBuilder
+from paseos import SpacecraftActor, GroundstationActor, ActorBuilder
 
 import pykep as pk
+import numpy as np
 
 
 def from_epoch_to_s(epoch: pk.epoch):
     return (epoch.mjd2000 - pk.epoch(0).mjd2000) / pk.SEC2DAY
 
 
-def test_communication_link():
+def test_communication_link_sat_to_ground():
+    """This test checks if the communication window between Sentinel
+    and one of it's ground stations matches
+    """
+    earth = pk.planet.jpl_lp("earth")
+
+    # Define Sentinel 2 orbit
+    today = pk.epoch_from_string("2022-Oct-27 21:04:45")
+    sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, today)
+    sentinel2B_line1 = (
+        "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
+    )
+    sentinel2B_line2 = (
+        "2 42063  98.5693  13.0364 0001083 104.3232 255.8080 14.30819357294601"
+    )
+    s2b = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
+
+    # Calculating S2B ephemerides.
+    sentinel2B_eph = s2b.eph(today)
+
+    ActorBuilder.set_orbit(
+        actor=sentinel2B,
+        position=sentinel2B_eph[0],
+        velocity=sentinel2B_eph[1],
+        epoch=today,
+        central_body=earth,
+    )
+
+    # Define ground station
+    maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
+        name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=today
+    )
+
+    ActorBuilder.set_ground_station_location(
+        maspalomas_groundstation, -15.6338, 27.7629, 205.1, minimum_altitude_angle=5
+    )
+
+    # Add communication link
+    ActorBuilder.add_comm_device(sentinel2B, device_name="link1", bandwidth_in_kbps=1)
+    transmitted = 0
+    # Check again after communication_window_end_time
+    (
+        communication_window_start_time,
+        communication_window_end_time,
+        transmitted,
+    ) = sentinel2B.get_communication_window(
+        local_actor_communication_link_name="link1",
+        target_actor=maspalomas_groundstation,
+        dt=1,
+        t0=today,
+        data_to_send_in_b=1000000,
+    )
+    window_in_s = (
+        communication_window_end_time.mjd2000 - communication_window_start_time.mjd2000
+    ) * pk.DAY2SEC
+    expected_window_in_s = 731.9999999657739
+    assert np.isclose(expected_window_in_s, window_in_s)
+
+
+def test_communication_link_sat_to_sat():
     # create satellites where sat1 and sat2 starts from the same point but move along different orbit.
     # At t=1470s they will not be in line of sight anymore.
     earth = pk.planet.jpl_lp("earth")
@@ -74,4 +134,5 @@ def test_communication_link():
 
 
 if __name__ == "__main__":
-    test_communication_link()
+    # test_communication_link_sat_to_sat()
+    test_communication_link_sat_to_ground()

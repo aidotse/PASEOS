@@ -16,6 +16,7 @@ setup(
         "loguru",
         "pykep",
         "scikit-spatial",
+        "skyfield",
         "toml",
         "tqdm",
     ],

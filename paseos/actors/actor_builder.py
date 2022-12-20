@@ -1,6 +1,7 @@
 from loguru import logger
 from dotmap import DotMap
 import pykep as pk
+from skyfield.api import wgs84
 
 from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
@@ -44,8 +45,39 @@ class ActorBuilder:
 
         return actor_type(name, epoch)
 
+    def set_ground_station_location(
+        actor: GroundstationActor,
+        latitude: float,
+        longitude: float,
+        elevation: float = 0,
+        minimum_altitude_angle: float = 30,
+    ):
+        """Define the position of a ground station actor.
+
+        Args:
+            actor (GroundstationActor): Actor to update.
+            latitude (float): Latitude of the ground station in degrees.
+            longitude (float): Longitude of the ground station in degrees.
+            elevation (float): A distance specifying elevation above (positive)
+            or below (negative) the surface of the Earth
+            ellipsoid specified by the WSG84 model in meters. Defaults to 0.
+            minimum_altitude_angle (float): Minimum angle above the horizon that
+            this station can communicate with.
+        """
+        assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
+        assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
+        assert (
+            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
+        ), "0 <= minimum_altitude_angle <= 90."
+        actor._skyfield_position = wgs84.latlon(
+            latitude_degrees=latitude,
+            longitude_degrees=longitude,
+            elevation_m=elevation,
+        )
+        actor._minimum_altitude_angle = minimum_altitude_angle
+
     def set_orbit(
-        actor: BaseActor,
+        actor: SpacecraftActor,
         position,
         velocity,
         epoch: pk.epoch,
@@ -61,6 +93,10 @@ class ActorBuilder:
             central_body (pk.planet): Central body around which the actor is orbiting as a pykep planet.
         """
         # TODO Add checks for sensibility of orbit
+
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Orbit only supported for SpacecraftActors"
 
         actor._central_body = central_body
         actor._orbital_parameters = pk.planet.keplerian(
@@ -81,8 +117,12 @@ class ActorBuilder:
 
         Args:
             actor (BaseActor): Actor set the position on.
-            position (list): [x,y,z] position.
+            position (list): [x,y,z] position for SpacecraftActor.
         """
+        assert not isinstance(
+            actor, GroundstationActor
+        ), "Position changing not supported for GroundstationActors"
+
         assert len(position) == 3, "Position has to be list of 3 floats."
         assert all(
             [isinstance(val, float) for val in position]
