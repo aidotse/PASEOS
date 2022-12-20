@@ -601,7 +601,7 @@ Finally, the time in the lower left and lower right corners corresponds to the e
 
 #### Writing Smulation Results to a File
 
-To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate. You can save the current log to a \*.csv file at any point.
+To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
 
 ```py
 cfg = load_default_cfg() # loading cfg to modify defaults
