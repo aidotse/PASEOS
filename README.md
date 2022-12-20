@@ -95,7 +95,6 @@ Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [K
 
 ```py 
 import pykep as pk
-import paseos
 from paseos import ActorBuilder, SpacecraftActor
 # Define an actor of type SpacecraftActor of name mySat
 sat_actor = ActorBuilder.get_actor_scaffold(name="mySat", 
