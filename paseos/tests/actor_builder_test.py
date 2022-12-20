@@ -40,7 +40,7 @@ def test_add_power_devices():
     _, sat1, _ = get_default_instance()
     ActorBuilder.set_power_devices(sat1, 42, 42, 42)
     assert sat1.battery_level_in_Ws == 42
-    assert sat1.battery_level_ratio == 1
+    assert sat1.state_of_charge == 1
     assert sat1.charging_rate_in_W == 42
 
 

@@ -43,6 +43,11 @@ class BaseActor(ABC):
     # Tracks the current activity
     _current_activity = None
 
+    # The following variables are used to track last evaluated state vectors to avoid recomputation.
+    _last_position = None
+    _last_velocity = None
+    _last_eclipse_status = None
+
     def __init__(self, name: str, epoch: pk.epoch) -> None:
         """Constructor for a base actor
 
@@ -56,6 +61,15 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
+
+    @property
+    def current_activity(self) -> str:
+        """Returns the name of the activity the actor is currently performing.
+
+        Returns:
+            str: Activity name. None if no activity being performed.
+        """
+        return self._current_activity
 
     @property
     def local_time(self) -> pk.epoch:
@@ -145,6 +159,7 @@ class BaseActor(ABC):
         # If the actor has no orbit, return position
         if self._orbital_parameters is None:
             if self._position is not None:
+                self._last_position = self._position
                 return self._position
         else:
             return self._orbital_parameters.eph(epoch)[0]
@@ -174,7 +189,10 @@ class BaseActor(ABC):
             + str(epoch.mjd2000)
             + " (mjd2000)."
         )
-        return self._orbital_parameters.eph(epoch)
+        pos, vel = self._orbital_parameters.eph(epoch)
+        self._last_position = pos
+        self._last_velocity = vel
+        return pos, vel
 
     def is_in_line_of_sight(
         self,
@@ -208,7 +226,8 @@ class BaseActor(ABC):
         """
         if t is None:
             t = self._local_time
-        return is_in_eclipse(self, self._central_body, t)
+        self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
+        return self._last_eclipse_status
 
     def get_communication_window(
         self,
