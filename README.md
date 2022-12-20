@@ -395,7 +395,7 @@ Finally, the time in the lower left and lower right corners correspond to the ep
   The `local actor` is the `actor` whose behavior is modelled by the locally running PASEOS instance.
 
 * ### On-termination function
-  A on-termination function is an asynchronous function that can be used by the PASEOS user to specify some operations to be executed on termination of predefied PASEOS user.
+  A on-termination function is an asynchronous function that can be used by the PASEOS user to specify some operations to be executed on termination of predefined PASEOS user.
 
 * ### SpacecraftActor
   `PASEOS actor` emulating a spacecraft or a satellite. 
