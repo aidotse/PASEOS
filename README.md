@@ -570,7 +570,7 @@ Finally, the time in the lower left and lower right corners corresponds to the e
 
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/animation.png" alt="Scheme"  width="900" height="500">
+    <img src="resources/images/animation.png" alt="Scheme"  width="910" height="459">
   </a>
   <p align="center">
     Snapshot of PASEOS visualization
