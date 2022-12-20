@@ -49,7 +49,7 @@ class SpacecraftActor(BaseActor):
         return self._battery_level_in_Ws
 
     @property
-    def battery_level_ratio(self):
+    def state_of_charge(self):
         """Get the current battery level as ratio of maximum.
 
         Returns:

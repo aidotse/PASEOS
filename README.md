@@ -1,5 +1,6 @@
 # PASEOS
-PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft 
+
+PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
 
 ![Alt Text](resources/images/sat_gif.gif)
 
@@ -40,6 +41,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#utilities">Utilities</a></li>
     <ul>
     <li><a href="#visualization">Visualization</a></li>
+    <li><a href="#writing-simulation-results-to-a-file">Writing Simulation Results to a File</a></li>
     </ul>
     </ul>
     <li><a href="#system-design-of-paseos">System Design of PASEOS</a></li>
@@ -596,6 +598,20 @@ Finally, the time in the lower left and lower right corners corresponds to the e
     Description of PASEOS workflow on an individual device
   </p>
 </p>
+
+#### Writing Smulation Results to a File
+
+To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate. You can save the current log to a \*.csv file at any point.
+
+```py
+cfg = load_default_cfg() # loading cfg to modify defaults
+cfg.io.logging_interval = 0.25  # log every 0.25 seconds
+paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
+
+# Performing activities, running the simulation (...)
+
+paseos_instance.save_status_log_csv("output.csv")
+```
 
 ## Glossary
 * ### Activity
