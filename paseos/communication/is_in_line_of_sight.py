@@ -203,6 +203,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "GroundstationActor"
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -210,6 +212,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "GroundstationActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = other_actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )
