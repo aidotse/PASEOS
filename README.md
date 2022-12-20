@@ -388,7 +388,7 @@ Finally, the time in the lower left and lower right corners correspond to the ep
 * ### Constraint-function
   A constraint function is an asynchronous function that can be used by the PASEOS user to specify some constraints that shall be met during the execution of an activity.
 
-* ### Ground stationActor
+* ### GroundstationActor
   `PASEOS actor` emulating a ground station.  
 
 * ### Local actor
