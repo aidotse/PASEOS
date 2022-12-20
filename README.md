@@ -385,7 +385,7 @@ Finally, the time in the lower left and lower right corners correspond to the ep
 * ### Actor
   Since PASEOS is fully-decentralised, each node of a PASEOS constellation shall run an instance of PASEOS modelling all the nodes of  that constellation.  The abstraction of a constellation node inside a PASEOS instace is a PASEOS `actor`. 
 
-* ### Constraint-function
+* ### Constraint function
   A constraint function is an asynchronous function that can be used by the PASEOS user to specify some constraints that shall be met during the execution of an activity.
 
 * ### GroundstationActor
