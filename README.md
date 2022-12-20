@@ -1,7 +1,7 @@
 # PASEOS
 PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft 
 
-![Alt Text](sat_gif.gif)
+![Alt Text](resources/images/sat_gif.gif)
 
 Disclaimer: This project is currently under development. Use at your own risk.
 
@@ -42,7 +42,7 @@ PASEOS is a `Python` module that simulates the environment to operate multiple s
 <br> The project is being developed by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden) in the frame of a collaboration between [AI Sweden](https://www.ai.se/en/) and the [European Space Agency](https://www.esa.int/) to explore distributed edge learning for space applications. For more information on `PASEOS` and $\Phi$-lab@Sweden, please take a look at the recording of the $\Phi$-lab@Sweden [kick-off event](https://www.youtube.com/watch?v=KuFRCcNxLgo&t=2365s).
 
 ## PASEOS space environment simulation
-![Alt Text](PASEOS_constraints.png)
+![Alt Text](resources/images/PASEOS_constraints.png)
 PASEOS allow simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in PASEOS.
 
 ## Installation
