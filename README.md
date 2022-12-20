@@ -43,7 +43,7 @@ PASEOS is a `Python` module that simulates the environment to operate multiple s
 
 ## PASEOS space environment simulation
 ![Alt Text](resources/images/PASEOS_constraints.png)
-PASEOS allow simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in PASEOS.
+PASEOS allows simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in PASEOS.
 
 ## Installation
 `pip` and `conda` support will follow in the near future.
