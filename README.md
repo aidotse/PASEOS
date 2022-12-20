@@ -67,7 +67,7 @@ To activate the new environment, you can use:
 conda activate paseos
 ```
 
-Alternatively, you install PASEOS by using [PyPy](https://www.pypy.org/) as follows:
+Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as follows:
 
 ```
 cd PASEOS
