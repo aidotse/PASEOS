@@ -570,6 +570,20 @@ The local device is illustrated with white text.
 In the upper-right corner, the status of the communication link between each spacecraft is shown.
 Finally, the time in the lower left and lower right corners corresponds to the epoch and the PASEOS local simulation time.
 
+#### Writing Simulation Results to a File
+
+To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
+
+```py
+cfg = load_default_cfg() # loading cfg to modify defaults
+cfg.io.logging_interval = 0.25  # log every 0.25 seconds
+paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
+
+# Performing activities, running the simulation (...)
+
+paseos_instance.save_status_log_csv("output.csv")
+```
+
 <p align="center">
   <a href="https://github.com/aidotse/PASEOS/">
     <img src="resources/images/animation.png" alt="Scheme"  width="910" height="459">
@@ -599,19 +613,7 @@ Finally, the time in the lower left and lower right corners corresponds to the e
   </p>
 </p>
 
-#### Writing Smulation Results to a File
 
-To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
-
-```py
-cfg = load_default_cfg() # loading cfg to modify defaults
-cfg.io.logging_interval = 0.25  # log every 0.25 seconds
-paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
-
-# Performing activities, running the simulation (...)
-
-paseos_instance.save_status_log_csv("output.csv")
-```
 
 ## Glossary
 * ### Activity
