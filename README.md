@@ -83,7 +83,6 @@ The code snippet below shows how to create a PASEOS [actor](#actor) named **mySa
  
 ```py 
 import pykep as pk
-import paseos
 from paseos import ActorBuilder, SpacecraftActor
 # Define an actor of type SpacecraftActor of name mySat
 sat_actor = ActorBuilder.get_actor_scaffold(name="mySat", 
