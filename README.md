@@ -63,10 +63,12 @@ PASEOS is a `Python` module that simulates the environment to operate multiple s
 <br> The project is being developed by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden) in the frame of a collaboration between [AI Sweden](https://www.ai.se/en/) and the [European Space Agency](https://www.esa.int/) to explore distributed edge learning for space applications. For more information on PASEOS and $\Phi$-lab@Sweden, please take a look at the recording of the $\Phi$-lab@Sweden [kick-off event](https://www.youtube.com/watch?v=KuFRCcNxLgo&t=2365s).
 
 ## PASEOS space environment simulation
+
 ![Alt Text](resources/images/PASEOS_constraints.png)
 PASEOS allows simulating the effect of onboard and operational constraints on user-registered [activities](#activity). The image above showcases the different phenomena considered (or to be implemented) in PASEOS.
 
 ## Installation
+
 `pip` and `conda` support will follow in the near future.
 
 For now, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
@@ -81,7 +83,8 @@ To install PASEOS you can use [conda](https://docs.conda.io/en/latest/) as follo
 cd PASEOS
 conda env create -f environment.yml
 ```
-This will create a new conda environment called ``PASEOS`` and install the required software packages.
+
+This will create a new conda environment called `PASEOS` and install the required software packages.
 To activate the new environment, you can use:
 
 ```
@@ -96,6 +99,7 @@ pip install -e .
 ```
 
 ## Examples
+
 The next examples will introduce you to the use of PASEOS.
 
 ### Actors
@@ -104,8 +108,10 @@ The code snippet below shows how to create a PASEOS [actor](#actor) named **mySa
 [actors](#actor) are created by using an `ActorBuilder`. The latter is used to define the [actor](#actor) `scaffold` that includes the [actor](#actor) minimal properties. In this way, [actors](#actor) are built in a modular fashion that enables their use also for non-space applications.  
  
 ```py 
+
 import pykep as pk
 from paseos import ActorBuilder, SpacecraftActor
+
 # Define an actor of type SpacecraftActor of name mySat
 sat_actor = ActorBuilder.get_actor_scaffold(name="mySat", 
                                        actor_type=SpacecraftActor, 
@@ -229,7 +235,6 @@ ActorBuilder.set_power_devices(actor=sat_actor,
 #### Initializing PASEOS
 We will now show how to create an instance of PASEOS. An instance of PASEOS shall be bounded to one PASEOS [actor](#actor) that we call [local actor](#local-actor). Please, notice that an orbit shall be placed for a [SpacecraftActor](#spacecraftactor) before being added to a PASEOS instance. <br>
 
-
 ```py 
 import pykep as pk
 import paseos
@@ -290,7 +295,17 @@ cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC
 sim = paseos.init_sim(local_actor) 
 ```
 
+### Faster than real-time execution
 
+In some cases, you may be interested to simulate your spacecraft operating for an extended period. By default, PASEOS operates in real-time, thus this would take a lot of time. However, you can increase the rate of time passing (i.e. the spacecraft moving, power being charged / consumed etc.) using the `time_multiplier` parameter. Set it as follows when initializing PASEOS.
+
+```py
+
+cfg = load_default_cfg() # loading cfg to modify defaults
+cfg.sim.time_multiplier = 10 # setting the parameter so that in 1s real time, paseos models 10s having passed
+paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
+
+```
 
 ### Activities
 #### Simple activity
@@ -422,7 +437,6 @@ sim.perform_activity("my_activity",
 #Print return value
 print("The output of the activity function is: ", activity_out[0])
 ```
-
 
 #### Constraint Function
 
@@ -620,7 +634,6 @@ paseos_instance.save_status_log_csv("output.csv")
   Activity is the abstraction that PASEOS uses to keep track of specific actions performed by an [actor](#actor) upon a request from the user. >PASEOS is responsible for the execution of the activity and for updating the system status depending on the effects of the activity (e.g., by discharging the satellite battery).<br>
   When registering an activity, the user can specify a [constraint function](#constraint-function) to specify constraints to be met during the execution of the activity and an [on-termination](#on-termination) function to specify additional operations to be performed by PASEOS on termination of the activity function.
 
-
 * ### Activity function
   User-defined function emulating any operation to be executed in a PASEOS by an [actor](#actor). Activity functions are necessary to register [activities](#activity). Activity functions might include data transmission, housekeeping operations, onboard data acquisition and processing, and others.
 
@@ -646,7 +659,8 @@ paseos_instance.save_status_log_csv("output.csv")
   PASEOS [actor](actor) emulating a spacecraft or a satellite. 
 
 ## Contributing
-The ```PASEOS``` project is open to contributions. To contribute, you can open an [issue](https://github.com/gomezzz/MSMatch/issues) to report a bug or to request a new feature. If you prefer discussing new ideas and applications, you can contact us via email (please, refer to [Contact](#contact)).
+
+The `PASEOS` project is open to contributions. To contribute, you can open an [issue](https://github.com/gomezzz/MSMatch/issues) to report a bug or to request a new feature. If you prefer discussing new ideas and applications, you can contact us via email (please, refer to [Contact](#contact)).
 To contribute, please proceed as follow:
 
 1. Fork the Project
@@ -656,9 +670,11 @@ To contribute, please proceed as follow:
 5. Open a Pull Request
 
 ## License
+
 Distributed under the GPL-3.0 License.
 
 ## Contact
+
 Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 
 * Pablo Gómez - pablo.gomez at esa.int, pablo.gomez at ai.se

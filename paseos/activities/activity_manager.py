@@ -13,7 +13,12 @@ class ActivityManager:
     """This class is used to handle registering, performing and collection of activities.
     There can only be one instance of it and each paseos instance has one."""
 
-    def __new__(self, paseos_instance, paseos_update_interval: float):
+    def __new__(
+        self,
+        paseos_instance,
+        paseos_update_interval: float,
+        paseos_time_multiplier: float,
+    ):
         if not hasattr(self, "instance"):
             self.instance = super(ActivityManager, self).__new__(self)
         else:
@@ -22,19 +27,29 @@ class ActivityManager:
             )
         return self.instance
 
-    def __init__(self, paseos_instance, paseos_update_interval: float):
+    def __init__(
+        self,
+        paseos_instance,
+        paseos_update_interval: float,
+        paseos_time_multiplier: float,
+    ):
         """Creates a new activity manager. Singleton, so only one instance allowed.
 
         Args:
             paseos_instance (PASEOS): The main paseos instance.
             paseos_update_interval (float): Update interval for paseos.
+            paseos_time_multiplier (float): Multiplier for the time. At 1, it is real time.
         """
         logger.trace("Initializing ActivityManager")
         assert (
             paseos_update_interval > 1e-4
         ), f"Too small paseos update interval. Should not be less than 1e-4, was {paseos_update_interval}"
+        assert (
+            paseos_time_multiplier > 1e-4
+        ), f"Too small paseos paseos_time_multiplier. Should not be less than 1e-4, was {paseos_time_multiplier}"
         self._activities = DotMap(_dynamic=False)
         self._paseos_update_interval = paseos_update_interval
+        self._paseos_time_multiplier = paseos_time_multiplier
         self._paseos_instance = paseos_instance
 
     def remove_activity(self, name: str):
@@ -134,6 +149,7 @@ class ActivityManager:
                 power_consumption_in_watt=activity.power_consumption_in_watt,
                 paseos_instance=self._paseos_instance,
                 activity_runner=activity_runner,
+                time_multiplier=self._paseos_time_multiplier,
                 advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
 
