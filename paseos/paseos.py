@@ -1,5 +1,6 @@
 import types
 import asyncio
+import sys
 
 from dotmap import DotMap
 from loguru import logger
@@ -7,6 +8,7 @@ import pykep as pk
 
 from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
+from paseos.utils.operations_monitor import OperationsMonitor
 
 
 class PASEOS:
@@ -31,6 +33,10 @@ class PASEOS:
 
     # Semaphore to track if an activity is currently running
     _is_running_activity = False
+
+    # Used to monitor the local actor over execution and write performance stats
+    _operations_monitor = None
+    _time_since_last_log = sys.float_info.max
 
     # Use automatic clock (default on for now)
     use_automatic_clock = True
@@ -62,6 +68,20 @@ class PASEOS:
         self._activity_manager = ActivityManager(
             self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
         )
+        self._operations_monitor = OperationsMonitor(self._local_actor.name)
+
+    def save_status_log_csv(self, filename) -> None:
+        """Saves the status log incl. all kinds of information such as battery charge,
+        running activtiy, etc.
+
+        Args:
+            filename (str): File to save the log in.
+        """
+        self._operations_monitor.save_to_csv(filename)
+
+    def log_status(self):
+        """Updates the status log."""
+        self._operations_monitor.log(self._local_actor, self.known_actor_names)
 
     def advance_time(self, time_to_advance: float):
         """Advances the simulation by a specified amount of time
@@ -91,6 +111,13 @@ class PASEOS:
 
             self._state.time += dt
             self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+
+            # Check if we should update the status log
+            if self._time_since_last_log > self._cfg.io.logging_interval:
+                self.log_status()
+                self._time_since_last_log = 0
+            else:
+                self._time_since_last_log += dt
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
 
@@ -160,6 +187,14 @@ class PASEOS:
             actor_name in self.known_actors
         ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
         del self._known_actors[actor_name]
+
+    def remove_activity(self, name: str):
+        """Removes a registered activity
+
+        Args:
+            name (str): Name of the activity.
+        """
+        self._activity_manager.remove_activity(name=name)
 
     def register_activity(
         self,

@@ -28,6 +28,7 @@ def get_communication_window(
         pk.epoch: communication window end time.
         int: data that can be transmitted in the communication window [b].
     """
+    logger.debug(f"Computing comms window between {local_actor} and {target_actor}")
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
         "Trying to use a not-existing communication link with the name: "

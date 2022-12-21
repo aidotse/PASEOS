@@ -52,6 +52,19 @@ class ActivityManager:
         self._paseos_time_multiplier = paseos_time_multiplier
         self._paseos_instance = paseos_instance
 
+    def remove_activity(self, name: str):
+        """Removes a registered activity
+
+        Args:
+            name (str): Name of the activity.
+        """
+        if name not in self._activities.keys():
+            raise ValueError(
+                "Trying to remove non-existing activity with name: " + name
+            )
+        else:
+            del self._activities[name]
+
     def register_activity(
         self,
         name: str,
