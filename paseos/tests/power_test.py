@@ -9,7 +9,7 @@ def test_power_charging():
 
     # Initial power is 500m check charging works
     assert sat1.battery_level_in_Ws == 500
-    sim.advance_time(42,0)
+    sim.advance_time(42, 0)
     assert sat1.battery_level_in_Ws == 542
 
     # TODO check charging doesn't work when in eclipse

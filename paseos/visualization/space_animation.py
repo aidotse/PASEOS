@@ -393,7 +393,7 @@ class SpaceAnimation(Animation):
         Returns:
             List[Artist]: list of Artist objects
         """
-        sim.advance_time(dt,0)
+        sim.advance_time(dt, 0)
         self.update(sim, creating_animation=True)
         return self.ax_3d.get_children() + self.ax_los.get_children()
 
