@@ -18,4 +18,3 @@ def test_multiple_instances():
     sim2.advance_time(42)
     assert sat1.battery_level_in_Ws == 542
     assert sat2.battery_level_in_Ws == 542
-
