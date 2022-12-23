@@ -83,6 +83,8 @@ class SpacecraftActor(BaseActor):
 
         self = discharge_model.discharge(self, power_consumption)
 
+        logger.debug(f"New battery level is {self._battery_level_in_Ws}Ws")
+
     def charge(self, t0: pk.epoch, t1: pk.epoch):
         """Charges the actor during that period. Note that it is only
         verified the actor is neither at start nor end of the period in eclipse,

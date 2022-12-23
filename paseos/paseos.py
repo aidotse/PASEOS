@@ -90,6 +90,7 @@ class PASEOS:
         assert (
             current_power_consumption_in_W >= 0
         ), "Power consumption cannot be negative."
+
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
         dt = self._cfg.sim.dt
@@ -105,8 +106,8 @@ class PASEOS:
             ):
                 time_since_constraint_check = 0
                 if not constraint_function():
-                    logger.info("Time advance interrupted. Constraint false.")
-                    logger.info("New time is: " + str(self._state.time) + " s.")
+                    logger.info("Time advancing interrupted. Constraint false.")
+                    logger.debug("New time is: " + str(self._state.time) + " s.")
                     return
 
             if self._state.time > target_time - dt:
