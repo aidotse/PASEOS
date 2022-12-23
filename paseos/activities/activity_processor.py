@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import suppress
-from weakref import WeakValueDictionary
 from timeit import default_timer as timer
 
 from loguru import logger
