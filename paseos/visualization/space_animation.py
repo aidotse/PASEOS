@@ -147,7 +147,7 @@ class SpaceAnimation(Animation):
         info_str = f"{actor.name}"
         if isinstance(actor, SpacecraftActor):
             if actor.battery_level_in_Ws is not None:
-                battery_level = actor.battery_level_ratio * 100
+                battery_level = actor.state_of_charge * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
             for name in actor.communication_devices.keys():
