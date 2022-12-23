@@ -60,7 +60,7 @@ class ActivityProcessor:
         self._power_consumption_in_watt = power_consumption_in_watt
         assert update_interval > 0, "update_interval has to be > 0"
         self.update_interval = update_interval
-        assert time_multiplier > 0, "time_multiplier has to be > 0"
+        assert time_multiplier > 1e-4, "time_multiplier has to be > 1e-4"
         self._time_multiplier = time_multiplier
         self._is_started = False
         self._task = None

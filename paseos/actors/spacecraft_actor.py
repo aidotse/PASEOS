@@ -60,7 +60,7 @@ class SpacecraftActor(BaseActor):
         return self._thermal_model.temperature_in_K
 
     @property
-    def battery_level_ratio(self):
+    def state_of_charge(self):
         """Get the current battery level as ratio of maximum.
 
         Returns:
