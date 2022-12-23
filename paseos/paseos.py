@@ -38,9 +38,6 @@ class PASEOS:
     _operations_monitor = None
     _time_since_last_log = sys.float_info.max
 
-    # Use automatic clock (default on for now)
-    use_automatic_clock = True
-
     def __init__(self, local_actor: BaseActor, cfg=None):
         """Initalize PASEOS
 
@@ -74,19 +71,44 @@ class PASEOS:
         """Updates the status log."""
         self._operations_monitor.log(self._local_actor, self.known_actor_names)
 
-    def advance_time(self, time_to_advance: float):
+    def advance_time(
+        self,
+        time_to_advance: float,
+        current_power_consumption_in_W: float,
+        constraint_function: types.FunctionType = None,
+    ):
         """Advances the simulation by a specified amount of time
 
         Args:
             time_to_advance (float): Time to advance in seconds.
+            current_power_consumption_in_W (float): Current power consumed per second in Watt.
+            constraint_function(FunctionType): Constraint function which will be evaluated
+            every cfg.sim.activity_timestep seconds. Aborts the advancement if False.
+
         """
+        assert time_to_advance > 0, "Time to advance has to be positive."
+        assert (
+            current_power_consumption_in_W >= 0
+        ), "Power consumption cannot be negative."
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
         dt = self._cfg.sim.dt
 
+        time_since_constraint_check = float("inf")
+
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
+            if (
+                constraint_function is not None
+                and time_since_constraint_check > self._cfg.sim.activity_timestep
+            ):
+                time_since_constraint_check = 0
+                if not constraint_function():
+                    logger.info("Time advance interrupted. Constraint false.")
+                    logger.info("New time is: " + str(self._state.time) + " s.")
+                    return
+
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
                 dt = target_time - self._state.time
@@ -100,7 +122,20 @@ class PASEOS:
                 pk.epoch((self._state.time + dt) * pk.SEC2DAY),
             )
 
+            # Update actor temperature
+            if (
+                hasattr(self._local_actor, "_thermal_model")
+                and self._local_actor._thermal_model is not None
+            ):
+                self._local_actor._thermal_model.update_temperature(
+                    dt, current_power_consumption_in_W
+                )
+
+            # Update state of charge
+            self._local_actor.discharge(current_power_consumption_in_W, dt)
+
             self._state.time += dt
+            time_since_constraint_check += dt
             self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
             # Check if we should update the status log

@@ -17,7 +17,6 @@ class ActivityProcessor:
         paseos_instance,
         activity_runner: ActivityRunner,
         time_multiplier: float = 1,
-        advance_paseos_clock=True,
     ):
         """Initializes the ActivityProcessor.
 
@@ -28,7 +27,6 @@ class ActivityProcessor:
             activity_runner (ActivityRunner): Runner of the activity that is performed.
             Needed check if constraints are still valid.
             time_multiplier (float): Specifies the rate at which times passes to allow faster-than-real time modeling.
-            advance_paseos_clock (bool, optional): Whether to advanced the local time of
             the actor and thus local simulation. Defaults to True.
         """
         logger.trace("Initalized ActivityProcessor.")
@@ -48,7 +46,6 @@ class ActivityProcessor:
         self._task = None
         self._paseos_instance = paseos_instance
         self._activity_runner = activity_runner
-        self._advance_paseos_clock = advance_paseos_clock
 
     async def start(self):
         """Starts the processor."""
@@ -86,21 +83,8 @@ class ActivityProcessor:
         logger.debug(f"Time since last update: {elapsed_time}s")
         logger.trace(f"Applying time multiplier of {self._time_multiplier}")
         elapsed_time *= self._time_multiplier
-        if self._advance_paseos_clock:
-            self._paseos_instance.advance_time(elapsed_time)
-
-        # Update actor temperature
-        if (
-            hasattr(self._paseos_instance.local_actor, "_thermal_model")
-            and self._paseos_instance.local_actor._thermal_model is not None
-        ):
-            self._paseos_instance.local_actor._thermal_model.update_temperature(
-                elapsed_time, self._power_consumption_in_watt
-            )
-
-        # Update state of charge
-        self._paseos_instance.local_actor.discharge(
-            self._power_consumption_in_watt, elapsed_time
+        self._paseos_instance.advance_time(
+            elapsed_time, self._power_consumption_in_watt
         )
 
     async def _run(self):
