@@ -30,6 +30,8 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <ul>
     <li><a href="#initializing-paseos">Initializing PASEOS</a></li>
     <li><a href="#using-the-cfg">Using the cfg</a></li>
+    <li><a href="#faster-than-real-time">Faster than real-time execution</a></li>
+    <li><a href="#event-based-mode">Event-based mode</a></li>
     </ul>
     <li><a href="#activities">Activities</a></li>
     <ul>
@@ -279,7 +281,7 @@ print(my_actor.temperature_in_K)
 #### Initializing PASEOS
 We will now show how to create an instance of PASEOS. An instance of PASEOS shall be bounded to one PASEOS [actor](#actor) that we call [local actor](#local-actor). Please, notice that an orbit shall be placed for a [SpacecraftActor](#spacecraftactor) before being added to a PASEOS instance. <br>
 
-### How to instantiate PASEOS
+#### How to instantiate PASEOS
 ```py 
 import pykep as pk
 import paseos
@@ -340,7 +342,7 @@ cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC
 sim = paseos.init_sim(local_actor) 
 ```
 
-### Faster than real-time execution
+#### Faster than real-time execution
 
 In some cases, you may be interested to simulate your spacecraft operating for an extended period. By default, PASEOS operates in real-time, thus this would take a lot of time. However, you can increase the rate of time passing (i.e. the spacecraft moving, power being charged / consumed etc.) using the `time_multiplier` parameter. Set it as follows when initializing PASEOS.
 
@@ -352,9 +354,41 @@ paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos insta
 
 ```
 
+#### Event-based mode
+Alternatively, you can rely on an event-based mode where PASEOS will simulate the physical constraints for an amount of time. The below code shows how to run PASEOS for a fixed amount of time or until an event interrupts it.
+
+```py
+    import pykep as pk
+    import paseos
+    from paseos import ActorBuilder, SpacecraftActor
+
+    # Define the central body as Earth by using pykep APIs.
+    earth = pk.planet.jpl_lp("earth")
+
+    # Define a satellite with some orbit and simple power model
+    my_sat = ActorBuilder.get_actor_scaffold("MySat", SpacecraftActor, pk.epoch(0))
+    ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
+    ActorBuilder.set_power_devices(sat1, 500, 1000, 1)
+
+    # Abort when sat is at 10% battery
+    def constraint_func():
+        return sat1.state_of_charge > 0.1
+
+    # Set some settings to control evaluation of the constraint
+    cfg = load_default_cfg()  # loading cfg to modify defaults
+    cfg.sim.dt = 0.1  # setting timestep of physical models (power, thermal, ...)
+    cfg.sim.activity_timestep = 1.0  # how often constraint func is evaluated 
+    sim = paseos.init_sim(sat1, cfg) # Init simulation
+
+    # Advance for a long time, will interrupt much sooner due to constraint function
+    sim.advance_time(3600, 10, constraint_function=constraint_func)
+```
+
+
 ### Activities
 #### Simple activity
-PASEOS enables the user to register their [activities](#activity) that will be executed on the `local actor`. <br> 
+PASEOS enables the user to register their [activities](#activity) that will be executed on the `local actor`. This is an alternative to the [event-based mode](#event-based-mode)
+
 To register an activity, it is first necessary to define an asynchronous [activity function](#activity-function). The following code snippet shows how to create a simple [activity function](#activity-function) `activity_function_A` that prints "Hello Universe!". Then, it waits for 0.1 s before concluding the activity. <br> When you register an [activity](#activity), you need to specify the power consumption associated to the activity. 
 
 ```py 
