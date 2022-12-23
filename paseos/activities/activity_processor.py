@@ -11,23 +11,6 @@ from paseos.activities.activity_runner import ActivityRunner
 class ActivityProcessor:
     """This class specifies the processor of paseos running in the background during an activity."""
 
-    # This slightly different construction of a singleton object ensures
-    # that we can del the object successfully.
-
-    _instances = WeakValueDictionary()
-
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            # This variable declaration is required to force a
-            # strong reference on the instance.
-            instance = super(ActivityProcessor, self).__call__(*args, **kwargs)
-            self._instances[self] = instance
-            return self._instances[self]
-        else:
-            raise RuntimeError(
-                "Tried to create a second instance of the ActivityProcessor. Only one can be used at a time."
-            )
-
     def __init__(
         self,
         update_interval: float,
