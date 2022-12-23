@@ -51,6 +51,7 @@ class ActorBuilder:
         latitude: float,
         longitude: float,
         elevation: float = 0,
+        minimum_altitude_angle: float = 30,
     ):
         """Define the position of a ground station actor.
 
@@ -61,14 +62,20 @@ class ActorBuilder:
             elevation (float): A distance specifying elevation above (positive)
             or below (negative) the surface of the Earth
             ellipsoid specified by the WSG84 model in meters. Defaults to 0.
+            minimum_altitude_angle (float): Minimum angle above the horizon that
+            this station can communicate with.
         """
         assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
+        assert (
+            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
+        ), "0 <= minimum_altitude_angle <= 90."
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
             longitude_degrees=longitude,
             elevation_m=elevation,
         )
+        actor._minimum_altitude_angle = minimum_altitude_angle
 
     def set_orbit(
         actor: SpacecraftActor,

@@ -1,13 +1,18 @@
 from loguru import logger
 import pykep as pk
+import os
 import numpy as np
 from skspatial.objects import Line
 from skyfield.units import AU_M
 from skyfield.api import load
 from skyfield.vectorlib import VectorFunction
 
+
+_SKYFIELD_EARTH_PATH = os.path.join(
+    os.path.dirname(__file__) + "/../resources/", "de421.bsp"
+)
 # Skyfield Earth, in the future we may not always want to load this.
-_SKYFIELD_EARTH = load("de421.bsp")["earth"]
+_SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
 
 class SkyfieldSkyCoordinate(VectorFunction):
@@ -203,6 +208,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "GroundstationActor"
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -210,6 +217,8 @@ def is_in_line_of_sight(
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "GroundstationActor"
     ):
+        if minimum_altitude_angle is None:
+            minimum_altitude_angle = other_actor._minimum_altitude_angle
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )
