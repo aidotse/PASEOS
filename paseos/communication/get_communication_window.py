@@ -1,5 +1,7 @@
 """This file contains models of the communication transmission through a channel"""
 
+import sys
+
 import pykep as pk
 from loguru import logger
 
@@ -8,27 +10,30 @@ def get_communication_window(
     local_actor,
     local_actor_communication_link_name,
     target_actor,
-    dt: float,
-    t0: pk.epoch,
-    data_to_send_in_b: int,
+    dt: float = 10.0,
+    t0: pk.epoch = None,
+    data_to_send_in_b: int = sys.maxsize,
     window_timeout_value_in_s=7200,
 ):
     """Returning the communication window and the amount of data that can be transmitted from the local to the target actor.
 
     Args:
-        local_actor (base_actor): local actor.
-        local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
+        local_actor (base_actor): Local actor.
+        local_actor_communication_link_name (base_actor):  Name of the local_actor's communication link to use.
         target_actor (base_actor): other actor.
-        dt (float): simulation timestep [s].
-        t0 (pk.epoch): current simulation time.
-        data_to_send_in_b (int): amount of data to transmit [b].
-        window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
+        dt (float): Simulation timestep [s]. Defaults to 10.
+        t0 (pk.epoch): Current simulation time. Defaults to local time.
+        data_to_send_in_b (int): Amount of data to transmit [b]. Defaults to maxint.
+        window_timeout_value_in_s (float, optional): Timeout for estimating the communication window. Defaults to 7200.0.
     Returns:
-        pk.epoch: communication window start time.
-        pk.epoch: communication window end time.
-        int: data that can be transmitted in the communication window [b].
+        pk.epoch: Communication window start time.
+        pk.epoch: Communication window end time.
+        int: Data that can be transmitted in the communication window [b].
     """
     logger.debug(f"Computing comms window between {local_actor} and {target_actor}")
+
+    if t0 is None:
+        t0 = local_actor.local_time
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
         "Trying to use a not-existing communication link with the name: "
