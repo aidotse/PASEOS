@@ -90,9 +90,9 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
     for elements in elements_list:
         pos, v = pk.par2ic(elements, pk.MU_EARTH)
 
-        # convert to km and numpy
-        pos = np.asarray(pos) / 1000.0
-        v = np.asarray(v) / 1000.0
+        # convert to numpy
+        pos = np.asarray(pos)
+        v = np.asarray(v)
 
         satellites.append((pos, v))
 
