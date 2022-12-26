@@ -1,11 +1,11 @@
-from loguru import logger
-import pykep as pk
-
-from skspatial.objects import Sphere
-
 from abc import ABC
 
+from loguru import logger
+import pykep as pk
+import numpy as np
+from skspatial.objects import Sphere
 from dotmap import DotMap
+
 from ..communication.get_communication_window import get_communication_window
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
 from ..power.is_in_eclipse import is_in_eclipse
@@ -19,6 +19,9 @@ class BaseActor(ABC):
 
     # Actor name, has to be unique
     name = None
+
+    # Actor's mass in kg
+    _mass = None
 
     # Timestep this actor's info is at (excl. pos/vel)
     _local_time = None
@@ -45,8 +48,11 @@ class BaseActor(ABC):
 
     # The following variables are used to track last evaluated state vectors to avoid recomputation.
     _last_position = None
+    _time_of_last_position = None
     _last_velocity = None
     _last_eclipse_status = None
+    _time_of_last_eclipse_status = None
+    _last_altitude = None
 
     def __init__(self, name: str, epoch: pk.epoch) -> None:
         """Constructor for a base actor
@@ -61,6 +67,15 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
+
+    @property
+    def mass(self) -> float:
+        """Returns actor's mass in kg.
+
+        Returns:
+            float: Mass
+        """
+        return self._mass
 
     @property
     def current_activity(self) -> str:
@@ -134,6 +149,30 @@ class BaseActor(ABC):
         """
         pass
 
+    @property
+    def altitude(
+        self,
+        t0: pk.epoch = None,
+    ) -> float:
+        """Returns altitude above [0,0,0]. Will only compute if not computed for this timestep.
+
+        Args:
+            t0 (pk.epoch): Epoch to get altitude at. Defaults to local time.
+
+        Returns:
+            float: Altitude in meters.
+        """
+        if t0 is None:
+            t0 = self._local_time
+        if (
+            t0.mjd2000 == self._time_of_last_position
+            and self._last_altitude is not None
+        ):
+            return self._last_altitude
+        else:
+            self._last_altitude = np.sqrt(np.sum(np.power(self.get_position(t0), 2)))
+            return self._last_altitude
+
     def get_position(self, epoch: pk.epoch):
         """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
 
@@ -160,6 +199,7 @@ class BaseActor(ABC):
         if self._orbital_parameters is None:
             if self._position is not None:
                 self._last_position = self._position
+                self._time_of_last_position = epoch.mjd2000
                 return self._position
         else:
             return self._orbital_parameters.eph(epoch)[0]
@@ -192,6 +232,7 @@ class BaseActor(ABC):
         pos, vel = self._orbital_parameters.eph(epoch)
         self._last_position = pos
         self._last_velocity = vel
+        self._time_of_last_position = epoch.mjd2000
         return pos, vel
 
     def is_in_line_of_sight(
@@ -226,7 +267,11 @@ class BaseActor(ABC):
         """
         if t is None:
             t = self._local_time
-        self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
+        if t.mjd2000 == self._time_of_last_eclipse_status:
+            return self._last_eclipse_status
+        else:
+            self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._time_of_last_eclipse_status = t.mjd2000
         return self._last_eclipse_status
 
     def get_communication_window(

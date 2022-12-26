@@ -107,6 +107,16 @@ class ActivityProcessor:
         if self._advance_paseos_clock:
             self._paseos_instance.advance_time(elapsed_time)
 
+        # Update actor temperature
+        if (
+            hasattr(self._paseos_instance.local_actor, "_thermal_model")
+            and self._paseos_instance.local_actor._thermal_model is not None
+        ):
+            self._paseos_instance.local_actor._thermal_model.update_temperature(
+                elapsed_time, self._power_consumption_in_watt
+            )
+
+        # Update state of charge
         self._paseos_instance.local_actor.discharge(
             self._power_consumption_in_watt, elapsed_time
         )
