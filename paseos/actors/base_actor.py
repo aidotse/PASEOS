@@ -5,8 +5,6 @@ import pykep as pk
 import numpy as np
 from skspatial.objects import Sphere
 from dotmap import DotMap
-
-from ..communication.get_communication_window import get_communication_window
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
 from ..power.is_in_eclipse import is_in_eclipse
 
@@ -273,36 +271,3 @@ class BaseActor(ABC):
             self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
             self._time_of_last_eclipse_status = t.mjd2000
         return self._last_eclipse_status
-
-    def get_communication_window(
-        self,
-        local_actor_communication_link_name,
-        target_actor,
-        dt: float,
-        t0: float,
-        data_to_send_in_b: int,
-        window_timeout_value_in_s=7200.0,
-    ):
-        """Returning the communication window and the data amount that can be transmitted from the local to the target actor.
-
-        Args:
-            local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
-            target_actor (base_actor): other actor.
-            dt (float): simulation timestep.
-            t0 (pk.epoch): current simulation time [s].
-            data_to_send_in_b (int): amount of data to transmit [b].
-            window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
-        Returns:
-            pk.epoch: communication window start time.
-            k.epoch: communication window end time.
-            int: data that can be transmitted in the communication window [b].
-        """
-        return get_communication_window(
-            self,
-            local_actor_communication_link_name,
-            target_actor,
-            dt,
-            t0,
-            data_to_send_in_b,
-            window_timeout_value_in_s,
-        )
