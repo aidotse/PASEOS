@@ -3,6 +3,7 @@ import csv
 from loguru import logger
 from dotmap import DotMap
 import pykep as pk
+import matplotlib.pyplot as plt
 
 from paseos.actors.base_actor import BaseActor
 from paseos.actors.spacecraft_actor import SpacecraftActor
@@ -28,6 +29,31 @@ class OperationsMonitor:
         self._log.known_actors = []
         self._log.position = []
         self._log.velocity = []
+
+    def __getitem__(self, item):
+        """Get a logged attributes values.
+
+        Args:
+            item (str): Name of item. Available are "timesteps","current_activity","state_of_charge",
+            "is_in_eclipse","known_actors","position","velocity","temperature"
+        """
+        assert item in self._log.keys(), (
+            'Untracked quantity. Available are "timesteps","current_activity","state_of_charge",'
+            + '"is_in_eclipse","known_actors","position","velocity","temperature"'
+        )
+        return self._log[item]
+
+    def plot(self, item):
+        assert item in self._log.keys(), (
+            'Untracked quantity. Available are "timesteps","current_activity","state_of_charge",'
+            + '"is_in_eclipse","known_actors","position","velocity","temperature"'
+        )
+        values = self._log[item]
+        plt.Figure(figsize=(6, 2), dpi=150)
+        t = self._log.timesteps
+        plt.plot(t, values)
+        plt.xlabel("Time [s]")
+        plt.ylabel(item.replace("_", " "))
 
     def log(
         self,
