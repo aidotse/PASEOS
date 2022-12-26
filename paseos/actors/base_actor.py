@@ -6,7 +6,6 @@ from skspatial.objects import Sphere
 from abc import ABC
 
 from dotmap import DotMap
-from ..communication.get_communication_window import get_communication_window
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
 from ..power.is_in_eclipse import is_in_eclipse
 

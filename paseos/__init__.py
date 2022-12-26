@@ -35,8 +35,8 @@ def init_sim(local_actor: BaseActor, cfg=None):
 __all__ = [
     "ActorBuilder",
     "BaseActor",
-    "find_next_window"
-    "get_communication_window"
+    "find_next_window",
+    "get_communication_window",
     "GroundstationActor",
     "load_default_cfg",
     "PASEOS",
