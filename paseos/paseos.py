@@ -138,6 +138,15 @@ class PASEOS:
         self._known_actors[actor.name] = actor
 
     @property
+    def monitor(self):
+        """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
+
+        Returns:
+            OperationsMonitor: Monitor object.
+        """
+        return self._operations_monitor
+
+    @property
     def is_running_activity(self):
         """Allows checking whether there is currently an activity running.
 

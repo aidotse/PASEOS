@@ -56,4 +56,7 @@ async def test_monitor():
     sim.perform_activity("Activity_2")
     await wait_for_activity(sim)
 
+    # Try out item function
+    sim.monitor["state_of_charge"]
+    sim.monitor.plot("state_of_charge")
     sim.save_status_log_csv("test.csv")
