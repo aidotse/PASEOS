@@ -53,7 +53,7 @@ class OperationsMonitor:
         t = self._log.timesteps
         plt.plot(t, values)
         plt.xlabel("Time [s]")
-        plt.ylabel(item)
+        plt.ylabel(item.replace("_", " "))
 
     def log(
         self,

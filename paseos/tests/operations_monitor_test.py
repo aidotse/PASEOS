@@ -59,4 +59,5 @@ async def test_monitor():
     # Try out item function
     sim.monitor["state_of_charge"]
     sim.monitor.plot("state_of_charge")
+
     sim.save_status_log_csv("test.csv")
