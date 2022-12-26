@@ -39,7 +39,6 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
     # -------------------------------------------------------------------------------------------------------------------
 
     minW = startingW
-    maxW = W_area + startingW
 
     a = altitude + 6371000  # in [m], earth radius included
     e = 0
