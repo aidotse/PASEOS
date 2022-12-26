@@ -80,9 +80,6 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         W = W + pStep
         M = plane_count * sExtraStep  # equals 0 + count*0 = 0 in the usual case
 
-    shell = (altitude, inclination, nPlanes, nSats)
-    xparams = (offsetM, argPeriapsis, startingW, W_area)
-
     print("Added " + str(len(elements_list)) + " planets")
 
     print("Computing positions and velocities")
