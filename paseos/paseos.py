@@ -106,7 +106,9 @@ class PASEOS:
             ):
                 time_since_constraint_check = 0
                 if not constraint_function():
-                    logger.info("Time advancing interrupted. Constraint false.")
+                    logger.info(
+                        f"Actor: {self.local_actor} - Time advancing interrupted. Constraint false."
+                    )
                     logger.debug("New time is: " + str(self._state.time) + " s.")
                     return
 
