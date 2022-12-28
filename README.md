@@ -43,6 +43,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#utilities">Utilities</a></li>
     <ul>
     <li><a href="#visualization">Visualization</a></li>
+    <li><a href="#monitor">Monitoring Simulation Status</a></li>
     <li><a href="#writing-simulation-results-to-a-file">Writing Simulation Results to a File</a></li>
     </ul>
     </ul>
@@ -671,6 +672,23 @@ Finally, the time in the lower left and lower right corners corresponds to the e
     Snapshot of PASEOS visualization
   </p>
 </p>
+
+#### Monitoring Simulation Status
+
+You can easily track the status of a PASEOS simulation via the `monitor` which keeps track of actor status.
+
+It allows access like this
+
+```py
+(...) # actor definition etc., see above
+instance = paseos.init_sim(local_actor=my_local_actor)
+
+(...) # running the simulation
+
+# access tracked parameters
+timesteps = instance.monitor["timesteps"]
+state_of_charge = instance.monitor["state_of_charge"]
+```
 
 #### Writing Simulation Results to a File
 
