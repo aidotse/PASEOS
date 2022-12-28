@@ -52,11 +52,11 @@ class PASEOS:
         self._known_actors = {}
         self._local_actor = local_actor
         # Update local actor time to simulation start time.
-        self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
+        self.local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
         self._activity_manager = ActivityManager(
             self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
         )
-        self._operations_monitor = OperationsMonitor(self._local_actor.name)
+        self._operations_monitor = OperationsMonitor(self.local_actor.name)
 
     def save_status_log_csv(self, filename) -> None:
         """Saves the status log incl. all kinds of information such as battery charge,
@@ -69,7 +69,7 @@ class PASEOS:
 
     def log_status(self):
         """Updates the status log."""
-        self._operations_monitor.log(self._local_actor, self.known_actor_names)
+        self._operations_monitor.log(self.local_actor, self.known_actor_names)
 
     def advance_time(
         self,
@@ -118,26 +118,25 @@ class PASEOS:
             # Perform updates for local actor (e.g. charging)
             # Each actor only updates itself
             # charge from current moment to time after timestep
-            self._local_actor.charge(
-                self._local_actor.local_time,
-                pk.epoch((self._state.time + dt) * pk.SEC2DAY),
-            )
+            if self.local_actor.has_power_model:
+                self.local_actor.charge(
+                    self.local_actor.local_time,
+                    pk.epoch((self._state.time + dt) * pk.SEC2DAY),
+                )
 
             # Update actor temperature
-            if (
-                hasattr(self._local_actor, "_thermal_model")
-                and self._local_actor._thermal_model is not None
-            ):
-                self._local_actor._thermal_model.update_temperature(
+            if self.local_actor.has_thermal_model:
+                self.local_actor._thermal_model.update_temperature(
                     dt, current_power_consumption_in_W
                 )
 
             # Update state of charge
-            self._local_actor.discharge(current_power_consumption_in_W, dt)
+            if self.local_actor.has_power_model:
+                self.local_actor.discharge(current_power_consumption_in_W, dt)
 
             self._state.time += dt
             time_since_constraint_check += dt
-            self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+            self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
             # Check if we should update the status log
             if self._time_since_last_log > self._cfg.io.logging_interval:
