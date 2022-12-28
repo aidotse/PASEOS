@@ -67,6 +67,27 @@ class BaseActor(ABC):
         self._communication_devices = DotMap(_dynamic=False)
 
     @property
+    def has_power_model(self) -> bool:
+        """Returns true if actor's battery is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return (
+            hasattr(self, "_battery_level_in_Ws")
+            and self._battery_level_in_Ws is not None
+        )
+
+    @property
+    def has_thermal_model(self) -> bool:
+        """Returns true if actor's temperature is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_thermal_model") and self._thermal_model is not None
+
+    @property
     def mass(self) -> float:
         """Returns actor's mass in kg.
 
