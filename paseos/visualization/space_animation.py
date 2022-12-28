@@ -32,7 +32,7 @@ class SpaceAnimation(Animation):
         self._norm_coeff = self._local_actor._central_body.radius
 
         for known_actor in current_actors:
-            pos, _ = known_actor.get_position_velocity(self._local_actor.local_time)
+            pos = known_actor.get_position(self._local_actor.local_time)
             pos_norm = [x / self._norm_coeff for x in pos]
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
@@ -145,23 +145,17 @@ class SpaceAnimation(Animation):
             str: text to populate the textbox.
         """
         info_str = f"{actor.name}"
-        if isinstance(actor, SpacecraftActor):
-            if actor.battery_level_in_Ws is not None:
+        if isinstance(actor, SpacecraftActor) or isinstance(actor, GroundstationActor):
+            if actor.has_power_model:
                 battery_level = actor.state_of_charge * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
-            if actor._thermal_model is not None:
+            if actor.has_thermal_model:
                 info_str += f"\nTemperature: {actor.temperature_in_K}K,{actor.temperature_in_K-273.15}C"
 
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
                 info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
-
-        elif isinstance(actor, GroundstationActor):
-            # TODO: implement textbox for groundstation
-            raise NotImplementedError(
-                "SpacePlot is currently not implemented for actor type" + type(actor)
-            )
         else:
             raise NotImplementedError(
                 "SpacePlot is currently not implemented for actor type" + type(actor)
@@ -203,7 +197,9 @@ class SpaceAnimation(Animation):
             logger.trace(f"Position for object: {data}")
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
-                if isinstance(obj.actor, SpacecraftActor):
+                if isinstance(obj.actor, SpacecraftActor) or isinstance(
+                    obj.actor, GroundstationActor
+                ):
                     logger.trace("Updating SpacecraftActor.")
 
                     # update trajectory
@@ -217,12 +213,10 @@ class SpaceAnimation(Animation):
                     actor_info = self._populate_textbox(obj.actor)
                     obj.plot.text.set_position_3d(data[-1, :] + self._textbox_offset)
                     obj.plot.text.set_text(actor_info)
-
-                elif isinstance(obj.actor, GroundstationActor):
-                    # TODO: implement update of groundstation object
-                    pass
             else:
-                if isinstance(obj.actor, SpacecraftActor):
+                if isinstance(obj.actor, SpacecraftActor) or isinstance(
+                    obj.actor, GroundstationActor
+                ):
                     trajectory = self.ax_3d.plot3D(data[0, 0], data[0, 1], data[0, 2])[
                         0
                     ]
@@ -259,13 +253,6 @@ class SpaceAnimation(Animation):
                             clip_on=True,
                             fontsize=8,
                         )
-
-                elif isinstance(obj.actor, GroundstationActor):
-                    # TODO: implement initial rendering of groundstation object
-                    raise NotImplementedError(
-                        "SpacePlot is currently not implemented for actor type"
-                        + type(obj.actor)
-                    )
 
         self.ax_3d.set_box_aspect(
             (
