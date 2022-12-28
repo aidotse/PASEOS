@@ -6,7 +6,6 @@ import pykep as pk
 import matplotlib.pyplot as plt
 
 from paseos.actors.base_actor import BaseActor
-from paseos.actors.spacecraft_actor import SpacecraftActor
 
 
 class OperationsMonitor:
