@@ -10,22 +10,7 @@ from paseos.utils.is_notebook import is_notebook
 
 
 class ActivityManager:
-    """This class is used to handle registering, performing and collection of activities.
-    There can only be one instance of it and each paseos instance has one."""
-
-    def __new__(
-        self,
-        paseos_instance,
-        paseos_update_interval: float,
-        paseos_time_multiplier: float,
-    ):
-        if not hasattr(self, "instance"):
-            self.instance = super(ActivityManager, self).__new__(self)
-        else:
-            logger.debug(
-                "Tried to create another instance of ActivityManager. Keeping original one..."
-            )
-        return self.instance
+    """This class is used to handle registering, performing and collection of activities."""
 
     def __init__(
         self,
@@ -33,7 +18,7 @@ class ActivityManager:
         paseos_update_interval: float,
         paseos_time_multiplier: float,
     ):
-        """Creates a new activity manager. Singleton, so only one instance allowed.
+        """Creates a new activity manager linked to a paseos instance.
 
         Args:
             paseos_instance (PASEOS): The main paseos instance.

@@ -41,15 +41,6 @@ class PASEOS:
     # Use automatic clock (default on for now)
     use_automatic_clock = True
 
-    def __new__(self, local_actor: BaseActor, cfg):
-        if not hasattr(self, "instance"):
-            self.instance = super(PASEOS, self).__new__(self)
-        else:
-            logger.warning(
-                "Tried to create another instance of PASEOS simulation.Keeping original one..."
-            )
-        return self.instance
-
     def __init__(self, local_actor: BaseActor, cfg=None):
         """Initalize PASEOS
 
