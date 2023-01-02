@@ -25,6 +25,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#set-an-orbit-for-a-paseos-spacecraftactor">Set an orbit for a PASEOS SpacecraftActor</a></li>
     <li><a href="#how-to-add-a-communication-device">How to add a communication device</a></li>
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
+    <li><a href="#thermal-modeling">Thermal Modeling</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
