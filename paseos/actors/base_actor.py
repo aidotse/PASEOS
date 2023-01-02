@@ -20,9 +20,6 @@ class BaseActor(ABC):
     # Actor name, has to be unique
     name = None
 
-    # Actor's mass in kg
-    _mass = None
-
     # Timestep this actor's info is at (excl. pos/vel)
     _local_time = None
 
@@ -67,15 +64,6 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
-
-    @property
-    def mass(self) -> float:
-        """Returns actor's mass in kg.
-
-        Returns:
-            float: Mass
-        """
-        return self._mass
 
     @property
     def current_activity(self) -> str:
