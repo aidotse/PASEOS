@@ -38,7 +38,7 @@ async def test_thermal():
 
     # init simulation
     cfg = load_default_cfg()  # loading cfg to modify defaults
-    cfg.sim.dt = 5.0  # setting lower timestep to run things quickly
+    cfg.sim.dt = 5.0  # setting higher timestep to run things quickly
     cfg.sim.activity_timestep = 1.0
     cfg.io.logging_interval = 10.0  # log every 0.25 seconds
     cfg.sim.time_multiplier = 200  # speed up execution for convenience

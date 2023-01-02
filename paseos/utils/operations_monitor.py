@@ -71,8 +71,8 @@ class OperationsMonitor:
         )
         self._log.timesteps.append(local_actor.local_time.mjd2000 * pk.DAY2SEC)
         self._log.current_activity.append(local_actor.current_activity)
-        self._log.position.append(local_actor._last_position)
-        self._log.velocity.append(local_actor._last_velocity)
+        self._log.position.append(local_actor._previous_position)
+        self._log.velocity.append(local_actor._previous_velocity)
         self._log.known_actors.append(known_actors)
         if local_actor.has_thermal_model:
             self._log.temperature.append(local_actor.temperature_in_K)
@@ -83,10 +83,10 @@ class OperationsMonitor:
         else:
             self._log.state_of_charge.append(1.0)
 
-        if local_actor._last_eclipse_status is None:
+        if local_actor._previous_eclipse_status is None:
             self._log.is_in_eclipse.append(False)
         else:
-            self._log.is_in_eclipse.append(local_actor._last_eclipse_status)
+            self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
 
     def save_to_csv(self, filename):
         """Write the created log file to a csv file.

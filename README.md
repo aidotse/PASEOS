@@ -1,8 +1,18 @@
-# PASEOS
-
-PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+## PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+![Read the Docs (version)](https://img.shields.io/readthedocs/paseos/latest?style=flat-square) ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/aidotse/PASEOS/.github/workflows/run_tests.yml?branch=main?style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/aidotse/PASEOS?style=flat-square)
+![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square) 
+![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
 
 ![Alt Text](resources/images/sat_gif.gif)
+
+<p align="left">
+    <a href="https://paseos.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Request Feature</a>
+</p>
 
 Disclaimer: This project is currently under development. Use at your own risk.
 
@@ -25,6 +35,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#set-an-orbit-for-a-paseos-spacecraftactor">Set an orbit for a PASEOS SpacecraftActor</a></li>
     <li><a href="#how-to-add-a-communication-device">How to add a communication device</a></li>
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
+    <li><a href="#thermal-modeling">Thermal Modeling</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -305,6 +316,9 @@ ActorBuilder.set_orbit(actor=local_actor,
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor) 
 ```
+
+For each actor you wish to model, you can create a PASEOS instance. Running multiple instances on the same machine / thread is supported.
+
 #### How to use the cfg
 When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration. <br> The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` by loading a custom configuration.
 
