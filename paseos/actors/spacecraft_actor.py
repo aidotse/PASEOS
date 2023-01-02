@@ -16,6 +16,11 @@ class SpacecraftActor(BaseActor):
     _max_battery_level_in_Ws = None
     _charging_rate_in_W = None
 
+    # Actor's mass in kg
+    _mass = None
+
+    _thermal_model = None
+
     def __init__(
         self,
         name: str,
@@ -47,6 +52,24 @@ class SpacecraftActor(BaseActor):
             float: current battery level in wattseconds.
         """
         return self._battery_level_in_Ws
+
+    @property
+    def mass(self) -> float:
+        """Returns actor's mass in kg.
+
+        Returns:
+            float: Mass
+        """
+        return self._mass
+
+    @property
+    def temperature_in_K(self) -> float:
+        """Returns the current temperature of the actor in K.
+
+        Returns:
+            float: Temperature in Kelvin.
+        """
+        return self._thermal_model.temperature_in_K
 
     @property
     def state_of_charge(self):
