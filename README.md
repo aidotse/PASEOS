@@ -1,8 +1,18 @@
-# PASEOS
-
-PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+## PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+![Read the Docs (version)](https://img.shields.io/readthedocs/paseos/latest?style=flat-square) ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/aidotse/PASEOS/.github/workflows/run_tests.yml?branch=main?style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/aidotse/PASEOS?style=flat-square)
+![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square) 
+![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
 
 ![Alt Text](resources/images/sat_gif.gif)
+
+<p align="left">
+    <a href="https://paseos.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Request Feature</a>
+</p>
 
 Disclaimer: This project is currently under development. Use at your own risk.
 
