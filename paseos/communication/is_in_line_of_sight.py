@@ -1,13 +1,18 @@
 from loguru import logger
 import pykep as pk
+import os
 import numpy as np
 from skspatial.objects import Line
 from skyfield.units import AU_M
 from skyfield.api import load
 from skyfield.vectorlib import VectorFunction
 
+
+_SKYFIELD_EARTH_PATH = os.path.join(
+    os.path.dirname(__file__) + "/../resources/", "de421.bsp"
+)
 # Skyfield Earth, in the future we may not always want to load this.
-_SKYFIELD_EARTH = load("de421.bsp")["earth"]
+_SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
 
 class SkyfieldSkyCoordinate(VectorFunction):

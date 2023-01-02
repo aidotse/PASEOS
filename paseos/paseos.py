@@ -36,19 +36,10 @@ class PASEOS:
 
     # Used to monitor the local actor over execution and write performance stats
     _operations_monitor = None
-    _time_since_last_log = sys.float_info.max
+    _time_since_previous_log = sys.float_info.max
 
     # Use automatic clock (default on for now)
     use_automatic_clock = True
-
-    def __new__(self, local_actor: BaseActor, cfg):
-        if not hasattr(self, "instance"):
-            self.instance = super(PASEOS, self).__new__(self)
-        else:
-            logger.warning(
-                "Tried to create another instance of PASEOS simulation.Keeping original one..."
-            )
-        return self.instance
 
     def __init__(self, local_actor: BaseActor, cfg=None):
         """Initalize PASEOS
@@ -113,11 +104,11 @@ class PASEOS:
             self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
             # Check if we should update the status log
-            if self._time_since_last_log > self._cfg.io.logging_interval:
+            if self._time_since_previous_log > self._cfg.io.logging_interval:
                 self.log_status()
-                self._time_since_last_log = 0
+                self._time_since_previous_log = 0
             else:
-                self._time_since_last_log += dt
+                self._time_since_previous_log += dt
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
 

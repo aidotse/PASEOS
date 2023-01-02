@@ -1,11 +1,11 @@
-from loguru import logger
-import pykep as pk
-
-from skspatial.objects import Sphere
-
 from abc import ABC
 
+from loguru import logger
+import pykep as pk
+import numpy as np
+from skspatial.objects import Sphere
 from dotmap import DotMap
+
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
 from ..power.is_in_eclipse import is_in_eclipse
 
@@ -43,9 +43,12 @@ class BaseActor(ABC):
     _current_activity = None
 
     # The following variables are used to track last evaluated state vectors to avoid recomputation.
-    _last_position = None
-    _last_velocity = None
-    _last_eclipse_status = None
+    _previous_position = None
+    _time_of_previous_position = None
+    _previous_velocity = None
+    _previous_eclipse_status = None
+    _time_of_previous_eclipse_status = None
+    _previous_altitude = None
 
     def __init__(self, name: str, epoch: pk.epoch) -> None:
         """Constructor for a base actor
@@ -133,6 +136,32 @@ class BaseActor(ABC):
         """
         pass
 
+    @property
+    def altitude(
+        self,
+        t0: pk.epoch = None,
+    ) -> float:
+        """Returns altitude above [0,0,0]. Will only compute if not computed for this timestep.
+
+        Args:
+            t0 (pk.epoch): Epoch to get altitude at. Defaults to local time.
+
+        Returns:
+            float: Altitude in meters.
+        """
+        if t0 is None:
+            t0 = self._local_time
+        if (
+            t0.mjd2000 == self._time_of_previous_position
+            and self._previous_altitude is not None
+        ):
+            return self._previous_altitude
+        else:
+            self._previous_altitude = np.sqrt(
+                np.sum(np.power(self.get_position(t0), 2))
+            )
+            return self._previous_altitude
+
     def get_position(self, epoch: pk.epoch):
         """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
 
@@ -158,7 +187,8 @@ class BaseActor(ABC):
         # If the actor has no orbit, return position
         if self._orbital_parameters is None:
             if self._position is not None:
-                self._last_position = self._position
+                self._previous_position = self._position
+                self._time_of_previous_position = epoch.mjd2000
                 return self._position
         else:
             return self._orbital_parameters.eph(epoch)[0]
@@ -189,8 +219,9 @@ class BaseActor(ABC):
             + " (mjd2000)."
         )
         pos, vel = self._orbital_parameters.eph(epoch)
-        self._last_position = pos
-        self._last_velocity = vel
+        self._previous_position = pos
+        self._previous_velocity = vel
+        self._time_of_previous_position = epoch.mjd2000
         return pos, vel
 
     def is_in_line_of_sight(
@@ -225,5 +256,9 @@ class BaseActor(ABC):
         """
         if t is None:
             t = self._local_time
-        self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
-        return self._last_eclipse_status
+        if t.mjd2000 == self._time_of_previous_eclipse_status:
+            return self._previous_eclipse_status
+        else:
+            self._previous_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._time_of_previous_eclipse_status = t.mjd2000
+        return self._previous_eclipse_status

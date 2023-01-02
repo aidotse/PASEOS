@@ -1,8 +1,18 @@
-# PASEOS
-
-PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+## PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
+![Read the Docs (version)](https://img.shields.io/readthedocs/paseos/latest?style=flat-square) ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/aidotse/PASEOS/.github/workflows/run_tests.yml?branch=main?style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/aidotse/PASEOS?style=flat-square)
+![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square) 
+![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
 
 ![Alt Text](resources/images/sat_gif.gif)
+
+<p align="left">
+    <a href="https://paseos.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/aidotse/PASEOS/issues">Request Feature</a>
+</p>
 
 Disclaimer: This project is currently under development. Use at your own risk.
 
@@ -25,6 +35,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#set-an-orbit-for-a-paseos-spacecraftactor">Set an orbit for a PASEOS SpacecraftActor</a></li>
     <li><a href="#how-to-add-a-communication-device">How to add a communication device</a></li>
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
+    <li><a href="#thermal-modeling">Thermal Modeling</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -231,10 +242,55 @@ ActorBuilder.set_power_devices(actor=sat_actor,
                                # Charging rate in W
                                charging_rate_in_W=10)
 ```
+
+#### Thermal Modelling
+To model thermal constraints on spacecraft we utilize a model inspired by the one-node model described in [Martínez - Spacecraft Thermal Modelling and Test](http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf). Thus, we model the change in temperature as 
+
+$mc \, \frac{dT}{dt} = \dot{Q}_{solar} + \dot{Q}_{albedo} + \dot{Q}_{central_body_IR} - \dot{Q}_{dissipated} + \dot{Q}_{activity}.$
+
+This means your spacecraft will heat up due to being in sunlight, albedo reflections, infrared radiation emitted by the central body as well as due to power consumption of activities. It will cool down due to heat dissipation.
+
+The model is only available for a [SpacecraftActor](#spacecraftactor) and (like all the physical models) only evaluated for the [local actor](#local-actor).
+
+The following parameters have to be specified for this:
+* Spacecraft mass [kg], initial temperature [K], emissive area (for heat disspiation) and thermal capacity [J / (kg * K)]
+* Spacecraft absorptance of Sun light, infrared light. [0 to 1]
+* Spacecraft area [m^2] facing Sun and central body, respectively
+* Solar irradiance in this orbit [W] (defaults to 1360W)
+* Central body surface temperature [k] (defaults to 288K)
+* Central body emissivity and reflectance [0 to 1] (defaults to 0.6 and 0.3)
+* Ratio of power converted to heat (defaults to 0.5)
+
+To use it, simply equip your [SpacecraftActor](#spacecraftactor) with a thermal model with:
+
+```py
+from paseos import SpacecraftActor, ActorBuilder
+my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch(0))
+ActorBuilder.set_thermal_model(
+    actor=my_actor,
+    actor_mass=50.0, # Setting mass to 50kg
+    actor_initial_temperature_in_K=273.15, # Setting initialtemperature to 0°C
+    actor_sun_absorptance=1.0, # Depending on material, define absorptance
+    actor_infrared_absorptance=1.0, # Depending on material, define absorptance
+    actor_sun_facing_area=1.0, # Area in m2
+    actor_central_body_facing_area=1.0, # Area in m2
+    actor_emissive_area=1.0, # Area in m2
+    actor_thermal_capacity=1000, # Capacity in J / (kg * K)
+    # ... leaving out default valued parameters, see docs for details
+)
+```
+
+The model is evaluated automatically during [activities](#activity). You can check the spacecraft temperature with:
+
+```py
+print(my_actor.temperature_in_K)
+```
+
 ### Simulation Settings
 #### Initializing PASEOS
 We will now show how to create an instance of PASEOS. An instance of PASEOS shall be bounded to one PASEOS [actor](#actor) that we call [local actor](#local-actor). Please, notice that an orbit shall be placed for a [SpacecraftActor](#spacecraftactor) before being added to a PASEOS instance. <br>
 
+### How to instantiate PASEOS
 ```py 
 import pykep as pk
 import paseos
@@ -257,6 +313,9 @@ ActorBuilder.set_orbit(actor=local_actor,
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor) 
 ```
+
+For each actor you wish to model, you can create a PASEOS instance. Running multiple instances on the same machine / thread is supported.
+
 #### How to use the cfg
 When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration. <br> The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` by loading a custom configuration.
 

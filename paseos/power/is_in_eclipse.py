@@ -21,7 +21,9 @@ def is_in_eclipse(actor, central_body: pk.planet, t: pk.epoch, plot=False) -> bo
     try:
         logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
     except RuntimeError:
-        logger.debug(f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000).")
+        logger.debug(
+            f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000)."
+        )
 
     # Compute central body position in solar reference frame
     r_central_body_heliocentric, _ = np.array(central_body.eph(t))
@@ -31,7 +33,7 @@ def is_in_eclipse(actor, central_body: pk.planet, t: pk.epoch, plot=False) -> bo
     )
 
     # Compute satellite / actor position in solar reference frame
-    r_sat_central_body_frame = np.array(actor.get_position_velocity(t)[0])
+    r_sat_central_body_frame = np.array(actor.get_position(t))
     logger.trace("r_sat_central_body_frame is" + str(r_sat_central_body_frame))
     r_sat_heliocentric = r_central_body_heliocentric + r_sat_central_body_frame
     logger.trace("r_sat_heliocentric is" + str(r_sat_heliocentric))
