@@ -92,9 +92,9 @@ class ThermalModel:
         self._body_surface_temperature_in_K = body_surface_temperature_in_K
         self._body_reflectance = body_reflectance
 
-        self._initialize_constant_vars()
+        self._initialize_constants()
 
-    def _initialize_constant_vars(self):
+    def _initialize_constants(self):
         """This function initializes a bunch of values which will remain constant over actor operations."""
         logger.trace("Initializing thermal model constants.")
 
