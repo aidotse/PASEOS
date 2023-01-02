@@ -31,7 +31,7 @@ class ThermalModel:
     # Ratio at which activities generate heat
     _power_consumption_to_heat_ratio = None
 
-    _bolzmann_constant = 5.670374419e-8  # in W m^-2 K^-4
+    _boltzmann_constant = 5.670374419e-8  # in W m^-2 K^-4
 
     def __init__(
         self,
@@ -120,7 +120,7 @@ class ThermalModel:
             self._actor_infrared_absorptance
             * self._body_emissivity
             * self._actor_central_body_facing_area
-            * self._bolzmann_constant
+            * self._boltzmann_constant
             * self._body_surface_temperature_in_K**4
         )
         logger.trace(f"self._C_body_emission={self._C_body_emission}")
@@ -129,7 +129,7 @@ class ThermalModel:
         self._C_actor_emission = (
             self._actor_infrared_absorptance
             * self._actor_emissive_area
-            * self._bolzmann_constant
+            * self._boltzmann_constant
         )
         logger.trace(f"self._C_actor_emission={self._C_actor_emission}")
 
