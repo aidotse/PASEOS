@@ -53,7 +53,7 @@ class ThermalModel:
         heat flux from sun, central body albedo, central body IR, actor IR
         emission and due to actor activities.
         For the moment, it is a slightly simplified version
-        of the single node model from "Spacecraft Thermal Control" by Prof. Isidoro Martínez
+        of the single node model from EQ 20 in "Spacecraft Thermal Control" by Prof. Isidoro Martínez
         available at http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf
 
         Args:
@@ -98,6 +98,7 @@ class ThermalModel:
         """This function initializes a bunch of values which will remain constant over actor operations."""
         logger.trace("Initializing thermal model constants.")
 
+        # EQ 15 in source
         self._C_solar_input = (
             self._actor_sun_absorptance
             * self._actor_sun_facing_area
@@ -105,6 +106,7 @@ class ThermalModel:
         )
         logger.trace(f"self._C_solar_input={self._C_solar_input}")
 
+        # EQ 17
         self._C_albedo_input = (
             self._actor_sun_absorptance
             * self._actor_central_body_facing_area
@@ -113,6 +115,7 @@ class ThermalModel:
         )
         logger.trace(f"self._C_albedo_input={self._C_albedo_input}")
 
+        # EQ 16
         self._C_body_emission = (
             self._actor_infrared_absorptance
             * self._body_emissivity
@@ -122,6 +125,7 @@ class ThermalModel:
         )
         logger.trace(f"self._C_body_emission={self._C_body_emission}")
 
+        # EQ 20
         self._C_actor_emission = (
             self._actor_infrared_absorptance
             * self._actor_emissive_area
