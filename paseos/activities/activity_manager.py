@@ -18,7 +18,7 @@ class ActivityManager:
         paseos_update_interval: float,
         paseos_time_multiplier: float,
     ):
-        """Creates a new activity manager. Singleton, so only one instance allowed.
+        """Creates a new activity manager linked to a paseos instance.
 
         Args:
             paseos_instance (PASEOS): The main paseos instance.
