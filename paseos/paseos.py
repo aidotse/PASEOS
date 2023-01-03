@@ -119,10 +119,7 @@ class PASEOS:
             # Each actor only updates itself
             # charge from current moment to time after timestep
             if self.local_actor.has_power_model:
-                self.local_actor.charge(
-                    self.local_actor.local_time,
-                    pk.epoch((self._state.time + dt) * pk.SEC2DAY),
-                )
+                self._local_actor.charge(dt)
 
             # Update actor temperature
             if self.local_actor.has_thermal_model:

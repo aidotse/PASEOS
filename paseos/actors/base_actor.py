@@ -148,13 +148,13 @@ class BaseActor(ABC):
         """
         self._local_time = t
 
-    def charge(self, t0: pk.epoch, t1: pk.epoch):
-        """Charges the actor during that period. Not implemented by default.
+    def charge(self, duration_in_s: float):
+        """Charges the actor from now for that period. Note that it is only
+        verified the actor is neither at start nor end of the period in eclipse,
+        thus short periods are preferable.
 
         Args:
-            t0 (pk.epoch): Start of the charging interval
-            t1 (pk.epoch): End of the charging interval
-
+            duration_in_s (float): How long the activity is performed in seconds
         """
         pass
 
