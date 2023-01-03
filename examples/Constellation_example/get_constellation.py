@@ -79,9 +79,9 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         W = W + pStep
         M = plane_count * sExtraStep  # equals 0 + count*0 = 0 in the usual case
 
-    print("Added " + str(len(elements_list)) + " planets")
+    print("Created " + str(len(elements_list)) + " satellites...")
 
-    print("Computing positions and velocities")
+    print("Computing constellation's positions and velocities...")
     satellites = []
     for elements in elements_list:
         pos, v = pk.par2ic(elements, pk.MU_EARTH)
@@ -92,4 +92,5 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
 
         satellites.append((pos, v))
 
+    print("Done!")
     return planet_list, satellites
