@@ -135,7 +135,6 @@ class ActivityManager:
                 paseos_instance=self._paseos_instance,
                 activity_runner=activity_runner,
                 time_multiplier=self._paseos_time_multiplier,
-                advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
 
             await asyncio.wait(
