@@ -56,5 +56,7 @@ def get_analysis_df(df, timestep=60):
             "# of " + df.known_actors.cat.categories[3]: comm_stat[3],
         }
     )
+    ana_df["Share Processing"] = ana_df["# of Processing"] / len(sats)
+    ana_df["Share in Eclipse"] = ana_df["# in Eclipse"] / len(sats)
 
     return ana_df
