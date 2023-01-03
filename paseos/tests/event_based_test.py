@@ -8,7 +8,11 @@ from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
 
 async def test_event_based_mode():
-    """Test to see if we use PASEOS with just the "advance_time" function instead of async activity stuff"""
+    """Test for PASEOS event-based mode where we advance time up to a certain event
+    using the "advance_time" function instead of async activity stuff.
+    The test runs a some activities for a while to see if the temperature and battery level
+    change as expected.
+    """
     # Define central body
     earth = pk.planet.jpl_lp("earth")
 
