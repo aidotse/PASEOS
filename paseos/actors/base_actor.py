@@ -288,6 +288,6 @@ class BaseActor(ABC):
         if t.mjd2000 == self._time_of_previous_eclipse_status:
             return self._previous_eclipse_status
         else:
-            self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._previous_eclipse_status = is_in_eclipse(self, self._central_body, t)
             self._time_of_last_eclipse_status = t.mjd2000
-        return self._last_eclipse_status
+        return self._previous_eclipse_status
