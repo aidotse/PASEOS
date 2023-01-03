@@ -5,11 +5,13 @@ import sys
 import pykep as pk
 from loguru import logger
 
+from ..actors.base_actor import BaseActor
+
 
 def get_communication_window(
-    local_actor,
-    local_actor_communication_link_name,
-    target_actor,
+    local_actor: BaseActor,
+    local_actor_communication_link_name: str,
+    target_actor: BaseActor,
     dt: float = 10.0,
     t0: pk.epoch = None,
     data_to_send_in_b: int = sys.maxsize,
@@ -18,9 +20,9 @@ def get_communication_window(
     """Returning the communication window and the amount of data that can be transmitted from the local to the target actor.
 
     Args:
-        local_actor (base_actor): Local actor.
-        local_actor_communication_link_name (base_actor):  Name of the local_actor's communication link to use.
-        target_actor (base_actor): other actor.
+        local_actor (BaseActor): Local actor.
+        local_actor_communication_link_name (str):  Name of the local_actor's communication link to use.
+        target_actor (BaseActor): other actor.
         dt (float): Simulation timestep [s]. Defaults to 10.
         t0 (pk.epoch): Current simulation time. Defaults to local time.
         data_to_send_in_b (int): Amount of data to transmit [b]. Defaults to maxint.

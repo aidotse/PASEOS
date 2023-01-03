@@ -34,6 +34,9 @@ class PASEOS:
     # Semaphore to track if an activity is currently running
     _is_running_activity = False
 
+    # Semaphore to track if we are currently running "advance_time"
+    _is_advancing_time = False
+
     # Used to monitor the local actor over execution and write performance stats
     _operations_monitor = None
     _time_since_previous_log = sys.float_info.max
@@ -89,6 +92,11 @@ class PASEOS:
             float: Time remaining to advance (or 0 if done)
 
         """
+        assert (
+            not self._is_advancing_time
+        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        self._is_advancing_time = True
+
         assert time_to_advance > 0, "Time to advance has to be positive."
         assert (
             current_power_consumption_in_W >= 0
@@ -109,11 +117,8 @@ class PASEOS:
             ):
                 time_since_constraint_check = 0
                 if not constraint_function():
-                    logger.info(
-                        f"Actor: {self.local_actor} - Time advancing interrupted. Constraint false."
-                    )
-                    logger.debug("New time is: " + str(self._state.time) + " s.")
-                    return max(target_time - self._state.time, 0)
+                    logger.info("Time advancing interrupted. Constraint false.")
+                    break
 
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
@@ -124,10 +129,7 @@ class PASEOS:
             # Each actor only updates itself
             # charge from current moment to time after timestep
             if self.local_actor.has_power_model:
-                self.local_actor.charge(
-                    self.local_actor.local_time,
-                    pk.epoch((self._state.time + dt) * pk.SEC2DAY),
-                )
+                self._local_actor.charge(dt)
 
             # Update actor temperature
             if self.local_actor.has_thermal_model:
@@ -151,6 +153,7 @@ class PASEOS:
                 self._time_since_previous_log += dt
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
+        self._is_advancing_time = False
         return max(target_time - self._state.time, 0)
 
     def add_known_actor(self, actor: BaseActor):

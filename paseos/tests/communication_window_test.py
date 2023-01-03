@@ -67,7 +67,7 @@ def test_find_next_window():
 
     start, length, transmittable_data = find_next_window(
         sentinel2B,
-        link_name="link1",
+        local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
         search_window_in_s=600,
         t0=t0,
@@ -75,6 +75,7 @@ def test_find_next_window():
 
     assert np.isclose(start.mjd2000, 8335.87835648148)
     assert np.isclose(length, 731.9999999657739, rtol=0.01, atol=3.0)
+    assert np.isclose(transmittable_data, 732000, rtol=0.01, atol=3000)
 
     # Test correct return if no window found
     t0 = pk.epoch_from_string("2022-Oct-27 20:00:00")
@@ -82,7 +83,7 @@ def test_find_next_window():
 
     start, length, transmittable_data = find_next_window(
         sentinel2B,
-        link_name="link1",
+        local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
         search_window_in_s=300,
         t0=t0,
