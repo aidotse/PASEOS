@@ -34,6 +34,9 @@ class PASEOS:
     # Semaphore to track if an activity is currently running
     _is_running_activity = False
 
+    # Semaphore to track if we are currently running "advance_time"
+    _is_advancing_time = False
+
     # Used to monitor the local actor over execution and write performance stats
     _operations_monitor = None
     _time_since_previous_log = sys.float_info.max
@@ -86,6 +89,11 @@ class PASEOS:
             every cfg.sim.activity_timestep seconds. Aborts the advancement if False.
 
         """
+        assert (
+            not self._is_advancing_time
+        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        self._is_advancing_time = True
+
         assert time_to_advance > 0, "Time to advance has to be positive."
         assert (
             current_power_consumption_in_W >= 0
@@ -107,8 +115,7 @@ class PASEOS:
                 time_since_constraint_check = 0
                 if not constraint_function():
                     logger.info("Time advancing interrupted. Constraint false.")
-                    logger.debug("New time is: " + str(self._state.time) + " s.")
-                    return
+                    break
 
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
@@ -143,6 +150,7 @@ class PASEOS:
                 self._time_since_previous_log += dt
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
+        self._is_advancing_time = False
 
     def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.
