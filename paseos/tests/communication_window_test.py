@@ -3,7 +3,13 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor, GroundstationActor, ActorBuilder
+from paseos import (
+    SpacecraftActor,
+    GroundstationActor,
+    ActorBuilder,
+    find_next_window,
+    get_communication_window,
+)
 
 import pykep as pk
 import numpy as np
@@ -13,15 +19,13 @@ def from_epoch_to_s(epoch: pk.epoch):
     return (epoch.mjd2000 - pk.epoch(0).mjd2000) / pk.SEC2DAY
 
 
-def test_communication_link_sat_to_ground():
-    """This test checks if the communication window between Sentinel
-    and one of it's ground stations matches
-    """
+def setup_sentinel_example(t0):
+    """Sets up the example with sentinel2B and maspolamas ground station."""
+    """Tests the find_next_window function"""
     earth = pk.planet.jpl_lp("earth")
 
     # Define Sentinel 2 orbit
-    today = pk.epoch_from_string("2022-Oct-27 21:04:45")
-    sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, today)
+    sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, t0)
     sentinel2B_line1 = (
         "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
     )
@@ -31,19 +35,19 @@ def test_communication_link_sat_to_ground():
     s2b = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
 
     # Calculating S2B ephemerides.
-    sentinel2B_eph = s2b.eph(today)
+    sentinel2B_eph = s2b.eph(t0)
 
     ActorBuilder.set_orbit(
         actor=sentinel2B,
         position=sentinel2B_eph[0],
         velocity=sentinel2B_eph[1],
-        epoch=today,
+        epoch=t0,
         central_body=earth,
     )
 
     # Define ground station
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
-        name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=today
+        name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=t0
     )
 
     ActorBuilder.set_ground_station_location(
@@ -52,17 +56,62 @@ def test_communication_link_sat_to_ground():
 
     # Add communication link
     ActorBuilder.add_comm_device(sentinel2B, device_name="link1", bandwidth_in_kbps=1)
-    transmitted = 0
+    return sentinel2B, maspalomas_groundstation
+
+
+def test_find_next_window():
+
+    # Test window from other test is found
+    t0 = pk.epoch_from_string("2022-Oct-27 21:00:00")
+    sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
+
+    start, length, transmittable_data = find_next_window(
+        sentinel2B,
+        local_actor_communication_link_name="link1",
+        target_actor=maspalomas_groundstation,
+        search_window_in_s=600,
+        t0=t0,
+    )
+
+    assert np.isclose(start.mjd2000, 8335.87835648148)
+    assert np.isclose(length, 731.9999999657739, rtol=0.01, atol=3.0)
+    assert np.isclose(transmittable_data, 732000, rtol=0.01, atol=3000)
+
+    # Test correct return if no window found
+    t0 = pk.epoch_from_string("2022-Oct-27 20:00:00")
+    sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
+
+    start, length, transmittable_data = find_next_window(
+        sentinel2B,
+        local_actor_communication_link_name="link1",
+        target_actor=maspalomas_groundstation,
+        search_window_in_s=300,
+        t0=t0,
+    )
+
+    assert start is None
+    assert length == 0
+    assert transmittable_data == 0
+
+
+def test_communication_link_sat_to_ground():
+    """This test checks if the communication window between Sentinel
+    and one of it's ground stations matches
+    """
+    t0 = pk.epoch_from_string("2022-Oct-27 21:04:45")
+    sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
+
     # Check again after communication_window_end_time
     (
         communication_window_start_time,
         communication_window_end_time,
-        transmitted,
-    ) = sentinel2B.get_communication_window(
+        _,
+    ) = get_communication_window(
+        sentinel2B,
         local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
         dt=1,
-        t0=today,
+        t0=t0,
         data_to_send_in_b=1000000,
     )
     window_in_s = (
@@ -102,7 +151,8 @@ def test_communication_link_sat_to_sat():
         _,
         communication_window_end_time,
         transmitted_data_in_b,
-    ) = sat1.get_communication_window(
+    ) = get_communication_window(
+        sat1,
         local_actor_communication_link_name="link1",
         target_actor=sat2,
         dt=10,
@@ -119,7 +169,8 @@ def test_communication_link_sat_to_sat():
         communication_window_start_time,
         communication_window_end_time,
         transmitted_data_in_b,
-    ) = sat1.get_communication_window(
+    ) = get_communication_window(
+        sat1,
         local_actor_communication_link_name="link1",
         target_actor=sat2,
         dt=10,
