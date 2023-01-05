@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def convert_known_actors_to_categorical(values):
+def get_known_actor_comms_status(values):
     """Helper function to track comms status"""
     conv_values = []
     for val in values:
