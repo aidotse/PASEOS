@@ -4,7 +4,7 @@ This notebook illustrates how to run many PASEOS instances in parellel to model 
 
 First, let's import all necessary modules
 
-In addition to PASEOS's requirements this notebook uses seaborn and pandas. `conda install seaborn` or `pip install seaborn` will get it. (installing seaborn will get pandas too)
+In addition to PASEOS's requirements this notebook uses seaborn and pandas. `conda install seaborn` or `pip install seaborn` will get it. (analogously for pandas)
 
 
 ```python
@@ -26,8 +26,8 @@ from paseos import ActorBuilder, SpacecraftActor, GroundstationActor
 paseos.set_log_level("WARNING") # use info / debug if you want more insight
 ```
 
-    [32m15:40:55[0m|PASEOS-[34mDEBUG[0m| [34m[1mSetting LogLevel to DEBUG[0m
-    [32m15:40:55[0m|PASEOS-[34mDEBUG[0m| [34m[1mLoaded module.[0m
+    [32m10:53:38[0m|PASEOS-[34mDEBUG[0m| [34m[1mSetting LogLevel to DEBUG[0m
+    [32m10:53:38[0m|PASEOS-[34mDEBUG[0m| [34m[1mLoaded module.[0m
     
 
 ### Constellation setup
@@ -40,16 +40,16 @@ For illustrative purposes our constellation will consist of 16 satellites in LEO
 ```python
 from get_constellation import get_constellation
 altitude = 550 * 1000 # Constellation attitude above the Earth's ground
-inclination = 30.0 # inclination of each orbital plane
+inclination = 10.0 # inclination of each orbital plane
 nPlanes = 4 # the number of orbital planes (see linked wiki article)
 nSats = 4 # the number of satellites per orbital plane
-t0 = pk.epoch_from_string("2022-Oct-27 21:00:00") # the starting date of our simulation
+t0 = pk.epoch_from_string("2023-Jan-04 20:00:00") # the starting date of our simulation
 
 # Compute orbits of LEO satellites
-planet_list,sats_pos_and_v = get_constellation(altitude,inclination,nSats,nPlanes,t0)
+planet_list,sats_pos_and_v,orbital_period = get_constellation(altitude,inclination,nSats,nPlanes,t0)
 
 # Compute orbit of GEO communications satellite
-comms_sat,comm_sat_pos_and_v = get_constellation(35786*1000,0,1,1,t0)
+comms_sat,comm_sat_pos_and_v,_ = get_constellation(35786*1000,0,1,1,t0)
 ```
 
     Created 16 satellites...
@@ -109,7 +109,7 @@ for idx,sat_pos_v in enumerate(sats_pos_and_v):
             actor_infrared_absorptance=1.0,
             actor_sun_facing_area=2.0,
             actor_central_body_facing_area=2.0,
-            actor_emissive_area=3.0,
+            actor_emissive_area=4.0,
             actor_thermal_capacity=1000
     )
     
@@ -124,7 +124,7 @@ For our comms satellite, we skip modelling the thermal and power concerns for si
 comms_instances = []
 
 gs_actor = ActorBuilder.get_actor_scaffold(name="gs_1",actor_type=GroundstationActor, epoch=t0)
-ActorBuilder.set_ground_station_location(gs_actor,latitude=-15.6338, longitude=27.7629, elevation=205.1, minimum_altitude_angle=5)
+ActorBuilder.set_ground_station_location(gs_actor,latitude=27.7629, longitude=-15.6338, elevation=205.1, minimum_altitude_angle=5)
 instance = paseos.init_sim(local_actor=gs_actor)
 comms_instances.append(instance)
 
@@ -156,7 +156,7 @@ plotter = paseos.plot(paseos_instances[0], paseos.PlotType.SpacePlot)
 
 Now, we define some operational constraints for our constellation. Let's say, our LEO satellites have two tasks:
 
-* Processing - Consumes 50W and can only be performed at < 68° C and if our battery is at least 20% charged.
+* Processing - Consumes 100W and can only be performed at < 56.85° C and if our battery is at least 20% charged.
 * Charging - What we do if the above constraint is violated
 
 To this end, we define a function hat returns `True` if the constraint is met.
@@ -181,7 +181,7 @@ def operational_constraint(actor):
 
 ### Running the simulation
 
-Now, we are ready to run the main simulation. We will simulate the operations of this constellation for 24 hours. Every 600 seconds (or once the constraint is no longer valid) we will redecide whether a satellite is going to "charge" or "process".
+Now, we are ready to run the main simulation. We will simulate the operations of this constellation for 8 hours. Every 600 seconds (or once the constraint is no longer valid) we will redecide whether a satellite is going to "charge" or "process".
 
 Whenever a satellite starts violating the operational constraint, it will stop the activity and continue which charging. This is marked by an `INFO` output from PASEOS.
 
@@ -189,9 +189,9 @@ If the activity is interrupted due to overheating or lack of battery charge, we 
 
 
 ```python
-simulation_time = 4.0 * 3600 # one day in seconds
+simulation_time = 8.0 * 3600 # one day in seconds
 t = 0 # starting time in seconds
-timestep = 600 # refresh interval deciding which activity to perform
+timestep = 600 # how often we decide what each sat should do [s]
 
 # Run until end of simulation
 while t <= simulation_time: 
@@ -222,6 +222,8 @@ while t <= simulation_time:
         instance.local_actor._current_activity = activity
 
         # Advance the simulation state of this satellite
+        # Note how we pass the "eval_constraint" to tell paseos to evaluate if the constraint
+        # for running the "Processing" is still satisfied
         time_remaining_to_advance = instance.advance_time(
             time_to_advance=timestep,
             current_power_consumption_in_W=power_consumption,
@@ -246,30 +248,54 @@ while t <= simulation_time:
 ```
 
     Time: 0s - # of Processing = 16 (9 interrupted), # of Charging = 0
-    Time: 600s - # of Processing = 11 (8 interrupted), # of Charging = 5
-    Time: 1200s - # of Processing = 11 (11 interrupted), # of Charging = 5
-    Time: 1800s - # of Processing = 4 (4 interrupted), # of Charging = 12
+    Time: 600s - # of Processing = 15 (14 interrupted), # of Charging = 1
+    Time: 1200s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 1800s - # of Processing = 12 (12 interrupted), # of Charging = 4
     Time: 2400s - # of Processing = 8 (8 interrupted), # of Charging = 8
-    Time: 3000s - # of Processing = 4 (4 interrupted), # of Charging = 12
+    Time: 3000s - # of Processing = 8 (8 interrupted), # of Charging = 8
     Time: 3600s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 4200s - # of Processing = 6 (4 interrupted), # of Charging = 10
-    Time: 4800s - # of Processing = 8 (6 interrupted), # of Charging = 8
-    Time: 5400s - # of Processing = 2 (2 interrupted), # of Charging = 14
-    Time: 6000s - # of Processing = 8 (4 interrupted), # of Charging = 8
-    Time: 6600s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 7200s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 4200s - # of Processing = 12 (8 interrupted), # of Charging = 4
+    Time: 4800s - # of Processing = 12 (12 interrupted), # of Charging = 4
+    Time: 5400s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 6000s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 6600s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 7200s - # of Processing = 12 (12 interrupted), # of Charging = 4
     Time: 7800s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 8400s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 9000s - # of Processing = 6 (2 interrupted), # of Charging = 10
-    Time: 9600s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 10200s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 8400s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 9000s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 9600s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 10200s - # of Processing = 8 (8 interrupted), # of Charging = 8
     Time: 10800s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 11400s - # of Processing = 6 (4 interrupted), # of Charging = 10
-    Time: 12000s - # of Processing = 4 (2 interrupted), # of Charging = 12
-    Time: 12600s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 13200s - # of Processing = 8 (4 interrupted), # of Charging = 8
-    Time: 13800s - # of Processing = 4 (4 interrupted), # of Charging = 12
-    Time: 14400s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 11400s - # of Processing = 12 (8 interrupted), # of Charging = 4
+    Time: 12000s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 12600s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 13200s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 13800s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 14400s - # of Processing = 12 (12 interrupted), # of Charging = 4
+    Time: 15000s - # of Processing = 4 (4 interrupted), # of Charging = 12
+    Time: 15600s - # of Processing = 12 (8 interrupted), # of Charging = 4
+    Time: 16200s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 16800s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 17400s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 18000s - # of Processing = 4 (4 interrupted), # of Charging = 12
+    Time: 18600s - # of Processing = 12 (8 interrupted), # of Charging = 4
+    Time: 19200s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 19800s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 20400s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 21000s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 21600s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 22200s - # of Processing = 4 (4 interrupted), # of Charging = 12
+    Time: 22800s - # of Processing = 12 (8 interrupted), # of Charging = 4
+    Time: 23400s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 24000s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 24600s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 25200s - # of Processing = 6 (4 interrupted), # of Charging = 10
+    Time: 25800s - # of Processing = 12 (10 interrupted), # of Charging = 4
+    Time: 26400s - # of Processing = 6 (6 interrupted), # of Charging = 10
+    Time: 27000s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 27600s - # of Processing = 8 (8 interrupted), # of Charging = 8
+    Time: 28200s - # of Processing = 8 (4 interrupted), # of Charging = 8
+    Time: 28800s - # of Processing = 8 (8 interrupted), # of Charging = 8
     
 
 ### Plotting and Analysis
@@ -286,7 +312,7 @@ We will also accumulate all the data into a [pandas dataframe](https://pandas.py
 
 
 ```python
-from constellation_example_utils import convert_known_actors_to_categorical
+from constellation_example_utils import get_known_actor_comms_status
 
 # Quantities we wanna track
 quantities = ["temperature","state_of_charge","current_activity","known_actors","is_in_eclipse"]
@@ -309,7 +335,7 @@ for idx,item in enumerate(quantities):
 
         # Get data
         if item == "known_actors":
-            values = convert_known_actors_to_categorical(instance.monitor[item])
+            values = get_known_actor_comms_status(instance.monitor[item])
         else:
             values = instance.monitor[item]
         names.append(instance.local_actor.name)
@@ -378,8 +404,9 @@ We will do some pandas magic in the background to make this easy. The below cell
 
 ```python
 from constellation_example_utils import get_analysis_df
-N_timesteps = 32
-analysis_df = get_analysis_df(df,timestep=df.Time.max() // N_timesteps)
+N_timesteps = 20
+df["Completed orbits"] = df.Time / orbital_period
+analysis_df = get_analysis_df(df,df.Time.max() // N_timesteps,orbital_period)
 analysis_df.head()
 ```
 
@@ -410,8 +437,8 @@ analysis_df.head()
       <th># in Eclipse</th>
       <th># of CommSat only</th>
       <th># of Ground + Sat</th>
-      <th># of Ground only</th>
       <th># of No signal</th>
+      <th>Completed orbits</th>
       <th>Share Processing</th>
       <th>Share in Eclipse</th>
     </tr>
@@ -423,64 +450,64 @@ analysis_df.head()
       <td>0</td>
       <td>16</td>
       <td>4</td>
-      <td>2</td>
+      <td>8</td>
       <td>0</td>
-      <td>0</td>
-      <td>14</td>
-      <td>1.0000</td>
-      <td>0.250</td>
+      <td>8</td>
+      <td>0.00</td>
+      <td>1.00</td>
+      <td>0.25</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>483.0</td>
+      <td>1546.0</td>
+      <td>8</td>
+      <td>8</td>
+      <td>4</td>
+      <td>4</td>
       <td>0</td>
-      <td>16</td>
-      <td>6</td>
-      <td>2</td>
-      <td>0</td>
-      <td>0</td>
-      <td>14</td>
-      <td>1.0000</td>
-      <td>0.375</td>
+      <td>12</td>
+      <td>0.27</td>
+      <td>0.50</td>
+      <td>0.25</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>966.0</td>
-      <td>5</td>
-      <td>11</td>
+      <td>3093.0</td>
       <td>8</td>
-      <td>2</td>
-      <td>2</td>
-      <td>0</td>
-      <td>12</td>
-      <td>0.6875</td>
-      <td>0.500</td>
+      <td>8</td>
+      <td>4</td>
+      <td>7</td>
+      <td>1</td>
+      <td>8</td>
+      <td>0.54</td>
+      <td>0.50</td>
+      <td>0.25</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1450.0</td>
-      <td>5</td>
-      <td>11</td>
+      <td>4639.0</td>
       <td>4</td>
-      <td>6</td>
+      <td>12</td>
+      <td>4</td>
+      <td>4</td>
       <td>0</td>
-      <td>0</td>
-      <td>10</td>
-      <td>0.6875</td>
-      <td>0.250</td>
+      <td>12</td>
+      <td>0.81</td>
+      <td>0.75</td>
+      <td>0.25</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1933.0</td>
-      <td>12</td>
-      <td>4</td>
+      <td>6185.0</td>
       <td>8</td>
-      <td>0</td>
-      <td>0</td>
-      <td>2</td>
-      <td>14</td>
-      <td>0.2500</td>
-      <td>0.500</td>
+      <td>8</td>
+      <td>4</td>
+      <td>7</td>
+      <td>1</td>
+      <td>8</td>
+      <td>1.08</td>
+      <td>0.50</td>
+      <td>0.25</td>
     </tr>
   </tbody>
 </table>
@@ -490,16 +517,16 @@ analysis_df.head()
 
 
 ```python
-melt_df = analysis_df[["Time[s]",'Share Processing', 'Share in Eclipse']].melt('Time[s]', var_name='Status', value_name='Ratio of Satellites')
-# g = sns.catplot(x="Time[s]", y="Ratio of Satellites", hue='Status', data=melt_df, kind='point',aspect=2, linestyles=["-","--"],markers=["None","None"])
-g = sns.catplot(x="Time[s]", y="Ratio of Satellites", hue='Status', data=melt_df, kind='bar',aspect=2)
+sns.set(font_scale=1.8)
+melt_df = analysis_df[["Completed orbits",'Share Processing', 'Share in Eclipse']].melt('Completed orbits', var_name='Status', value_name='Ratio of Satellites')
+g = sns.catplot(x="Completed orbits", y="Ratio of Satellites", hue='Status', data=melt_df, kind='bar',aspect=2)
 g.set_xticklabels(rotation=90)
 ```
 
 
 
 
-    <seaborn.axisgrid.FacetGrid at 0x1d1ae81dc30>
+    <seaborn.axisgrid.FacetGrid at 0x2b03d8cc220>
 
 
 
@@ -511,17 +538,18 @@ g.set_xticklabels(rotation=90)
 
 
 ```python
-# create stacked bar chart for monthly temperatures
-analysis_df[["Time[s]",'# of CommSat only', '# of Ground + Sat', '# of Ground only','# of No signal']].plot(x="Time[s]",kind='bar', stacked=True)
-plt.xlabel('Time')
-plt.ylabel('Communication Status Distribution')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+fig,ax = plt.subplots(figsize=(10,4),dpi=100)
+subset = ["Completed orbits",'# of CommSat only', '# of Ground + Sat','# of No signal']
+analysis_df[subset].plot(x="Completed orbits",kind='bar', stacked=True,ax=ax,color=sns.color_palette()[0:4])
+plt.xlabel('Completed orbits')
+plt.ylabel('Satellites')
+plt.legend(bbox_to_anchor=(1.025, 1), loc='upper left', borderaxespad=0,frameon=False)
 ```
 
 
 
 
-    <matplotlib.legend.Legend at 0x1d1b468b700>
+    <matplotlib.legend.Legend at 0x2b03b9b0df0>
 
 
 
@@ -536,9 +564,10 @@ Now, let's have a look at operational temperatures and state of charge. We plot 
 
 ```python
 sns.set(rc={'figure.figsize':(12,6)})
-sns.lineplot(data=df,x="Time",y="temperature",errorbar=("pi",100),estimator="median")
-sns.lineplot(data=df,x="Time",y="temperature",errorbar=("pi",50))
-sns.lineplot(data=df,x="Time",y="temperature",errorbar=("pi",25))
+sns.set(font_scale=1.8)
+sns.lineplot(data=df,x="Completed orbits",y="temperature",errorbar=("pi",100),estimator="median")
+sns.lineplot(data=df,x="Completed orbits",y="temperature",errorbar=("pi",50))
+sns.lineplot(data=df,x="Completed orbits",y="temperature",errorbar=("pi",25))
 plt.legend(["Median","100% PI","_","50% PI","Mean","25% PI",]);
 plt.ylabel("Temperature [K]")
 ```
@@ -558,9 +587,9 @@ plt.ylabel("Temperature [K]")
 
 
 ```python
-sns.lineplot(data=df,x="Time",y="state_of_charge",errorbar=("pi",100),estimator="median")
-sns.lineplot(data=df,x="Time",y="state_of_charge",errorbar=("pi",50))
-sns.lineplot(data=df,x="Time",y="state_of_charge",errorbar=("pi",25))
+sns.lineplot(data=df,x="Completed orbits",y="state_of_charge",errorbar=("pi",100),estimator="median")
+sns.lineplot(data=df,x="Completed orbits",y="state_of_charge",errorbar=("pi",50))
+sns.lineplot(data=df,x="Completed orbits",y="state_of_charge",errorbar=("pi",25))
 plt.legend(["Median","100% PI","_","50% PI","Mean","25% PI",]);
 plt.ylabel("State of Charge")
 ```
@@ -577,3 +606,8 @@ plt.ylabel("State of Charge")
 ![png](output_24_1.png)
     
 
+
+
+```python
+
+```
