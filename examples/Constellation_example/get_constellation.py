@@ -58,6 +58,7 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
     sStep = 2 * np.pi / nSats  # M goes from 0° to 360°
     sExtraStep = pk.DEG2RAD * offsetM
 
+    # We use pykep planets, see https://esa.github.io/pykep/documentation/planets.html
     planet_list = []
     elements_list = []
     for x in range(nPlanes):
@@ -79,6 +80,7 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         W = W + pStep
         M = plane_count * sExtraStep  # equals 0 + count*0 = 0 in the usual case
 
+    period = planet_list[0].compute_period(t0)
     print("Created " + str(len(elements_list)) + " satellites...")
 
     print("Computing constellation's positions and velocities...")
@@ -93,4 +95,4 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         satellites.append((pos, v))
 
     print("Done!")
-    return planet_list, satellites
+    return planet_list, satellites, period

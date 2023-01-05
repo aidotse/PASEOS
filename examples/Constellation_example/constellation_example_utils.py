@@ -17,13 +17,12 @@ def get_closest_entry(df, t, id):
     return df_id.iloc[(df_id["Time"] - t).abs().argsort().iloc[:1]]
 
 
-def get_analysis_df(df, timestep=60):
+def get_analysis_df(df, timestep=60, orbital_period=1):
 
     t = np.round(np.linspace(0, df.Time.max(), int(df.Time.max() // timestep)))
     sats = df.ID.unique()
     df["known_actors"] = pd.Categorical(df.known_actors)
     df["comm_cat"] = df.known_actors.cat.codes
-
     charging = []
     processing = []
     is_in_eclipse = []
@@ -53,9 +52,11 @@ def get_analysis_df(df, timestep=60):
             "# of " + df.known_actors.cat.categories[0]: comm_stat[0],
             "# of " + df.known_actors.cat.categories[1]: comm_stat[1],
             "# of " + df.known_actors.cat.categories[2]: comm_stat[2],
-            "# of " + df.known_actors.cat.categories[3]: comm_stat[3],
+            # "# of " + df.known_actors.cat.categories[3]: comm_stat[3],
         }
     )
+    ana_df["Completed orbits"] = ana_df["Time[s]"] / orbital_period
+    ana_df = ana_df.round({"Completed orbits": 2})
     ana_df["Share Processing"] = ana_df["# of Processing"] / len(sats)
     ana_df["Share in Eclipse"] = ana_df["# in Eclipse"] / len(sats)
 
