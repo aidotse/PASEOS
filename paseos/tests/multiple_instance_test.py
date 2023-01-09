@@ -11,10 +11,12 @@ def test_multiple_instances():
     # Initial power is 500m check charging works
     assert sat1.battery_level_in_Ws == 500
     assert sat2.battery_level_in_Ws == 500
+
     sim.advance_time(42, 0)
     assert sat1.battery_level_in_Ws == 542
     assert sat2.battery_level_in_Ws == 500
 
     sim2.advance_time(42, 0)
+
     assert sat1.battery_level_in_Ws == 542
     assert sat2.battery_level_in_Ws == 542

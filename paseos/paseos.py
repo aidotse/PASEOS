@@ -39,6 +39,7 @@ class PASEOS:
 
     # Used to monitor the local actor over execution and write performance stats
     _operations_monitor = None
+
     _time_since_previous_log = sys.float_info.max
 
     def __init__(self, local_actor: BaseActor, cfg=None):
@@ -167,6 +168,15 @@ class PASEOS:
             )
         # Else add
         self._known_actors[actor.name] = actor
+
+    @property
+    def monitor(self):
+        """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
+
+        Returns:
+            OperationsMonitor: Monitor object.
+        """
+        return self._operations_monitor
 
     @property
     def is_running_activity(self):
