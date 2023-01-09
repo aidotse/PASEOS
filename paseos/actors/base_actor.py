@@ -6,7 +6,6 @@ import numpy as np
 from skspatial.objects import Sphere
 from dotmap import DotMap
 
-from ..communication.get_communication_window import get_communication_window
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
 from ..power.is_in_eclipse import is_in_eclipse
 
@@ -19,9 +18,6 @@ class BaseActor(ABC):
 
     # Actor name, has to be unique
     name = None
-
-    # Actor's mass in kg
-    _mass = None
 
     # Timestep this actor's info is at (excl. pos/vel)
     _local_time = None
@@ -47,12 +43,12 @@ class BaseActor(ABC):
     _current_activity = None
 
     # The following variables are used to track last evaluated state vectors to avoid recomputation.
-    _last_position = None
-    _time_of_last_position = None
-    _last_velocity = None
-    _last_eclipse_status = None
-    _time_of_last_eclipse_status = None
-    _last_altitude = None
+    _previous_position = None
+    _time_of_previous_position = None
+    _previous_velocity = None
+    _previous_eclipse_status = None
+    _time_of_previous_eclipse_status = None
+    _previous_altitude = None
 
     def __init__(self, name: str, epoch: pk.epoch) -> None:
         """Constructor for a base actor
@@ -67,6 +63,27 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
+
+    @property
+    def has_power_model(self) -> bool:
+        """Returns true if actor's battery is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return (
+            hasattr(self, "_battery_level_in_Ws")
+            and self._battery_level_in_Ws is not None
+        )
+
+    @property
+    def has_thermal_model(self) -> bool:
+        """Returns true if actor's temperature is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_thermal_model") and self._thermal_model is not None
 
     @property
     def mass(self) -> float:
@@ -130,13 +147,13 @@ class BaseActor(ABC):
         """
         self._local_time = t
 
-    def charge(self, t0: pk.epoch, t1: pk.epoch):
-        """Charges the actor during that period. Not implemented by default.
+    def charge(self, duration_in_s: float):
+        """Charges the actor from now for that period. Note that it is only
+        verified the actor is neither at start nor end of the period in eclipse,
+        thus short periods are preferable.
 
         Args:
-            t0 (pk.epoch): Start of the charging interval
-            t1 (pk.epoch): End of the charging interval
-
+            duration_in_s (float): How long the activity is performed in seconds
         """
         pass
 
@@ -165,13 +182,15 @@ class BaseActor(ABC):
         if t0 is None:
             t0 = self._local_time
         if (
-            t0.mjd2000 == self._time_of_last_position
-            and self._last_altitude is not None
+            t0.mjd2000 == self._time_of_previous_position
+            and self._previous_altitude is not None
         ):
-            return self._last_altitude
+            return self._previous_altitude
         else:
-            self._last_altitude = np.sqrt(np.sum(np.power(self.get_position(t0), 2)))
-            return self._last_altitude
+            self._previous_altitude = np.sqrt(
+                np.sum(np.power(self.get_position(t0), 2))
+            )
+            return self._previous_altitude
 
     def get_position(self, epoch: pk.epoch):
         """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
@@ -198,8 +217,8 @@ class BaseActor(ABC):
         # If the actor has no orbit, return position
         if self._orbital_parameters is None:
             if self._position is not None:
-                self._last_position = self._position
-                self._time_of_last_position = epoch.mjd2000
+                self._previous_position = self._position
+                self._time_of_previous_position = epoch.mjd2000
                 return self._position
         else:
             return self._orbital_parameters.eph(epoch)[0]
@@ -230,9 +249,9 @@ class BaseActor(ABC):
             + " (mjd2000)."
         )
         pos, vel = self._orbital_parameters.eph(epoch)
-        self._last_position = pos
-        self._last_velocity = vel
-        self._time_of_last_position = epoch.mjd2000
+        self._previous_position = pos
+        self._previous_velocity = vel
+        self._time_of_previous_position = epoch.mjd2000
         return pos, vel
 
     def is_in_line_of_sight(
@@ -267,42 +286,9 @@ class BaseActor(ABC):
         """
         if t is None:
             t = self._local_time
-        if t.mjd2000 == self._time_of_last_eclipse_status:
-            return self._last_eclipse_status
+        if t.mjd2000 == self._time_of_previous_eclipse_status:
+            return self._previous_eclipse_status
         else:
-            self._last_eclipse_status = is_in_eclipse(self, self._central_body, t)
-            self._time_of_last_eclipse_status = t.mjd2000
-        return self._last_eclipse_status
-
-    def get_communication_window(
-        self,
-        local_actor_communication_link_name,
-        target_actor,
-        dt: float,
-        t0: float,
-        data_to_send_in_b: int,
-        window_timeout_value_in_s=7200.0,
-    ):
-        """Returning the communication window and the data amount that can be transmitted from the local to the target actor.
-
-        Args:
-            local_actor_communication_link_name (base_actor):  name of the local_actor's communication link to use.
-            target_actor (base_actor): other actor.
-            dt (float): simulation timestep.
-            t0 (pk.epoch): current simulation time [s].
-            data_to_send_in_b (int): amount of data to transmit [b].
-            window_timeout_value_in_s (float, optional): timeout for estimating the communication window. Defaults to 7200.0.
-        Returns:
-            pk.epoch: communication window start time.
-            k.epoch: communication window end time.
-            int: data that can be transmitted in the communication window [b].
-        """
-        return get_communication_window(
-            self,
-            local_actor_communication_link_name,
-            target_actor,
-            dt,
-            t0,
-            data_to_send_in_b,
-            window_timeout_value_in_s,
-        )
+            self._previous_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._time_of_previous_eclipse_status = t.mjd2000
+        return self._previous_eclipse_status

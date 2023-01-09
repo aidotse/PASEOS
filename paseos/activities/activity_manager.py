@@ -18,7 +18,7 @@ class ActivityManager:
         paseos_update_interval: float,
         paseos_time_multiplier: float,
     ):
-        """Creates a new activity manager. Singleton, so only one instance allowed.
+        """Creates a new activity manager linked to a paseos instance.
 
         Args:
             paseos_instance (PASEOS): The main paseos instance.
@@ -135,7 +135,6 @@ class ActivityManager:
                 paseos_instance=self._paseos_instance,
                 activity_runner=activity_runner,
                 time_multiplier=self._paseos_time_multiplier,
-                advance_paseos_clock=self._paseos_instance.use_automatic_clock,
             )
 
             await asyncio.wait(

@@ -16,6 +16,9 @@ class SpacecraftActor(BaseActor):
     _max_battery_level_in_Ws = None
     _charging_rate_in_W = None
 
+    # Actor's mass in kg
+    _mass = None
+
     _thermal_model = None
 
     def __init__(
@@ -51,6 +54,15 @@ class SpacecraftActor(BaseActor):
         return self._battery_level_in_Ws
 
     @property
+    def mass(self) -> float:
+        """Returns actor's mass in kg.
+
+        Returns:
+            float: Mass
+        """
+        return self._mass
+
+    @property
     def temperature_in_K(self) -> float:
         """Returns the current temperature of the actor in K.
 
@@ -83,25 +95,27 @@ class SpacecraftActor(BaseActor):
 
         self = discharge_model.discharge(self, power_consumption)
 
-    def charge(self, t0: pk.epoch, t1: pk.epoch):
-        """Charges the actor during that period. Note that it is only
+        logger.debug(f"New battery level is {self._battery_level_in_Ws}Ws")
+
+    def charge(self, duration_in_s: float):
+        """Charges the actor from now for that period. Note that it is only
         verified the actor is neither at start nor end of the period in eclipse,
         thus short periods are preferable.
 
         Args:
-            t0 (pk.epoch): Start of the charging interval
-            t1 (pk.epoch): End of the charging interval
+            duration_in_s (float): How long the activity is performed in seconds
         """
-        time_interval = (t1.mjd2000 - t0.mjd2000) * pk.DAY2SEC
-        logger.debug(f"Charging actor {self} for {time_interval}s.")
+        logger.debug(f"Charging actor {self} for {duration_in_s}s.")
         assert (
-            time_interval > 0
+            duration_in_s > 0
         ), "Charging interval has to be positive but t1 was less or equal t0."
 
-        if is_in_eclipse(self, central_body=self._central_body, t=t0) or is_in_eclipse(
-            self, central_body=self._central_body, t=t1
-        ):
+        # Compute end of charging time
+        t1 = pk.epoch(self.local_time.mjd2000 + duration_in_s * pk.SEC2DAY)
+        if is_in_eclipse(
+            self, central_body=self._central_body, t=self.local_time
+        ) or is_in_eclipse(self, central_body=self._central_body, t=t1):
             logger.debug("Actor is in eclipse, not charging.")
         else:
-            self = charge_model.charge(self, time_interval)
+            self = charge_model.charge(self, duration_in_s)
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")

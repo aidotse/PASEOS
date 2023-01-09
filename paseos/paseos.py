@@ -34,12 +34,13 @@ class PASEOS:
     # Semaphore to track if an activity is currently running
     _is_running_activity = False
 
+    # Semaphore to track if we are currently running "advance_time"
+    _is_advancing_time = False
+
     # Used to monitor the local actor over execution and write performance stats
     _operations_monitor = None
-    _time_since_last_log = sys.float_info.max
 
-    # Use automatic clock (default on for now)
-    use_automatic_clock = True
+    _time_since_previous_log = sys.float_info.max
 
     def __init__(self, local_actor: BaseActor, cfg=None):
         """Initalize PASEOS
@@ -55,11 +56,11 @@ class PASEOS:
         self._known_actors = {}
         self._local_actor = local_actor
         # Update local actor time to simulation start time.
-        self._local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
+        self.local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
         self._activity_manager = ActivityManager(
             self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
         )
-        self._operations_monitor = OperationsMonitor(self._local_actor.name)
+        self._operations_monitor = OperationsMonitor(self.local_actor.name)
 
     def save_status_log_csv(self, filename) -> None:
         """Saves the status log incl. all kinds of information such as battery charge,
@@ -72,21 +73,51 @@ class PASEOS:
 
     def log_status(self):
         """Updates the status log."""
-        self._operations_monitor.log(self._local_actor, self.known_actor_names)
+        self._operations_monitor.log(self.local_actor, self.known_actor_names)
 
-    def advance_time(self, time_to_advance: float):
+    def advance_time(
+        self,
+        time_to_advance: float,
+        current_power_consumption_in_W: float,
+        constraint_function: types.FunctionType = None,
+    ):
         """Advances the simulation by a specified amount of time
 
         Args:
             time_to_advance (float): Time to advance in seconds.
+            current_power_consumption_in_W (float): Current power consumed per second in Watt.
+            constraint_function(FunctionType): Constraint function which will be evaluated
+            every cfg.sim.activity_timestep seconds. Aborts the advancement if False.
+
         """
+        assert (
+            not self._is_advancing_time
+        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        self._is_advancing_time = True
+
+        assert time_to_advance > 0, "Time to advance has to be positive."
+        assert (
+            current_power_consumption_in_W >= 0
+        ), "Power consumption cannot be negative."
+
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
         dt = self._cfg.sim.dt
 
+        time_since_constraint_check = float("inf")
+
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
+            if (
+                constraint_function is not None
+                and time_since_constraint_check > self._cfg.sim.activity_timestep
+            ):
+                time_since_constraint_check = 0
+                if not constraint_function():
+                    logger.info("Time advancing interrupted. Constraint false.")
+                    break
+
             if self._state.time > target_time - dt:
                 # compute final timestep to catch up
                 dt = target_time - self._state.time
@@ -95,22 +126,32 @@ class PASEOS:
             # Perform updates for local actor (e.g. charging)
             # Each actor only updates itself
             # charge from current moment to time after timestep
-            self._local_actor.charge(
-                self._local_actor.local_time,
-                pk.epoch((self._state.time + dt) * pk.SEC2DAY),
-            )
+            if self.local_actor.has_power_model:
+                self._local_actor.charge(dt)
+
+            # Update actor temperature
+            if self.local_actor.has_thermal_model:
+                self.local_actor._thermal_model.update_temperature(
+                    dt, current_power_consumption_in_W
+                )
+
+            # Update state of charge
+            if self.local_actor.has_power_model:
+                self.local_actor.discharge(current_power_consumption_in_W, dt)
 
             self._state.time += dt
-            self._local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+            time_since_constraint_check += dt
+            self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
             # Check if we should update the status log
-            if self._time_since_last_log > self._cfg.io.logging_interval:
+            if self._time_since_previous_log > self._cfg.io.logging_interval:
                 self.log_status()
-                self._time_since_last_log = 0
+                self._time_since_previous_log = 0
             else:
-                self._time_since_last_log += dt
+                self._time_since_previous_log += dt
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
+        self._is_advancing_time = False
 
     def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.

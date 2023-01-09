@@ -182,6 +182,30 @@ class ActorBuilder:
         body_reflectance: float = 0.3,
         power_consumption_to_heat_ratio: float = 0.5,
     ):
+        """Add a thermal model to the actor to model temperature based on
+        heat flux from sun, central body albedo, central body IR, actor IR
+        emission and due to actor activities.
+        For the moment, it is a slightly simplified version
+        of the single node model from "Spacecraft Thermal Control" by Prof. Isidoro Martínez
+        available at http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_mass (float): Actor's mass in kg.
+            actor_initial_temperature_in_K (float): Actor's initial temperature in K.
+            actor_sun_absorptance (float): Actor's absorptance ([0,1]) of solar light
+            actor_infrared_absorptance (float): Actor's absportance ([0,1]) of IR.
+            actor_sun_facing_area (float): Actor area facing the sun in m^2.
+            actor_central_body_facing_area (float): Actor area facing central body in m^2.
+            actor_emissive_area (float): Actor area emitting (radiating) heat.
+            actor_thermal_capacity (float): Actor's thermal capacity in J / (kg * K).
+            body_solar_irradiance (float, optional): Irradiance from the sun in W. Defaults to 1360.
+            body_surface_temperature_in_K (float, optional): Central body surface temperature. Defaults to 288.
+            body_emissivity (float, optional): Centrla body emissivity [0,1] in IR. Defaults to 0.6.
+            body_reflectance (float, optional): Central body reflectance of sun light. Defaults to 0.3.
+            power_consumption_to_heat_ratio (float, optional): Conversion ratio for activities.
+            0 leads to know heat-up due to activity. Defaults to 0.5.
+        """
         # check for spacecraft actor
         assert isinstance(
             actor, SpacecraftActor
