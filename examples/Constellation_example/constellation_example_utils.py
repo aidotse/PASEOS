@@ -23,7 +23,7 @@ def get_analysis_df(df, timestep=60, orbital_period=1):
     sats = df.ID.unique()
     df["known_actors"] = pd.Categorical(df.known_actors)
     df["comm_cat"] = df.known_actors.cat.codes
-    charging = []
+    standby = []
     processing = []
     is_in_eclipse = []
     comm_stat = [[], [], [], []]
@@ -35,18 +35,18 @@ def get_analysis_df(df, timestep=60, orbital_period=1):
             c.append(0)
         for sat in sats:
             vals = get_closest_entry(df, t_cur, sat)
-            n_c += vals.current_activity.values[0] == "Charging"
+            n_c += vals.current_activity.values[0] == "Standby"
             n_ec += vals.is_in_eclipse.values[0]
             c_idx = vals.comm_cat.values[0]
             comm_stat[c_idx][idx] += 1
-        charging.append(n_c)
+        standby.append(n_c)
         processing.append(len(sats) - n_c)
         is_in_eclipse.append(n_ec)
 
     ana_df = pd.DataFrame(
         {
             "Time[s]": t,
-            "# of Charging": charging,
+            "# of Standby": standby,
             "# of Processing": processing,
             "# in Eclipse": is_in_eclipse,
             "# of " + df.known_actors.cat.categories[0]: comm_stat[0],
