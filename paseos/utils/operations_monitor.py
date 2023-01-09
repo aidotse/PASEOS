@@ -6,7 +6,6 @@ import pykep as pk
 import matplotlib.pyplot as plt
 
 from paseos.actors.base_actor import BaseActor
-from paseos.actors.spacecraft_actor import SpacecraftActor
 
 
 class OperationsMonitor:
@@ -75,11 +74,11 @@ class OperationsMonitor:
         self._log.position.append(local_actor._previous_position)
         self._log.velocity.append(local_actor._previous_velocity)
         self._log.known_actors.append(known_actors)
-        if isinstance(local_actor, SpacecraftActor):
-            if local_actor._thermal_model is not None:
-                self._log.temperature.append(local_actor.temperature_in_K)
-            else:
-                self._log.temperature.append(-1)
+        if local_actor.has_thermal_model:
+            self._log.temperature.append(local_actor.temperature_in_K)
+        else:
+            self._log.temperature.append(-1)
+        if local_actor.has_power_model:
             self._log.state_of_charge.append(local_actor.state_of_charge)
         else:
             self._log.state_of_charge.append(1.0)

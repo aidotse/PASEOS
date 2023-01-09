@@ -89,6 +89,9 @@ class PASEOS:
             constraint_function(FunctionType): Constraint function which will be evaluated
             every cfg.sim.activity_timestep seconds. Aborts the advancement if False.
 
+        Returns:
+            float: Time remaining to advance (or 0 if done)
+
         """
         assert (
             not self._is_advancing_time
@@ -152,6 +155,7 @@ class PASEOS:
 
         logger.debug("New time is: " + str(self._state.time) + " s.")
         self._is_advancing_time = False
+        return max(target_time - self._state.time, 0)
 
     def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.
