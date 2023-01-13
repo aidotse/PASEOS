@@ -7,6 +7,7 @@ from .actors.ground_station_actor import GroundstationActor
 from .actors.spacecraft_actor import SpacecraftActor
 from .communication.get_communication_window import get_communication_window
 from .communication.find_next_window import find_next_window
+from .power.power_device_type import PowerDeviceType
 from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
 
@@ -42,6 +43,7 @@ __all__ = [
     "PASEOS",
     "plot",
     "PlotType",
+    "PowerDeviceType",
     "set_log_level",
     "SpacecraftActor",
 ]

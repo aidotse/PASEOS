@@ -7,6 +7,7 @@ from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
 from .ground_station_actor import GroundstationActor
 from ..thermal.thermal_model import ThermalModel
+from paseos.power.power_device_type import PowerDeviceType
 
 
 class ActorBuilder:
@@ -136,6 +137,7 @@ class ActorBuilder:
         battery_level_in_Ws: float,
         max_battery_level_in_Ws: float,
         charging_rate_in_W: float,
+        power_device_type: PowerDeviceType = PowerDeviceType.SolarPanel,
     ):
         """Add a power device (battery + some charging mechanism (e.g. solar power)) to the actor.
         This will allow constraints related to power consumption.
@@ -145,6 +147,7 @@ class ActorBuilder:
             battery_level_in_Ws (float): Current battery level in Watt seconds / Joule
             max_battery_level_in_Ws (float): Maximum battery level in Watt seconds / Joule
             charging_rate_in_W (float): Charging rate of the battery in Watt
+            power_device_type (PowerDeviceType): Type of power device. Either "SolarPanel" or "RTG" at the moment. Defaults to SolarPanel.
         """
 
         # check for spacecraft actor
@@ -153,15 +156,20 @@ class ActorBuilder:
         ), "Power devices are only supported for SpacecraftActors"
 
         logger.trace("Checking battery values for sensibility.")
-        assert battery_level_in_Ws > 0, "Battery level must be non-negative"
-        assert max_battery_level_in_Ws > 0, "Battery level must be non-negative"
-        assert charging_rate_in_W > 0, "Battery level must be non-negative"
+        assert battery_level_in_Ws > 0, "Battery level must be positive"
+        assert max_battery_level_in_Ws > 0, "Battery level must be positive"
+        assert charging_rate_in_W > 0, "Battery level must be positive"
+        assert (
+            power_device_type == PowerDeviceType.SolarPanel
+            or power_device_type == PowerDeviceType.RTG
+        ), "Only SolarPanel and RTG devices supported."
 
+        actor._power_device_type = power_device_type
         actor._max_battery_level_in_Ws = max_battery_level_in_Ws
         actor._battery_level_in_Ws = battery_level_in_Ws
         actor._charging_rate_in_W = charging_rate_in_W
         logger.debug(
-            f"Added power device. MaxBattery={max_battery_level_in_Ws}Ws, "
+            f"Added {power_device_type} power device. MaxBattery={max_battery_level_in_Ws}Ws, "
             + f"CurrBattery={battery_level_in_Ws}Ws, "
             + f"ChargingRate={charging_rate_in_W}W to actor {actor}"
         )

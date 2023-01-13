@@ -4,7 +4,6 @@ import pykep as pk
 from paseos.actors.base_actor import BaseActor
 from paseos.power import discharge_model
 from paseos.power import charge_model
-from paseos.power.is_in_eclipse import is_in_eclipse
 
 
 class SpacecraftActor(BaseActor):
@@ -12,6 +11,7 @@ class SpacecraftActor(BaseActor):
     velocity also has additional constraints such as power/battery."""
 
     # Power-related properties
+    _power_device_type = None
     _battery_level_in_Ws = None
     _max_battery_level_in_Ws = None
     _charging_rate_in_W = None
@@ -34,6 +34,15 @@ class SpacecraftActor(BaseActor):
         """
         logger.trace("Instantiating SpacecraftActor.")
         super().__init__(name, epoch)
+
+    @property
+    def power_device_type(self):
+        """Get the power device type    
+
+        Returns:
+            PowerDeviceType: Type of power device.
+        """
+        return self._power_device_type
 
     @property
     def charging_rate_in_W(self):
@@ -110,12 +119,6 @@ class SpacecraftActor(BaseActor):
             duration_in_s > 0
         ), "Charging interval has to be positive but t1 was less or equal t0."
 
-        # Compute end of charging time
-        t1 = pk.epoch(self.local_time.mjd2000 + duration_in_s * pk.SEC2DAY)
-        if is_in_eclipse(
-            self, central_body=self._central_body, t=self.local_time
-        ) or is_in_eclipse(self, central_body=self._central_body, t=t1):
-            logger.debug("Actor is in eclipse, not charging.")
-        else:
-            self = charge_model.charge(self, duration_in_s)
+        self = charge_model.charge(self, duration_in_s)
+
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")
