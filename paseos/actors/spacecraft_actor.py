@@ -37,7 +37,7 @@ class SpacecraftActor(BaseActor):
 
     @property
     def power_device_type(self):
-        """Get the power device type    
+        """Get the power device type
 
         Returns:
             PowerDeviceType: Type of power device.

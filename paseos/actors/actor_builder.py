@@ -147,7 +147,8 @@ class ActorBuilder:
             battery_level_in_Ws (float): Current battery level in Watt seconds / Joule
             max_battery_level_in_Ws (float): Maximum battery level in Watt seconds / Joule
             charging_rate_in_W (float): Charging rate of the battery in Watt
-            power_device_type (PowerDeviceType): Type of power device. Either "SolarPanel" or "RTG" at the moment. Defaults to SolarPanel.
+            power_device_type (PowerDeviceType): Type of power device.
+            Either "SolarPanel" or "RTG" at the moment. Defaults to SolarPanel.
         """
 
         # check for spacecraft actor
