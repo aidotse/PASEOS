@@ -192,7 +192,7 @@ class PASEOS:
         # Else add
         self._known_actors[actor.name] = actor
 
-    def monitor_data_corruption(self, data_shape: list, exposure_period_in_s: float):
+    def model_data_corruption(self, data_shape: list, exposure_period_in_s: float):
         """Computes a boolean mask for each data element that has been corrupted.
 
         Args:
@@ -209,7 +209,7 @@ class PASEOS:
 
         assert exposure_period_in_s > 0, "Exposure period must be positive."
 
-        self.local_actor._radiation_model.model_data_corruption(
+        return self.local_actor._radiation_model.model_data_corruption(
             data_shape=data_shape, exposure_period_in_s=exposure_period_in_s
         )
 

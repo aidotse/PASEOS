@@ -37,7 +37,29 @@ def test_radiation_model():
 
 
 @pytest.mark.asyncio
-async def test__radiation_model_device_death():
+async def test_radiation_model_data_corruption():
+    """Checks whether we can charge an actor"""
+    sim, sat1, earth = get_default_instance()
+    paseos.set_log_level("INFO")
+
+    # Has to be seeded for reproducibility
+    np.random.seed(42)
+
+    # Setup radiation model example where actor is interrupted
+    ActorBuilder.set_radiation_model(
+        actor=sat1,
+        data_corruption_events_per_s=1e-5,
+        restart_events_per_s=0,
+        failure_events_per_s=0,
+    )
+
+    mask = sim.model_data_corruption([10, 4, 8], 1e5)
+    assert mask.shape == (10, 4, 8)
+    assert mask.sum() == 199
+
+
+@pytest.mark.asyncio
+async def test_radiation_model_device_death():
     """Checks whether we can charge an actor"""
     sim, sat1, earth = get_default_instance()
     paseos.set_log_level("INFO")
@@ -70,7 +92,7 @@ async def test__radiation_model_device_death():
 
 
 @pytest.mark.asyncio
-async def test__radiation_model_interruption():
+async def test_radiation_model_interruption():
     """Checks whether we can charge an actor"""
     sim, sat1, earth = get_default_instance()
     paseos.set_log_level("INFO")
