@@ -7,6 +7,7 @@ from paseos import SpacecraftActor, ActorBuilder, load_default_cfg
 import asyncio
 import pytest
 
+
 # tell pytest to create an event loop and execute the tests using the event loop
 @pytest.mark.asyncio
 async def test_thermal():

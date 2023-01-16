@@ -204,7 +204,8 @@ class PASEOS:
         """
         if not self.local_actor.has_radiation_model:
             raise ValueError(
-                f"Actor {self.local_actor} has no radiation model. Set on up with ActorBuilder.set_radiation_model() first to be able to corrupt data."
+                f"Actor {self.local_actor} has no radiation model. Set on up with ActorBuilder"
+                + ".set_radiation_model() first to be able to corrupt data."
             )
 
         assert exposure_period_in_s > 0, "Exposure period must be positive."

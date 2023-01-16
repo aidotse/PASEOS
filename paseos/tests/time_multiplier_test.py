@@ -8,6 +8,7 @@ from test_utils import wait_for_activity
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
+
 # tell pytest to create an event loop and execute the tests using the event loop
 @pytest.mark.asyncio
 async def test_activity():
