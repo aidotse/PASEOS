@@ -53,8 +53,13 @@ class RadiationModel:
         )
         return np.random.rand() > poisson_prob
 
-    def model_data_corruption(self, data, exposure_period_in_s: float):
-        pass
+    def model_data_corruption(self, data_shape, exposure_period_in_s: float):
+        poisson_prob = RadiationModel._compute_poisson_nonzero_event_probability(
+            self._data_corruption_events_per_s, exposure_period_in_s
+        )
+        mask = np.ones(data_shape) * poisson_prob
+        rand_mask = np.random.rand(data_shape)
+        return rand_mask > mask
 
     def did_device_restart(self, interval_in_s: float):
         """Models whether the device experienced a random restart in this interval.
@@ -63,7 +68,7 @@ class RadiationModel:
             interval_in_s (float): Time interval length in seconds.
 
         Returns:
-            bool: Whether restart event occured.
+            bool: Whether restart event occurred.
         """
         assert interval_in_s > 0, "Time interval must be positive."
         return RadiationModel._sample_poisson_process(
@@ -77,7 +82,7 @@ class RadiationModel:
             interval_in_s (float): Time interval length in seconds.
 
         Returns:
-            bool: Whether restart event occured.
+            bool: Whether restart event occurred.
         """
         assert interval_in_s > 0, "Time interval must be positive."
         return RadiationModel._sample_poisson_process(
