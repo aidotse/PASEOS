@@ -128,6 +128,25 @@ class PASEOS:
 
             # Perform updates for local actor (e.g. charging)
             # Each actor only updates itself
+
+            # check for device and / or activity failure
+            if self.local_actor.has_radiation_model:
+                if self.local_actor.is_dead:
+                    logger.warning(
+                        f"Tried to advance time on dead actor {self.local_actor}."
+                    )
+                    return max(target_time - self._state.time, 0)
+                if self.local_actor._radiation_model.did_device_restart(dt):
+                    logger.info(
+                        f"Actor {self.local_actor} interrupted during advance_time."
+                    )
+                    self.local_actor.set_was_interrupted()
+                    return max(target_time - self._state.time, 0)
+                if self.local_actor._radiation_model.did_device_experience_failure(dt):
+                    logger.info(f"Actor {self.local_actor} died during advance_time.")
+                    self.local_actor.set_is_dead()
+                    return max(target_time - self._state.time, 0)
+
             # charge from current moment to time after timestep
             if self.local_actor.has_power_model:
                 self._local_actor.charge(dt)
@@ -172,6 +191,27 @@ class PASEOS:
             )
         # Else add
         self._known_actors[actor.name] = actor
+
+    def monitor_data_corruption(self, data_shape: list, exposure_period_in_s: float):
+        """Computes a boolean mask for each data element that has been corrupted.
+
+        Args:
+            data_shape (list): Shape of the data to corrupt.
+            exposure_period_in_s (float): Period of radiation exposure.
+
+        Returns:
+            np.array: Boolean mask which is True if an entry was corrupted.
+        """
+        if not self.local_actor.has_radiation_model:
+            raise ValueError(
+                f"Actor {self.local_actor} has no radiation model. Set on up with ActorBuilder.set_radiation_model() first to be able to corrupt data."
+            )
+
+        assert exposure_period_in_s > 0, "Exposure period must be positive."
+
+        self.local_actor._radiation_model.model_data_corruption(
+            data_shape=data_shape, exposure_period_in_s=exposure_period_in_s
+        )
 
     @property
     def monitor(self):

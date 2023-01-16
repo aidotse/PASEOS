@@ -1,11 +1,15 @@
 import numpy as np
+from loguru import logger
 
 
 class RadiationModel:
     """This class defines a simple radiation model for data corruption, random restarts and device failure due to radiation."""
 
     def __init__(
-        self, data_corruption_events_per_s, restart_events_per_s, failure_events_per_s
+        self,
+        data_corruption_events_per_s: float,
+        restart_events_per_s: float,
+        failure_events_per_s: float,
     ) -> None:
         """Initializes the model.
 
@@ -19,6 +23,8 @@ class RadiationModel:
         ), "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
         assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
+
+        logger.debug("Initializing radiation model.")
 
         self._data_corruption_events_per_s = data_corruption_events_per_s
         self._restart_events_per_s = restart_events_per_s
@@ -51,15 +57,27 @@ class RadiationModel:
         poisson_prob = RadiationModel._compute_poisson_nonzero_event_probability(
             events_per_s, interval_in_s
         )
-        return np.random.rand() > poisson_prob
+        logger.trace(f"poisson_prob={poisson_prob}")
+        sample = np.random.rand()
+        logger.trace(f"sample ={sample }")
+        return sample < poisson_prob
 
-    def model_data_corruption(self, data_shape, exposure_period_in_s: float):
+    def model_data_corruption(self, data_shape: list, exposure_period_in_s: float):
+        """Computes a boolean mask for each data element that has been corrupted.
+
+        Args:
+            data_shape (list): Shape of the data to corrupt.
+            exposure_period_in_s (float): Period of radiation exposure.
+
+        Returns:
+            np.array: Boolean mask which is True if an entry was corrupted.
+        """
         poisson_prob = RadiationModel._compute_poisson_nonzero_event_probability(
             self._data_corruption_events_per_s, exposure_period_in_s
         )
         mask = np.ones(data_shape) * poisson_prob
-        rand_mask = np.random.rand(data_shape)
-        return rand_mask > mask
+        rand_mask = np.random.rand(*data_shape)
+        return rand_mask < mask
 
     def did_device_restart(self, interval_in_s: float):
         """Models whether the device experienced a random restart in this interval.
