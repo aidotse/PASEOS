@@ -4,6 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 
+
 class SimpleNeuralNetwork(torch.nn.Module):
     """Neural network to perform binary classification on 2D points"""
 
