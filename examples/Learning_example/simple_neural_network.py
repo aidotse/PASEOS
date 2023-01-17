@@ -4,7 +4,6 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 
-
 class SimpleNeuralNetwork(torch.nn.Module):
     """Neural network to perform binary classification on 2D points"""
 
@@ -63,9 +62,9 @@ class SimpleNeuralNetwork(torch.nn.Module):
 
         # divide the training set so none of the peers have the same data
         if self.node_id == 1:
-            train_mask = X_train[:, 0] < 0.2
+            train_mask = X_train[:, 0] < 0
         elif self.node_id == 2:
-            train_mask = X_train[:, 0] > -0.2
+            train_mask = X_train[:, 0] > -0
 
         X_train = np.ma.compress_rows(
             np.ma.masked_array(X_train, mask=np.transpose(np.tile(train_mask, (2, 1))))
