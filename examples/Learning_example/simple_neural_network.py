@@ -4,7 +4,10 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
 
+
 class SimpleNeuralNetwork(torch.nn.Module):
+    """Neural network to perform binary classification on 2D points"""
+
     def __init__(self, node_id):
         super(SimpleNeuralNetwork, self).__init__()
 
@@ -15,24 +18,32 @@ class SimpleNeuralNetwork(torch.nn.Module):
         torch.nn.init.kaiming_uniform_(self.layer_1.weight, nonlinearity="relu")
         self.layer_2 = torch.nn.Linear(hidden_dim, output_dim)
         self.num_epochs = 1
-        
+
         self.optimizer = None
         self.loss_fn = None
         self.node_id = node_id
         self.load_data()
-        
+
     def set_optimizer(self, optimizer, scheduler=None):
+        """Attach an optimizer to the model
+
+        Args:
+            optimizer (_type_): optimization method
+            scheduler (_type_, optional): schedule method. Defaults to None.
+        """
         self.optimizer = optimizer
         self.scheduler = scheduler
 
     def set_loss_fn(self, loss_fn):
+        """Attach a loss function for the training"""
         self.loss_fn = loss_fn
-        
-    def load_data(self):
 
-        import numpy as np
+    def load_data(self):
+        """Create dataloaders based on points belonging to two circles"""
 
         class Data(Dataset):
+            """Custom dataset to read out 2D points and labels"""
+
             def __init__(self, X, y):
                 self.X = torch.from_numpy(X.astype(np.float32))
                 self.y = torch.from_numpy(y.astype(np.float32))
@@ -64,15 +75,32 @@ class SimpleNeuralNetwork(torch.nn.Module):
         # Create dataloaders
         train_data = Data(X_train, y_train)
         test_data = Data(X_test, y_test)
-        self.train_dataloader = DataLoader(dataset=train_data, batch_size=64, shuffle=True)
-        self.test_dataloader = DataLoader(dataset=test_data, batch_size=64, shuffle=True)
-        
+        self.train_dataloader = DataLoader(
+            dataset=train_data, batch_size=64, shuffle=True
+        )
+        self.test_dataloader = DataLoader(
+            dataset=test_data, batch_size=64, shuffle=True
+        )
+
     def forward(self, x):
+        """Do inference on model
+
+        Args:
+            x (_type_): 2D input
+
+        Returns:
+            _type_: prediction
+        """
         x = torch.nn.functional.relu(self.layer_1(x))
         x = torch.sigmoid(self.layer_2(x))
         return x
 
     def train(self):
+        """Train model using the training data
+
+        Returns:
+            _type_: loss values for each datapoint
+        """
         loss_values = []
         for epoch in range(self.num_epochs):
             for X, y in self.train_dataloader:
@@ -88,6 +116,11 @@ class SimpleNeuralNetwork(torch.nn.Module):
         return loss_values
 
     def eval(self):
+        """Evaluate the model on the test set
+
+        Returns:
+            _type_: accuracy
+        """
         total = 0
         correct = 0
         with torch.no_grad():
