@@ -6,7 +6,6 @@ from dotmap import DotMap
 
 from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
-from paseos.utils.is_notebook import is_notebook
 
 
 class ActivityManager:
@@ -151,10 +150,12 @@ class ActivityManager:
 
         # Workaround to avoid error when executed in a Jupyter notebook.
         self._paseos_instance._local_actor._current_activity = name
-        if is_notebook():
-            return job()
-        else:
-            # Run activity and processor
+
+        # Run activity and processor
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
             asyncio.gather(job())
+        else:
+            asyncio.run(job())
 
         logger.info(f"Activity {activity} completed.")
