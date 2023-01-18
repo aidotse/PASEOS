@@ -1,7 +1,7 @@
 import asyncio
 import pykep as pk
 import torch
-import time
+import numpy as np
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 from simple_neural_network import SimpleNeuralNetwork
@@ -21,7 +21,12 @@ class Node:
             f"sat{node_id}", SpacecraftActor, pk.epoch(0)
         )
         ActorBuilder.set_orbit(sat, pos_and_vel[0], pos_and_vel[1], pk.epoch(0), earth)
-        ActorBuilder.set_power_devices(sat, 8000, 10000, 1)
+        ActorBuilder.set_power_devices(
+            actor=sat,
+            battery_level_in_Ws=70000 + np.random.rand() * 10000,
+            max_battery_level_in_Ws=100000,
+            charging_rate_in_W=50,
+        )
         ActorBuilder.add_comm_device(sat, device_name="link", bandwidth_in_kbps=1000)
         self.paseos = paseos.init_sim(sat, paseos_cfg)
 
@@ -36,14 +41,14 @@ class Node:
             * self.paseos.local_actor.communication_devices["link"].bandwidth_in_kbps
         )
 
-        self.training_time = None
+        self.current_activity = "train"
 
         # constraint_function = lambda x: self.paseos._operations_monitor.
         self.paseos.register_activity(
             "Train",
             activity_function=self.train,
             power_consumption_in_watt=power_consumption_in_watt,
-            constraint_function=None,
+            constraint_function=self.always_communicate_constraint,
         )
 
         self.paseos.register_activity(
@@ -56,8 +61,8 @@ class Node:
         self.paseos.register_activity(
             "StandBy",
             activity_function=self.stand_by,
-            power_consumption_in_watt=0,
-            constraint_function=None,
+            power_consumption_in_watt=2,
+            constraint_function=self.always_communicate_constraint,
         )
 
     def model_size(self):
@@ -78,12 +83,9 @@ class Node:
         """Add the actor of a node to the list of known actors"""
         self.paseos.add_known_actor(node.paseos.local_actor)
 
-    def activity_scheduler(self):
+    def operational_constraint(self):
         """Determine what activity should be performed"""
-        if self.paseos.local_actor.state_of_charge > 0.2:
-            return "train"
-        else:
-            return "standby"
+        return self.paseos.local_actor.state_of_charge > 0.5
 
     def in_in_line_of_sight(self, target_node):
         """Check if node is in line of sight
@@ -128,17 +130,27 @@ class Node:
             local_sd[key] = 0.5 * local_sd[key] + 0.5 * received_sd[key]
         self.model.load_state_dict(local_sd)
 
+    async def always_communicate_constraint(self):
+        """Stop training if actor is in line of sight
+
+        Returns:
+            bool: actor is in line-of-sight
+        """
+        other_actors = self.known_actors
+        for actor in other_actors:
+            if self.paseos.local_actor.is_in_line_of_sight(actor, self.local_time()):
+                return False
+        return True
+
     async def train(self, args):
         """Training activity
 
         Args:
             args (_type_): List of previous accuracies
         """
-        start_time = time.time()
         self.model.train()
         acc = self.model.eval()
         args.append(acc)
-        self.training_time = time.time() - start_time
 
     async def communicate_model(self, args):
         """Emulate communication by sleeping for transmission duration"""
@@ -151,4 +163,4 @@ class Node:
             args (_type_): list of previous accuracies
         """
         args.append(args[-1])
-        await asyncio.sleep(self.training_time)
+        await asyncio.sleep(0.01)
