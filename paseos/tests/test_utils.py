@@ -1,5 +1,6 @@
 """Utility for tests"""
 import sys
+import asyncio
 
 sys.path.append("../..")
 
@@ -23,3 +24,8 @@ def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):
     sim = paseos.init_sim(sat1)
 
     return sim, sat1, earth
+
+
+async def wait_for_activity(sim):
+    while sim._is_running_activity is True:
+        await asyncio.sleep(0.1)

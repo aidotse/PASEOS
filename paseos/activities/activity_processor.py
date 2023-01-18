@@ -63,8 +63,11 @@ class ActivityProcessor:
             logger.trace("Stopping ActivityProcessor.")
             # Calculate elapsed time since last update
             elapsed_time = timer() - self.start_time
-            # Perform final update
-            await self._update(elapsed_time)
+            # Perform final update if not interrupted before (otherwise already upto date)
+            if not self._paseos_instance.local_actor.was_interrupted:
+                await self._update(elapsed_time)
+            # Reset interrupt (to prepare for potential next interrupt)
+            self._paseos_instance.local_actor._was_interrupted = False
             self._is_started = False
             # Stop task and await it stopped:
             self._task.cancel()
@@ -107,6 +110,15 @@ class ActivityProcessor:
 
             # Check if the activity should still run
             # otherwise stop it and then the processor
+
+            # Radiation interruption leads to stop
+            if (
+                self._paseos_instance.local_actor.was_interrupted
+                or self._paseos_instance.local_actor.is_dead
+            ):
+                await self.stop()
+                await self._activity_runner.stop()
+
             if self._activity_runner.has_constraint():
                 if not await self._activity_runner.check_constraint():
                     await self.stop()
