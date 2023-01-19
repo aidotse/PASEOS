@@ -178,10 +178,11 @@ class ActorBuilder:
         passed rates to 0 to disable that particular model.
 
         Args:
-            actor (SpacecraftActor): _description_
-            data_corruption_events_per_s (float): Single bit of data being corrupted, events per second.
+            actor (SpacecraftActor):  The actor to add to.
+            data_corruption_events_per_s (float): Single bit of data being corrupted, events per second,
+            i.e. a Single Event Upset (SEU).
             restart_events_per_s (float): Device restart being triggered, events per second.
-            failure_events_per_s (float): Complete device failure, events per second.float): _description_
+            failure_events_per_s (float): Complete device failure, events per second, i.e. a Single Event Latch-Up (SEL).
         """
         # check for spacecraft actor
         assert isinstance(

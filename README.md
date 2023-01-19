@@ -308,7 +308,7 @@ PASEOS models three types of radiation effects.
 2. Unexpected software faults leading to a random interruption of [activities](#activity) with a Poisson-distributed event rate $r_i$ per second
 3. Device failures with a Poisson-distributed event rate $r_f$ per second, which can be imputed mostly to single event latch-ups
    
-You can add a radiation model with
+You can add a radiation model affecting the operations of the devices you are interested in with
 
 ```py
     from paseos import SpacecraftActor, ActorBuilder

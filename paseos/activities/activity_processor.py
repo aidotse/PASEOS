@@ -64,7 +64,10 @@ class ActivityProcessor:
             # Calculate elapsed time since last update
             elapsed_time = timer() - self.start_time
             # Perform final update if not interrupted before (otherwise already upto date)
-            if not self._paseos_instance.local_actor.was_interrupted:
+            if (
+                not self._paseos_instance.local_actor.was_interrupted
+                and not self._paseos_instance.local_actor.is_dead
+            ):
                 await self._update(elapsed_time)
             # Reset interrupt (to prepare for potential next interrupt)
             self._paseos_instance.local_actor._was_interrupted = False
