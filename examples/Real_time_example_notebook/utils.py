@@ -1,4 +1,4 @@
-
+import platform
 def clean_list(list_to_clean):
     """Clean list of tasks-profile removing empty elements.
 
@@ -29,19 +29,24 @@ def extract_cpu_time_from_file(file_name):
     f=open(file_name,"r")
     profiling_results_text=f.read()
     f.close()
-    profiling_results_list=profiling_results_text.split("\n\n")
+    if platform.system() == "Windows":
+        profiling_results_list=profiling_results_text.split("\n\n")
+    else:
+        profiling_results_list=profiling_results_text.split("\n")
+        
     profiling_results_list=profiling_results_list[5:]
 
     profiling_results=[]
     for x in profiling_results_list:
         profiling_results.append(clean_list(x.split(" ")))
-
+    
     task_to_track_idx_list=[]
     for idx in range(len(profiling_results)):
         for elem in profiling_results[idx]:
-            if elem in task_name_list:
-                task_to_track_idx_list.append(idx)
-                break
+            for task in task_name_list:
+                if task in elem:
+                    task_to_track_idx_list.append(idx)
+                    break
 
     task_name_id_dict=dict(zip(task_name_list, task_to_track_idx_list))
     time_activity=float(profiling_results[task_name_id_dict["detect_volcanic_eruptions_async"]][-2])
