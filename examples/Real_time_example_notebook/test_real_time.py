@@ -102,9 +102,9 @@ def main():
     #Add radiation model
     ActorBuilder.set_radiation_model(
         actor=sat,
-        data_corruption_events_per_s=1e-3,
-        restart_events_per_s=1e-5,
-        failure_events_per_s=1e-7,
+        data_corruption_events_per_s=0,
+        restart_events_per_s=0,
+        failure_events_per_s=0,
     )
 
     #Add thermal model
@@ -192,22 +192,6 @@ def main():
 
     f.close()
 
-    fig, ax=plt.subplots(1,3,figsize=(10,4))
-    
-    print(imgs[0].shape)
-    for n in range(3):
-        img_swap_channels=imgs[n]
-        img_swap_channels[:,:,0]=imgs[n][:,:,2]
-        img_swap_channels[:,:,2]=imgs[n][:,:,0]
-        img_swap_channels=img_swap_channels/img_swap_channels.max()
-        ax[n].imshow(img_swap_channels)
-        
-        bboxes, _ = output_event_bbox_info[0][n][0], output_event_bbox_info[0][n][1]
-        for bbox in bboxes:
-            bbox=bbox.bbox
-            rect = patches.Rectangle((bbox[1], bbox[0]), abs(bbox[1]-bbox[3]), abs(bbox[0]-bbox[2]), linewidth=1, edgecolor='y', facecolor='none')
-            ax[n].add_patch(rect)
-    plt.savefig("prova.png")
 
 if __name__ == "__main__":
     main()
