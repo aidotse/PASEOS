@@ -152,6 +152,12 @@ class ActorBuilder:
             actor, SpacecraftActor
         ), "Power devices are only supported for SpacecraftActors"
 
+        # Check if the actor already had a power device
+        if actor.has_power_model:
+            logger.warning(
+                "The actor already had a power device. Currently only one device is supported. Overriding old device."
+            )
+
         logger.trace("Checking battery values for sensibility.")
         assert battery_level_in_Ws > 0, "Battery level must be non-negative"
         assert max_battery_level_in_Ws > 0, "Battery level must be non-negative"
@@ -210,6 +216,12 @@ class ActorBuilder:
         assert isinstance(
             actor, SpacecraftActor
         ), "Thermal models are only supported for SpacecraftActors"
+
+        # Check if the actor already had a thermal model
+        if actor.has_thermal_model:
+            logger.warning(
+                "The actor already had a thermal model. Currently only one model is supported. Overriding old model."
+            )
 
         assert actor_mass > 0, "Actor mass has to be positive."
 
