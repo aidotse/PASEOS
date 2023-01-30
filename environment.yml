@@ -2,17 +2,17 @@ name: paseos
 channels:
   - conda-forge
 dependencies:
-- dotmap
-- loguru
-- matplotlib
-- myst-parser
-- pykep
-- pytest
-- pytest-asyncio
-- python 
-- scikit-spatial
-- skyfield
-- sphinx
-- sphinx_rtd_theme
-- toml
-- tqdm
+  - dotmap>=1.3.30 # core non-optional dependency
+  - loguru>=0.6.0 # core non-optional dependency
+  - matplotlib-base>=3.6.0 # core non-optional dependency
+  - myst-parser # for markdown math in docs
+  - pykep>=2.6 # core non-optional dependency
+  - pytest # for tests
+  - pytest-asyncio # for tests involving activities
+  - python>=3.8 # core non-optional dependency
+  - scikit-spatial>=6.5.0 # core non-optional dependency
+  - skyfield>=1.45 # core non-optional dependency
+  - sphinx # for docs
+  - sphinx_rtd_theme # for docs
+  - toml>=0.10.2 # core non-optional dependency
+  - tqdm>=4.64.1 # core non-optional dependency
