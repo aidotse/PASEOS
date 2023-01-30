@@ -84,7 +84,22 @@ PASEOS allows simulating the effect of onboard and operational constraints on us
 
 ## Installation
 
-`pip` and `conda` support will follow in the near future.
+### pip / conda
+
+`conda` support may follow in the near future.
+
+You can install via `pip` using
+
+```
+
+pip install paseos
+
+```
+
+This requires `Python 3.8` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). If you encounter problems, please consider setting up a `conda` environment to install dependencies.
+
+
+### Building from source
 
 For now, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
 
