@@ -20,6 +20,13 @@ class SpacecraftActor(BaseActor):
     _mass = None
 
     _thermal_model = None
+    _radiation_model = None
+
+    # If radiation randomly restarted the device
+    _was_interrupted = False
+
+    # If radiation permanently killed this device
+    _is_dead = False
 
     def __init__(
         self,
@@ -34,6 +41,32 @@ class SpacecraftActor(BaseActor):
         """
         logger.trace("Instantiating SpacecraftActor.")
         super().__init__(name, epoch)
+
+    def set_is_dead(self):
+        """Sets this device to "is_dead=True" indicating permanent damage."""
+        self._is_dead = True
+
+    def set_was_interrupted(self):
+        """Sets this device to "was_interrupted=True" indicating current activities were interrupted."""
+        self._was_interrupted = True
+
+    @property
+    def was_interrupted(self) -> bool:
+        """Returns whether the actor was interrupted in its activity.
+
+        Returns:
+            bool: True if device is interrupted.
+        """
+        return self._was_interrupted
+
+    @property
+    def is_dead(self) -> bool:
+        """Returns whether the device experienced fatal radiation failure.
+
+        Returns:
+            bool: True if device is dead.
+        """
+        return self._is_dead
 
     @property
     def charging_rate_in_W(self):
