@@ -87,8 +87,7 @@ exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=T
 
 
 ############ SIMULATION SETUP #############
-# Now, we will propagate each rank for 2.5 min simulation time unless it encounters another
-# actor on its way (according to the regularly information about their trajectories)
+# Now, we will propagate each rank for some time and check for windows during
 
 # Let's define the variable to track the actors we see
 total_seen_actors = 0
