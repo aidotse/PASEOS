@@ -140,6 +140,8 @@ while t <= simulation_time:
     )
     t += timestep
 
+    sys.stdout.flush()  # update prints to better see parallelism
+
     # Exchange actors between all ranks
     exchange_actors(
         comm, paseos_instance, local_actor, other_ranks, rank, verbose=SHOW_ALL_COMMS
