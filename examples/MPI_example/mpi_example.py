@@ -87,13 +87,14 @@ exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=T
 
 
 ############ SIMULATION SETUP #############
-# Now, we will propagate each rank for some time and check for windows during
+# Now, we will propagate each rank for some time and check for windows during that
 
 # Let's define the variable to track the actors we see
 total_seen_actors = 0
 
 # We will (ab)use PASEOS constraint function to track all the actors
-# we see in an evaluation window. Turn on verbose if you want to see each window
+# we see in an evaluation window (see timestep below).
+# Turn on SHOW_ALL_WINDOWS if you want to see each window
 def constraint_func(verbose=SHOW_ALL_WINDOWS):
     # For simplicity we use a global variable here
     global total_seen_actors
@@ -103,9 +104,8 @@ def constraint_func(verbose=SHOW_ALL_WINDOWS):
     # (It will be readded during actor exchange, but we should not count the same actor
     # again if we still see it a few seconds later)
     known_actors = paseos_instance.known_actors.values()
-    actors_to_remove = (
-        []
-    )  # we track keys to remove so the size doesn't change in iteration
+    actors_to_remove = []  # track keys to remove so size doesn't change in iteration
+
     for actor in known_actors:
         if paseos_instance.local_actor.is_in_line_of_sight(actor, local_t):
             if verbose:
