@@ -103,6 +103,11 @@ class PASEOS:
             current_power_consumption_in_W >= 0
         ), "Power consumption cannot be negative."
 
+        # Check constraint function returns something
+        assert (
+            constraint_function() is not None
+        ), "Your constraint function failed to return True or False."
+
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
         dt = self._cfg.sim.dt
