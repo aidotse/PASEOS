@@ -96,7 +96,7 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
         v = np.asarray(v)
 
         satellites.append((pos, v))
-        
+
     if verbose:
         print("Done!")
     return planet_list, satellites, period

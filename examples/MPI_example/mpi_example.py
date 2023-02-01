@@ -10,10 +10,12 @@ window encounters for each satellite.
 N.B. There are some simplifications in this example. Running this on a larger scale
 you would want to minimize communications between ranks more. For clarity, we stay simple.
 For details on the MPI parts also have a look at the mpi_utility_func.py in this folder.
-
-Let's start by importing the required packages, in addition to PASEOS' requirements 
-we also need mpi4py (install via conda install mpi4py -c conda-forge )
 """
+# flake8: noqa
+
+############ IMPORTS ########
+# Let's start by importing the required packages, in addition to PASEOS' requirements
+# we also need mpi4py (install via conda install mpi4py -c conda-forge )
 
 import sys
 import time
