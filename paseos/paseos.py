@@ -104,9 +104,10 @@ class PASEOS:
         ), "Power consumption cannot be negative."
 
         # Check constraint function returns something
-        assert (
-            constraint_function() is not None
-        ), "Your constraint function failed to return True or False."
+        if constraint_function is not None:
+            assert (
+                constraint_function() is not None
+            ), "Your constraint function failed to return True or False."
 
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
@@ -117,6 +118,7 @@ class PASEOS:
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
+            # Check constraint function
             if (
                 constraint_function is not None
                 and time_since_constraint_check > self._cfg.sim.activity_timestep
