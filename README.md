@@ -519,6 +519,16 @@ sim.register_activity(
 sim.perform_activity("activity_A")
 ```
 
+##### Waiting for Activities to Finish
+
+If you want to run multiple activities in a row or just wait for the existing one to finish, you can use
+
+```py
+await sim.wait_for_activity()
+```
+
+to wait until the running activity has finished.
+
 #### Activities with Inputs and Outputs
 
 The next code snippet will show how to register and perform activities with inputs and outputs. In particular, we will register an [activity function](#activity-function) `activity_function_with_in_and_outs` that takes an input argument and returns its value multiplied by two. Then, it waits for 0.1 s before concluding the activity. <br>

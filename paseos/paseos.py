@@ -62,6 +62,11 @@ class PASEOS:
         )
         self._operations_monitor = OperationsMonitor(self.local_actor.name)
 
+    async def wait_for_activity(self):
+        """This functions allows waiting for the currently running activity to finish."""
+        while self._is_running_activity is True:
+            await asyncio.sleep(0.1)
+
     def save_status_log_csv(self, filename) -> None:
         """Saves the status log incl. all kinds of information such as battery charge,
         running activtiy, etc.
