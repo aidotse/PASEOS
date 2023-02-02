@@ -1,15 +1,11 @@
 """Simple test of the thermal model to see if temperatures evolve as expected"""
 import pykep as pk
 
+from test_utils import wait_for_activity
 import paseos
 from paseos import SpacecraftActor, ActorBuilder, load_default_cfg
 import asyncio
 import pytest
-
-
-async def wait_for_activity(sim):
-    while sim._is_running_activity is True:
-        await asyncio.sleep(0.1)
 
 
 # tell pytest to create an event loop and execute the tests using the event loop

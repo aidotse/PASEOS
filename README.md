@@ -37,6 +37,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#how-to-add-a-communication-device">How to add a communication device</a></li>
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
     <li><a href="#thermal-modelling">Thermal Modelling</a></li>
+    <li><a href="#radiation-modelling">Radiation Modelling</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -261,7 +262,7 @@ Alternatively to the default `paseos.PowerDeviceType.SolarPanel` you can also us
 
 To model thermal constraints on spacecraft we utilize a model inspired by the one-node model described in [Martínez - Spacecraft Thermal Modelling and Test](http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf). Thus, we model the change in temperature as
 
-$mc \, \frac{dT}{dt} = \dot{Q}_{solar} + \dot{Q}_{albedo} + \dot{Q}_{central_body_IR} - \dot{Q}_{dissipated} + \dot{Q}_{activity}.$
+$$mc \, \frac{dT}{dt} = \dot{Q}_{solar} + \dot{Q}_{albedo} + \dot{Q}_{central_body_IR} - \dot{Q}_{dissipated} + \dot{Q}_{activity}.$$
 
 This means your spacecraft will heat up due to being in sunlight, albedo reflections, infrared radiation emitted by the central body as well as due to power consumption of activities. It will cool down due to heat dissipation.
 
@@ -300,6 +301,40 @@ The model is evaluated automatically during [activities](#activity). You can che
 
 ```py
 print(my_actor.temperature_in_K)
+```
+
+#### Radiation Modelling
+PASEOS models three types of radiation effects.
+1. Data corruption due to single event upsets which a event rate $r_d$.
+2. Unexpected software faults leading to a random interruption of [activities](#activity) with a Poisson-distributed event rate $r_i$ per second
+3. Device failures with a Poisson-distributed event rate $r_f$ per second, which can be imputed mostly to single event latch-ups
+   
+You can add a radiation model affecting the operations of the devices you are interested in with
+
+```py
+    from paseos import SpacecraftActor, ActorBuilder
+    my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch(0))
+    ActorBuilder.set_radiation_model(
+        actor=my_actor,
+        data_corruption_events_per_s=r_d,
+        restart_events_per_s=r_i,
+        failure_events_per_s=r_f,
+    )
+```
+
+You can set any of the event rates to 0 to disable that part. Only [SpacecraftActors](#spacecraftactor) support radiation models. You can find out if your actor has failed with
+
+```py
+my_actor.is_dead
+```
+
+Interrupted [activities](#activity) will return as if a [constraint function](#constraint-function) was no longer satisfied.
+
+To get a binary mask to model data corruption on the [local actor](#local-actor) you can call
+
+```py
+mask = paseos_instance.model_data_corruption(data_shape=your_data_shape,
+                                             exposure_time_in_s=your_time)
 ```
 
 ### Simulation Settings

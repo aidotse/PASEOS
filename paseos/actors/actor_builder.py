@@ -7,7 +7,8 @@ from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
 from .ground_station_actor import GroundstationActor
 from ..thermal.thermal_model import ThermalModel
-from paseos.power.power_device_type import PowerDeviceType
+from ..power.power_device_type import PowerDeviceType
+from ..radiation.radiation_model import RadiationModel
 
 
 class ActorBuilder:
@@ -174,6 +175,41 @@ class ActorBuilder:
             + f"CurrBattery={battery_level_in_Ws}Ws, "
             + f"ChargingRate={charging_rate_in_W}W to actor {actor}"
         )
+
+    def set_radiation_model(
+        actor: SpacecraftActor,
+        data_corruption_events_per_s: float,
+        restart_events_per_s: float,
+        failure_events_per_s: float,
+    ):
+        """Enables the radiation model allowing data corruption, activities being
+        interrupted by restarts and potentially critical device failures. Set any of the
+        passed rates to 0 to disable that particular model.
+
+        Args:
+            actor (SpacecraftActor):  The actor to add to.
+            data_corruption_events_per_s (float): Single bit of data being corrupted, events per second,
+            i.e. a Single Event Upset (SEU).
+            restart_events_per_s (float): Device restart being triggered, events per second.
+            failure_events_per_s (float): Complete device failure, events per second, i.e. a Single Event Latch-Up (SEL).
+        """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Radiation models are only supported for SpacecraftActors"
+
+        assert (
+            data_corruption_events_per_s >= 0
+        ), "data_corruption_events_per_s cannot be negative."
+        assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
+        assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
+
+        actor._radiation_model = RadiationModel(
+            data_corruption_events_per_s=data_corruption_events_per_s,
+            restart_events_per_s=restart_events_per_s,
+            failure_events_per_s=failure_events_per_s,
+        )
+        logger.debug(f"Added radiation model to actor {actor}.")
 
     def set_thermal_model(
         actor: SpacecraftActor,

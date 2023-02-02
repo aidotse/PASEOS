@@ -1,15 +1,9 @@
 """Simple test of starting an activity"""
-from test_utils import get_default_instance
+from test_utils import get_default_instance, wait_for_activity
 
 from paseos import SpacecraftActor
 import asyncio
 import pytest
-
-
-async def wait_for_activity(sim):
-    while sim._is_running_activity is True:
-        await asyncio.sleep(0.1)
-
 
 # Below test can be used to check what happens when you formulate an invalid constraint function.
 # It is temporarily commented out as it doesn't really check right now because I could not figure
