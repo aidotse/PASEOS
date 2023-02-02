@@ -42,7 +42,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <ul>
     <li><a href="#initializing-paseos">Initializing PASEOS</a></li>
     <li><a href="#using-the-cfg">Using the cfg</a></li>
-    <li><a href="#faster-than-real-time">Faster than real-time execution</a></li>
+    <li><a href="#faster-than-real-time-execution">Faster than real-time execution</a></li>
     <li><a href="#event-based-mode">Event-based mode</a></li>
     </ul>
     <li><a href="#activities">Activities</a></li>
@@ -334,7 +334,7 @@ sim = paseos.init_sim(local_actor)
 
 For each actor you wish to model, you can create a PASEOS instance. Running multiple instances on the same machine / thread is supported.
 
-#### How to use the cfg
+#### Using the cfg
 
 When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration. <br> The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` by loading a custom configuration.
 
