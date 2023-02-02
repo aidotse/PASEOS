@@ -257,6 +257,7 @@ Moreover, PASEOS assumes that the battery will be charged by solar panels, which
 
 ```py
 import pykep as pk
+import paseos
 from paseos import ActorBuilder, SpacecraftActor
 # Define an actor of type SpacecraftActor of name mySat
 sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
@@ -264,13 +265,13 @@ sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        epoch=pk.epoch(0))
 # Add a power device
 ActorBuilder.set_power_devices(actor=sat_actor,
-                               # Battery level at the start of the simulation in Ws
-                               battery_level_in_Ws=100,
-                               # Max battery level in Ws
+                               battery_level_in_Ws=100, # current level
                                max_battery_level_in_Ws=2000,
-                               # Charging rate in W
-                               charging_rate_in_W=10)
+                               charging_rate_in_W=10,
+                               power_device_type=paseos.PowerDeviceType.SolarPanel)
 ```
+
+Alternatively to the default `paseos.PowerDeviceType.SolarPanel` you can also use `paseos.PowerDeviceType.RTG`. The only difference at the moment is that [RTGs](https://en.wikipedia.org/wiki/Radioisotope_thermoelectric_generator) also charge in eclipse.
 
 Note that at the moment only one power device is supported. Adding another will override the existing one.
 
