@@ -16,7 +16,7 @@ def charge(
     Args:
         actor (SpacecraftActor): Actor to apply this to.
         charging_time_in_s (float): Charging period in s.
-        model (str, optional): Model to use, amt only "simple". Defaults to "simple".
+        model (str, optional): Model to use, at the moment only "simple". Defaults to "simple".
 
     Returns:
         SpacecraftActor: Modified actor after charging.
