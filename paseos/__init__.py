@@ -11,7 +11,7 @@ from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
 
 
-set_log_level("DEBUG")
+set_log_level("WARNING")
 
 logger.debug("Loaded module.")
 

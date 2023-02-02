@@ -77,6 +77,15 @@ class BaseActor(ABC):
         )
 
     @property
+    def has_radiation_model(self) -> bool:
+        """Returns true if actor's temperature is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_radiation_model") and self._radiation_model is not None
+
+    @property
     def has_thermal_model(self) -> bool:
         """Returns true if actor's temperature is modeled, else false.
 

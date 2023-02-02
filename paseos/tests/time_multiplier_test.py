@@ -4,13 +4,9 @@ import asyncio
 import pytest
 import pykep as pk
 
+from test_utils import wait_for_activity
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
-
-
-async def wait_for_activity(sim):
-    while sim._is_running_activity is True:
-        await asyncio.sleep(0.1)
 
 
 # tell pytest to create an event loop and execute the tests using the event loop
