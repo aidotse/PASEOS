@@ -96,7 +96,7 @@ pip install paseos
 
 ```
 
-This requires `Python 3.8` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). If you encounter problems, please consider setting up a `conda` environment to install dependencies.
+This requires `Python 3.8` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). If you encounter problems, please consider setting up a dedicated `conda` environment to install dependencies.
 
 
 ### Building from source
@@ -251,7 +251,7 @@ ActorBuilder.add_comm_device(actor=sat_actor,
 
 #### How to add a power device
 
-The following code snippet shows how to add a power device to a [SpacecraftActor](#spacecraftactor). At the moment, only one battery device is supported.
+The following code snippet shows how to add a power device to a [SpacecraftActor](#spacecraftactor).
 Moreover, PASEOS assumes that the battery will be charged by solar panels, which will provide energy thanks to the incoming solar radiation when the spacecraft is not eclipsed. Charging and discharging happens automatically during [activities](#activity).
 
 ```py
@@ -270,6 +270,8 @@ ActorBuilder.set_power_devices(actor=sat_actor,
                                # Charging rate in W
                                charging_rate_in_W=10)
 ```
+
+Note that at the moment only one power device is supported. Adding another will override the existing one.
 
 #### Thermal Modelling
 
@@ -315,6 +317,8 @@ The model is evaluated automatically during [activities](#activity). You can che
 ```py
 print(my_actor.temperature_in_K)
 ```
+
+At the moment, only one thermal model per actor is supported. Setting a second will override the old one.
 
 ### Simulation Settings
 
@@ -500,7 +504,8 @@ sim.perform_activity("activity_A")
 
 ##### Waiting for Activities to Finish
 
-If you want to run multiple activities in a row or just wait for the existing one to finish, you can use
+At the moment, parallel running of multiple activities is not supported.
+However, if you want to run multiple activities in a row or just wait for the existing one to finish, you can use
 
 ```py
 await sim.wait_for_activity()
