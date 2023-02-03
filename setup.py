@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="paseos",
-    version="0.1.1",
+    version="0.1.2",
     description="A package which simulates the space environment for operating multiple spacecraft.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -36,10 +36,12 @@ setup(
         "paseos.actors",
         "paseos.communication",
         "paseos.power",
+        "paseos.radiation",
+        "paseos.thermal",
         "paseos.utils",
         "paseos.visualization",
     ],
-    python_requires=">=3.8,<3.9",
+    python_requires=">=3.7,<3.9",
     project_urls={
         "Source": "https://github.com/aidotse/paseos/",
     },
