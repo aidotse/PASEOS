@@ -87,9 +87,9 @@ PASEOS allows simulating the effect of onboard and operational constraints on us
 
 ### pip / conda
 
-`conda` support may follow in the near future.
+`conda` support will follow in the near future.
 
-You can install via `pip` using
+On Linux you can install via `pip` using
 
 ```
 
@@ -97,7 +97,9 @@ pip install paseos
 
 ```
 
-This requires `Python 3.8` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). If you encounter problems, please consider setting up a dedicated `conda` environment to install dependencies.
+This requires `Python 3.8.16` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). 
+
+On Windows / OS X or if you encounter problems, please consider [setting up a dedicated](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) `conda` environment to install dependencies with the provided `environment.yml`
 
 
 ### Building from source

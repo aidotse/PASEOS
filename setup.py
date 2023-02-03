@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="paseos",
-    version="0.1.0",
+    version="0.1.2",
     description="A package which simulates the space environment for operating multiple spacecraft.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -15,6 +15,7 @@ setup(
         "dotmap>=1.3.30",
         "loguru>=0.6.0",
         "matplotlib>=3.6.0",
+        "numpy==1.23.5",
         "pykep>=2.6",
         "scikit-spatial>=6.5.0",
         "skyfield>=1.45",
@@ -35,6 +36,8 @@ setup(
         "paseos.actors",
         "paseos.communication",
         "paseos.power",
+        "paseos.radiation",
+        "paseos.thermal",
         "paseos.utils",
         "paseos.visualization",
     ],
