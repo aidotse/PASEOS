@@ -41,7 +41,7 @@ setup(
         "paseos.utils",
         "paseos.visualization",
     ],
-    python_requires=">=3.7,<3.9",
+    python_requires=">=3.8,<3.9",
     project_urls={
         "Source": "https://github.com/aidotse/paseos/",
     },
