@@ -15,6 +15,7 @@ setup(
         "dotmap>=1.3.30",
         "loguru>=0.6.0",
         "matplotlib>=3.6.0",
+        "numpy==1.23.0",
         "pykep>=2.6",
         "scikit-spatial>=6.5.0",
         "skyfield>=1.45",
