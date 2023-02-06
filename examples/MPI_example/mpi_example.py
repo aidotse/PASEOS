@@ -3,7 +3,7 @@ using MPI (see also https://mpi4py.readthedocs.io/en/stable/tutorial.html).
 
 Please run the example with mpiexec -n 4 python mpi_example.py
 
-In the example, we model four satellites in low-Earth orbit which are only very infrequently in
+In the example, we model four satellites in low-Earth orbit that are only very infrequently in
 line of sight of each other. For simplicity, the modelled task here will be to count the number of
 window encounters for each satellite. 
 

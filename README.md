@@ -123,7 +123,7 @@ Comprehensive, self-contained examples can also be found in the `examples` folde
 * Modelling and analysing a large constellation with PASEOS
 * Modelling distributed learning on heterogeneous data in a constellation
 * Using PASEOS with MPI to run PASEOS on supercomputers
-* Using PASEOS to mode the task of volcano eruption detection
+* Using PASEOS to model the task of onboard satellite volcanic eruptions detection
 
 The following are small snippets on specific topics.
 

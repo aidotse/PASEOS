@@ -51,7 +51,7 @@ def _parse_actor_data(actor_data):
 def exchange_actors(
     comm, paseos_instance, local_actor, other_ranks, rank, verbose=False
 ):
-    """This function exchanges actor between all MPI ranks.
+    """This function exchanges the states of various actors among all MPI ranks. 
 
     Args:
         comm (MPI_COMM_WORLD): The MPI comm world.
