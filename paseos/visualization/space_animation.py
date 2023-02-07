@@ -312,9 +312,7 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos, _ = known_actor.get_position_velocity(
-                        self._local_actor.local_time
-                    )
+                    pos = known_actor.get_position(self._local_actor.local_time)
                     pos_norm = [x / self._norm_coeff for x in pos]
                     if "positions" in obj:
                         if obj.positions.shape[0] > self.n_trajectory:
