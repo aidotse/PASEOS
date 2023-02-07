@@ -336,7 +336,8 @@ class SpaceAnimation(Animation):
             self.ax_3d.get_zlim()[0],
         ]
         for obj in self.objects:
-            coords_max = np.maximum(obj.positions.max(axis=0), coords_max)
+            overhead = 1.1  # Give some more space to fit text
+            coords_max = np.maximum(obj.positions.max(axis=0) * overhead, coords_max)
             coords_min = np.minimum(obj.positions.min(axis=0), coords_min)
         self.ax_3d.set_xlim(coords_min[0], coords_max[0])
         self.ax_3d.set_ylim(coords_min[1], coords_max[1])
@@ -349,7 +350,7 @@ class SpaceAnimation(Animation):
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
         self.ax_los.set_yticks(xaxis)
-        self.ax_los.set_xticklabels(current_actors, fontsize=8)
+        self.ax_los.set_xticklabels(current_actors, fontsize=8, rotation=90)
         self.ax_los.set_yticklabels(current_actors, fontsize=8)
 
         if creating_animation:
@@ -364,7 +365,9 @@ class SpaceAnimation(Animation):
         except RuntimeError:
             logger.trace("Animation date label could not be updated.")
 
-        self.time_label.set_text(f"t={sim._state.time:<10.2e}")
+        self.time_label.set_text(
+            f"t={sim._state.time - sim._cfg.sim.start_time:<10.2e}"
+        )
 
         logger.debug("Plot updated.")
 
