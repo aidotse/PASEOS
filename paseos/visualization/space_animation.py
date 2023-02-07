@@ -151,7 +151,7 @@ class SpaceAnimation(Animation):
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
             if actor.has_thermal_model:
-                info_str += f"\nTemperature: {actor.temperature_in_K}K,{actor.temperature_in_K-273.15}C"
+                info_str += f"\nTemperature: {actor.temperature_in_K:.2f}K,{actor.temperature_in_K-273.15:.2f}C"
 
             for name in actor.communication_devices.keys():
                 info = actor.communication_devices[name]
