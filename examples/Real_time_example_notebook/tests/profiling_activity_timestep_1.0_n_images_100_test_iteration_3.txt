@@ -1,0 +1,455 @@
+---------------n_images_100-----------activity_timestep_1.0-----------test_iteration_3---------------
+Clock type: CPU
+Ordered by: totaltime, desc
+
+name                                  ncall  tsub      ttot      tavg      
+..eos.py:337 PASEOS.perform_activity  1      0.000022  28.96048  28.96048
+..3 ActivityManager.perform_activity  1      0.000082  28.96036  28.96036
+..hon3.11/asyncio/runners.py:160 run  1      0.000037  28.95864  28.95864
+..lectorEventLoop.run_until_complete  4      0.000185  28.95856  7.239639
+..1/asyncio/runners.py:86 Runner.run  1      0.000037  28.95819  28.95819
+..4 _UnixSelectorEventLoop._run_once  40     0.001178  28.95810  0.723953
+..1/asyncio/events.py:78 Handle._run  43     0.000215  28.95506  0.673374
+.._UnixSelectorEventLoop.run_forever  4      0.000085  28.79519  7.198797
+..y_runner.py:51 ActivityRunner._run  1      0.000010  28.75009  28.75009
+..27 detect_volcanic_eruptions_async  1      0.019179  28.75008  28.75008
+..tebook/utils.py:215 s2pix_detector  100    0.602437  28.73072  0.287307
+..38 get_alert_matrix_and_thresholds  100    0.155364  15.75121  0.157512
+..otebook/utils.py:73 get_thresholds  100    3.733670  15.59585  0.155958
+..al/_signaltools.py:1636 convolve2d  200    0.002820  14.61050  0.073052
+..ebook/utils.py:54 check_surrounded  100    0.583765  7.837349  0.078373
+.._notebook/utils.py:169 cluster_9px  100    0.001760  7.488545  0.074885
+..tils.py:187 get_event_bounding_box  100    0.024521  4.888525  0.048885
+..ay_function__ internals>:177 where  1680   0.016416  4.028615  0.002398
+..ge/_shared/utils.py:267 fixed_func  100    0.001273  1.304337  0.013043
+..skimage/measure/_label.py:33 label  100    0.000887  1.297140  0.012971
+..e/_regionprops.py:1001 regionprops  100    0.004210  0.734093  0.007341
+../_measurements.py:240 find_objects  100    0.001359  0.712970  0.007130
+..essor.py:93 ActivityProcessor._run  1      0.000447  0.202473  0.202473
+..es/numpy/core/_methods.py:39 _amax  120    0.000519  0.144263  0.001202
+..or.py:78 ActivityProcessor._update  11     0.000362  0.128584  0.011689
+..rray_function__ internals>:177 pad  200    0.001617  0.127400  0.000637
+..s/paseos.py:78 PASEOS.advance_time  11     0.001563  0.126650  0.011514
+..ages/numpy/lib/arraypad.py:529 pad  200    0.008457  0.124018  0.000620
+..r/is_in_eclipse.py:8 is_in_eclipse  65     0.005408  0.111683  0.001718
+..mpy/lib/arraypad.py:86 _pad_simple  200    0.091862  0.094296  0.000471
+..92 ActivityRunner.check_constraint  10     0.000082  0.072202  0.007220
+..y:42 check_los_with_ground_station  10     0.000058  0.071931  0.007193
+..f_sight.py:176 is_in_line_of_sight  10     0.000083  0.071867  0.007187
+..sight_ground_station_to_spacecraft  10     0.000496  0.071784  0.007178
+..88 ThermalModel.update_temperature  13     0.000471  0.068407  0.005262
+..:290 SpacecraftActor.is_in_eclipse  39     0.000270  0.063190  0.001620
+...py:1571 _array_str_implementation  195    0.000608  0.059802  0.000307
+..ore/arrayprint.py:561 array2string  195    0.001495  0.059194  0.000304
+../arrayprint.py:506 ndarray.wrapper  195    0.001251  0.055226  0.000283
+..re/arrayprint.py:523 _array2string  195    0.001654  0.053448  0.000274
+..ctor.py:133 SpacecraftActor.charge  13     0.000689  0.050638  0.003895
+..field/vectorlib.py:74 VectorSum.at  80     0.000583  0.046332  0.000579
+..ionlib.py:730 Astrometric.apparent  10     0.000218  0.038836  0.003884
+..ld/relativity.py:22 add_deflection  10     0.000837  0.036290  0.003629
+..yprint.py:452 _get_format_function  195    0.001731  0.035429  0.000182
+..props.py:367 RegionProperties.bbox  6128   0.022668  0.034057  0.000006
+..pllib.py:215 ChebyshevPosition._at  100    0.000896  0.032690  0.000327
+..py/core/arrayprint.py:411 <lambda>  195    0.000524  0.032541  0.000167
+..int.py:907 FloatingFormat.__init__  195    0.001113  0.032016  0.000164
+.. Segment.compute_and_differentiate  100    0.000875  0.031524  0.000315
+..lephem/spk.py:194 Segment.generate  300    0.025556  0.030649  0.000102
+..t.py:934 FloatingFormat.fillFormat  195    0.007730  0.030609  0.000157
+..eld/vectorlib.py:211 VectorSum._at  20     0.000432  0.025608  0.001280
+..objects/_base_array.py:138 __new__  390    0.000907  0.023503  0.000060
+../objects/_base_array.py:23 __new__  390    0.005639  0.022596  0.000058
+..ThermalModel._compute_albedo_input  13     0.000088  0.021487  0.001653
+.. ThermalModel._compute_solar_input  13     0.000101  0.021467  0.001651
+..ore/arrayprint.py:780 _formatArray  195    0.000488  0.016124  0.000083
+..py/core/arrayprint.py:789 recurser  780..  0.005346  0.015636  0.000020
+..loguru/_logger.py:1847 Logger._log  705    0.003376  0.015099  0.000021
+..s.py:279 RegionProperties.__init__  766    0.006959  0.014553  0.000019
+..segment.py:55 LineSegment.__init__  65     0.000304  0.013615  0.000209
+..umpy/lib/arraypad.py:454 _as_pairs  400    0.004661  0.013293  0.000033
+..essor.py:60 ActivityProcessor.stop  11     0.000059  0.012960  0.001178
+..s/loguru/_datetime.py:81 aware_now  705    0.004921  0.011201  0.000016
+..kages/loguru/_logger.py:1967 trace  472    0.001075  0.010946  0.000023
+..oslib.py:41 GeographicPosition._at  10     0.000103  0.010906  0.001091
+..d/descriptorlib.py:9 reify.__get__  110..  0.000439  0.010812  0.000098
+..yfield/framelib.py:122 rotation_at  20     0.000160  0.010524  0.000526
+..phere.py:136 Sphere.intersect_line  65     0.000610  0.010203  0.000157
+..l/objects/line.py:87 Line.__init__  65     0.000194  0.009024  0.000139
+..ase_line_plane.py:17 Line.__init__  65     0.000390  0.008830  0.000136
+../skyfield/timelib.py:828 Time.gast  10     0.000159  0.008078  0.000808
+..y:356 RegionProperties.__setattr__  8426   0.007593  0.007593  0.000001
+..ure/_regionprops.py:375 <listcomp>  6128   0.006520  0.006520  0.000001
+..s/_base_array.py:79 Point.is_close  65     0.000328  0.006238  0.000096
+..:758 Time._nutation_angles_radians  10     0.000033  0.006027  0.000603
+..nutationlib.py:26 iau2000a_radians  10     0.000077  0.005994  0.000599
+..yfield/nutationlib.py:236 iau2000a  10     0.001313  0.005906  0.000591
+..8 deprecate_kwarg.get_stack_length  100    0.000536  0.005854  0.000059
+..kages/loguru/_logger.py:1971 debug  232    0.000612  0.005813  0.000025
+..rayprint.py:753 _extendLine_pretty  585    0.001843  0.005755  0.000010
+../lib/arraypad.py:129 _set_pad_area  400    0.004818  0.005690  0.000014
+...11/warnings.py:130 filterwarnings  390    0.002260  0.005620  0.000014
+..l/objects/vector.py:72 from_points  65     0.000952  0.005428  0.000084
+../relativity.py:116 _add_deflection  30     0.001522  0.005424  0.000181
+..y_function__ internals>:177 round_  200    0.000652  0.005279  0.000026
+..ared/utils.py:39 _get_stack_length  100    0.000537  0.005272  0.000053
+..on_base.py:2301 vectorize.__call__  65     0.000303  0.005161  0.000079
+..e/fromnumeric.py:69 _wrapreduction  436    0.001921  0.005074  0.000012
+..ray_function__ internals>:177 amax  215    0.000637  0.004968  0.000023
+..ure/_regionprops.py:376 <listcomp>  6128   0.004869  0.004869  0.000001
+...py:2400 vectorize._vectorize_call  65     0.001173  0.004857  0.000075
+..lib.py:170 SpiceKernel.__getitem__  50     0.000908  0.004835  0.000097
+..jects/sphere.py:75 Sphere.__init__  65     0.000201  0.004767  0.000073
+..shared/utils.py:27 _get_stack_rank  200..  0.000534  0.004611  0.000023
+.._base_sphere.py:14 Sphere.__init__  65     0.000215  0.004566  0.000070
+..ge/_shared/utils.py:35 _is_wrapped  200    0.000538  0.004077  0.000020
+..py/core/fromnumeric.py:3754 round_  200    0.000611  0.004072  0.000020
+..py/core/_ufunc_config.py:33 seterr  390    0.001818  0.003894  0.000010
+..naltools.py:56 _inputs_swap_needed  200    0.002053  0.003843  0.000019
+..umpy/core/fromnumeric.py:2703 amax  215    0.000624  0.003631  0.000017
+..y:204 SpacecraftActor.get_position  101    0.001392  0.003618  0.000036
+..nt.py:1018 FloatingFormat.__call__  585    0.002465  0.003468  0.000006
+..y_function__ internals>:177 around  200    0.000652  0.003461  0.000017
+..d/jpllib.py:144 SpiceKernel.decode  50     0.000377  0.003336  0.000067
+..core/arrayprint.py:739 _extendLine  585    0.002133  0.003220  0.000006
+..ges/numpy/core/_methods.py:61 _all  455    0.000620  0.003185  0.000007
+..y/core/arrayprint.py:963 <genexpr>  520    0.001059  0.003116  0.000006
+..ray_function__ internals>:177 amin  195    0.000479  0.003100  0.000016
+../objects/vector.py:105 Vector.norm  130    0.000326  0.002979  0.000023
+..ld/timelib.py:333 Timescale.tdb_jd  70     0.000465  0.002895  0.000041
+..c_config.py:430 errstate.__enter__  195    0.000472  0.002759  0.000014
+..ray_function__ internals>:177 size  390    0.000947  0.002739  0.000007
+..y_function__ internals>:177 einsum  100    0.000277  0.002729  0.000027
+..skyfield/functions.py:45 length_of  170    0.001009  0.002693  0.000016
+..ray_function__ internals>:177 norm  130    0.000306  0.002652  0.000020
+..y/core/fromnumeric.py:51 _wrapfunc  210    0.000818  0.002559  0.000012
+../objects/vector.py:137 Vector.unit  65     0.000798  0.002551  0.000039
+..field/timelib.py:318 Timescale.tdb  60     0.000140  0.002547  0.000042
+..31 vectorize._get_ufunc_and_otypes  65     0.000854  0.002505  0.000039
+..on3.11/warnings.py:181 _add_filter  390    0.001532  0.002413  0.000006
+..tionlib.py:685 Barycentric.observe  10     0.000099  0.002402  0.000240
+..py/core/fromnumeric.py:3245 around  200    0.000623  0.002345  0.000012
+..s/skyfield/jpllib.py:164 <genexpr>  340    0.000663  0.002337  0.000007
+..odel.py:46 _sample_poisson_process  26     0.000420  0.002321  0.000089
+..umpy/core/fromnumeric.py:2829 amin  195    0.000452  0.002178  0.000011
+..ldSkyCoordinate._observe_from_bcrs  10     0.000047  0.002117  0.000212
+..225 _correct_for_light_travel_time  10     0.000365  0.002070  0.000207
+..rrayprint.py:64 _make_options_dict  195    0.001110  0.002066  0.000011
+..nc_config.py:435 errstate.__exit__  195    0.000428  0.002034  0.000010
+..ges/numpy/core/_methods.py:47 _sum  300    0.000588  0.002025  0.000007
+..numpy/core/multiarray.py:345 where  1680   0.002015  0.002015  0.000001
+..s/numpy/linalg/linalg.py:2342 norm  130    0.001101  0.001976  0.000015
+..ore/numerictypes.py:356 issubdtype  100    0.000717  0.001951  0.000020
+..or.py:178 SpacecraftActor.altitude  26     0.000540  0.001929  0.000074
+../positionlib.py:824 Apparent.altaz  10     0.000035  0.001883  0.000188
+..field/positionlib.py:876 _to_altaz  10     0.000168  0.001847  0.000185
+..y/core/arrayprint.py:960 <genexpr>  520    0.001065  0.001772  0.000003
+..tionlib.py:97 Barycentric.__init__  100    0.000639  0.001712  0.000017
+..y/core/arrayprint.py:989 <genexpr>  260    0.000640  0.001682  0.000006
+..pllib.py:248 _format_code_and_name  320    0.000955  0.001674  0.000005
+..d/positionlib.py:20 build_position  80     0.000286  0.001657  0.000021
+../earthlib.py:64 compute_limb_angle  10     0.000285  0.001655  0.000165
+..ages/skyfield/functions.py:17 dots  130    0.000460  0.001575  0.000012
+.. RadiationModel.did_device_restart  13     0.000081  0.001558  0.000120
+..tivity.py:98 light_time_difference  30     0.000244  0.001552  0.000052
+..field/timelib.py:1019 tdb_minus_tt  80     0.001524  0.001524  0.000019
+..__init__.py:109 DotMap.__getattr__  189    0.001085  0.001491  0.000008
+..._compute_central_body_IR_emission  13     0.000103  0.001438  0.000111
+..tion__ internals>:177 iscomplexobj  110    0.000468  0.001409  0.000013
+..ectors.py:451 EpollSelector.select  40     0.000450  0.001358  0.000034
+..gs.py:466 catch_warnings.__enter__  390    0.001117  0.001339  0.000003
+..ges/numpy/core/_methods.py:55 _any  210    0.000410  0.001338  0.000006
+..y/core/_ufunc_config.py:132 geterr  390    0.001119  0.001338  0.000003
+..ges/skyfield/timelib.py:721 Time.M  10     0.000117  0.001323  0.000132
+..hon3.11/asyncio/tasks.py:627 sleep  12     0.000207  0.001263  0.000105
+..re/numerictypes.py:282 issubclass_  200    0.000768  0.001170  0.000006
+..mpy/core/einsumfunc.py:1009 einsum  100    0.000245  0.001097  0.000011
+..odel._compute_body_view_from_actor  13     0.000053  0.001062  0.000082
+..ncio/runners.py:62 Runner.__exit__  1      0.000010  0.001040  0.001040
+..asyncio/runners.py:65 Runner.close  1      0.000029  0.001030  0.001030
+..numpy/lib/arraypad.py:58 _view_roi  400    0.001025  0.001025  0.000003
+..ngs.py:487 catch_warnings.__exit__  390    0.000827  0.001018  0.000003
+..ray_function__ internals>:177 clip  10     0.000044  0.000986  0.000099
+../skyfield/timelib.py:823 Time.gmst  10     0.000032  0.000974  0.000097
+..py:1179 _normalize_jd_and_fraction  80     0.000347  0.000964  0.000012
+..ay.py:149 Point.__array_finalize__  1040   0.000951  0.000951  0.000001
+..kyfield/functions.py:153 _to_array  320    0.000628  0.000950  0.000003
+..ield/earthlib.py:109 sidereal_time  10     0.000091  0.000942  0.000094
+..y/core/arrayprint.py:984 <genexpr>  260    0.000545  0.000916  0.000004
+..y/core/arrayprint.py:964 <genexpr>  520    0.000594  0.000900  0.000002
+..odel.did_device_experience_failure  13     0.000040  0.000884  0.000068
+..py:583 Barycentric._altaz_rotation  10     0.000047  0.000883  0.000088
+..umpy/core/fromnumeric.py:2111 clip  10     0.000046  0.000882  0.000088
+../lib/arraypad.py:33 _slice_at_axis  800    0.000872  0.000872  0.000001
+..umpy/core/fromnumeric.py:3194 size  390    0.000656  0.000865  0.000002
+..kages/skyfield/functions.py:35 mxm  30     0.000074  0.000861  0.000029
+..117 GeographicPosition.rotation_at  10     0.000047  0.000822  0.000082
+..b/function_base.py:2410 <listcomp>  65     0.000181  0.000799  0.000012
+..d/timelib.py:811 Time.ut1_fraction  10     0.000063  0.000776  0.000078
+..umpy/lib/arraypad.py:109 <genexpr>  600    0.000774  0.000774  0.000001
+..kages/skyfield/functions.py:31 mxv  30     0.000072  0.000751  0.000025
+..y/core/arrayprint.py:965 <genexpr>  520    0.000550  0.000745  0.000001
+../arrayprint.py:403 _get_formatdict  195    0.000739  0.000739  0.000004
+..y/core/arrayprint.py:977 <genexpr>  520    0.000544  0.000731  0.000001
+..s/numpy/core/_methods.py:127 _clip  10     0.000127  0.000714  0.000071
+..y/core/arrayprint.py:968 <genexpr>  520    0.000528  0.000712  0.000001
+..umpy/lib/arraypad.py:120 <genexpr>  600    0.000700  0.000700  0.000001
+.. _UnixSelectorEventLoop.call_later  12     0.000226  0.000696  0.000058
+.._the_equinoxes_complimentary_terms  10     0.000495  0.000688  0.000069
+..yfield/timelib.py:815 Time.delta_t  10     0.000062  0.000679  0.000068
+..jects/vector.py:182 Vector.is_zero  65     0.000204  0.000663  0.000010
+..rray_function__ internals>:177 dot  100    0.000274  0.000649  0.000006
+../core/fromnumeric.py:70 <dictcomp>  436    0.000625  0.000625  0.000001
+..rray_function__ internals>:177 sum  26     0.000081  0.000622  0.000024
+..8 _UnixSelectorEventLoop.call_soon  32     0.000187  0.000622  0.000019
+..ield/units.py:92 Distance.__init__  110    0.000272  0.000622  0.000006
+..y:311 _set_result_unless_cancelled  11     0.000103  0.000619  0.000056
+..ld/timelib.py:1044 DeltaT.__call__  10     0.000098  0.000605  0.000060
+..r.py:116 SpacecraftActor.discharge  13     0.000118  0.000603  0.000046
+..ngs.py:440 catch_warnings.__init__  390    0.000520  0.000520  0.000001
+..ges/skyfield/functions.py:39 mxmxm  10     0.000039  0.000513  0.000051
+..eld/units.py:155 Velocity.__init__  100    0.000235  0.000498  0.000005
+..kyfield/_compatibility.py:9 interp  10     0.000065  0.000497  0.000050
+..eos/power/charge_model.py:5 charge  13     0.000146  0.000496  0.000038
+.._poisson_nonzero_event_probability  26     0.000492  0.000492  0.000019
+..s/skyfield/jpllib.py:174 <genexpr>  480    0.000480  0.000480  0.000001
+..lib/type_check.py:303 iscomplexobj  110    0.000418  0.000477  0.000004
+..d/relativity.py:163 add_aberration  10     0.000200  0.000465  0.000047
+..numpy/core/fromnumeric.py:2188 sum  26     0.000104  0.000464  0.000018
+..sumfunc.py:1001 _einsum_dispatcher  510    0.000451  0.000451  0.000001
+..hods.py:93 _clip_dep_is_scalar_nan  20     0.000192  0.000446  0.000022
+..vities/activity_manager.py:130 job  1      0.000075  0.000444  0.000444
+..aultEventLoopPolicy.new_event_loop  2      0.000009  0.000439  0.000219
+..elib.py:881 Time.precession_matrix  10     0.000056  0.000435  0.000044
+..63 _UnixSelectorEventLoop.__init__  2      0.000008  0.000430  0.000215
+..730 _UnixSelectorEventLoop.call_at  12     0.000124  0.000424  0.000035
+..49 _UnixSelectorEventLoop.__init__  2      0.000037  0.000422  0.000211
+..y_function__ internals>:177 interp  10     0.000044  0.000417  0.000042
+..function__ internals>:177 rollaxis  20     0.000069  0.000417  0.000021
+..m/descriptorlib.py:9 reify.__get__  5      0.000022  0.000412  0.000082
+.. _UnixSelectorEventLoop._call_soon  32     0.000202  0.000401  0.000013
+..y/core/arrayprint.py:72 <dictcomp>  195    0.000392  0.000392  0.000002
+..ignal/_signaltools.py:81 <genexpr>  400    0.000391  0.000391  0.000001
+../jplephem/spk.py:161 Segment._data  5      0.000091  0.000390  0.000078
+..ignal/_signaltools.py:80 <genexpr>  600    0.000388  0.000388  0.000001
+..o/runners.py:193 _cancel_all_tasks  1      0.000020  0.000379  0.000379
+..onlib.py:339 fundamental_arguments  10     0.000353  0.000377  0.000038
+..y/core/arrayprint.py:993 <genexpr>  260    0.000276  0.000373  0.000001
+..cessionlib.py:5 compute_precession  10     0.000322  0.000366  0.000037
+..aultEventLoopPolicy.get_event_loop  1      0.000013  0.000358  0.000358
+..y/core/arrayprint.py:994 <genexpr>  260    0.000262  0.000354  0.000001
+..ignaltools.py:48 _bvalfromboundary  200    0.000354  0.000354  0.000002
+..field/functions.py:70 to_spherical  10     0.000162  0.000335  0.000033
+.._runner.py:58 ActivityRunner.start  1      0.000052  0.000331  0.000331
+..eos/paseos.py:74 PASEOS.log_status  2      0.000036  0.000316  0.000158
+..b/function_base.py:2361 <listcomp>  65     0.000166  0.000316  0.000005
+..yncio/events.py:31 Handle.__init__  46     0.000246  0.000312  0.000007
+..py:67 _UnixSelectorEventLoop.close  1      0.000014  0.000298  0.000298
+..field/timelib.py:411 Time.__init__  80     0.000217  0.000296  0.000004
+..y/lib/function_base.py:1457 interp  10     0.000081  0.000294  0.000029
+..ackages/skyfield/functions.py:27 T  10     0.000034  0.000287  0.000029
+..thon3.11/signal.py:24 _int_to_enum  4      0.000019  0.000286  0.000072
+..al/_signaltools.py:40 _valfrommode  200    0.000285  0.000285  0.000001
+..ermalModel._compute_actor_emission  13     0.000061  0.000285  0.000022
+..py:86 _UnixSelectorEventLoop.close  1      0.000022  0.000283  0.000283
+..py:697 _UnixSelectorEventLoop.time  63     0.000193  0.000281  0.000004
+..hon3.11/reprlib.py:15 Task.wrapper  3      0.000028  0.000280  0.000093
+..es/skyfield/functions.py:141 rot_z  20     0.000165  0.000279  0.000014
+..umpy/core/numeric.py:1258 rollaxis  20     0.000187  0.000276  0.000014
+..onitor.py:57 OperationsMonitor.log  2      0.000087  0.000271  0.000135
+..numeric.py:3241 _around_dispatcher  400    0.000270  0.000270  0.000001
+..ib/python3.11/enum.py:669 __call__  4      0.000019  0.000268  0.000067
+..ray_function__ internals>:177 ndim  20     0.000070  0.000254  0.000013
+..b/function_base.py:2366 <listcomp>  65     0.000252  0.000252  0.000004
+..ib/python3.11/enum.py:1074 __new__  4      0.000068  0.000249  0.000062
+..syncio/base_tasks.py:26 _task_repr  3      0.000021  0.000242  0.000081
+..b/function_base.py:2390 <listcomp>  65     0.000157  0.000242  0.000004
+..imelib.py:874 Time.nutation_matrix  10     0.000042  0.000240  0.000024
+..y_runner.py:72 ActivityRunner.stop  1      0.000038  0.000239  0.000239
+../__init__.py:95 DotMap.__getitem__  190    0.000235  0.000235  0.000001
+..SelectorEventLoop._close_self_pipe  1      0.000117  0.000233  0.000233
+..linalg/linalg.py:117 isComplexType  130    0.000167  0.000232  0.000002
+..o/events.py:147 TimerHandle.cancel  12     0.000141  0.000231  0.000019
+../python3.11/signal.py:60 getsignal  2      0.000018  0.000231  0.000115
+..eld/timelib.py:302 Timescale.tt_jd  10     0.000060  0.000230  0.000023
+..io/base_tasks.py:9 _task_repr_info  3      0.000062  0.000219  0.000073
+..d/timelib.py:806 Time.tdb_fraction  10     0.000036  0.000218  0.000022
+..omnumeric.py:3190 _size_dispatcher  390    0.000217  0.000217  0.000001
+..e_array.py:47 Point.__array_wrap__  390    0.000216  0.000216  0.000001
+../vectorlib.py:42 VectorSum.__add__  10     0.000111  0.000210  0.000021
+..xSelectorEventLoop._make_self_pipe  2      0.000023  0.000207  0.000103
+..thon3.11/asyncio/tasks.py:389 wait  2      0.000044  0.000207  0.000103
+.._UnixSelectorEventLoop.create_task  8      0.000088  0.000200  0.000025
+..ionlib.py:44 build_nutation_matrix  10     0.000156  0.000198  0.000020
+..events.py:103 TimerHandle.__init__  12     0.000069  0.000190  0.000016
+..ib/arraypad.py:521 _pad_dispatcher  200    0.000156  0.000156  0.000001
+..1/asyncio/tasks.py:366 create_task  5      0.000024  0.000152  0.000030
+..nc_config.py:426 errstate.__init__  195    0.000152  0.000152  0.000001
+..print.py:898 _none_or_positive_arg  195    0.000147  0.000147  0.000001
+..e/__init__.py:34 epoch._epoch_ctor  26     0.000144  0.000144  0.000006
+..ib/function_base.py:2362 <genexpr>  195    0.000136  0.000136  0.000001
+..omnumeric.py:2698 _amax_dispatcher  215    0.000135  0.000135  0.000001
+..map/__init__.py:142 DotMap.__str__  2      0.000059  0.000129  0.000065
+..cio/runners.py:58 Runner.__enter__  1      0.000006  0.000129  0.000129
+..o/runners.py:131 Runner._lazy_init  2      0.000009  0.000125  0.000062
+.._UnixSelectorEventLoop._add_reader  2      0.000025  0.000123  0.000061
+..yfield/units.py:267 Angle.__init__  20     0.000063  0.000120  0.000006
+..umpy/core/fromnumeric.py:3152 ndim  20     0.000088  0.000118  0.000006
+..s/paseos.py:235 PASEOS.local_actor  154    0.000118  0.000118  0.000001
+..nixSelectorEventLoop.create_future  14     0.000096  0.000111  0.000008
+..lib/python3.11/signal.py:54 signal  2      0.000013  0.000109  0.000055
+..yncio/events.py:803 new_event_loop  1      0.000003  0.000109  0.000109
+..y:777 Time._mean_obliquity_radians  10     0.000057  0.000108  0.000011
+..omnumeric.py:2824 _amin_dispatcher  195    0.000107  0.000107  0.000001
+..89 _UnixSelectorEventLoop.__init__  2      0.000035  0.000095  0.000047
+..:21 SkyfieldSkyCoordinate.__init__  10     0.000091  0.000091  0.000009
+..kyfield/units.py:315 Angle.degrees  10     0.000032  0.000087  0.000009
+..3.11/asyncio/tasks.py:42 all_tasks  1      0.000021  0.000087  0.000087
+..jplephem/daf.py:135 DAF.read_array  5      0.000036  0.000086  0.000017
+..asyncio/tasks.py:644 ensure_future  4      0.000012  0.000085  0.000021
+..e_check.py:206 _is_type_dispatcher  110    0.000085  0.000085  0.000001
+..67 SpacecraftActor.has_power_model  28     0.000061  0.000083  0.000003
+..yncio/coroutines.py:34 iscoroutine  11     0.000027  0.000083  0.000008
+..ges/skyfield/jpllib.py:241 _center  60     0.000083  0.000083  0.000001
+..tor.py:148 SpacecraftActor.__str__  111    0.000082  0.000082  0.000001
+..se_futures.py:45 _future_repr_info  3      0.000036  0.000081  0.000027
+..ixSelectorEventLoop._remove_reader  1      0.000022  0.000081  0.000081
+..syncio/tasks.py:652 _ensure_future  5      0.000018  0.000078  0.000016
+..s.py:103 _clip_dep_is_byte_swapped  20     0.000058  0.000077  0.000004
+..7 _UnixSelectorEventLoop.get_debug  82     0.000075  0.000075  0.000001
+..io/events.py:64 TimerHandle.cancel  13     0.000062  0.000075  0.000006
+..ectorlib.py:190 VectorSum.__init__  10     0.000036  0.000073  0.000007
+..lg/linalg.py:2338 _norm_dispatcher  130    0.000071  0.000071  0.000001
+..s/numpy/core/multiarray.py:740 dot  100    0.000069  0.000069  0.000001
+..pacecraftActor.has_radiation_model  13     0.000048  0.000068  0.000005
+..e.py:51 transmit_to_ground_station  1      0.000015  0.000068  0.000068
+..ents.py:180 _run_until_complete_cb  4      0.000045  0.000067  0.000017
+..coroutines.py:50 _format_coroutine  3      0.000040  0.000065  0.000022
+..hon3.11/asyncio/tasks.py:497 _wait  2      0.000045  0.000065  0.000032
+..:108 _clip_dep_invoke_with_casting  10     0.000065  0.000065  0.000006
+..__init__.py:101 DotMap.__setattr__  13     0.000041  0.000061  0.000005
+..yfield/functions.py:169 _reconcile  10     0.000040  0.000060  0.000006
+..ctors.py:180 EpollSelector.get_key  3      0.000018  0.000059  0.000020
+<frozen abc>:117 __instancecheck__    13     0.000020  0.000059  0.000005
+..nixSelectorEventLoop._check_closed  62     0.000059  0.000059  0.000001
+..ython3.11/socket.py:594 socketpair  2      0.000020  0.000056  0.000028
+..xSelectorEventLoop._process_events  40     0.000053  0.000053  0.000001
+.._weakrefset.py:63 WeakSet.__iter__  3      0.000022  0.000050  0.000017
+..syncio/tasks.py:509 _on_completion  3      0.000017  0.000050  0.000017
+..vents.py:758 get_event_loop_policy  4      0.000006  0.000050  0.000012
+../jplephem/daf.py:149 DAF.map_array  5      0.000020  0.000048  0.000010
+..ssor.py:50 ActivityProcessor.start  1      0.000007  0.000046  0.000046
+..tors.py:351 EpollSelector.register  2      0.000011  0.000044  0.000022
+..wer/discharge_model.py:4 discharge  13     0.000035  0.000044  0.000003
+..nts.py:750 _init_event_loop_policy  1      0.000023  0.000043  0.000043
+..s/skyfield/timelib.py:848 Time.tdb  30     0.000042  0.000042  0.000001
+..python3.11/reprlib.py:52 Repr.repr  2      0.000012  0.000041  0.000021
+..o/events.py:119 TimerHandle.__lt__  11     0.000030  0.000039  0.000004
+..rthlib.py:129 earth_rotation_angle  10     0.000039  0.000039  0.000004
+..io/coroutines.py:11 _is_debug_mode  2      0.000011  0.000039  0.000020
+.. SpacecraftActor.has_thermal_model  15     0.000028  0.000039  0.000003
+..syncio/base_futures.py:14 isfuture  11     0.000023  0.000039  0.000004
+...py:115 SpacecraftActor.local_time  38     0.000039  0.000039  0.000001
+..es/skyfield/timelib.py:844 Time.tt  30     0.000037  0.000037  0.000001
+..d/nutationlib.py:71 mean_obliquity  10     0.000036  0.000036  0.000004
+..py:69 _SelectorMapping.__getitem__  3      0.000017  0.000036  0.000012
+..on3.11/asyncio/tasks.py:718 gather  1      0.000017  0.000034  0.000034
+..rs.py:365 EpollSelector.unregister  1      0.000017  0.000033  0.000033
+..ging/__init__.py:1467 Logger.debug  2      0.000007  0.000033  0.000017
+..hon3.11/socket.py:498 socket.close  2      0.000007  0.000033  0.000017
+...11/asyncio/tasks.py:414 <genexpr>  5      0.000008  0.000032  0.000006
+..lib/python3.11/typing.py:2216 cast  65     0.000032  0.000032  0.000000
+..ixSelectorEventLoop._check_running  8      0.000020  0.000031  0.000004
+..ckages/loguru/_logger.py:1975 info  1      0.000003  0.000030  0.000030
+..ython3.11/reprlib.py:55 Repr.repr1  2      0.000016  0.000029  0.000015
+..ht.py:34 SkyfieldSkyCoordinate._at  20     0.000029  0.000029  0.000001
+..s/jplephem/daf.py:92 DAF.map_words  1      0.000027  0.000029  0.000029
+..r.py:13 ActivityProcessor.__init__  1      0.000005  0.000028  0.000028
+.._collections_abc>:771 _Environ.get  2      0.000008  0.000028  0.000014
+..kyfield/vectorlib.py:196 <genexpr>  20     0.000027  0.000027  0.000001
+..tors.py:347 EpollSelector.__init__  2      0.000019  0.000026  0.000013
+..pacecraftActor.battery_level_in_Ws  39     0.000026  0.000026  0.000001
+..init__.py:1734 Logger.isEnabledFor  2      0.000015  0.000026  0.000013
+..1/socket.py:494 socket._real_close  2      0.000006  0.000026  0.000013
+..nner.py:11 ActivityRunner.__init__  1      0.000005  0.000026  0.000026
+..:215 EpollSelector._fileobj_lookup  6      0.000013  0.000026  0.000004
+..3.11/_weakrefset.py:85 WeakSet.add  8      0.000019  0.000024  0.000003
+..yncio/events.py:798 set_event_loop  2      0.000009  0.000024  0.000012
+..y:104 WeakValueDictionary.__init__  2      0.000012  0.000024  0.000012
+..thon3.11/_weakrefset.py:39 _remove  6      0.000018  0.000024  0.000004
+..ctor.py:62 SpacecraftActor.is_dead  23     0.000024  0.000024  0.000001
+..set.py:27 _IterationGuard.__exit__  1      0.000013  0.000023  0.000023
+..tors.py:234 EpollSelector.register  2      0.000010  0.000022  0.000011
+..1/asyncio/futures.py:299 _get_loop  9      0.000017  0.000022  0.000002
+..aultEventLoopPolicy.set_event_loop  3      0.000010  0.000021  0.000007
+<frozen os>:673 _Environ.__getitem__  2      0.000013  0.000020  0.000010
+..syncio/tasks.py:754 _done_callback  1      0.000008  0.000020  0.000020
+../__init__.py:93 DotMap.__setitem__  13     0.000020  0.000020  0.000002
+<frozen abc>:121 __subclasscheck__    2      0.000003  0.000020  0.000010
+..y:43 ActivityRunner.has_constraint  20     0.000019  0.000019  0.000001
+..rEventLoop._timer_handle_cancelled  12     0.000018  0.000018  0.000002
+..omnumeric.py:3148 _ndim_dispatcher  20     0.000018  0.000018  0.000001
+..yfield/units.py:304 Angle._degrees  10     0.000017  0.000017  0.000002
+..romnumeric.py:2183 _sum_dispatcher  26     0.000016  0.000016  0.000001
+..meric.py:1254 _rollaxis_dispatcher  20     0.000016  0.000016  0.000001
+..lectors.py:483 EpollSelector.close  1      0.000007  0.000015  0.000015
+..or.py:151 SpacecraftActor.set_time  13     0.000015  0.000015  0.000001
+..t_actor.py:89 SpacecraftActor.mass  13     0.000014  0.000014  0.000001
+..thon3.11/signal.py:34 _enum_to_int  4      0.000014  0.000014  0.000003
+...11/selectors.py:21 _fileobj_to_fd  6      0.000010  0.000013  0.000002
+...py:289 WeakValueDictionary.update  2      0.000009  0.000012  0.000006
+../asyncio/coroutines.py:53 get_name  3      0.000008  0.000012  0.000004
+..__init__.py:75 DotMap.__call_items  2      0.000008  0.000011  0.000006
+..3.11/asyncio/tasks.py:61 <setcomp>  1      0.000006  0.000011  0.000011
+..aultEventLoopPolicy.set_event_loop  3      0.000010  0.000011  0.000004
+..y:660 _UnixSelectorEventLoop.close  1      0.000008  0.000011  0.000011
+..3.11/socket.py:220 socket.__init__  4      0.000011  0.000011  0.000003
+../reprlib.py:143 Repr.repr_instance  2      0.000008  0.000011  0.000005
+..rs.py:247 EpollSelector.unregister  1      0.000005  0.000010  0.000010
+..nixDefaultEventLoopPolicy.__init__  1      0.000005  0.000010  0.000010
+..lections_abc>:156 __subclasshook__  2      0.000005  0.000010  0.000005
+..oop._set_coroutine_origin_tracking  8      0.000010  0.000010  0.000001
+..omnumeric.py:2107 _clip_dispatcher  10     0.000010  0.000010  0.000001
+..on_base.py:1453 _interp_dispatcher  10     0.000010  0.000010  0.000001
+..53 SpacecraftActor.was_interrupted  11     0.000010  0.000010  0.000001
+.. _UnixSelectorEventLoop.is_running  13     0.000009  0.000009  0.000001
+..py:28 SkyfieldSkyCoordinate.target  10     0.000009  0.000009  0.000001
+..8 SpacecraftActor.temperature_in_K  2      0.000007  0.000009  0.000004
+..s.py:697 _GatheringFuture.__init__  1      0.000008  0.000009  0.000009
+..lectorEventLoop.shutdown_asyncgens  1      0.000004  0.000009  0.000009
+..set.py:53 WeakSet._commit_removals  1      0.000007  0.000009  0.000009
+..0 _UnixSelectorEventLoop.set_debug  2      0.000006  0.000008  0.000004
+<frozen os>:755 encode                2      0.000005  0.000008  0.000004
+../_weakrefset.py:72 WeakSet.__len__  2      0.000006  0.000008  0.000004
+..os.py:253 PASEOS.known_actor_names  2      0.000006  0.000008  0.000004
+..tors.py:209 EpollSelector.__init__  2      0.000006  0.000008  0.000004
+<string>:1 <lambda>                   2      0.000005  0.000007  0.000003
+..ontextlib.py:431 suppress.__exit__  3      0.000006  0.000007  0.000002
+..1/threading.py:1446 current_thread  2      0.000005  0.000006  0.000003
+.._weakrefset.py:37 WeakSet.__init__  2      0.000005  0.000005  0.000003
+..ib.py:33 GeographicPosition.target  10     0.000005  0.000005  0.000001
+..ncio/runners.py:49 Runner.__init__  1      0.000005  0.000005  0.000005
+..lectors.py:268 EpollSelector.close  1      0.000004  0.000005  0.000005
+..gging/__init__.py:228 _acquireLock  1      0.000004  0.000005  0.000005
+..collections_abc>:78 _check_methods  2      0.000005  0.000005  0.000002
+..nixDefaultEventLoopPolicy.__init__  1      0.000005  0.000005  0.000005
+..._bootstrap>:405 ModuleSpec.parent  1      0.000004  0.000005  0.000005
+..ontextlib.py:425 suppress.__init__  3      0.000004  0.000004  0.000001
+..._bootstrap>:1209 _handle_fromlist  1      0.000003  0.000004  0.000004
+..dotmap/__init__.py:262 DotMap.keys  1      0.000004  0.000004  0.000004
+..asyncio/tasks.py:65 _set_task_name  5      0.000004  0.000004  0.000001
+..ctors.py:272 EpollSelector.get_map  3      0.000004  0.000004  0.000001
+..gging/__init__.py:237 _releaseLock  1      0.000003  0.000003  0.000003
+..py:652 _UnixSelectorEventLoop.stop  4      0.000003  0.000003  0.000001
+..ntextlib.py:428 suppress.__enter__  3      0.000003  0.000003  0.000001
+..et.py:21 _IterationGuard.__enter__  1      0.000002  0.000003  0.000003
+..07 SpacecraftActor.state_of_charge  2      0.000003  0.000003  0.000001
+../python3.11/enum.py:1163 _missing_  4      0.000003  0.000003  0.000001
+.._.py:1720 Logger.getEffectiveLevel  1      0.000002  0.000002  0.000002
+..set.py:17 _IterationGuard.__init__  1      0.000002  0.000002  0.000002
+..ventLoop.shutdown_default_executor  1      0.000002  0.000002  0.000002
+..6 SpacecraftActor.current_activity  2      0.000002  0.000002  0.000001
+..:219 ThermalModel.temperature_in_K  2      0.000002  0.000002  0.000001
+..3 _UnixSelectorEventLoop.is_closed  2      0.000001  0.000001  0.000001
+..rs.py:63 _SelectorMapping.__init__  2      0.000001  0.000001  0.000001
+..3.11/threading.py:1590 main_thread  2      0.000001  0.000001  0.000001
+..g/__init__.py:1319 Manager.disable  1      0.000001  0.000001  0.000001
+.. _GeneratorContextManager.__exit__  1      0.000000  0.000000  0.000000
