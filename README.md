@@ -135,6 +135,15 @@ pip install -e .
 
 The next examples will introduce you to the use of PASEOS.
 
+Comprehensive, self-contained examples can also be found in the `examples` folder where you can find an example on:
+
+* Modelling and analysing a large constellation with PASEOS
+* Modelling distributed learning on heterogeneous data in a constellation
+* Using PASEOS with MPI to run PASEOS on supercomputers
+* Using PASEOS to model the task of onboard satellite volcanic eruptions detection
+
+The following are small snippets on specific topics.
+
 ### Actors
 
 #### Create a PASEOS actor

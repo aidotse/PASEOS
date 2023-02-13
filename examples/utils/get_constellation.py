@@ -4,7 +4,7 @@ import numpy as np
 import pykep as pk
 
 
-def get_constellation(altitude, inclination, nSats, nPlanes, t0):
+def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
     """Creates a constellation with the passed parameters
 
     Args:
@@ -13,6 +13,7 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         nSats (int): Number of sats per plane.
         nPlanes (int): Number of orbital planes.
         t0 (pk.epoch): Initial time.
+        verbose (bool): Whether to print output.
 
     Returns:
         planets,satellites: pykep planets and list of (r,v) of the constellation.
@@ -81,9 +82,11 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
         M = plane_count * sExtraStep  # equals 0 + count*0 = 0 in the usual case
 
     period = planet_list[0].compute_period(t0)
-    print("Created " + str(len(elements_list)) + " satellites...")
+    if verbose:
+        print("Created " + str(len(elements_list)) + " satellites...")
 
-    print("Computing constellation's positions and velocities...")
+    if verbose:
+        print("Computing constellation's positions and velocities...")
     satellites = []
     for elements in elements_list:
         pos, v = pk.par2ic(elements, pk.MU_EARTH)
@@ -94,5 +97,6 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0):
 
         satellites.append((pos, v))
 
-    print("Done!")
+    if verbose:
+        print("Done!")
     return planet_list, satellites, period
