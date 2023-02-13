@@ -128,7 +128,12 @@ class SpaceAnimation(Animation):
 
         for i, a1 in enumerate(current_actors):
             for j, a2 in enumerate(current_actors[i + 1 :]):
-                if a1.is_in_line_of_sight(a2, local_time) is True:
+                # Skip LOS between groundstations (leads to crash)
+                if isinstance(a1, GroundstationActor) and isinstance(
+                    a2, GroundstationActor
+                ):
+                    continue
+                elif a1.is_in_line_of_sight(a2, local_time) is True:
                     los_matrix[i, j + i + 1] = 1.0
 
         # make los_matrix symmetric with diagonal entries equal to 0.5 to make colorbar nicer
