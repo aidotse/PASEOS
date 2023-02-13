@@ -14,6 +14,13 @@ class Node:
 
     def __init__(self, node_id, pos_and_vel, paseos_cfg, power_consumption_in_watt):
 
+        # set randomness
+        seed = 1
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
         # Create PASEOS instance to node
         earth = pk.planet.jpl_lp("earth")
         self.node_id = node_id
@@ -27,6 +34,18 @@ class Node:
             max_battery_level_in_Ws=100000,
             charging_rate_in_W=50,
         )
+        ActorBuilder.set_thermal_model(
+            actor=sat,
+            actor_mass=50.0,
+            actor_initial_temperature_in_K=273.15,
+            actor_sun_absorptance=0.5,
+            actor_infrared_absorptance=0.5,
+            actor_sun_facing_area=2.0,
+            actor_central_body_facing_area=2.0,
+            actor_emissive_area=3.0,
+            actor_thermal_capacity=1000,
+        )
+
         ActorBuilder.add_comm_device(sat, device_name="link", bandwidth_in_kbps=1000)
         self.paseos = paseos.init_sim(sat, paseos_cfg)
 
@@ -43,12 +62,11 @@ class Node:
 
         self.current_activity = "train"
 
-        # constraint_function = lambda x: self.paseos._operations_monitor.
         self.paseos.register_activity(
             "Train",
             activity_function=self.train,
             power_consumption_in_watt=power_consumption_in_watt,
-            constraint_function=self.always_communicate_constraint,
+            constraint_function=self.train_activity_constraint,
         )
 
         self.paseos.register_activity(
@@ -62,7 +80,7 @@ class Node:
             "StandBy",
             activity_function=self.stand_by,
             power_consumption_in_watt=2,
-            constraint_function=self.always_communicate_constraint,
+            constraint_function=self.standby_activity_constraint,
         )
 
     def model_size(self):
@@ -86,6 +104,7 @@ class Node:
     def operational_constraint(self):
         """Determine what activity should be performed"""
         return self.paseos.local_actor.state_of_charge > 0.5
+        # return (self.paseos.local_actor.state_of_charge > 0.5 and self.paseos.local_actor.temperature_in_K < 330)
 
     def in_in_line_of_sight(self, target_node):
         """Check if node is in line of sight
@@ -130,7 +149,19 @@ class Node:
             local_sd[key] = 0.5 * local_sd[key] + 0.5 * received_sd[key]
         self.model.load_state_dict(local_sd)
 
-    async def always_communicate_constraint(self):
+    async def train_activity_constraint(self):
+        """Stop training if actor is in line of sight
+
+        Returns:
+            bool: actor is in line-of-sight
+        """
+        other_actors = self.known_actors
+        for actor in other_actors:
+            if self.paseos.local_actor.is_in_line_of_sight(actor, self.local_time()):
+                return False
+        return True
+
+    async def standby_activity_constraint(self):
         """Stop training if actor is in line of sight
 
         Returns:
