@@ -286,7 +286,7 @@ Alternatively to the default `paseos.PowerDeviceType.SolarPanel` you can also us
 
 Note that at the moment only one power device is supported. Adding another will override the existing one.
 
-You can check the battery's state of charge and level in wattseconds with:
+You can check the battery's state of charge and level in Ws with:
 
 ```py
 print(my_actor.state_of_charge)
