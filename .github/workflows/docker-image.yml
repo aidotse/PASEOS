@@ -1,9 +1,7 @@
-name: Docker Image CI
+name: Docker Image CI - PASEOS
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
 
 jobs:
