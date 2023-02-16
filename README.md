@@ -130,6 +130,10 @@ Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as f
 cd PASEOS
 pip install -e .
 ```
+### Using Docker
+Two [Docker](https://www.docker.com/) images are available:
+* paseos: corresponding to the last release.
+* paseos-nightly: including the last implemented features. 
 
 ## Examples
 
