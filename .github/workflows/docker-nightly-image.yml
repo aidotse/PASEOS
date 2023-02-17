@@ -3,6 +3,8 @@ name: Docker Image CI - NIGHTLY
 on:
   push:
     branches: [ "main" ]
+    
+  workflow_dispatch:
 
 jobs:
 
