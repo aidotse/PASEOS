@@ -402,7 +402,9 @@ For each actor you wish to model, you can create a PASEOS instance. Running mult
 
 #### Using the cfg
 
-When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration. <br> The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` by loading a custom configuration.
+When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), a PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration.
+
+The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` (MJD2000) by loading a custom configuration.
 
 ```py
 import pykep as pk
@@ -437,6 +439,13 @@ cfg=load_default_cfg()
 cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor)
+```
+
+You can access the current simulation time (seconds since the start) and the current epoch like this:
+
+```py
+time_since_start_in_s = sim.simulation_time
+current_epoch = sim.local_time
 ```
 
 #### Faster than real-time execution
