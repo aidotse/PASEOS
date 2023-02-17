@@ -12,7 +12,7 @@ RUN useradd --create-home -s /bin/bash --no-user-group -u $USERID $USERNAME
 # Instal basic utilities
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git wget unzip bzip2 sudo build-essential ca-certificates && \
-    apt-get install ffmpeg libsm6 libxext6  -y && \
+    apt-get install libsm6 libxext6  -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -34,15 +34,17 @@ WORKDIR /home/$USERNAME/paseos
 # copy all files.
 COPY . $HOME/paseos
     
-#Install environment
-RUN conda env create -f environment.yml
+# Install mamba
+RUN conda install -y mamba -c conda-forge
+RUN mamba env update --file environment.yml --name base
 
 # For interactive shell
 SHELL ["/bin/bash", "-c"]
 
 RUN echo ". activate base" >> $HOME/.bashrc  && \ 
     chmod u+x $HOME/.bashrc && \ 
-    $HOME/.bashrc
+    $HOME/.bashrc && \
+	pip install -e . --no-dependencies --ignore-requires-python
 
-#
+
 ENV PATH $HOME/conda/envs/env/bin:$PATH
