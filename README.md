@@ -132,7 +132,7 @@ pip install -e .
 ```
 ### Using Docker
 Two [Docker](https://www.docker.com/) images are available:
-* paseos: corresponding to the last release.
+* paseos: corresponding to the latest release.
 * paseos-nightly: based on the latest commit on the branch `main`. 
 
 ## Examples
