@@ -227,6 +227,24 @@ class PASEOS:
         )
 
     @property
+    def simulation_time(self) -> float:
+        """Get the current simulation time of this paseos instance in seconds since start.
+
+        Returns:
+            float: Time since start in seconds.
+        """
+        return self._state.time
+
+    @property
+    def local_time(self) -> pk.epoch:
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+
+        Returns:
+            pk.epoch: local time of the actor
+        """
+        return self.local_actor.local_time
+
+    @property
     def monitor(self):
         """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
 
