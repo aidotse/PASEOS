@@ -3,6 +3,8 @@ name: Build and publish a Docker image for PASEOS-nightly
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
