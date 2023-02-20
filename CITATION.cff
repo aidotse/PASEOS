@@ -18,7 +18,6 @@ authors:
     family-names: Magal Shreenath
     affiliation: >-
       AI Sweden, Gothenburg, Sweden
-    orcid:    
   - given-names: Gabriele
     family-names: Meoni
     affiliation: >-
@@ -47,7 +46,6 @@ preferred-citation:
     family-names: Magal Shreenath
     affiliation: >-
       AI Sweden, Gothenburg, Sweden
-    orcid:    
   - given-names: Gabriele
     family-names: Meoni
     affiliation: >-
@@ -56,6 +54,4 @@ preferred-citation:
   doi: "10.48550/ARXIV.2302.02659"
   journal: "ArXiV"
   title: "PAseos Simulates the Environment for Operating multiple Spacecraft"
-  issue: 
-  volume: 
   year: 2023
