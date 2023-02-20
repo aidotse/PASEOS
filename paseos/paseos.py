@@ -289,7 +289,7 @@ class PASEOS:
         """
         return self._known_actors.keys()
 
-    def emtpy_known_actors(self):
+    def empty_known_actors(self):
         """Clears the list of known actors."""
         self._known_actors = {}
 
