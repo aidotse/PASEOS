@@ -286,6 +286,13 @@ Alternatively to the default `paseos.PowerDeviceType.SolarPanel` you can also us
 
 Note that at the moment only one power device is supported. Adding another will override the existing one.
 
+You can check the battery's state of charge and level in Ws with:
+
+```py
+print(my_actor.state_of_charge)
+print(my_actor.battery_level_in_Ws)
+```
+
 #### Thermal Modelling
 
 To model thermal constraints on spacecraft we utilize a model inspired by the one-node model described in [Martínez - Spacecraft Thermal Modelling and Test](http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf). Thus, we model the change in temperature as
