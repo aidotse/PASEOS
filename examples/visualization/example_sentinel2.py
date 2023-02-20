@@ -2,7 +2,6 @@ import sys
 
 sys.path.append("../..")
 
-import numpy as np
 from paseos.utils.set_log_level import set_log_level
 from paseos.utils.load_default_cfg import load_default_cfg
 import paseos
@@ -53,7 +52,8 @@ S2B = ActorBuilder.get_actor_scaffold("Satellite-B", SpacecraftActor, today)
 # Adding orbits around Earth based on previously calculated ephemerides
 ActorBuilder.set_orbit(S2A, sentinel2A_eph[0], sentinel2A_eph[1], today, earth)
 
-# To enable the communication between S2A and S2B, the velocity vector is multiplied by - 1 making the satellite to orbit with opposite direction.
+# To enable the communication between S2A and S2B, the velocity vector is
+# multiplied by - 1 making the satellite to orbit with opposite direction.
 ActorBuilder.set_orbit(
     S2B,
     sentinel2B_eph[0],
