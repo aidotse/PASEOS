@@ -207,7 +207,7 @@ class SpaceAnimation(Animation):
                     obj.plot.trajectory.set_3d_properties(data[-n_points:, 2].T)
 
                     # update satellite position
-                    data_point = list(map(lambda el:[el], data[-1, :]))
+                    data_point = list(map(lambda el: [el], data[-1, :]))
                     obj.plot.point.set_data_3d(data_point)
 
                     # update text box
