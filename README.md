@@ -130,6 +130,12 @@ Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as f
 cd PASEOS
 pip install -e .
 ```
+### Using Docker
+Two [Docker](https://www.docker.com/) images are available:
+* [paseos](https://hub.docker.com/r/gabrielemeoni/paseos): corresponding to the latest release.
+* [paseos-nightly](https://hub.docker.com/r/gabrielemeoni/paseos-nightly): based on the latest commit on the branch `main`. 
+
+If you want to install PASEOS using Docker, access the desired repository and follow the provided instructions. 
 
 ## Examples
 
