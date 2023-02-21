@@ -921,3 +921,15 @@ Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 - Gabriele Meoni - gabriele.meoni at esa.int, gabriele.meoni at ai.se
 - Johan Östman - johan.ostman at ai.se
 - Vinutha Magal Shreenath - vinutha at ai.se
+
+## Reference
+
+If you have used `PASEOS`, please cite the following paper:
+```
+@article{gomez23paseos,
+  author = {Gómez, Pablo and Östman, Johan and Shreenath, Vinutha Magal and Meoni, Gabriele},
+  title = {{PA}seos {S}imulates the {E}nvironment for {O}perating multiple {S}pacecraft},
+  journal = {arXiv:2302.02659 [cs.DC]},
+  year = {2023},
+}
+```
