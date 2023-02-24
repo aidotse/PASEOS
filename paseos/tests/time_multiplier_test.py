@@ -23,7 +23,7 @@ async def test_activity():
     # init simulation
 
     cfg = load_default_cfg()  # loading cfg to modify defaults
-    cfg.sim.time_multiplier = 10
+    cfg.sim.time_multiplier = 10.0
     sim = paseos.init_sim(sat1, cfg)
 
     # Initial power is 500
