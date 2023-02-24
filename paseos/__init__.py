@@ -1,5 +1,6 @@
 from loguru import logger
 from .utils.load_default_cfg import load_default_cfg
+from .utils.check_cfg import check_cfg
 from .paseos import PASEOS
 from .actors.base_actor import BaseActor
 from .actors.actor_builder import ActorBuilder
@@ -29,6 +30,8 @@ def init_sim(local_actor: BaseActor, cfg=None):
     logger.debug("Initializing simulation.")
     if cfg is None:
         cfg = load_default_cfg()
+    else:
+        check_cfg(cfg)
     sim = PASEOS(local_actor=local_actor, cfg=cfg)
     return sim
 
