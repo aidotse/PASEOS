@@ -3,6 +3,7 @@ from dotmap import DotMap
 import pykep as pk
 
 from .utils.load_default_cfg import load_default_cfg
+from .utils.check_cfg import check_cfg
 from .paseos import PASEOS
 from .actors.base_actor import BaseActor
 from .actors.actor_builder import ActorBuilder
@@ -35,10 +36,11 @@ def init_sim(
     logger.debug("Initializing simulation.")
     if cfg is None:
         cfg = load_default_cfg()
-
         # If no start was specified neither via cfg or directly we use local actor time
         if starting_epoch is None:
             cfg.sim.start_time = local_actor.local_time.mjd2000 * pk.DAY2SEC
+    else:
+        check_cfg(cfg)
 
     if starting_epoch is not None:
         cfg.sim.start_time = starting_epoch.mjd2000 * pk.DAY2SEC
