@@ -50,10 +50,10 @@ def _check_for_keys(cfg: DotMap, major_categories: list) -> None:
 def _check_entry_types(cfg: DotMap, major_categories: list) -> None:
     """Check that all entries in the config are of the correct type"""
     # fmt: off
-    integer_keys = []
-    float_keys = ["start_time","dt","activity_timestep","time_multiplier","logging_interval",]
-    boolean_keys = []
-    string_keys = []
+    integer_keys = [] # noqa
+    float_keys = ["start_time","dt","activity_timestep","time_multiplier","logging_interval",] # noqa
+    boolean_keys = [] # noqa
+    string_keys = [] # noqa
     list_keys = []
     # fmt: on
 
@@ -90,8 +90,8 @@ def _check_value_ranges(cfg: DotMap, major_categories: list) -> None:
     This throws runtime errors as ValueErrors are caught in training to avoid NaNs crashing the training."""
 
     # fmt: off
-    positive_value_keys = ["dt","activity_timestep","time_multiplier","logging_interval",]
-    positive_or_zero_value_keys = ["start_time"]
+    positive_value_keys = ["dt","activity_timestep","time_multiplier","logging_interval",] # noqa
+    positive_or_zero_value_keys = ["start_time"] # noqa
     # fmt: on
 
     for key in positive_value_keys:
