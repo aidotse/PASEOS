@@ -47,7 +47,8 @@ def init_sim(
 
     if local_actor.local_time.mjd2000 * pk.DAY2SEC != cfg.sim.start_time:
         logger.warning(
-            "You provided a different starting epoch for PASEOS than the local time of the local actor. starting_epoch will be used."
+            "You provided a different starting epoch for PASEOS than the local time of the local actor."
+            + "starting_epoch will be used."
         )
 
     sim = PASEOS(local_actor=local_actor, cfg=cfg)
