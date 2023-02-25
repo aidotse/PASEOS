@@ -19,6 +19,6 @@ jobs:
       - name: Run the test examples
         shell: bash -l {0}
         run: |
-          pip install seaborn, mpi4py, pytorch, scikit-learn, rasterio, scikit-image
+          pip install seaborn=0.12, mpi4py, pytorch, scikit-learn, rasterio, scikit-image
           cd paseos/examples
           python3 test_examples.py
