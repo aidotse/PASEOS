@@ -3,7 +3,6 @@ from abc import ABC
 from loguru import logger
 import pykep as pk
 import numpy as np
-from skspatial.objects import Sphere
 from dotmap import DotMap
 
 from ..communication.is_in_line_of_sight import is_in_line_of_sight

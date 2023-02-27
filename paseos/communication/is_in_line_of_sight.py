@@ -150,7 +150,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
     # Plot if requested
     if plot:
         from skspatial.plotting import plot_3d
-        from skspatial.objects import Sphere, Line, Point
+        from skspatial.objects import Line, Point
 
         def plot(gs_pos_t, sat_pos_t, t):
             # Converting to geocentric
