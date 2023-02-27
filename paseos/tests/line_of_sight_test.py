@@ -10,7 +10,7 @@ from paseos.communication.is_in_line_of_sight import is_in_line_of_sight
 
 import pykep as pk
 
-from test_utils import get_default_instance
+from test_utils import get_default_instance, _PASEOS_TESTS_EARTH_RADIUS
 
 
 def test_los_between_sats():
@@ -20,10 +20,10 @@ def test_los_between_sats():
 
     sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat2, [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth)
-    sat2.set_central_body_shape(Sphere([0, 0, 0], 6371000))
+    sat2.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
 
     sat3 = ActorBuilder.get_actor_scaffold("sat3", SpacecraftActor, pk.epoch(0))
-    sat3.set_central_body_shape(Sphere([0, 0, 0], 6371000))
+    sat3.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
     ActorBuilder.set_orbit(sat3, [0, -10000000, 0], [0, 0, -8000.0], pk.epoch(0), earth)
 
     # check that LOS is correct

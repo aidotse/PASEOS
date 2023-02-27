@@ -16,6 +16,8 @@ from paseos import (
 import pykep as pk
 import numpy as np
 
+from test_utils import _PASEOS_TESTS_EARTH_RADIUS
+
 
 def from_epoch_to_s(epoch: pk.epoch):
     return (epoch.mjd2000 - pk.epoch(0).mjd2000) / pk.SEC2DAY
@@ -47,7 +49,7 @@ def setup_sentinel_example(t0):
         central_body=earth,
     )
 
-    sentinel2B.set_central_body_shape(Sphere([0, 0, 0], 6371000))
+    sentinel2B.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
 
     # Define ground station
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
@@ -147,8 +149,8 @@ def test_communication_link_sat_to_sat():
         central_body=earth,
     )
 
-    sat1.set_central_body_shape(Sphere([0, 0, 0], 6371000))
-    sat2.set_central_body_shape(Sphere([0, 0, 0], 6371000))
+    sat1.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
+    sat2.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
 
     # Add communication link
     ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
