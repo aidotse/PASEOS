@@ -109,9 +109,18 @@ class SpacecraftActor(BaseActor):
         """Returns the current temperature of the actor in K.
 
         Returns:
-            float: Temperature in Kelvin.
+            float: Actor temperature in Kelvin.
         """
         return self._thermal_model.temperature_in_K
+
+    @property
+    def temperature_in_C(self) -> float:
+        """Returns the current temperature of the actor in C.
+
+        Returns:
+            float: Actor temperature in Celsius.
+        """
+        return self._thermal_model.temperature_in_K - 273.15
 
     @property
     def state_of_charge(self):
