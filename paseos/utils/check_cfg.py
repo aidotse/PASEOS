@@ -8,7 +8,7 @@ def check_cfg(cfg: DotMap):
     Args:
         cfg (DotMap): Run config you intend to use.
     """
-    major_categories = ["sim", "io"]
+    major_categories = ["sim", "io", "comm"]
     _check_for_keys(cfg, major_categories)
     _check_entry_types(cfg, major_categories)
     _check_value_ranges(cfg, major_categories)
@@ -23,6 +23,7 @@ def _check_for_keys(cfg: DotMap, major_categories: list) -> None:
         "activity_timestep",
         "time_multiplier",
         "logging_interval",
+        "central_body_LOS_radius",
     ]
     # Check only expected categories are there that are expected
     for key in cfg.keys():
@@ -51,7 +52,7 @@ def _check_entry_types(cfg: DotMap, major_categories: list) -> None:
     """Check that all entries in the config are of the correct type"""
     # fmt: off
     integer_keys = [] # noqa
-    float_keys = ["start_time","dt","activity_timestep","time_multiplier","logging_interval",] # noqa
+    float_keys = ["start_time","dt","activity_timestep","time_multiplier","logging_interval","central_body_LOS_radius"] # noqa
     boolean_keys = [] # noqa
     string_keys = [] # noqa
     list_keys = []
@@ -91,7 +92,7 @@ def _check_value_ranges(cfg: DotMap, major_categories: list) -> None:
 
     # fmt: off
     positive_value_keys = ["dt","activity_timestep","time_multiplier","logging_interval",] # noqa
-    positive_or_zero_value_keys = ["start_time"] # noqa
+    positive_or_zero_value_keys = ["start_time","central_body_LOS_radius"] # noqa
     # fmt: on
 
     for key in positive_value_keys:

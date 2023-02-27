@@ -6,3 +6,6 @@ time_multiplier = 1.0 # [unitless] Defines how much real time passes
 
 [io]
 logging_interval = 10.0 # [s] after how many seconds should paseos log the actor status
+
+[comm]
+central_body_LOS_radius = 6371000.0 # [m] radius of the sphere blocking line of sight
