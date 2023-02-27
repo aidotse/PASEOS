@@ -37,7 +37,7 @@ async def test_thermal():
     cfg.sim.dt = 5.0  # setting higher timestep to run things quickly
     cfg.sim.activity_timestep = 1.0
     cfg.io.logging_interval = 10.0  # log every 0.25 seconds
-    cfg.sim.time_multiplier = 200  # speed up execution for convenience
+    cfg.sim.time_multiplier = 200.0  # speed up execution for convenience
     sim = paseos.init_sim(sat1, cfg)
 
     # Initial temperature is 0C / 273.15K

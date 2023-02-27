@@ -27,7 +27,7 @@ async def test_monitor():
     cfg.sim.dt = 0.1  # setting lower timestep to run things quickly
     cfg.sim.activity_timestep = 0.1
     cfg.io.logging_interval = 0.25  # log every 0.25 seconds
-    cfg.sim.time_multiplier = 10  # speed up execution for convenience
+    cfg.sim.time_multiplier = 10.0  # speed up execution for convenience
     sim = paseos.init_sim(sat1, cfg)
 
     async def func1(args):
