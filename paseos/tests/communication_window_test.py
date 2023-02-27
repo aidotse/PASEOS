@@ -3,6 +3,8 @@ import sys
 
 sys.path.append("../..")
 
+from skspatial.objects import Sphere
+
 from paseos import (
     SpacecraftActor,
     GroundstationActor,
@@ -44,6 +46,8 @@ def setup_sentinel_example(t0):
         epoch=t0,
         central_body=earth,
     )
+
+    sentinel2B.set_central_body_shape(Sphere([0, 0, 0], 6371000))
 
     # Define ground station
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
@@ -142,6 +146,9 @@ def test_communication_link_sat_to_sat():
         epoch=pk.epoch(0),
         central_body=earth,
     )
+
+    sat1.set_central_body_shape(Sphere([0, 0, 0], 6371000))
+    sat2.set_central_body_shape(Sphere([0, 0, 0], 6371000))
 
     # Add communication link
     ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
