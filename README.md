@@ -13,6 +13,8 @@
     <a href="https://github.com/aidotse/PASEOS/issues">Report Bug</a>
     ·
     <a href="https://github.com/aidotse/PASEOS/issues">Request Feature</a>
+    ·
+    <a href="https://arxiv.org/abs/2302.02659">Read the Paper</a>
 </p>
 
 Disclaimer: This project is currently under development. Use at your own risk.
