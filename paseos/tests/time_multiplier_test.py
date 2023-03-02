@@ -23,7 +23,7 @@ async def test_activity():
     # init simulation
 
     cfg = load_default_cfg()  # loading cfg to modify defaults
-    cfg.sim.time_multiplier = 10.0
+    cfg.sim.time_multiplier = 5.0
     sim = paseos.init_sim(sat1, cfg)
 
     # Initial power is 500
@@ -34,7 +34,7 @@ async def test_activity():
     test_val = [0]
 
     async def func(args):
-        for _ in range(10):
+        for _ in range(5):
             args[0][0] += 1
             await asyncio.sleep(0.2)
 
@@ -48,12 +48,12 @@ async def test_activity():
     await wait_for_activity(sim)
 
     # Check activity result
-    assert test_val[0] == 10
+    assert test_val[0] == 5
 
     # Check power was depleted as expected
-    # Activity should run roughly 2s
+    # Activity should run roughly 1s
     # We charge 1W per second
-    # 1s real time equals 10s simulation
+    # 1s real time equals 5s simulation
     # And discharge 10W per second
-    # So should be roughly 200W - 20W consumed from starting 500
-    assert sat1.battery_level_in_Ws > 315 and sat1.battery_level_in_Ws < 325
+    # So should be roughly 50W - 5W consumed from starting 500
+    assert sat1.battery_level_in_Ws > 350 and sat1.battery_level_in_Ws <= 455

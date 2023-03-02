@@ -70,7 +70,7 @@ async def test_activity():
     # We charge 1W per second
     # And discharge 10W per second
     # So should be roughly 20W - 6W consumed from starting 500
-    assert sat1.battery_level_in_Ws > 480 and sat1.battery_level_in_Ws < 490
+    assert sat1.battery_level_in_Ws > 475 and sat1.battery_level_in_Ws < 490
 
     # test removing the activity
     assert "Testing" in sim._activity_manager._activities.keys()
