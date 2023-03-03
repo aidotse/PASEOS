@@ -5,6 +5,7 @@ import sys
 from dotmap import DotMap
 from loguru import logger
 import pykep as pk
+from skspatial.objects import Sphere
 
 from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
@@ -12,8 +13,7 @@ from paseos.utils.operations_monitor import OperationsMonitor
 
 
 class PASEOS:
-    """This class serves as the main interface with the user. It is designed
-    as a singleton to ensure we only have one instance running at any time."""
+    """This class serves as the main interface with the user."""
 
     # Config file of the simulation
     _cfg = None
@@ -27,6 +27,9 @@ class PASEOS:
 
     # The actor of the device this is running on
     _local_actor = None
+
+    # TODO replace this in the future depending on central body
+    _central_body_sphere = None
 
     # Handles registered activities
     _activity_manager = None
@@ -51,12 +54,15 @@ class PASEOS:
         """
         logger.trace("Initializing PASEOS")
         self._cfg = cfg
+        self._central_body_sphere = Sphere([0, 0, 0], cfg.comm.central_body_LOS_radius)
         self._state = DotMap(_dynamic=False)
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
         # Update local actor time to simulation start time.
         self.local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
+        # Set line of sight blocking sphere
+        self.local_actor.set_central_body_shape(self._central_body_sphere)
         self._activity_manager = ActivityManager(
             self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
         )
@@ -108,6 +114,12 @@ class PASEOS:
             current_power_consumption_in_W >= 0
         ), "Power consumption cannot be negative."
 
+        # Check constraint function returns something
+        if constraint_function is not None:
+            assert (
+                constraint_function() is not None
+            ), "Your constraint function failed to return True or False."
+
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
         dt = self._cfg.sim.dt
@@ -117,6 +129,7 @@ class PASEOS:
         # Perform timesteps until target_time - dt reached,
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
+            # Check constraint function
             if (
                 constraint_function is not None
                 and time_since_constraint_check > self._cfg.sim.activity_timestep
@@ -220,6 +233,24 @@ class PASEOS:
         )
 
     @property
+    def simulation_time(self) -> float:
+        """Get the current simulation time of this paseos instance in seconds since start.
+
+        Returns:
+            float: Time since start in seconds.
+        """
+        return self._state.time
+
+    @property
+    def local_time(self) -> pk.epoch:
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+
+        Returns:
+            pk.epoch: local time of the actor
+        """
+        return self.local_actor.local_time
+
+    @property
     def monitor(self):
         """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
 
@@ -264,7 +295,7 @@ class PASEOS:
         """
         return self._known_actors.keys()
 
-    def emtpy_known_actors(self):
+    def empty_known_actors(self):
         """Clears the list of known actors."""
         self._known_actors = {}
 

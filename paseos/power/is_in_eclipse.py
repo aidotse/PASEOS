@@ -5,7 +5,12 @@ from skspatial.objects import LineSegment, Line, Sphere
 from loguru import logger
 
 
-def is_in_eclipse(actor, central_body: pk.planet, t: pk.epoch, plot=False) -> bool:
+def is_in_eclipse(
+    actor,
+    central_body: pk.planet,
+    t: pk.epoch,
+    plot=False,
+) -> bool:
     """Checks whether the actor is currently in eclipse of central body.
 
     Args:

@@ -1,6 +1,6 @@
 ## PASEOS - PAseos Simulates the Environment for Operating multiple Spacecraft
 
-![Read the Docs (version)](https://img.shields.io/readthedocs/paseos/latest?style=flat-square) ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/aidotse/PASEOS/.github/workflows/run_tests.yml?branch=main?style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/aidotse/PASEOS?style=flat-square)
+![Read the Docs (version)](https://img.shields.io/readthedocs/paseos/latest?style=flat-square) [![Tests](https://github.com/aidotse/paseos/actions/workflows/run_tests.yml/badge.svg)](https://github.com/aidotse/paseos/actions/workflows/run_tests.yml) ![GitHub last commit](https://img.shields.io/github/last-commit/aidotse/PASEOS?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
@@ -13,6 +13,8 @@
     <a href="https://github.com/aidotse/PASEOS/issues">Report Bug</a>
     ·
     <a href="https://github.com/aidotse/PASEOS/issues">Request Feature</a>
+    ·
+    <a href="https://arxiv.org/abs/2302.02659">Read the Paper</a>
 </p>
 
 Disclaimer: This project is currently under development. Use at your own risk.
@@ -130,10 +132,25 @@ Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as f
 cd PASEOS
 pip install -e .
 ```
+### Using Docker
+Two [Docker](https://www.docker.com/) images are available:
+* [paseos](https://hub.docker.com/r/gabrielemeoni/paseos): corresponding to the latest release.
+* [paseos-nightly](https://hub.docker.com/r/gabrielemeoni/paseos-nightly): based on the latest commit on the branch `main`. 
+
+If you want to install PASEOS using Docker, access the desired repository and follow the provided instructions. 
 
 ## Examples
 
 The next examples will introduce you to the use of PASEOS.
+
+Comprehensive, self-contained examples can also be found in the `examples` folder where you can find an example on:
+
+* Modelling and analysing a large constellation with PASEOS
+* Modelling distributed learning on heterogeneous data in a constellation
+* Using PASEOS with MPI to run PASEOS on supercomputers
+* Using PASEOS to model the task of onboard satellite volcanic eruptions detection
+
+The following are small snippets on specific topics.
 
 ### Actors
 
@@ -277,6 +294,13 @@ Alternatively to the default `paseos.PowerDeviceType.SolarPanel` you can also us
 
 Note that at the moment only one power device is supported. Adding another will override the existing one.
 
+You can check the battery's state of charge and level in Ws with:
+
+```py
+print(my_actor.state_of_charge)
+print(my_actor.battery_level_in_Ws)
+```
+
 #### Thermal Modelling
 
 To model thermal constraints on spacecraft we utilize a model inspired by the one-node model described in [Martínez - Spacecraft Thermal Modelling and Test](http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf). Thus, we model the change in temperature as
@@ -393,7 +417,9 @@ For each actor you wish to model, you can create a PASEOS instance. Running mult
 
 #### Using the cfg
 
-When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration. <br> The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` by loading a custom configuration.
+When you instantiate PASEOS as shown in [Initializing PASEOS](#initializing-paseos), a PASEOS instance is created by using the default configuration. However, sometimes it is useful to use a custom configuration.
+
+The next code snippet will show how to start the PASEOS simulation with a time different from `pk.epoch(0)` (MJD2000) by loading a custom configuration.
 
 ```py
 import pykep as pk
@@ -428,6 +454,13 @@ cfg=load_default_cfg()
 cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor)
+```
+
+You can access the current simulation time (seconds since the start) and the current epoch like this:
+
+```py
+time_since_start_in_s = sim.simulation_time
+current_epoch = sim.local_time
 ```
 
 #### Faster than real-time execution
@@ -890,3 +923,15 @@ Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 - Gabriele Meoni - gabriele.meoni at esa.int, gabriele.meoni at ai.se
 - Johan Östman - johan.ostman at ai.se
 - Vinutha Magal Shreenath - vinutha at ai.se
+
+## Reference
+
+If you have used `PASEOS`, please cite the following paper:
+```
+@article{gomez23paseos,
+  author = {Gómez, Pablo and Östman, Johan and Shreenath, Vinutha Magal and Meoni, Gabriele},
+  title = {{PA}seos {S}imulates the {E}nvironment for {O}perating multiple {S}pacecraft},
+  journal = {arXiv:2302.02659 [cs.DC]},
+  year = {2023},
+}
+```

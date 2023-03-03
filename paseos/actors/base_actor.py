@@ -3,7 +3,6 @@ from abc import ABC
 from loguru import logger
 import pykep as pk
 import numpy as np
-from skspatial.objects import Sphere
 from dotmap import DotMap
 
 from ..communication.is_in_line_of_sight import is_in_line_of_sight
@@ -28,10 +27,8 @@ class BaseActor(ABC):
     # Position if not defined by orbital parameters
     _position = None
 
-    # Earth as a sphere (for now)
-    # TODO replace this in the future depending on central body
-    # Note that this needs to be specified in solar reference frame for now
-    _central_body_sphere = Sphere([0, 0, 0], 6371000)
+    # Is specified by user / paseos instance but required for line of sight computations
+    _central_body_sphere = None
 
     # Central body this actor is orbiting
     _central_body = None
@@ -147,6 +144,14 @@ class BaseActor(ABC):
 
     def __str__(self):
         return self.name
+
+    def set_central_body_shape(self, sphere) -> None:
+        """Sets the central body of this actor.
+
+        Args:
+            sphere (skspatial.Sphere): Sphere blocking line of sight.
+        """
+        self._central_body_sphere = sphere
 
     def set_time(self, t: pk.epoch):
         """Updates the local time of the actor.

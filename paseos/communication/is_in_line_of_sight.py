@@ -150,9 +150,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
     # Plot if requested
     if plot:
         from skspatial.plotting import plot_3d
-        from skspatial.objects import Sphere, Line, Point
-
-        central_body_sphere = Sphere([0, 0, 0], 6371000)
+        from skspatial.objects import Line, Point
 
         def plot(gs_pos_t, sat_pos_t, t):
             # Converting to geocentric
@@ -162,7 +160,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
             sat_point = Point(r2)
             line = Line(r1, r2 - r1)
             plot_3d(
-                central_body_sphere.plotter(alpha=0.4),
+                spacecraft._central_body_sphere.plotter(alpha=0.4),
                 line.plotter(c="b"),
                 gs_point.plotter(c="r", s=100),
                 sat_point.plotter(c="r", s=100),
@@ -201,6 +199,9 @@ def is_in_line_of_sight(
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
+        assert (
+            actor._central_body_sphere is not None
+        ), f"Please set the central sphere on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_spacecraft_to_spacecraft(
             actor, other_actor, epoch, plot
         )
@@ -210,6 +211,9 @@ def is_in_line_of_sight(
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
+        assert (
+            other_actor._central_body_sphere is not None
+        ), f"Please set the central sphere on actor {other_actor} for line of sight computations."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -219,6 +223,9 @@ def is_in_line_of_sight(
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
+        assert (
+            actor._central_body_sphere is not None
+        ), f"Please set the central sphere on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )
