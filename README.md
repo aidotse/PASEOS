@@ -802,14 +802,7 @@ The local device is illustrated with white text.
 In the upper-right corner, the status of the communication link between each spacecraft is shown.
 Finally, the time in the lower left and lower right corners corresponds to the epoch and the PASEOS local simulation time.
 
-<p align="center">
-  <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/animation.png" alt="Scheme"  width="910" height="459">
-  </a>
-  <p align="center">
-    Snapshot of PASEOS visualization
-  </p>
-</p>
+![Alt Text](resources/images/animation.png)
 
 #### Monitoring Simulation Status
 
@@ -844,23 +837,8 @@ paseos_instance.save_status_log_csv("output.csv")
 
 ## System Design of PASEOS
 
-<p align="center">
-  <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/datastructure.svg" alt="Scheme"  width="910" height="459">
-  </a>
-  <p align="center">
-    Description of PASEOS data structure
-  </p>
-</p>
-
-<p align="center">
-  <a href="https://github.com/aidotse/PASEOS/">
-    <img src="resources/images/flowchart.svg" alt="Scheme"  width="910" height="459">
-  </a>
-  <p align="center">
-    Description of PASEOS workflow on an individual device
-  </p>
-</p>
+![Alt Text](resources/images/datastructure.svg)
+![Alt Text](resources/images/flowchart.svg)
 
 ## Glossary
 
@@ -898,7 +876,7 @@ paseos_instance.save_status_log_csv("output.csv")
   An on-termination function is an asynchronous function that can be used by the PASEOS user to specify some operations to be executed on termination of the predefined PASEOS user's activity.
 
 - ### SpacecraftActor
-  PASEOS [actor](actor) emulating a spacecraft or a satellite.
+  PASEOS [actor](#actor) emulating a spacecraft or a satellite.
 
 ## Contributing
 

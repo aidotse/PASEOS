@@ -27,7 +27,7 @@ copyright = "2022"
 author = "Pablo Gómez, Gabriele Meoni, Johan Östman, Vinutha Magal Shreenath"
 
 # The full version, including alpha/beta/rc tags
-release = "v0.1.2"
+release = "v0.1.3"
 
 
 # -- General configuration ---------------------------------------------------
@@ -59,7 +59,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
 
-html_logo = "logo.jpg"
+# html_logo = "logo.jpg"
 
 html_theme_options = {
     "logo_only": True,
