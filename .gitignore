@@ -137,3 +137,5 @@ paseos/tests/de421.bsp
 test.csv
 thermal_test.csv
 results
+pytest-coverage.txt
+pytest.xml
