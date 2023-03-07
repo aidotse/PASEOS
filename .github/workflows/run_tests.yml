@@ -47,7 +47,6 @@ jobs:
         shell: bash -l {0}
         run: |
           micromamba activate paseos
-          cd paseos/tests
           micromamba install pytest pytest-cov pytest-asyncio
           pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
