@@ -80,7 +80,7 @@ class SpaceAnimation(Animation):
                 fontsize=self.font_size,
             )
             self.time_label = self.ax_3d.annotate(
-                f"t={sim._state.time:<10.2e}",
+                f"t={sim._state.time - sim._cfg.sim.start_time:<10.2e}",
                 xy=(0.99, 0.01),
                 xycoords="figure fraction",
                 horizontalalignment="right",
@@ -120,7 +120,7 @@ class SpaceAnimation(Animation):
 
             los_matrix = self._get_los_matrix(current_actors)
             self._plot_los(los_matrix)
-            self._plot_comm_lines(los_matrix)
+            self._plot_comm_lines()
             self.ax_los.set_visible(self.show_los_matrix)
 
             plt.ion()
@@ -181,7 +181,7 @@ class SpaceAnimation(Animation):
                     a2, GroundstationActor
                 ):
                     continue
-                elif a1.is_in_line_of_sight(a2, local_time) is True:
+                elif a1.is_in_line_of_sight(a2, local_time):
                     los_matrix[i, j + i + 1] = 1.0
 
         # make los_matrix symmetric with diagonal entries equal to 0.5 to make colorbar nicer
@@ -240,7 +240,7 @@ class SpaceAnimation(Animation):
         cbar.ax.set_yticklabels(["no signal", "signal"])
         cbar.ax.set_visible(self.show_los_matrix)
 
-    def _plot_comm_lines(self, los_matrix: np.ndarray):
+    def _plot_comm_lines(self):
         # Clear old
         for idx in range(len(self.comm_lines)):
             self.comm_lines[idx][0].set_visible(False)
@@ -250,7 +250,13 @@ class SpaceAnimation(Animation):
         # Create lines between connected actors
         for i in range(len(self.objects)):
             for j in range(i + 1, len(self.objects)):
-                if los_matrix[i, j] == 1:
+                if isinstance(self.objects[i].actor, GroundstationActor) and isinstance(
+                    self.objects[j].actor, GroundstationActor
+                ):
+                    continue
+                elif self.objects[i].actor.is_in_line_of_sight(
+                    self.objects[j].actor, self.objects[i].actor.local_time
+                ):
                     pos_i, pos_j = self.objects[i].positions, self.objects[j].positions
                     if isinstance(pos_i[0], np.ndarray):
                         pos_i = pos_i[-1]
@@ -441,7 +447,7 @@ class SpaceAnimation(Animation):
         # Update LOS heatmap
         current_actors = list(current_actors)
         los_matrix = self._get_los_matrix(current_actors)
-        self._plot_comm_lines(los_matrix)
+        self._plot_comm_lines()
         self._los_plot.set_data(los_matrix)
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
