@@ -1,3 +1,4 @@
 include paseos/resources/default_cfg.toml
 include paseos/resources/de421.bsp
+include paseos/resources/bluemarble_med.png
 include README.md

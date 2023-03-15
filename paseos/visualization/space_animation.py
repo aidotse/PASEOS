@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import PIL
 from dotmap import DotMap
 from typing import List
 import matplotlib.pyplot as plt
@@ -7,6 +9,7 @@ from matplotlib.artist import Artist
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from loguru import logger
+import pykep as pk
 
 from paseos.actors.base_actor import BaseActor
 from paseos.actors.spacecraft_actor import SpacecraftActor
@@ -27,6 +30,19 @@ class SpaceAnimation(Animation):
         """
         super().__init__(sim)
         logger.debug("Initializing animation")
+
+        path = os.path.join(
+            os.path.dirname(__file__) + "/../resources/", "bluemarble_med.png"
+        )
+        self.earth_img = PIL.Image.open(path)
+        self.earth_resolution_stride = 4
+        self.font_size = 10
+        self.comm_lines = []
+        self.dpi = 150
+        self.show_los_matrix = False
+        self.show_trajectories = False
+        self.central_body = None
+
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body.radius
@@ -42,16 +58,34 @@ class SpaceAnimation(Animation):
             self.fig, default_ax = plt.subplots(
                 1,
                 2,
-                figsize=(10, 5),
+                figsize=(10, 5.625),  # 16 to 9
                 facecolor="black",
-                dpi=100,
+                dpi=self.dpi,
                 layout="constrained",
-                gridspec_kw={"width_ratios": [3.5, 1]},
+                gridspec_kw={
+                    "width_ratios": [3.5, 1] if self.show_los_matrix else [100, 0.01]
+                },
             )
 
             # Removing defaultax to add projection
             default_ax[0].remove()
             self.ax_3d = plt.subplot(121, projection="3d")
+            self.ax_3d.view_init(elev=0, azim=300)
+
+            # Write text labels
+            self.date_label = self.ax_3d.annotate(
+                self._local_actor.local_time,
+                xy=(0.01, 0.01),
+                xycoords="figure fraction",
+                fontsize=self.font_size,
+            )
+            self.time_label = self.ax_3d.annotate(
+                f"t={sim._state.time:<10.2e}",
+                xy=(0.99, 0.01),
+                xycoords="figure fraction",
+                horizontalalignment="right",
+                fontsize=self.font_size,
+            )
 
             # Get rid of the panes
             self.ax_3d.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
@@ -68,10 +102,14 @@ class SpaceAnimation(Animation):
 
             # how many samples from histories to visualize
             self.n_trajectory = n_trajectory
-            self._textbox_offset = 0.1
+            self._textbox_offset = 0.02
 
-            # Create figure for LOS
+            # # plot the objects
+            self._plot_central_body()
+            self._plot_actors()
+
             default_ax[1].remove()
+            # Create figure for LOS
             self.ax_los = plt.subplot(122)
             xaxis = np.arange(len(current_actors))
             self.ax_los.set_position([0.75, 0.7, 0.2, 0.2])
@@ -80,24 +118,10 @@ class SpaceAnimation(Animation):
             self.ax_los.set_xticklabels(current_actors, fontsize=8)
             self.ax_los.set_yticklabels(current_actors, fontsize=8)
 
-            # plot the objects
-            self._plot_central_body()
-            self._plot_actors()
             los_matrix = self._get_los_matrix(current_actors)
             self._plot_los(los_matrix)
-
-            # Write text labels
-            self.date_label = plt.annotate(
-                self._local_actor.local_time,
-                xy=(0.01, 0.01),
-                xycoords="figure fraction",
-            )
-            self.time_label = plt.annotate(
-                f"t={sim._state.time:<10.2e}",
-                xy=(0.99, 0.01),
-                xycoords="figure fraction",
-                horizontalalignment="right",
-            )
+            self._plot_comm_lines(los_matrix)
+            self.ax_los.set_visible(self.show_los_matrix)
 
             plt.ion()
             plt.show()
@@ -105,14 +129,38 @@ class SpaceAnimation(Animation):
 
     def _plot_central_body(self) -> None:
         """Plot the central object as a sphere of radius 1"""
-        central_body = self._local_actor._central_body
-        central_body.radius
+        bm = self.earth_img
 
-        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
-        x = np.cos(u) * np.sin(v)
-        y = np.sin(u) * np.sin(v)
-        z = np.cos(v)
-        self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
+        rotation_start_time = pk.epoch_from_string("2023-Dec-17 14:42:42")
+        day_phase = (
+            self._local_actor.local_time.mjd2000 - rotation_start_time.mjd2000
+        ) % 1
+
+        # it's big, so I'll rescale it, convert to array, and divide by 256 to get RGB values that matplotlib accept
+        # bm = np.array(bm.resize([int(d) for d in bm.size]))/256.
+        bm = np.array(bm) / 256
+
+        # coordinates of the image - don't know if this is entirely accurate, but probably close
+        lons = np.linspace(-180, 180, bm.shape[1]) * np.pi / 180
+        lats = np.linspace(-90, 90, bm.shape[0])[::-1] * np.pi / 180
+
+        x = np.outer(np.cos(lons + 30.45 + 2 * day_phase * np.pi), np.cos(lats)).T
+        y = np.outer(np.sin(lons + 30.45 + 2 * day_phase * np.pi), np.cos(lats)).T
+        z = np.outer(np.ones(np.size(lons + 2 * day_phase * np.pi)), np.sin(lats)).T
+        if self.central_body is not None:
+            self.central_body.set_visible(False)
+            del self.central_body
+        self.central_body = self.ax_3d.plot_surface(
+            x,
+            y,
+            z,
+            rstride=self.earth_resolution_stride,
+            cstride=self.earth_resolution_stride,
+            facecolors=bm,
+            linewidth=0,
+            alpha=1.0,
+            zorder=0,
+        )
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
         """Compute line-of-sight (LOS) between all actors
@@ -138,6 +186,7 @@ class SpaceAnimation(Animation):
 
         # make los_matrix symmetric with diagonal entries equal to 0.5 to make colorbar nicer
         los_matrix = los_matrix + los_matrix.T - 1.5 * np.diag(np.diag(los_matrix))
+
         return los_matrix
 
     def _populate_textbox(self, actor: BaseActor) -> str:
@@ -156,11 +205,11 @@ class SpaceAnimation(Animation):
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
             if actor.has_thermal_model:
-                info_str += f"\nTemperature: {actor.temperature_in_K:.2f}K,{actor.temperature_in_K-273.15:.2f}C"
+                info_str += f"\nTemp.: {actor.temperature_in_K-273.15:.2f}C"
 
-            for name in actor.communication_devices.keys():
-                info = actor.communication_devices[name]
-                info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
+            # for name in actor.communication_devices.keys():
+            #     info = actor.communication_devices[name]
+            #     info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
         else:
             raise NotImplementedError(
                 "SpacePlot is currently not implemented for actor type" + type(actor)
@@ -178,6 +227,7 @@ class SpaceAnimation(Animation):
         Args:
             los_matrix (np.ndarray): matrix telling what satellites can see each other.
         """
+
         # Create new colormap, with black for two
         colors = [(255, 0, 0), (0, 0, 0), (0, 255, 0)]
         new_map = LinearSegmentedColormap.from_list("new_map", colors, N=3)
@@ -188,6 +238,32 @@ class SpaceAnimation(Animation):
 
         cbar = self.fig.colorbar(self._los_plot, ticks=[0, 1], cax=cax)
         cbar.ax.set_yticklabels(["no signal", "signal"])
+        cbar.ax.set_visible(self.show_los_matrix)
+
+    def _plot_comm_lines(self, los_matrix: np.ndarray):
+        # Clear old
+        for idx in range(len(self.comm_lines)):
+            self.comm_lines[idx][0].set_visible(False)
+        del self.comm_lines
+        self.comm_lines = []
+
+        # Create lines between connected actors
+        for i in range(len(self.objects)):
+            for j in range(i + 1, len(self.objects)):
+                if los_matrix[i, j] == 1:
+                    pos_i, pos_j = self.objects[i].positions, self.objects[j].positions
+                    if isinstance(pos_i[0], np.ndarray):
+                        pos_i = pos_i[-1]
+                        pos_j = pos_j[-1]
+                    x1x2 = [pos_i[0], pos_j[0]]
+                    y1y2 = [pos_i[1], pos_j[1]]
+                    z1z2 = [pos_i[2], pos_j[2]]
+
+                    self.comm_lines.append(
+                        self.ax_3d.plot3D(
+                            x1x2, y1y2, z1z2, "--", color="lightblue", zorder=10
+                        )
+                    )
 
     def _plot_actors(self) -> None:
         """Plots all the actors"""
@@ -207,9 +283,10 @@ class SpaceAnimation(Animation):
                 ):
                     logger.trace("Updating SpacecraftActor.")
 
-                    # update trajectory
-                    obj.plot.trajectory.set_data(data[-n_points:, :2].T)
-                    obj.plot.trajectory.set_3d_properties(data[-n_points:, 2].T)
+                    if self.show_trajectories:
+                        # update trajectory
+                        obj.plot.trajectory.set_data(data[-n_points:, :2].T)
+                        obj.plot.trajectory.set_3d_properties(data[-n_points:, 2].T)
 
                     # update satellite position
                     data_point = list(map(lambda el: [el], data[-1, :]))
@@ -219,21 +296,29 @@ class SpaceAnimation(Animation):
                     actor_info = self._populate_textbox(obj.actor)
                     obj.plot.text.set_position_3d(data[-1, :] + self._textbox_offset)
                     obj.plot.text.set_text(actor_info)
+                    obj.plot.text.set_fontsize(self.font_size)
+
             else:
                 if isinstance(obj.actor, SpacecraftActor) or isinstance(
                     obj.actor, GroundstationActor
                 ):
-                    trajectory = self.ax_3d.plot3D(data[0, 0], data[0, 1], data[0, 2])[
-                        0
-                    ]
-                    obj.plot.trajectory = trajectory
+                    color = "white"
+                    if isinstance(obj.actor, GroundstationActor):
+                        color = "red"
+                    if self.show_trajectories:
+                        trajectory = self.ax_3d.plot3D(
+                            data[0, 0], data[0, 1], data[0, 2], zorder=10, color=color
+                        )[0]
+                        obj.plot.trajectory = trajectory
                     obj.plot.point = self.ax_3d.plot(
                         data[0, 0],
                         data[0, 1],
                         data[0, 2],
-                        "x",
-                        color=trajectory.get_color(),
+                        "o",
+                        color=color,
+                        zorder=10,
                     )[0]
+
                     actor_info = self._populate_textbox(obj.actor)
                     if obj.actor == self._local_actor:
                         obj.plot.text = self.ax_3d.text(
@@ -244,7 +329,8 @@ class SpaceAnimation(Animation):
                             # bbox=dict(facecolor="mediumspringgreen"),
                             verticalalignment="bottom",
                             clip_on=True,
-                            fontsize=8,
+                            fontsize=self.font_size,
+                            zorder=10,
                         )
 
                     else:
@@ -257,7 +343,8 @@ class SpaceAnimation(Animation):
                             color="lightskyblue",
                             verticalalignment="bottom",
                             clip_on=True,
-                            fontsize=8,
+                            fontsize=self.font_size,
+                            zorder=10,
                         )
 
         self.ax_3d.set_box_aspect(
@@ -305,7 +392,8 @@ class SpaceAnimation(Animation):
             x for x in self.objects if x.actor in objects_to_remove
         ]
         for obj in plot_objects_to_remove:
-            obj.plot.trajectory.remove()
+            if self.show_trajectories:
+                obj.plot.trajectory.remove()
             obj.plot.point.remove()
             obj.plot.text.remove()
 
@@ -328,6 +416,7 @@ class SpaceAnimation(Animation):
                             obj.positions = np.vstack((obj.positions, pos_norm))
                     else:
                         obj.positions = np.array(pos_norm)
+        self._plot_central_body()
         self._plot_actors()
 
         # Step through trajectories to find max and min values in each direction
@@ -342,7 +431,7 @@ class SpaceAnimation(Animation):
             self.ax_3d.get_zlim()[0],
         ]
         for obj in self.objects:
-            overhead = 1.1  # Give some more space to fit text
+            overhead = 1.0  # Give some more space to fit text
             coords_max = np.maximum(obj.positions.max(axis=0) * overhead, coords_max)
             coords_min = np.minimum(obj.positions.min(axis=0), coords_min)
         self.ax_3d.set_xlim(coords_min[0], coords_max[0])
@@ -352,6 +441,7 @@ class SpaceAnimation(Animation):
         # Update LOS heatmap
         current_actors = list(current_actors)
         los_matrix = self._get_los_matrix(current_actors)
+        self._plot_comm_lines(los_matrix)
         self._los_plot.set_data(los_matrix)
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
