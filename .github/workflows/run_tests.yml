@@ -25,7 +25,10 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: write
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
@@ -51,6 +54,7 @@ jobs:
           pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
+        if: github.event_name == 'pull_request'
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           title: Coverage Report
