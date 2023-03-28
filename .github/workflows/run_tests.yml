@@ -70,7 +70,13 @@ jobs:
         run: |
           micromamba activate paseos
           cd examples
+<<<<<<< HEAD
           conda install -c anaconda seaborn=0.12 scikit-learn scikit-image
           conda install -c conda-forge mpi4py rasterio
           conda install -c pytorch pytorch
+=======
+          micromamba install -c anaconda seaborn scikit-learn scikit-image
+          micromamba install -c conda-forge mpi4py rasterio
+          micromamba install -c pytorch pytorch
+>>>>>>> 8ad65f9 (Install packages from correct channels.)
           python test_examples.py
