@@ -51,9 +51,7 @@ jobs:
           micromamba install pytest
           pytest
       - name: Ensure the examples run
-        shell: bash -l {0}
         run: |
-          micromamba activate paseos
-          cd paseos/examples
+          cd .../examples
           micromamba install seaborn, mpi4py, pytorch, scikit-learn, rasterio, scikit-image
-          python3 test_examples.py
+          python test_examples.py
