@@ -67,15 +67,9 @@ jobs:
           junitxml-path: ./pytest.xml
       - name: Ensure the examples run
         run: |
-<<<<<<< HEAD
           micromamba activate paseos
           cd examples
           conda install -c anaconda seaborn=0.12 scikit-learn scikit-image
           conda install -c conda-forge mpi4py rasterio
           conda install -c pytorch pytorch
-=======
-          cd ..
-          cd ../examples
-          micromamba install seaborn, mpi4py, pytorch, scikit-learn, rasterio, scikit-image
->>>>>>> 3a38631 (Folder navigation fix 2)
           python test_examples.py
