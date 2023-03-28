@@ -55,7 +55,7 @@ jobs:
         run: |
           micromamba activate paseos
           cd examples
-          micromamba install -c anaconda seaborn scikit-learn scikit-image
-          micromamba install -c conda-forge mpi4py rasterio
-          micromamba install -c pytorch pytorch
+          miniconda install -c anaconda -c conda-forge seaborn=0.12 scikit-learn scikit-image
+          miniconda install -c conda-forge mpi4py rasterio
+          miniconda install -c pytorch pytorch
           python test_examples.py
