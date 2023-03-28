@@ -52,6 +52,7 @@ jobs:
           pytest
       - name: Ensure the examples run
         run: |
-          cd .../examples
+          cd ..
+          cd ../examples
           micromamba install seaborn, mpi4py, pytorch, scikit-learn, rasterio, scikit-image
           python test_examples.py
