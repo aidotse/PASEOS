@@ -66,6 +66,7 @@ jobs:
           report-only-changed-files: false
           junitxml-path: ./pytest.xml
       - name: Ensure the examples run
+        shell: bash -l {0}
         run: |
           micromamba activate paseos
           cd examples
