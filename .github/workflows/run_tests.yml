@@ -66,6 +66,7 @@ jobs:
           report-only-changed-files: false
           junitxml-path: ./pytest.xml
       - name: Ensure the examples run
+        uses: mpi4py/setup-mpi@v1
         shell: bash -l {0}
         run: |
           micromamba activate paseos          
