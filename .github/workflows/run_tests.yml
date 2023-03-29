@@ -68,7 +68,7 @@ jobs:
       - name: Ensure the examples run
         shell: bash -l {0}
         run: |
-          micromamba activate paseos
-          cd examples
+          micromamba activate paseos          
           conda install -c conda-forge mpi4py rasterio seaborn=0.12 scikit-image scikit-learn pytorch nbformat nbconvert nb_conda_kernels
+          cd examples
           python test_examples.py 
