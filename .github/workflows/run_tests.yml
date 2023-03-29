@@ -65,3 +65,12 @@ jobs:
           hide-comment: false
           report-only-changed-files: false
           junitxml-path: ./pytest.xml
+      - name: Ensure the examples run
+        shell: bash -l {0}
+        run: |
+          micromamba activate paseos
+          cd examples
+          conda install -c anaconda seaborn=0.12 scikit-learn scikit-image
+          conda install -c conda-forge mpi4py rasterio
+          conda install -c pytorch pytorch
+          python test_examples.py
