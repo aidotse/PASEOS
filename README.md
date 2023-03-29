@@ -4,6 +4,7 @@
 ![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
+![Conda](https://img.shields.io/conda/dn/conda-forge/paseos?style=flat-square) ![PyPI - Downloads](https://img.shields.io/pypi/dm/paseos?style=flat-square)
 
 ![Alt Text](resources/images/sat_gif.gif)
 
