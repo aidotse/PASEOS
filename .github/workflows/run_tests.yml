@@ -65,8 +65,9 @@ jobs:
           hide-comment: false
           report-only-changed-files: false
           junitxml-path: ./pytest.xml
-      - name: Ensure the examples run
+      - name: Set up mpi for example
         uses: mpi4py/setup-mpi@v1
+      - name: Ensure the examples run
         shell: bash -l {0}
         run: |
           micromamba activate paseos          
