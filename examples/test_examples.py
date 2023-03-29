@@ -1,12 +1,9 @@
-import os
-import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
+import papermill as pm
 import subprocess
 
 # Run MPI example
-os.chdir("MPI_example")
-subprocess.run("mpiexec -n 4 python mpi_example.py", shell=True)
-os.chdir("..")
+mpi_example_path =f"MPI_example/mpi_example.py"
+subprocess.run(f"mpiexec -n 4 python {mpi_example_path}", shell=True)
 
 # Run Jupyter examples
 examples = [
@@ -17,12 +14,7 @@ examples = [
 ]
 
 for folder, example in examples:
-    os.chdir(folder)
     print(f"Running {example}")
-
-    with open(example) as ff:
-        nb_in = nbformat.read(example, as_version=4)
-        ep = ExecutePreprocessor(timeout=600, kernel_name="python")
-        nb_out = ep.preprocess(nb_in)
-        print(f"Finished running {example}")
-        os.chdir("..")
+    input_nb_path = f"./{folder}/{example}"
+    # execute the notebook using Papermill
+    pm.execute_notebook(input_nb_path, input_nb_path)

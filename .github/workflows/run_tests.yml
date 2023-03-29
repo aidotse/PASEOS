@@ -69,6 +69,6 @@ jobs:
         shell: bash -l {0}
         run: |
           micromamba activate paseos          
-          conda install -c conda-forge mpi4py rasterio seaborn=0.12 scikit-image scikit-learn pytorch nbformat nbconvert nb_conda_kernels
+          conda install -c conda-forge mpi4py rasterio seaborn=0.12 scikit-image scikit-learn pytorch papermill
           cd examples
           python test_examples.py 
