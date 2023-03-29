@@ -22,7 +22,7 @@ for folder, example in examples:
 
     with open(example) as ff:
         nb_in = nbformat.read(example, as_version=4)
-        ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+        ep = ExecutePreprocessor(timeout=600, kernel_name="python")
         nb_out = ep.preprocess(nb_in)
         print(f"Finished running {example}")
         os.chdir("..")
