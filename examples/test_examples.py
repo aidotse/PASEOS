@@ -15,6 +15,6 @@ examples = [
 
 for folder, example in examples:
     print(f"Running {example}")
-    input_nb_path = f"./examples/{folder}/{example}"
+    input_nb_path = f"./{folder}/{example}"
     # execute the notebook using Papermill
     pm.execute_notebook(input_nb_path, input_nb_path)
