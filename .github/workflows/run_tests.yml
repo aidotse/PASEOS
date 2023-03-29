@@ -71,4 +71,4 @@ jobs:
           micromamba activate paseos
           cd examples
           conda install -c conda-forge mpi4py rasterio seaborn=0.12 scikit-image scikit-learn pytorch nbformat nbconvert nb_conda_kernels
-          python test_examples.py
+          python test_examples.py 
