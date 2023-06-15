@@ -41,6 +41,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
     <li><a href="#thermal-modelling">Thermal Modelling</a></li>
     <li><a href="#radiation-modelling">Radiation Modelling</a></li>
+    <li><a href="#custom-modelling">Custom Modelling</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -385,6 +386,10 @@ To get a binary mask to model data corruption on the [local actor](#local-actor)
 mask = paseos_instance.model_data_corruption(data_shape=your_data_shape,
                                              exposure_time_in_s=your_time)
 ```
+
+#### Custom Modelling
+
+Under construction in #167
 
 ### Simulation Settings
 
