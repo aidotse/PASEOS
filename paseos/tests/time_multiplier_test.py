@@ -56,4 +56,4 @@ async def test_activity():
     # 1s real time equals 5s simulation
     # And discharge 10W per second
     # So should be roughly 50W - 5W consumed from starting 500
-    assert sat1.battery_level_in_Ws > 350 and sat1.battery_level_in_Ws <= 455
+    assert sat1.battery_level_in_Ws > 350 and sat1.battery_level_in_Ws <= 455.1

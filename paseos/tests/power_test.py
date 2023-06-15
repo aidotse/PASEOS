@@ -18,9 +18,6 @@ def test_power_charging():
     sim.advance_time(42, 0)
     assert sat1.battery_level_in_Ws == 542
 
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
-
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
