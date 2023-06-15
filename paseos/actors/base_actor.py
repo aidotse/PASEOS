@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Callable, Any
 
 from loguru import logger
 import pykep as pk
@@ -36,6 +37,13 @@ class BaseActor(ABC):
     # Communication links dictionary
     _communication_devices = DotMap(_dynamic=False)
 
+    # Tracks user-defined custom properties
+    _custom_properties = DotMap(_dynamic=False)
+
+    # Tracks the update function of user-defined custom properties
+    # Which is updated in advance_time in paseos.py
+    _custom_properties_update_function = DotMap(_dynamic=False)
+
     # Tracks the current activity
     _current_activity = None
 
@@ -60,6 +68,53 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
+
+    def get_custom_property(self, property_name: str) -> Any:
+        """Returns the value of the specified custom property.
+
+        Args:
+            property_name (str): The name of the custom property.
+
+        Returns:
+            Any: The value of the custom property.
+        """
+        if property_name not in self._custom_properties:
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+
+        return self._custom_properties[property_name]
+
+    @property
+    def custom_properties(self):
+        """Returns a dictionary of custom properties for this actor."""
+        return self._custom_properties.toDict()
+    
+    def set_custom_property(self, property_name: str, value: Any) -> None:
+        """Sets the value of the specified custom property.
+
+        Args:
+            property_name (str): The name of the custom property.
+            value (Any): The value to set for the custom property.
+        """
+        if property_name not in self._custom_properties:
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+
+        self._custom_properties[property_name] = value
+
+        logger.debug(f"Set custom property '{property_name}' to {value} for actor {self}.")
+
+    def get_custom_property_update_function(self, property_name: str) -> Callable:
+        """Returns the update function for the specified custom property.
+
+        Args:
+            property_name (str): The name of the custom property.
+
+        Returns:
+            Callable: The update function for the custom property.
+        """
+        if property_name not in self._custom_properties_update_function:
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+
+        return self._custom_properties_update_function[property_name]
 
     @property
     def has_power_model(self) -> bool:

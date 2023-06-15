@@ -179,6 +179,12 @@ class PASEOS:
             if self.local_actor.has_power_model:
                 self.local_actor.discharge(current_power_consumption_in_W, dt)
 
+            # Update user-defined properties in the actor
+            for property_name in self.local_actor.custom_properties.keys():
+                update_function = self.local_actor.get_custom_property_update_function(property_name)
+                new_value = update_function(self.local_actor, dt,current_power_consumption_in_W)
+                self.local_actor.set_custom_property(property_name, new_value)
+
             self._state.time += dt
             time_since_constraint_check += dt
             self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
