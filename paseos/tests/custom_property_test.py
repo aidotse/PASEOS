@@ -26,7 +26,7 @@ def test_custom_power_consumption_property():
         return actor.get_custom_property(prop_name) + power_consumption * dt
 
     ActorBuilder.add_custom_property(actor=sat1, property_name=prop_name, update_function=prop_update_fn, initial_value=0)
-    print(f"Actor custom props are now {sat1.custom_properties}")
+    print(f"Actor custom properties are now {sat1.custom_properties}")
 
     # init simulation
     sim = paseos.init_sim(sat1)
