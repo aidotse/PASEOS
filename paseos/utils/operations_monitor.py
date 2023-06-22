@@ -28,6 +28,7 @@ class OperationsMonitor:
         self._log.known_actors = []
         self._log.position = []
         self._log.velocity = []
+        self._log.custom_properties = DotMap(_dynamic=False)
 
     def __getitem__(self, item):
         """Get a logged attributes values.
@@ -36,18 +37,21 @@ class OperationsMonitor:
             item (str): Name of item. Available are "timesteps","current_activity","state_of_charge",
             "is_in_eclipse","known_actors","position","velocity","temperature"
         """
-        assert item in self._log.keys(), (
-            'Untracked quantity. Available are "timesteps","current_activity","state_of_charge",'
-            + '"is_in_eclipse","known_actors","position","velocity","temperature"'
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f'Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}'
         )
+        if item in self._log.custom_properties.keys():
+            return self._log.custom_properties[item]
         return self._log[item]
 
     def plot(self, item):
-        assert item in self._log.keys(), (
-            'Untracked quantity. Available are "timesteps","current_activity","state_of_charge",'
-            + '"is_in_eclipse","known_actors","position","velocity","temperature"'
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f'Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}'
         )
-        values = self._log[item]
+        if item in self._log.custom_properties.keys():
+            values = self._log.custom_properties[item]
+        else:
+            values = self._log[item]
         plt.Figure(figsize=(6, 2), dpi=150)
         t = self._log.timesteps
         plt.plot(t, values)
@@ -88,6 +92,13 @@ class OperationsMonitor:
         else:
             self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
 
+        # Track all custom properties
+        for key, value in local_actor.custom_properties.items():
+            if key not in self._log.custom_properties.keys():
+                logger.warning(f"Property {key} was not tracked beforem, adding now.")
+                self._log.custom_properties[key] = []
+            self._log.custom_properties[key].append(value)
+
     def save_to_csv(self, filename):
         """Write the created log file to a csv file.
 
@@ -96,7 +107,7 @@ class OperationsMonitor:
         """
         logger.trace("Writing status log file to " + filename)
         with open(filename, "w", newline="") as f:
-            w = csv.DictWriter(f, self._log.keys())
+            w = csv.DictWriter(f, list(self._log.keys()) + list(self._log.custom_properties.keys()))
             w.writeheader()
             for i in range(len(self._log.timesteps)):
                 row = {
@@ -109,4 +120,17 @@ class OperationsMonitor:
                     "state_of_charge": self._log.state_of_charge[i],
                     "is_in_eclipse": self._log.is_in_eclipse[i],
                 }
+                # Append custom properties
+                for key, value in self._log.custom_properties.items():
+                    # If quantity only started to be track during simulation
+                    # we need to fill the previous values with None
+                    if len(value) < len(self._log.timesteps):
+                        # Add None to the beginning of the list
+                        if i < len(self._log.timesteps) - len(value):
+                            row[key] = None
+                        else:
+                            row[key] = value[i - (len(self._log.timesteps) - len(value))]
+                    else:
+                        row[key] = value[i]
+
                 w.writerow(row)

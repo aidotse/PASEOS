@@ -1,3 +1,5 @@
+from typing import Callable, Any
+
 from loguru import logger
 from dotmap import DotMap
 import pykep as pk
@@ -18,9 +20,7 @@ class ActorBuilder:
         if not hasattr(self, "instance"):
             self.instance = super(ActorBuilder, self).__new__(self)
         else:
-            logger.debug(
-                "Tried to create another instance of ActorBuilder. Keeping original one..."
-            )
+            logger.debug("Tried to create another instance of ActorBuilder. Keeping original one...")
         return self.instance
 
     def __init__(self):
@@ -37,9 +37,7 @@ class ActorBuilder:
         Returns:
             Created actor
         """
-        assert (
-            actor_type != BaseActor
-        ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
+        assert actor_type != BaseActor, "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
         assert (
             actor_type == SpacecraftActor or actor_type == GroundstationActor
         ), f"Unsupported actor_type {actor_type}, Please use SpacecraftActor or GroundstationActor."
@@ -69,9 +67,7 @@ class ActorBuilder:
         """
         assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
-        assert (
-            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
-        ), "0 <= minimum_altitude_angle <= 90."
+        assert minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90, "0 <= minimum_altitude_angle <= 90."
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
             longitude_degrees=longitude,
@@ -97,9 +93,7 @@ class ActorBuilder:
         """
         # TODO Add checks for sensibility of orbit
 
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Orbit only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
 
         actor._central_body = central_body
         actor._orbital_parameters = pk.planet.keplerian(
@@ -122,14 +116,10 @@ class ActorBuilder:
             actor (BaseActor): Actor set the position on.
             position (list): [x,y,z] position for SpacecraftActor.
         """
-        assert not isinstance(
-            actor, GroundstationActor
-        ), "Position changing not supported for GroundstationActors"
+        assert not isinstance(actor, GroundstationActor), "Position changing not supported for GroundstationActors"
 
         assert len(position) == 3, "Position has to be list of 3 floats."
-        assert all(
-            [isinstance(val, float) for val in position]
-        ), "Position has to be list of 3 floats."
+        assert all([isinstance(val, float) for val in position]), "Position has to be list of 3 floats."
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
 
@@ -153,9 +143,7 @@ class ActorBuilder:
         """
 
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Power devices are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Power devices are only supported for SpacecraftActors"
 
         # Check if the actor already had a power device
         if actor.has_power_model:
@@ -168,8 +156,7 @@ class ActorBuilder:
         assert max_battery_level_in_Ws > 0, "Battery level must be positive"
         assert charging_rate_in_W > 0, "Battery level must be positive"
         assert (
-            power_device_type == PowerDeviceType.SolarPanel
-            or power_device_type == PowerDeviceType.RTG
+            power_device_type == PowerDeviceType.SolarPanel or power_device_type == PowerDeviceType.RTG
         ), "Only SolarPanel and RTG devices supported."
 
         actor._power_device_type = power_device_type
@@ -200,13 +187,9 @@ class ActorBuilder:
             failure_events_per_s (float): Complete device failure, events per second, i.e. a Single Event Latch-Up (SEL).
         """
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Radiation models are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Radiation models are only supported for SpacecraftActors"
 
-        assert (
-            data_corruption_events_per_s >= 0
-        ), "data_corruption_events_per_s cannot be negative."
+        assert data_corruption_events_per_s >= 0, "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
         assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
 
@@ -258,9 +241,7 @@ class ActorBuilder:
             0 leads to know heat-up due to activity. Defaults to 0.5.
         """
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Thermal models are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Thermal models are only supported for SpacecraftActors"
 
         # Check if the actor already had a thermal model
         if actor.has_thermal_model:
@@ -270,21 +251,12 @@ class ActorBuilder:
 
         assert actor_mass > 0, "Actor mass has to be positive."
 
-        assert (
-            0 <= power_consumption_to_heat_ratio
-            and power_consumption_to_heat_ratio <= 1.0
-        ), "Heat ratio has to be 0 to 1."
+        assert 0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0, "Heat ratio has to be 0 to 1."
 
         logger.trace("Checking actor thermal values for sensibility.")
-        assert (
-            0 <= actor_initial_temperature_in_K
-        ), "Actor initial temperature cannot be below 0K."
-        assert (
-            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
-        ), "Absorptance has to be 0 to 1."
-        assert (
-            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
-        ), "Absorptance has to be 0 to 1."
+        assert 0 <= actor_initial_temperature_in_K, "Actor initial temperature cannot be below 0K."
+        assert 0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0, "Absorptance has to be 0 to 1."
+        assert 0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0, "Absorptance has to be 0 to 1."
         assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
         assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
         assert 0 < actor_emissive_area, "Actor emissive area has to be > 0."
@@ -292,15 +264,9 @@ class ActorBuilder:
 
         logger.trace("Checking body thermal values for sensibility.")
         assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
-        assert (
-            0 <= body_surface_temperature_in_K
-        ), "Body surface temperature cannot be below 0K."
-        assert (
-            0 <= body_emissivity and body_emissivity <= 1.0
-        ), "Body emissivity has to be 0 to 1"
-        assert (
-            0 <= body_reflectance and body_reflectance <= 1.0
-        ), "Body reflectance has to be 0 to 1"
+        assert 0 <= body_surface_temperature_in_K, "Body surface temperature cannot be below 0K."
+        assert 0 <= body_emissivity and body_emissivity <= 1.0, "Body emissivity has to be 0 to 1"
+        assert 0 <= body_reflectance and body_reflectance <= 1.0, "Body reflectance has to be 0 to 1"
 
         actor._mass = actor_mass
         actor._thermal_model = ThermalModel(
@@ -327,15 +293,58 @@ class ActorBuilder:
             bandwidth_in_kbps (float): device bandwidth in kbps.
         """
         if device_name in actor.communication_devices:
-            raise ValueError(
-                "Trying to add already existing communication device with device_name: "
-                + device_name
+            raise ValueError("Trying to add already existing communication device with device_name: " + device_name)
+
+        actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
+
+        logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
+
+    def add_custom_property(actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable):
+        """Adds a custom property to the actor. This e.g. allows tracking any physical
+        the user would like to track.
+
+        The update functions needs to take three parameters as input: the actor,
+        the time to advance the state / model and the current_power_consumption_in_W
+        and return the new value of the custom property.
+        The function will be called with (actor,0,0) to check correctness.
+
+        Args:
+            actor (BaseActor): The actor to add the custom property to.
+            property_name (str): The name of the custom property.
+            initial_value (Any): The initial value of the custom property.
+            update_function (Callable): The function to update the custom property.
+        """
+        if property_name in actor._custom_properties:
+            raise ValueError(f"Custom property '{property_name}' already exists for actor {actor}.")
+
+        # Already adding property but will remove if the update function fails
+        actor._custom_properties[property_name] = initial_value
+
+        # Check if the update function accepts the required parameters
+        try:
+            logger.trace(f"Checking update function for actor {actor} with time 0 and power 0.")
+            new_value = update_function(actor, 0, 0)
+            logger.debug(f"Update function returned {new_value} for actor {actor} with time 0 and power 0.")
+        except TypeError as e:
+            logger.error(e)
+            # remove property if this failed
+            del actor._custom_properties[property_name]
+            raise TypeError(
+                "Update function must accept three parameters: actor, time_to_advance, current_power_consumption_in_W."
             )
 
-        actor._communication_devices[device_name] = DotMap(
-            bandwidth_in_kbps=bandwidth_in_kbps
-        )
+        # Check that the update function returns a value of the same type as the initial value
+        if type(new_value) != type(initial_value):
+            # remove property if this failed
+            del actor._custom_properties[property_name]
+            raise TypeError(f"Update function must return a value of type {type(initial_value)} matching initial vaue.")
 
-        logger.debug(
-            f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}."
-        )
+        # Check that the initial value is the same as the value returned by the update function with time 0
+        if new_value != initial_value:
+            # remove property if this failed
+            del actor._custom_properties[property_name]
+            raise ValueError("Update function must return the existing value when called with unchanged time (dt = 0).")
+
+        actor._custom_properties_update_function[property_name] = update_function
+
+        logger.debug(f"Added custom property '{property_name}' to actor {actor}.")

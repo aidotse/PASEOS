@@ -63,9 +63,7 @@ class PASEOS:
         self.local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
         # Set line of sight blocking sphere
         self.local_actor.set_central_body_shape(self._central_body_sphere)
-        self._activity_manager = ActivityManager(
-            self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier
-        )
+        self._activity_manager = ActivityManager(self, self._cfg.sim.activity_timestep, self._cfg.sim.time_multiplier)
         self._operations_monitor = OperationsMonitor(self.local_actor.name)
 
     async def wait_for_activity(self):
@@ -110,15 +108,11 @@ class PASEOS:
         self._is_advancing_time = True
 
         assert time_to_advance > 0, "Time to advance has to be positive."
-        assert (
-            current_power_consumption_in_W >= 0
-        ), "Power consumption cannot be negative."
+        assert current_power_consumption_in_W >= 0, "Power consumption cannot be negative."
 
         # Check constraint function returns something
         if constraint_function is not None:
-            assert (
-                constraint_function() is not None
-            ), "Your constraint function failed to return True or False."
+            assert constraint_function() is not None, "Your constraint function failed to return True or False."
 
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
@@ -130,10 +124,7 @@ class PASEOS:
         # then final smaller or equal timestep to reach target_time
         while self._state.time < target_time:
             # Check constraint function
-            if (
-                constraint_function is not None
-                and time_since_constraint_check > self._cfg.sim.activity_timestep
-            ):
+            if constraint_function is not None and time_since_constraint_check > self._cfg.sim.activity_timestep:
                 time_since_constraint_check = 0
                 if not constraint_function():
                     logger.info("Time advancing interrupted. Constraint false.")
@@ -150,14 +141,10 @@ class PASEOS:
             # check for device and / or activity failure
             if self.local_actor.has_radiation_model:
                 if self.local_actor.is_dead:
-                    logger.warning(
-                        f"Tried to advance time on dead actor {self.local_actor}."
-                    )
+                    logger.warning(f"Tried to advance time on dead actor {self.local_actor}.")
                     return max(target_time - self._state.time, 0)
                 if self.local_actor._radiation_model.did_device_restart(dt):
-                    logger.info(
-                        f"Actor {self.local_actor} interrupted during advance_time."
-                    )
+                    logger.info(f"Actor {self.local_actor} interrupted during advance_time.")
                     self.local_actor.set_was_interrupted()
                     return max(target_time - self._state.time, 0)
                 if self.local_actor._radiation_model.did_device_experience_failure(dt):
@@ -171,13 +158,17 @@ class PASEOS:
 
             # Update actor temperature
             if self.local_actor.has_thermal_model:
-                self.local_actor._thermal_model.update_temperature(
-                    dt, current_power_consumption_in_W
-                )
+                self.local_actor._thermal_model.update_temperature(dt, current_power_consumption_in_W)
 
             # Update state of charge
             if self.local_actor.has_power_model:
                 self.local_actor.discharge(current_power_consumption_in_W, dt)
+
+            # Update user-defined properties in the actor
+            for property_name in self.local_actor.custom_properties.keys():
+                update_function = self.local_actor.get_custom_property_update_function(property_name)
+                new_value = update_function(self.local_actor, dt, current_power_consumption_in_W)
+                self.local_actor.set_custom_property(property_name, new_value)
 
             self._state.time += dt
             time_since_constraint_check += dt
@@ -204,9 +195,7 @@ class PASEOS:
         logger.debug("Current actors: " + str(self._known_actors.keys()))
         # Check for duplicate actors by name
         if actor.name in self._known_actors.keys():
-            raise ValueError(
-                "Trying to add already existing actor with name: " + actor.name
-            )
+            raise ValueError("Trying to add already existing actor with name: " + actor.name)
         # Else add
         self._known_actors[actor.name] = actor
 
@@ -305,9 +294,7 @@ class PASEOS:
         Args:
             actor_name (str): name of the actor to remove.
         """
-        assert (
-            actor_name in self.known_actors
-        ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        assert actor_name in self.known_actors, f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
         del self._known_actors[actor_name]
 
     def remove_activity(self, name: str):
