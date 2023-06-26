@@ -37,7 +37,6 @@ class SpaceAnimation(Animation):
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
         with plt.style.context("dark_background"):
-
             # Create figure for 3d animation
             self.fig, default_ax = plt.subplots(
                 1,

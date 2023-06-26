@@ -62,7 +62,6 @@ def setup_sentinel_example(t0):
 
 
 def test_find_next_window():
-
     # Test window from other test is found
     t0 = pk.epoch_from_string("2022-Oct-27 21:00:00")
     sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
@@ -104,7 +103,11 @@ def test_communication_link_sat_to_ground():
     sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
 
     # Check again after communication_window_end_time
-    (communication_window_start_time, communication_window_end_time, _,) = get_communication_window(
+    (
+        communication_window_start_time,
+        communication_window_end_time,
+        _,
+    ) = get_communication_window(
         sentinel2B,
         local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
@@ -148,7 +151,11 @@ def test_communication_link_sat_to_sat():
     ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
 
     # Check communication link at == 0. Satellites shall be in line of sight
-    (_, communication_window_end_time, transmitted_data_in_b,) = get_communication_window(
+    (
+        _,
+        communication_window_end_time,
+        transmitted_data_in_b,
+    ) = get_communication_window(
         sat1,
         local_actor_communication_link_name="link1",
         target_actor=sat2,

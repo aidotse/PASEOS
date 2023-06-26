@@ -42,7 +42,6 @@ def test_power_charging():
 
 
 def test_RTG_charging_in_eclipse():
-
     # Define central body
     earth = pk.planet.jpl_lp("earth")
 

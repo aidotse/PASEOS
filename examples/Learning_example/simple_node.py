@@ -13,7 +13,6 @@ class Node:
     """
 
     def __init__(self, node_id, pos_and_vel, paseos_cfg, power_consumption_in_watt):
-
         # Create PASEOS instance to node
         earth = pk.planet.jpl_lp("earth")
         self.node_id = node_id

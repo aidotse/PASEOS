@@ -18,7 +18,6 @@ def get_closest_entry(df, t, id):
 
 
 def get_analysis_df(df, timestep=60, orbital_period=1):
-
     t = np.round(np.linspace(0, df.Time.max(), int(df.Time.max() // timestep)))
     sats = df.ID.unique()
     df["known_actors"] = pd.Categorical(df.known_actors)

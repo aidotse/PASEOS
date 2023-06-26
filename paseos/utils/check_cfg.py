@@ -84,7 +84,8 @@ def _check_entry_types(cfg: DotMap, major_categories: list) -> None:
 
 def _check_value_ranges(cfg: DotMap, major_categories: list) -> None:
     """Check that all values in the config are within the correct range.
-    This throws runtime errors as ValueErrors are caught in training to avoid NaNs crashing the training."""
+    This throws runtime errors as ValueErrors are caught in training to avoid NaNs crashing the training.
+    """
 
     # fmt: off
     positive_value_keys = ["dt","activity_timestep","time_multiplier","logging_interval",] # noqa

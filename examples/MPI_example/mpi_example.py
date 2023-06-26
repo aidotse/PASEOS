@@ -89,6 +89,7 @@ exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=T
 # Let's define the variable to track the actors we see
 total_seen_actors = 0
 
+
 # We will (ab)use PASEOS constraint function to track all the actors
 # we see in an evaluation window (see timestep below).
 # Turn on SHOW_ALL_WINDOWS if you want to see each window
@@ -127,7 +128,6 @@ timestep = 150  # how often we synchronize actors' trajectories
 
 # Run until end of simulation
 while t <= simulation_time:
-
     # Advance the simulation state of this rank
     # Note how we pass the "constraint_func" to tell paseos
     # to track windows
