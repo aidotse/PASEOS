@@ -100,9 +100,7 @@ class ThermalModel:
 
         # EQ 15 in source
         self._C_solar_input = (
-            self._actor_sun_absorptance
-            * self._actor_sun_facing_area
-            * self._body_solar_irradiance
+            self._actor_sun_absorptance * self._actor_sun_facing_area * self._body_solar_irradiance
         )
         logger.trace(f"self._C_solar_input={self._C_solar_input}")
 
@@ -127,9 +125,7 @@ class ThermalModel:
 
         # EQ 20
         self._C_actor_emission = (
-            self._actor_infrared_absorptance
-            * self._actor_emissive_area
-            * self._boltzmann_constant
+            self._actor_infrared_absorptance * self._actor_emissive_area * self._boltzmann_constant
         )
         logger.trace(f"self._C_actor_emission={self._C_actor_emission}")
 
@@ -207,9 +203,9 @@ class ThermalModel:
         logger.trace(f"Actor in eclipse: {self._actor.is_in_eclipse()}")
         logger.trace(f"Actor altitude: {self._actor.altitude()}")
 
-        self._actor_temperature_in_K = self._actor_temperature_in_K + (
-            dt * total_change_in_W
-        ) / (self._actor.mass * self._actor_thermal_capacity)
+        self._actor_temperature_in_K = self._actor_temperature_in_K + (dt * total_change_in_W) / (
+            self._actor.mass * self._actor_thermal_capacity
+        )
 
         # Ensure value cannot go below 0
         self._actor_temperature_in_K = max(0.0, self._actor_temperature_in_K)

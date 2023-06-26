@@ -26,16 +26,12 @@ def is_in_eclipse(
     try:
         logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
     except RuntimeError:
-        logger.debug(
-            f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000)."
-        )
+        logger.debug(f"Checking whether {actor} is in eclipse at {t.mjd2000} (mjd2000).")
 
     # Compute central body position in solar reference frame
     r_central_body_heliocentric, _ = np.array(central_body.eph(t))
     logger.trace("r_central_body_heliocentric is" + str(r_central_body_heliocentric))
-    central_body_sphere = Sphere(
-        r_central_body_heliocentric, actor._central_body_sphere.radius
-    )
+    central_body_sphere = Sphere(r_central_body_heliocentric, actor._central_body_sphere.radius)
 
     # Compute satellite / actor position in solar reference frame
     r_sat_central_body_frame = np.array(actor.get_position(t))

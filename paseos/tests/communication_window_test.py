@@ -30,12 +30,8 @@ def setup_sentinel_example(t0):
 
     # Define Sentinel 2 orbit
     sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, t0)
-    sentinel2B_line1 = (
-        "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
-    )
-    sentinel2B_line2 = (
-        "2 42063  98.5693  13.0364 0001083 104.3232 255.8080 14.30819357294601"
-    )
+    sentinel2B_line1 = "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
+    sentinel2B_line2 = "2 42063  98.5693  13.0364 0001083 104.3232 255.8080 14.30819357294601"
     s2b = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
 
     # Calculating S2B ephemerides.
@@ -108,11 +104,7 @@ def test_communication_link_sat_to_ground():
     sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
 
     # Check again after communication_window_end_time
-    (
-        communication_window_start_time,
-        communication_window_end_time,
-        _,
-    ) = get_communication_window(
+    (communication_window_start_time, communication_window_end_time, _,) = get_communication_window(
         sentinel2B,
         local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
@@ -156,11 +148,7 @@ def test_communication_link_sat_to_sat():
     ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
 
     # Check communication link at == 0. Satellites shall be in line of sight
-    (
-        _,
-        communication_window_end_time,
-        transmitted_data_in_b,
-    ) = get_communication_window(
+    (_, communication_window_end_time, transmitted_data_in_b,) = get_communication_window(
         sat1,
         local_actor_communication_link_name="link1",
         target_actor=sat2,

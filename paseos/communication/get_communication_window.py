@@ -41,9 +41,7 @@ def get_communication_window(
         "Trying to use a not-existing communication link with the name: "
         + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor.communication_devices[
-        local_actor_communication_link_name
-    ]
+    local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
     assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandiwidth has to be positive."
     assert dt > 0, "dt has to be positive."
@@ -54,9 +52,7 @@ def get_communication_window(
     transmitted_data_in_b = 0
     current_time_in_s = t0_in_s
     while (
-        local_actor.is_in_line_of_sight(
-            target_actor, pk.epoch(current_time_in_s * pk.SEC2DAY)
-        )
+        local_actor.is_in_line_of_sight(target_actor, pk.epoch(current_time_in_s * pk.SEC2DAY))
     ) and (current_time_in_s - t0_in_s < window_timeout_value_in_s):
         current_time_in_s += dt
         transmitted_data_in_b += int(

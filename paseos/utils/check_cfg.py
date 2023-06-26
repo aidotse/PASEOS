@@ -43,9 +43,7 @@ def _check_for_keys(cfg: DotMap, major_categories: list) -> None:
     for category in major_categories:
         for key in cfg[category].keys():
             if key not in required_keys:
-                raise KeyError(
-                    f"CFG Key {key} is not a valid key. Valid are {required_keys}"
-                )
+                raise KeyError(f"CFG Key {key} is not a valid key. Valid are {required_keys}")
 
 
 def _check_entry_types(cfg: DotMap, major_categories: list) -> None:
@@ -65,9 +63,7 @@ def _check_entry_types(cfg: DotMap, major_categories: list) -> None:
 
     for key in float_keys:
         for category in major_categories:
-            if key in cfg[category].keys() and not isinstance(
-                cfg[category][key], float
-            ):
+            if key in cfg[category].keys() and not isinstance(cfg[category][key], float):
                 raise TypeError(f"{key} must be a float")
 
     for key in boolean_keys:
