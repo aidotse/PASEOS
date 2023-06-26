@@ -1,19 +1,15 @@
-# GitHub Action that uses Black to reformat the Python code in an incoming pull request.
-# If all Python code in the pull request is compliant with Black then this Action does nothing.
-# Othewrwise, Black is run and its changes are committed back to the incoming pull request.
-# https://github.com/cclauss/autoblack
+name: Lint
 
-name: autoblack
 on: [pull_request]
+
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: psf/black@stable
         with:
-          python-version: '3.10' 
-      - name: Install Black
-        run: pip install black
-      - name: Run black --check --line-length 100 . 
-        run: black --check --line-length 100 .
+          options: "--check --verbose --line-length 100"
+          src: "."
+          jupyter: false
+          version: "23.3.0"
