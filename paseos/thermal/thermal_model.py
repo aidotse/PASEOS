@@ -139,7 +139,7 @@ class ThermalModel:
         Returns:
             float: constant from above defined EQs.
         """
-        h = self._actor.altitude / self._body_radius
+        h = self._actor.altitude() / self._body_radius
         return 1.0 / (h * h)
 
     def _compute_solar_input(self):
@@ -205,7 +205,7 @@ class ThermalModel:
 
         logger.debug(f"Actor's old temperature was {self._actor_temperature_in_K}.")
         logger.trace(f"Actor in eclipse: {self._actor.is_in_eclipse()}")
-        logger.trace(f"Actor altitude: {self._actor.altitude}")
+        logger.trace(f"Actor altitude: {self._actor.altitude()}")
 
         self._actor_temperature_in_K = self._actor_temperature_in_K + (
             dt * total_change_in_W

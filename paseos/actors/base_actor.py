@@ -232,7 +232,6 @@ class BaseActor(ABC):
         """
         pass
 
-    @property
     def altitude(
         self,
         t0: pk.epoch = None,
@@ -262,10 +261,18 @@ class BaseActor(ABC):
         Returns:
             np.array: [x,y,z] in meters
         """
-        logger.trace("Computing " + self._orbital_parameters.name + " position at time " + str(epoch.mjd2000) + " (mjd2000).")
+        logger.trace(
+            "Computing "
+            + self._orbital_parameters.name
+            + " position at time "
+            + str(epoch.mjd2000)
+            + " (mjd2000)."
+        )
 
         if self._orbital_parameters is not None and self._position is not None:
-            raise ValueError("Ambiguous position definition. Either set an orbit OR position with ActorBuilder.")
+            raise ValueError(
+                "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
+            )
 
         # If the actor has no orbit, return position
         if self._orbital_parameters is None:
@@ -290,10 +297,16 @@ class BaseActor(ABC):
             np.array: [x,y,z] in meters
         """
         if self._orbital_parameters is None:
-            raise NotImplementedError("No suitable way added to determine actor velocity. Set an orbit with ActorBuilder.")
+            raise NotImplementedError(
+                "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
+            )
 
         logger.trace(
-            "Computing " + self._orbital_parameters.name + " position / velocity at time " + str(epoch.mjd2000) + " (mjd2000)."
+            "Computing "
+            + self._orbital_parameters.name
+            + " position / velocity at time "
+            + str(epoch.mjd2000)
+            + " (mjd2000)."
         )
         pos, vel = self._orbital_parameters.eph(epoch)
         self._previous_position = pos
