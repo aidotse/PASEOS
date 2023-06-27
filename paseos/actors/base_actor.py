@@ -232,7 +232,7 @@ class BaseActor(ABC):
         """
         pass
 
-    def altitude(
+    def get_altitude(
         self,
         t0: pk.epoch = None,
     ) -> float:
