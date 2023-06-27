@@ -425,7 +425,7 @@ ActorBuilder.set_orbit(
 # PASEOS will always pass you the actor, the time step and the current power consumption
 # The function shall return the new value of the custom property
 def update_function(actor, dt, power_consumption):
-    return actor.altitude()  # get current altitude
+    return actor.get_altitude()  # get current altitude
 
 
 # Add the custom property to the actor, defining name, update fn and initial value
@@ -433,7 +433,7 @@ ActorBuilder.add_custom_property(
     actor=local_actor,
     property_name="altitude",
     update_function=update_function,
-    initial_value=local_actor.altitude(),
+    initial_value=local_actor.get_altitude(),
 )
 
 # One can easily access the property at any point with
