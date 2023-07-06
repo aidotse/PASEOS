@@ -39,9 +39,7 @@ async def test_activity():
             await asyncio.sleep(0.2)
 
     # Register an activity that draws 10 watt per second
-    sim.register_activity(
-        "Testing", activity_function=func, power_consumption_in_watt=10
-    )
+    sim.register_activity("Testing", activity_function=func, power_consumption_in_watt=10)
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])

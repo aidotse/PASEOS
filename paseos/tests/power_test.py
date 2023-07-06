@@ -21,9 +21,7 @@ def test_power_charging():
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_power_devices(
-        sat1, 500, 10000, 1, paseos.PowerDeviceType.SolarPanel
-    )
+    ActorBuilder.set_power_devices(sat1, 500, 10000, 1, paseos.PowerDeviceType.SolarPanel)
 
     # init simulation
     sim = paseos.init_sim(sat1)
@@ -44,7 +42,6 @@ def test_power_charging():
 
 
 def test_RTG_charging_in_eclipse():
-
     # Define central body
     earth = pk.planet.jpl_lp("earth")
 

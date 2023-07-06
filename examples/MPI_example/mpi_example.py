@@ -26,9 +26,7 @@ sys.path.append("../..")
 try:
     from mpi4py import MPI
 except:
-    print(
-        "This example requires mpi4py. Please install with conda install mpi4py -c conda-forge"
-    )
+    print("This example requires mpi4py. Please install with conda install mpi4py -c conda-forge")
 
 import pykep as pk
 import paseos
@@ -44,9 +42,7 @@ SHOW_ALL_COMMS = False
 # Now we will initialize MPI, for more details please refer to the mpi4py docs.
 # In MPI "rank" indicates the index of the compute node (so 0-3 in our example).
 comm = MPI.COMM_WORLD
-assert (
-    comm.Get_size() == 4
-), "Please run the example with mpiexec -n 4 python mpi_example.py"
+assert comm.Get_size() == 4, "Please run the example with mpiexec -n 4 python mpi_example.py"
 rank = comm.Get_rank()
 other_ranks = [x for x in range(4) if x != rank]
 print(f"Started rank {rank}, other ranks are {other_ranks}")
@@ -65,9 +61,7 @@ t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")  # the starting date of our si
 planet_list, sats_pos_and_v, _ = get_constellation(
     altitude, inclination, nSats, nPlanes, t0, verbose=False
 )
-print(
-    f"Rank {rank} set up its orbit with altitude={altitude}m and inclination={inclination}deg"
-)
+print(f"Rank {rank} set up its orbit with altitude={altitude}m and inclination={inclination}deg")
 
 ############ PASEOS INIT #############
 # We will now initialize the PASEOS instance on each rank
@@ -78,9 +72,7 @@ pos, v = sats_pos_and_v[0]  # get our position and velocity
 local_actor = ActorBuilder.get_actor_scaffold(
     name="Sat_" + str(rank), actor_type=SpacecraftActor, epoch=t0
 )
-ActorBuilder.set_orbit(
-    actor=local_actor, position=pos, velocity=v, epoch=t0, central_body=earth
-)
+ActorBuilder.set_orbit(actor=local_actor, position=pos, velocity=v, epoch=t0, central_body=earth)
 
 paseos_instance = paseos.init_sim(local_actor=local_actor)
 print(f"Rank {rank} set up its PASEOS instance for its local actor {local_actor}")
@@ -96,6 +88,7 @@ exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=T
 
 # Let's define the variable to track the actors we see
 total_seen_actors = 0
+
 
 # We will (ab)use PASEOS constraint function to track all the actors
 # we see in an evaluation window (see timestep below).
@@ -135,7 +128,6 @@ timestep = 150  # how often we synchronize actors' trajectories
 
 # Run until end of simulation
 while t <= simulation_time:
-
     # Advance the simulation state of this rank
     # Note how we pass the "constraint_func" to tell paseos
     # to track windows
@@ -147,9 +139,7 @@ while t <= simulation_time:
     sys.stdout.flush()  # update prints to better see parallelism
 
     # Exchange actors between all ranks
-    exchange_actors(
-        comm, paseos_instance, local_actor, other_ranks, rank, verbose=SHOW_ALL_COMMS
-    )
+    exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=SHOW_ALL_COMMS)
 
 # Wait until all ranks finished
 print(f"Rank {rank} finished the simulation. Waiting for all to finish.")

@@ -18,9 +18,7 @@ class RadiationModel:
             restart_events_per_s (float): Device restart being triggered, events per second.
             failure_events_per_s (float): Complete device failure, events per second.
         """
-        assert (
-            data_corruption_events_per_s >= 0
-        ), "data_corruption_events_per_s cannot be negative."
+        assert data_corruption_events_per_s >= 0, "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
         assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
 
@@ -89,9 +87,7 @@ class RadiationModel:
             bool: Whether restart event occurred.
         """
         assert interval_in_s > 0, "Time interval must be positive."
-        return RadiationModel._sample_poisson_process(
-            self._restart_events_per_s, interval_in_s
-        )
+        return RadiationModel._sample_poisson_process(self._restart_events_per_s, interval_in_s)
 
     def did_device_experience_failure(self, interval_in_s: float):
         """Models whether the device experienced a failure in this interval.
@@ -103,6 +99,4 @@ class RadiationModel:
             bool: Whether restart event occurred.
         """
         assert interval_in_s > 0, "Time interval must be positive."
-        return RadiationModel._sample_poisson_process(
-            self._failure_events_per_s, interval_in_s
-        )
+        return RadiationModel._sample_poisson_process(self._failure_events_per_s, interval_in_s)

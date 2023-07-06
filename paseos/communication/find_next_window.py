@@ -32,9 +32,7 @@ def find_next_window(
         "Trying to use a not-existing communication link with the name: "
         + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor.communication_devices[
-        local_actor_communication_link_name
-    ]
+    local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
     assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandiwidth has to be positive."
     assert search_step_size > 0, "dt has to be positive."
