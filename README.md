@@ -244,7 +244,11 @@ sim.add_known_actor(grndStation)
 
 #### Set an orbit for a PASEOS SpacecraftActor
 
-Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [Keplerian orbit](https://en.wikipedia.org/wiki/Kepler_orbit) to it. To this aim, you need to define the central body the [SpacecraftActor](#spacecraftactor) is orbiting around and specify its position and velocity (in the central body's [inertial frame](https://en.wikipedia.org/wiki/Inertial_frame_of_reference)) and an epoch. In this case, we will use `Earth` as a central body.
+Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [Keplerian orbit](https://en.wikipedia.org/wiki/Kepler_orbit) or use [SGP4 (Earth orbit only)](https://en.wikipedia.org/wiki/Simplified_perturbations_models). 
+
+##### Keplerian Orbit
+
+To this aim, you need to define the central body the [SpacecraftActor](#spacecraftactor) is orbiting around and specify its position and velocity (in the central body's [inertial frame](https://en.wikipedia.org/wiki/Inertial_frame_of_reference)) and an epoch. In this case, we will use `Earth` as a central body.
 
 ```py
 import pykep as pk
@@ -263,6 +267,37 @@ ActorBuilder.set_orbit(actor=sat_actor,
                        velocity=[0, 8000.0, 0],
                        epoch=pk.epoch(0), central_body=earth)
 ```
+
+##### SGP4 / Two-line element (TLE) 
+
+For using SGP4 / [Two-line element (TLE)](https://en.wikipedia.org/wiki/Two-line_element_set) you need to specify the TLE of the [SpacecraftActor](#spacecraftactor). In this case, we will use the TLE of the [Sentinel-2A](https://en.wikipedia.org/wiki/Sentinel-2) satellite from [celestrak](https://celestrak.com/).
+
+```py
+from paseos import ActorBuilder, SpacecraftActor
+# Define an actor of type SpacecraftActor
+sat_actor = ActorBuilder.get_actor_scaffold(name="Sentinel-2A",
+                                       actor_type=SpacecraftActor,
+                                       epoch=pk.epoch(0))
+
+# Specify your TLE
+line1 = "1 40697U 15028A   23188.15862373  .00000171  00000+0  81941-4 0  9994"
+line2 = "2 40697  98.5695 262.3977 0001349  91.8221 268.3116 14.30817084419867"
+
+# Set the orbit of the actor
+ActorBuilder.set_TLE(sat_actor, line1, line2)
+```
+
+##### Accessing the orbit
+You can access the orbit of a [SpacecraftActor](#spacecraftactor) with
+
+```py
+# Position, velocity and altitude can be accessed like this
+t0 = pk.epoch("2022-06-16 00:00:00.000") # Define the time (epoch)
+print(sat_actor.get_position(t0)) 
+print(sat_actor.get_position_velocity(t0))
+print(sat_actor.get_altitude(t0))
+```
+
 
 #### How to add a communication device
 
