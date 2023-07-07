@@ -12,8 +12,8 @@ name: Build and publish a Docker image for PASEOS
 on:
   push:
     branches: [ "update-docker-workflow" ]
-  tags:
-    "*"
+    tags:
+      "*"
 
   workflow_dispatch:
 
