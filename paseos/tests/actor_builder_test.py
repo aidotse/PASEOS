@@ -5,9 +5,51 @@ import sys
 
 sys.path.append("../..")
 
-from paseos import ActorBuilder
+from paseos import ActorBuilder, SpacecraftActor
 
 from test_utils import get_default_instance
+
+
+def test_set_TLE():
+    """Check if we can set a TLE correctly"""
+
+    _, sentinel2a, earth = get_default_instance()
+    # Set the TLE
+    line1 = "1 40697U 15028A   23188.15862373  .00000171  00000+0  81941-4 0  9994"
+    line2 = "2 40697  98.5695 262.3977 0001349  91.8221 268.3116 14.30817084419867"
+    ActorBuilder.set_TLE(sentinel2a, line1, line2)
+
+    # Check that get_altitude returns a sensible value
+    earth_radius = 6371000
+    assert sentinel2a.get_altitude() > earth_radius + 780000
+    assert sentinel2a.get_altitude() < earth_radius + 820000
+
+    # Check that get_position_velocity returns sensible values
+    position, velocity = sentinel2a.get_position_velocity(sentinel2a.local_time)
+    assert position is not None
+    assert velocity is not None
+
+    # Create an actor with a keplerian orbit and check that the position and velocity
+    # diverge over time
+    s2a_kep = ActorBuilder.get_actor_scaffold("s2a_kep", SpacecraftActor, sentinel2a.local_time)
+    ActorBuilder.set_orbit(s2a_kep, position, velocity, sentinel2a.local_time, earth)
+
+    # After some orbits the differences should be significant
+    # since the TLE uses SGP4 and the other actor uses Keplerian elements
+    t0_later = pk.epoch(sentinel2a.local_time.mjd2000 + 1)
+    r, v = sentinel2a.get_position_velocity(t0_later)
+    r_kep, v_kep = s2a_kep.get_position_velocity(t0_later)
+    print("r,v SGP4 after  1 day")
+    print(r)
+    print(v)
+    print("r,v Kep  after  1 day")
+    print(r_kep)
+    print(v_kep)
+    print("Differences in r and v")
+    print(np.linalg.norm(np.array(r) - np.array(r_kep)))
+    print(np.linalg.norm(np.array(v) - np.array(v_kep)))
+    assert np.linalg.norm(np.array(r) - np.array(r_kep)) > 100000
+    assert np.linalg.norm(np.array(v) - np.array(v_kep)) > 400
 
 
 def test_set_orbit():
