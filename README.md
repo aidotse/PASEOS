@@ -70,8 +70,10 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#via-custom-properties">Via Custom Properties</a></li>
     </ul>
     </ul>
-    <li><a href="#system-design-of-paseos">System Design of PASEOS</a></li>
     <li><a href="#glossary">Glossary</a></li>
+    <ul>
+    <li><a href="#physical-model-parameters">Physical Model Parameters</a></li>
+    </ul>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -1010,6 +1012,34 @@ print(local_actor.get_custom_property("channel_bandwidth"))
 
 - ### SpacecraftActor
   PASEOS [actor](#actor) emulating a spacecraft or a satellite.
+
+### Physical Model Parameters
+
+Description of the physical model parameters and default values in PASEOS with indications on sensitivity of parameters and suggested ranges.
+
+| Name                              | Datatype | Description                                                                 | Default    | Suggested Range | Sensitivity |
+|:---------------------------------:|:--------:|:---------------------------------------------------------------------------:|:----------:|:---------------:|:-----------:|
+| Battery Level [Ws]                | float    | Current battery level                                                       | -          | > 0             | high        |
+| Maximum Battery Level [Ws]        | float    | Maximum battery level                                                       | -          | > 0             | high        |
+| Charging Rate [W]                 | float    | Charging rate of the battery                                                | -          | > 0             | high        |
+| Power Device Type                 | enum     | Type of power device. Can be either "SolarPanel" or "RTG"                   | SolarPanel | -               | medium      |
+| Data Corruption Events [1/s]      | float    | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) | -          | >= 0            | low         |
+| Restart Events [1/s]              | float    | Roate of device restart being triggered                                     | -          | >= 0            | medium      |
+| Failure Events [1/s]              | float    | Rate of complete device failure, i.e. a Single Event Latch-Up (SEL)         | -          | >= 0            | high        |
+| Mass [kg]                         | float    | Actor's mass                                                                | -          | > 0             | low         |
+| Initial Temperature [K]           | float    | Actor's initial temperature                                                 | -          | >= 0            | medium      |
+| Sun Absorptance                   | float    | Actor's absorptance of solar light                                          | -          | [0,1]           | high        |
+| Infrared Absorptance              | float    | Actor's absportance of infrared light                                       | -          | [0,1]           | medium      |
+| Sun-Facing Area [$m^2$]           | float    | Actor's area facing the sun                                                 | -          | >= 0            | high        |
+| Central Body-Facing Area [$m^2$]  | float    | Actor's area facing central body                                            | -          | >= 0            | medium      |
+| Emissive Area [$m^2$]             | float    | Actor's area emitting (radiating) heat                                      | -          | >= 0            | high        |
+| Thermal Capacity [$J / (kg * K)$] | float    | Actor's thermal capacity                                                    | -          | >= 0            | low         |
+| Body Solar Irradiance [W]         | float    | Irradiance from the sun                                                     | 1360       | >= 0            | medium      |
+| Body Surface Temperature [K]      | float    | Central body surface temperature                                            | 288        | >= 0            | low         |
+| Body Emissivity                   | float    | Centrla body emissivity [0,1] in infrared                                   | 0.6        | [0,1]           | medium      |
+| Body Reflectance                  | float    | Central body reflectance of sunlight                                        | 0.3        | [0,1]           | medium      |
+| Heat Conversion Ratio [-]         | float    | Conversion ratio for activities, 0 leads to know heat-up due to activity    | 0.5        | [0,1]           | high        |
+
 
 ## Contributing
 
