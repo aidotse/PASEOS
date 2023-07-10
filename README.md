@@ -1036,7 +1036,7 @@ Description of the physical model parameters and default values in PASEOS with i
 | Thermal Capacity [$J / (kg * K)$] | float    | Actor's thermal capacity                                                    | -          | >= 0            | low         |
 | Body Solar Irradiance [W]         | float    | Irradiance from the sun                                                     | 1360       | >= 0            | medium      |
 | Body Surface Temperature [K]      | float    | Central body surface temperature                                            | 288        | >= 0            | low         |
-| Body Emissivity                   | float    | Centrla body emissivity [0,1] in infrared                                   | 0.6        | [0,1]           | medium      |
+| Body Emissivity                   | float    | Central body emissivity in infrared                                   | 0.6        | [0,1]           | medium      |
 | Body Reflectance                  | float    | Central body reflectance of sunlight                                        | 0.3        | [0,1]           | medium      |
 | Heat Conversion Ratio [-]         | float    | Conversion ratio for activities, 0 leads to know heat-up due to activity    | 0.5        | [0,1]           | high        |
 
