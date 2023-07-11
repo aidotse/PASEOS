@@ -86,8 +86,10 @@ class ActorBuilder:
 
     @staticmethod
     def set_custom_orbit(actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch):
-        """Define the orbit of the actor using a custom propagator function. The custom function has to return position and velocity in meters
-        and meters per second respectively. The function will be called with the current epoch as the only parameter.
+        """Define the orbit of the actor using a custom propagator function.
+        The custom function has to return position and velocity in meters
+        and meters per second respectively. The function will be called with the
+        current epoch as the only parameter.
 
         Args:
             actor (SpacecraftActor): Actor to update.
