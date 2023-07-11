@@ -139,3 +139,4 @@ thermal_test.csv
 results
 pytest-coverage.txt
 pytest.xml
+examples/Orekit_example/orekit-data.zip
