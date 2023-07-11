@@ -1,6 +1,7 @@
 from typing import Callable, Any
 
 from loguru import logger
+import numpy as np
 from dotmap import DotMap
 import pykep as pk
 from skyfield.api import wgs84
@@ -84,6 +85,42 @@ class ActorBuilder:
         actor._minimum_altitude_angle = minimum_altitude_angle
 
     @staticmethod
+    def set_custom_orbit(actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch):
+        """Define the orbit of the actor using a custom propagator function. The custom function has to return position and velocity in meters
+        and meters per second respectively. The function will be called with the current epoch as the only parameter.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            propagator_func (Callable): Function to propagate the orbit.
+            epoch (pk.epoch): Current epoch.
+        """
+        assert callable(propagator_func), "propagator_func has to be callable."
+        assert isinstance(epoch, pk.epoch), "epoch has to be a pykep epoch."
+        assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
+        assert actor._orbital_parameters is None, "Actor already has an orbit."
+        assert np.isclose(
+            actor.local_time.mjd2000, epoch.mjd2000
+        ), "The initial epoch has to match actor's local time."
+        actor._custom_orbit_propagator = propagator_func
+
+        # Try evaluating position and velocity to check if the function works
+        try:
+            position, velocity = actor.get_position_velocity(epoch)
+            assert len(position) == 3, "Position has to be list of 3 floats."
+            assert all(
+                [isinstance(val, float) for val in position]
+            ), "Position has to be list of 3 floats."
+            assert len(velocity) == 3, "Velocity has to be list of 3 floats."
+            assert all(
+                [isinstance(val, float) for val in velocity]
+            ), "Velocity has to be list of 3 floats."
+        except Exception as e:
+            logger.error(f"Error evaluating custom orbit propagator function: {e}")
+            raise RuntimeError("Error evaluating custom orbit propagator function.")
+
+        logger.debug(f"Added custom orbit propagator to actor {actor}")
+
+    @staticmethod
     def set_TLE(
         actor: SpacecraftActor,
         line1: str,
@@ -149,7 +186,7 @@ class ActorBuilder:
 
     @staticmethod
     def set_position(actor: BaseActor, position: list):
-        """Sets the actors position. Use this if you do not want the actor to have a keplerian orbit around a central body.
+        """Sets the actors position. Use this if you do *not* want the actor to have a keplerian orbit around a central body.
 
         Args:
             actor (BaseActor): Actor set the position on.
