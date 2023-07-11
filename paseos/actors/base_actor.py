@@ -265,11 +265,7 @@ class BaseActor(ABC):
             np.array: [x,y,z] in meters
         """
         logger.trace(
-            "Computing "
-            + self._orbital_parameters.name
-            + " position at time "
-            + str(epoch.mjd2000)
-            + " (mjd2000)."
+            "Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000)."
         )
 
         if (
