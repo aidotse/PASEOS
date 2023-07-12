@@ -53,7 +53,7 @@ def setup_sentinel_example(t0):
     )
 
     ActorBuilder.set_ground_station_location(
-        maspalomas_groundstation, -15.6338, 27.7629, 205.1, minimum_altitude_angle=5
+        maspalomas_groundstation, 27.7629, -15.6338, 205.1, minimum_altitude_angle=5
     )
 
     # Add communication link
