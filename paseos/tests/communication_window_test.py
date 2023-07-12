@@ -53,7 +53,7 @@ def setup_sentinel_example(t0):
     )
 
     ActorBuilder.set_ground_station_location(
-        maspalomas_groundstation, -15.6338, 27.7629, 205.1, minimum_altitude_angle=5
+        maspalomas_groundstation, 27.7629, -15.6338, 205.1, minimum_altitude_angle=5
     )
 
     # Add communication link
@@ -63,20 +63,20 @@ def setup_sentinel_example(t0):
 
 def test_find_next_window():
     # Test window from other test is found
-    t0 = pk.epoch_from_string("2022-Oct-27 21:00:00")
+    t0 = pk.epoch_from_string("2022-Oct-27 22:57:00")
     sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
 
     start, length, transmittable_data = find_next_window(
         sentinel2B,
         local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
-        search_window_in_s=600,
+        search_window_in_s=360,
         t0=t0,
     )
 
-    assert np.isclose(start.mjd2000, 8335.87835648148)
-    assert np.isclose(length, 731.9999999657739, rtol=0.01, atol=3.0)
-    assert np.isclose(transmittable_data, 732000, rtol=0.01, atol=3000)
+    assert np.isclose(start.mjd2000, 8335.957060185183)
+    assert np.isclose(length, 740.0000001071021, rtol=0.01, atol=3.0)
+    assert np.isclose(transmittable_data, 740000, rtol=0.01, atol=3000)
 
     # Test correct return if no window found
     t0 = pk.epoch_from_string("2022-Oct-27 20:00:00")
@@ -86,7 +86,7 @@ def test_find_next_window():
         sentinel2B,
         local_actor_communication_link_name="link1",
         target_actor=maspalomas_groundstation,
-        search_window_in_s=300,
+        search_window_in_s=360,
         t0=t0,
     )
 
@@ -99,7 +99,7 @@ def test_communication_link_sat_to_ground():
     """This test checks if the communication window between Sentinel
     and one of it's ground stations matches
     """
-    t0 = pk.epoch_from_string("2022-Oct-27 21:04:45")
+    t0 = pk.epoch_from_string("2022-Oct-27 22:58:09")
     sentinel2B, maspalomas_groundstation = setup_sentinel_example(t0)
 
     # Check again after communication_window_end_time
@@ -118,7 +118,7 @@ def test_communication_link_sat_to_ground():
     window_in_s = (
         communication_window_end_time.mjd2000 - communication_window_start_time.mjd2000
     ) * pk.DAY2SEC
-    expected_window_in_s = 731.9999999657739
+    expected_window_in_s = 739.0000000305008
     assert np.isclose(expected_window_in_s, window_in_s)
 
 
