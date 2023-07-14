@@ -85,6 +85,78 @@ class ActorBuilder:
         actor._minimum_altitude_angle = minimum_altitude_angle
 
     @staticmethod
+    def set_central_body(
+        actor: SpacecraftActor,
+        pykep_planet: pk.planet,
+        mesh: tuple = None,
+        radius: float = None,
+        rotation_declination: float = None,
+        rotation_right_ascension: float = None,
+        rotation_period: float = None,
+    ):
+        """Define the central body of the actor. This is the body the actor is orbiting around.
+
+        If a mesh is provided, it will be used to compute visibility and eclipse checks.
+        Otherwise, a sphere with the provided radius will be used. One of the two has to be provided.
+
+        Note the specification here will not affect the actor orbit.
+        For that, use set_orbit, set_TLE or set_custom_orbit.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            pykep_planet (pk.planet): Central body as a pykep planet in heliocentric frame.
+            mesh (tuple): A tuple of vertices and triangles defining a mesh.
+            radius (float): Radius of the central body in meters. Only used if no mesh is provided.
+            rotation_declination (float): Declination of the rotation axis in degrees in the
+            central body's inertial frame.
+            rotation_right_ascension (float): Right ascension of the rotation axis in degrees in
+            the central body's inertial frame.
+            rotation_period (float): Rotation period in seconds.
+        """
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Central body only supported for SpacecraftActors"
+        assert isinstance(pykep_planet, pk.planet), "pykep_planet has to be a pykep planet."
+        assert mesh is not None or radius is not None, "Either mesh or radius has to be provided."
+        assert mesh is None or radius is None, "Either mesh or radius has to be provided, not both."
+
+        # Check rotation parameters
+        if rotation_declination is not None:
+            assert (
+                rotation_declination >= -90 and rotation_declination <= 90
+            ), "Rotation declination has to be -90 <= dec <= 90"
+
+        if rotation_right_ascension is not None:
+            assert (
+                rotation_right_ascension >= -180 and rotation_right_ascension <= 180
+            ), "Rotation right ascension has to be -180 <= ra <= 180"
+        if rotation_period is not None:
+            assert rotation_period > 0, "Rotation period has to be > 0"
+
+        if (
+            rotation_period is not None
+            or rotation_right_ascension is not None
+            or rotation_declination is not None
+        ):
+            assert (
+                rotation_right_ascension is not None
+            ), "Rotation right ascension has to be set for rotation."
+            assert (
+                rotation_declination is not None
+            ), "Rotation declination has to be set. for rotation."
+            assert rotation_period is not None, "Rotation period has to be set for rotation."
+
+        # Check if pykep planet is either orbiting the sun or is the sunitself
+        # by comparing mu values
+        assert np.isclose(pykep_planet.mu_central_body, 1.32712440018e20) or np.isclose(
+            pykep_planet.mu_self, 1.32712440018e20
+        ), "Central body has to either be the sun or orbiting the sun."
+
+        # TODO
+
+        logger.debug(f"Added central body {pykep_planet} to actor {actor}")
+
+    @staticmethod
     def set_custom_orbit(actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch):
         """Define the orbit of the actor using a custom propagator function.
         The custom function has to return position and velocity in meters
@@ -229,6 +301,11 @@ class ActorBuilder:
         assert isinstance(
             actor, SpacecraftActor
         ), "Power devices are only supported for SpacecraftActors"
+
+        # If solar panel, check if the actor has a central body
+        # to check eclipse
+        if power_device_type == PowerDeviceType.SolarPanel:
+            assert actor.has_central_body, "Solar panels require a central body to check eclipse."
 
         # Check if the actor already had a power device
         if actor.has_power_model:

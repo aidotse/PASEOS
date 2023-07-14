@@ -6,8 +6,8 @@ import pykep as pk
 import numpy as np
 from dotmap import DotMap
 
-from ..communication.is_in_line_of_sight import is_in_line_of_sight
-from ..power.is_in_eclipse import is_in_eclipse
+from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from ..central_body.is_in_eclipse import is_in_eclipse
 
 
 class BaseActor(ABC):
@@ -118,6 +118,15 @@ class BaseActor(ABC):
             raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         return self._custom_properties_update_function[property_name]
+
+    @property
+    def has_central_body(self) -> bool:
+        """Returns true if actor has a central body, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_central_body") and self._central_body is not None
 
     @property
     def has_power_model(self) -> bool:
