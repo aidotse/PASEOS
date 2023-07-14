@@ -16,18 +16,19 @@ from ..radiation.radiation_model import RadiationModel
 class ActorBuilder:
     """This class is used to construct actors."""
 
-    def __new__(self):
-        if not hasattr(self, "instance"):
-            self.instance = super(ActorBuilder, self).__new__(self)
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(ActorBuilder, cls).__new__(cls)
         else:
             logger.debug(
                 "Tried to create another instance of ActorBuilder. Keeping original one..."
             )
-        return self.instance
+        return cls.instance
 
     def __init__(self):
         logger.trace("Initializing ActorBuilder")
 
+    @staticmethod
     def get_actor_scaffold(name: str, actor_type: object, epoch: pk.epoch):
         """Initiates an actor with minimal properties.
 
@@ -50,6 +51,7 @@ class ActorBuilder:
 
         return actor_type(name, epoch)
 
+    @staticmethod
     def set_ground_station_location(
         actor: GroundstationActor,
         latitude: float,
@@ -81,6 +83,36 @@ class ActorBuilder:
         )
         actor._minimum_altitude_angle = minimum_altitude_angle
 
+    @staticmethod
+    def set_TLE(
+        actor: SpacecraftActor,
+        line1: str,
+        line2: str,
+    ):
+        """Define the orbit of the actor using a TLE. For more information on TLEs see
+        https://en.wikipedia.org/wiki/Two-line_element_set .
+
+        TLEs can be obtained from https://www.space-track.org/ or https://celestrak.com/NORAD/elements/
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            line1 (str): First line of the TLE.
+            line2 (str): Second line of the TLE.
+
+        Raises:
+            RuntimeError: If the TLE could not be read.
+        """
+        try:
+            actor._orbital_parameters = pk.planet.tle(line1, line2)
+            # TLE only works around Earth
+            actor._central_body = pk.planet.jpl_lp("earth")
+        except RuntimeError:
+            logger.error("Error reading TLE \n", line1, "\n", line2)
+            raise RuntimeError("Error reading TLE")
+
+        logger.debug(f"Added TLE to actor {actor}")
+
+    @staticmethod
     def set_orbit(
         actor: SpacecraftActor,
         position,
@@ -115,6 +147,7 @@ class ActorBuilder:
 
         logger.debug(f"Added orbit to actor {actor}")
 
+    @staticmethod
     def set_position(actor: BaseActor, position: list):
         """Sets the actors position. Use this if you do not want the actor to have a keplerian orbit around a central body.
 
@@ -133,6 +166,7 @@ class ActorBuilder:
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
 
+    @staticmethod
     def set_power_devices(
         actor: SpacecraftActor,
         battery_level_in_Ws: float,
@@ -182,6 +216,7 @@ class ActorBuilder:
             + f"ChargingRate={charging_rate_in_W}W to actor {actor}"
         )
 
+    @staticmethod
     def set_radiation_model(
         actor: SpacecraftActor,
         data_corruption_events_per_s: float,
@@ -215,6 +250,7 @@ class ActorBuilder:
         )
         logger.debug(f"Added radiation model to actor {actor}.")
 
+    @staticmethod
     def set_thermal_model(
         actor: SpacecraftActor,
         actor_mass: float,
@@ -310,6 +346,7 @@ class ActorBuilder:
             power_consumption_to_heat_ratio=power_consumption_to_heat_ratio,
         )
 
+    @staticmethod
     def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):
         """Creates a communication device.
 
@@ -327,6 +364,7 @@ class ActorBuilder:
 
         logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
 
+    @staticmethod
     def add_custom_property(
         actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable
     ):
