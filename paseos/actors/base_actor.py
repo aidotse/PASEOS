@@ -25,6 +25,9 @@ class BaseActor(ABC):
     # Orbital parameters of the actor, stored in a pykep planet object
     _orbital_parameters = None
 
+    # Custom function for orbital propagation
+    _custom_orbit_propagator = None
+
     # Position if not defined by orbital parameters
     _position = None
 
@@ -262,24 +265,24 @@ class BaseActor(ABC):
             np.array: [x,y,z] in meters
         """
         logger.trace(
-            "Computing "
-            + self._orbital_parameters.name
-            + " position at time "
-            + str(epoch.mjd2000)
-            + " (mjd2000)."
+            "Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000)."
         )
 
-        if self._orbital_parameters is not None and self._position is not None:
+        if (
+            self._orbital_parameters is not None or self._custom_orbit_propagator is not None
+        ) and self._position is not None:
             raise ValueError(
                 "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
             )
 
         # If the actor has no orbit, return position
-        if self._orbital_parameters is None:
+        if self._orbital_parameters is None and self._custom_orbit_propagator is None:
             if self._position is not None:
                 self._previous_position = self._position
                 self._time_of_previous_position = epoch.mjd2000
                 return self._position
+        elif self._custom_orbit_propagator is not None:
+            return self._custom_orbit_propagator(epoch)[0]
         else:
             return self._orbital_parameters.eph(epoch)[0]
 
@@ -296,19 +299,27 @@ class BaseActor(ABC):
         Returns:
             np.array: [x,y,z] in meters
         """
-        if self._orbital_parameters is None:
+
+        if self._orbital_parameters is None and self._custom_orbit_propagator is None:
             raise NotImplementedError(
                 "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
             )
 
         logger.trace(
             "Computing "
-            + self._orbital_parameters.name
+            + self.name
             + " position / velocity at time "
             + str(epoch.mjd2000)
             + " (mjd2000)."
         )
-        pos, vel = self._orbital_parameters.eph(epoch)
+
+        # Use either custom propagator or pykep to compute position / velocity
+        if self._custom_orbit_propagator is not None:
+            pos, vel = self._custom_orbit_propagator(epoch)
+        else:
+            pos, vel = self._orbital_parameters.eph(epoch)
+
+        # Store the position / velocity for later use
         self._previous_position = pos
         self._previous_velocity = vel
         self._time_of_previous_position = epoch.mjd2000

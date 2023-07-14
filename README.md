@@ -289,6 +289,30 @@ line2 = "2 40697  98.5695 262.3977 0001349  91.8221 268.3116 14.30817084419867"
 ActorBuilder.set_TLE(sat_actor, line1, line2)
 ```
 
+##### Custom Propagators
+
+You can define any kind of function you would like to determine actor positions and velocities. This allows integrating more sophisticated propagators such as [orekit](https://www.orekit.org/). A dedicated example on this topic can be found in the `examples` folder.
+
+In short, you need to define a propagator function that returns the position and velocity of the actor at a given time. The function shall take the current epoch as arguments. You can then set the propagator function with
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+# Create a SpacecraftActor
+starting_epoch = pk.epoch(42)
+my_sat = ActorBuilder.get_actor_scaffold(
+    name="my_sat", actor_type=SpacecraftActor, epoch=starting_epoch
+)
+
+# Define a custom propagator function that just returns a sinus position
+def my_propagator(epoch: pk.epoch):
+  position,velocity = your_external_propagator(epoch)
+  return position,velocity
+
+# Set the custom propagator
+ActorBuilder.set_custom_orbit(my_sat, my_propagator, starting_epoch)
+```
+
 ##### Accessing the orbit
 You can access the orbit of a [SpacecraftActor](#spacecraftactor) with
 
