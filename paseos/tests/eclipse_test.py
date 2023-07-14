@@ -3,7 +3,7 @@ import sys
 
 sys.path.append("../..")
 
-from paseos.power.is_in_eclipse import is_in_eclipse
+from paseos.central_body.is_in_eclipse import is_in_eclipse
 
 import pykep as pk
 

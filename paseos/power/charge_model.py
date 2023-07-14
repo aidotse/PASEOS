@@ -3,7 +3,7 @@ from loguru import logger
 import pykep as pk
 
 from paseos.power.power_device_type import PowerDeviceType
-from paseos.power.is_in_eclipse import is_in_eclipse
+from paseos.central_body.is_in_eclipse import is_in_eclipse
 
 
 def charge(
