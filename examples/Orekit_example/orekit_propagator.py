@@ -22,7 +22,7 @@ class OrekitPropagator:
     https://gitlab.orekit.org/orekit-labs/python-wrapper/-/blob/master/examples/Propagation.ipynb
     """
 
-    # Some Constants
+    # Constants for the numerical propagator, see orekit docs for details
     minStep = 0.0001
     maxstep = 1000.0
     initStep = 60.0
