@@ -17,6 +17,7 @@ setup(
         "matplotlib>=3.6.0",
         "numpy==1.23.5",
         "pykep>=2.6",
+        "pyquaternion>=0.9.9",
         "scikit-spatial>=6.5.0",
         "skyfield>=1.45",
         "toml>=0.10.2",
