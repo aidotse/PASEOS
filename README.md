@@ -1024,7 +1024,7 @@ Description of the physical model parameters and default values in PASEOS with i
 | Charging Rate [W]                 | float    | Charging rate of the battery                                                | -          | > 0             | high        |
 | Power Device Type                 | enum     | Type of power device. Can be either "SolarPanel" or "RTG"                   | SolarPanel | -               | medium      |
 | Data Corruption Events [Hz]      | float    | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) | -          | >= 0            | low         |
-| Restart Events [1/s]              | float    | Roate of device restart being triggered                                     | -          | >= 0            | medium      |
+| Restart Events [Hz]              | float    | Rate of device restart being triggered                                     | -          | >= 0            | medium      |
 | Failure Events [1/s]              | float    | Rate of complete device failure, i.e. a Single Event Latch-Up (SEL)         | -          | >= 0            | high        |
 | Mass [kg]                         | float    | Actor's mass                                                                | -          | > 0             | low         |
 | Initial Temperature [K]           | float    | Actor's initial temperature                                                 | -          | >= 0            | medium      |
