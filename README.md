@@ -1023,9 +1023,9 @@ Description of the physical model parameters and default values in PASEOS with i
 | Maximum Battery Level [Ws]        | float    | Maximum battery level                                                       | -          | > 0             | high        |
 | Charging Rate [W]                 | float    | Charging rate of the battery                                                | -          | > 0             | high        |
 | Power Device Type                 | enum     | Type of power device. Can be either "SolarPanel" or "RTG"                   | SolarPanel | -               | medium      |
-| Data Corruption Events [Hz]      | float    | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) | -          | >= 0            | low         |
-| Restart Events [Hz]              | float    | Rate of device restart being triggered                                     | -          | >= 0            | medium      |
-| Failure Events [Hz]              | float    | Rate of complete device failure, i.e. a Single Event Latch-Up (SEL)         | -          | >= 0            | high        |
+| Data Corruption Events [Hz]       | float    | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) | -          | >= 0            | low         |
+| Restart Events [Hz]               | float    | Rate of device restart being triggered                                      | -          | >= 0            | medium      |
+| Failure Events [Hz]               | float    | Rate of complete device failure due to a Single Event Latch-Up (SEL)        | -          | >= 0            | high        |
 | Mass [kg]                         | float    | Actor's mass                                                                | -          | > 0             | low         |
 | Initial Temperature [K]           | float    | Actor's initial temperature                                                 | -          | >= 0            | medium      |
 | Sun Absorptance                   | float    | Actor's absorptance of solar light                                          | -          | [0,1]           | high        |
@@ -1036,7 +1036,7 @@ Description of the physical model parameters and default values in PASEOS with i
 | Thermal Capacity [$J / (kg * K)$] | float    | Actor's thermal capacity                                                    | -          | >= 0            | low         |
 | Body Solar Irradiance [W]         | float    | Irradiance from the sun                                                     | 1360       | >= 0            | medium      |
 | Body Surface Temperature [K]      | float    | Central body surface temperature                                            | 288        | >= 0            | low         |
-| Body Emissivity                   | float    | Central body emissivity in infrared                                   | 0.6        | [0,1]           | medium      |
+| Body Emissivity                   | float    | Central body emissivity in infrared                                         | 0.6        | [0,1]           | medium      |
 | Body Reflectance                  | float    | Central body reflectance of sunlight                                        | 0.3        | [0,1]           | medium      |
 | Heat Conversion Ratio [-]         | float    | Conversion ratio for activities, 0 leads to know heat-up due to activity    | 0.5        | [0,1]           | high        |
 
