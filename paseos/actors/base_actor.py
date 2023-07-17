@@ -7,7 +7,6 @@ import numpy as np
 from dotmap import DotMap
 
 from ..central_body.is_in_line_of_sight import is_in_line_of_sight
-from ..central_body.is_in_eclipse import is_in_eclipse
 
 
 class BaseActor(ABC):
@@ -30,9 +29,6 @@ class BaseActor(ABC):
 
     # Position if not defined by orbital parameters
     _position = None
-
-    # Is specified by user / paseos instance but required for line of sight computations
-    _central_body_sphere = None
 
     # Central body this actor is orbiting
     _central_body = None
@@ -209,14 +205,6 @@ class BaseActor(ABC):
     def __str__(self):
         return self.name
 
-    def set_central_body_shape(self, sphere) -> None:
-        """Sets the central body of this actor.
-
-        Args:
-            sphere (skspatial.Sphere): Sphere blocking line of sight.
-        """
-        self._central_body_sphere = sphere
-
     def set_time(self, t: pk.epoch):
         """Updates the local time of the actor.
 
@@ -367,6 +355,6 @@ class BaseActor(ABC):
         if t.mjd2000 == self._time_of_previous_eclipse_status:
             return self._previous_eclipse_status
         else:
-            self._previous_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._previous_eclipse_status = self._central_body.block_sun(self, t)
             self._time_of_last_eclipse_status = t.mjd2000
         return self._previous_eclipse_status
