@@ -4,7 +4,6 @@ from test_utils import get_default_instance
 
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-from paseos.central_body.is_in_eclipse import is_in_eclipse
 
 import pykep as pk
 
@@ -30,7 +29,7 @@ def test_power_charging():
     sim.advance_time(12 * 3600, 0)
 
     # Check we are in eclipse
-    assert is_in_eclipse(sat1, earth, sat1.local_time, plot=True)
+    assert sat1.is_in_eclipse()
 
     # Check we are fully charged
     assert sat1.battery_level_in_Ws == 10000
@@ -57,7 +56,7 @@ def test_RTG_charging_in_eclipse():
     sim.advance_time(12 * 3600, 1)
 
     # Check we are in eclipse
-    assert is_in_eclipse(sat1, earth, sat1.local_time, plot=True)
+    assert sat1.is_in_eclipse()
 
     # Initial power was 500m check charging works
     assert sat1.battery_level_in_Ws == 500

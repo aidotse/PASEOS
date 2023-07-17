@@ -3,8 +3,6 @@ import sys
 
 sys.path.append("../..")
 
-from paseos.central_body.is_in_eclipse import is_in_eclipse
-
 import pykep as pk
 
 from test_utils import get_default_instance
@@ -14,8 +12,8 @@ def test_eclipse():
     """Get the default satellite and see if is in eclipse and getting out of it"""
     _, sat1, earth = get_default_instance()
 
-    assert not is_in_eclipse(sat1, earth, pk.epoch(0), plot=True)
-    assert is_in_eclipse(sat1, earth, pk.epoch(0.5), plot=True)
+    assert not sat1.is_in_eclipse(pk.epoch(0))
+    assert sat1.is_in_eclipse(pk.epoch(0.5))
 
 
 if __name__ == "__main__":
