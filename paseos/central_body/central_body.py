@@ -79,12 +79,13 @@ class CentralBody:
             self._rotation_axis = q_axis.rotate([0, 0, 1])
             self._rotation_angular_velocity = 2.0 * pi / rotation_period
 
-    def blocks_sun(self, actor: SpacecraftActor, t: pk.epoch) -> bool:
+    def blocks_sun(self, actor: SpacecraftActor, t: pk.epoch, plot=False) -> bool:
         """Checks whether the central body blocks the sun for the given actor.
 
         Args:
             actor (SpacecraftActor): The actor to check
             t (pk.epoch): Epoch at which to check
+            plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
             bool: True if the central body blocks the sun
@@ -101,10 +102,10 @@ class CentralBody:
         r_sat_heliocentric = r_central_body_heliocentric + r_sat_central_body_frame
         logger.trace("r_sat_heliocentric is" + str(r_sat_heliocentric))
 
-        self.is_between_points([0, 0, 0], r_sat_heliocentric, t)
+        return self.is_between_points([0, 0, 0], r_sat_heliocentric, t, plot)
 
     def is_between_actors(
-        self, actor_1: SpacecraftActor, actor_2: SpacecraftActor, t: pk.epoch
+        self, actor_1: SpacecraftActor, actor_2: SpacecraftActor, t: pk.epoch, plot=False
     ) -> bool:
         """Checks whether the central body is between the two actors.
 
@@ -112,6 +113,7 @@ class CentralBody:
             actor_1 (SpacecraftActor): First actor
             actor_2 (SpacecraftActor): Second actor
             t (pk.epoch): Epoch at which to check
+            plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
             bool: True if the central body is between the two actors
@@ -120,26 +122,31 @@ class CentralBody:
         pos_1 = actor_1.get_position_velocity(t)
         pos_2 = actor_2.get_position_velocity(t)
 
-        self.is_between_points(pos_1[0], pos_2[0], t)
+        return self.is_between_points(pos_1[0], pos_2[0], t, plot)
 
-    def is_between_points(self, point_1, point_2, t: pk.epoch) -> bool:
+    def is_between_points(self, point_1, point_2, t: pk.epoch, plot: bool = False) -> bool:
         """Checks whether the central body is between the two points.
 
         Args:
             point_1 (np.array): First point
             point_2 (np.array): Second point
             t (pk.epoch): Epoch at which to check
+            plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
             bool: True if the central body is between the two points
         """
         logger.debug("Computing line of sight between points: " + str(point_1) + " " + str(point_2))
 
+        point_1 = np.array(point_1)
+        point_2 = np.array(point_2)
+
         if self._encompassing_sphere is not None:
             return sphere_between_points(
                 point_1=point_1,
                 point_2=point_2,
                 sphere=self._encompassing_sphere,
+                plot=plot,
             )
         elif self._mesh is not None:
             # Apply rotation if specified

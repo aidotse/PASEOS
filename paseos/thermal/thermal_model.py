@@ -75,7 +75,7 @@ class ThermalModel:
         """
         logger.trace("Initializing thermal model.")
         self._actor = local_actor
-        self._body_radius = self._actor._central_body.radius
+        self._body_radius = self._actor._central_body._planet.radius
 
         self._power_consumption_to_heat_ratio = power_consumption_to_heat_ratio
 

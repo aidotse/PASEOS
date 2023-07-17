@@ -29,7 +29,7 @@ class SpaceAnimation(Animation):
         logger.debug("Initializing animation")
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
-        self._norm_coeff = self._local_actor._central_body.radius
+        self._norm_coeff = self._local_actor._central_body._planet.radius
 
         for known_actor in current_actors:
             pos = known_actor.get_position(self._local_actor.local_time)

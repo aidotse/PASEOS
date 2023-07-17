@@ -87,6 +87,11 @@ class BaseActor(ABC):
         """Returns a dictionary of custom properties for this actor."""
         return self._custom_properties.toDict()
 
+    @property
+    def central_body(self):
+        """Returns the central body this actor is orbiting."""
+        return self._central_body
+
     def set_custom_property(self, property_name: str, value: Any) -> None:
         """Sets the value of the specified custom property.
 
@@ -355,6 +360,6 @@ class BaseActor(ABC):
         if t.mjd2000 == self._time_of_previous_eclipse_status:
             return self._previous_eclipse_status
         else:
-            self._previous_eclipse_status = self._central_body.block_sun(self, t)
+            self._previous_eclipse_status = self._central_body.blocks_sun(self, t)
             self._time_of_last_eclipse_status = t.mjd2000
         return self._previous_eclipse_status

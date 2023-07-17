@@ -9,14 +9,12 @@ from paseos import ActorBuilder, SpacecraftActor
 
 import pykep as pk
 
-_PASEOS_TESTS_EARTH_RADIUS = 6371000
-
 
 def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):
     """Sets up a instance of paseos with a satellite in orbit around Earth"""
 
     # Set log level for tests low
-    paseos.set_log_level("TRACE")
+    # paseos.set_log_level("TRACE")
 
     # Define central body
     earth = pk.planet.jpl_lp("earth")

@@ -33,22 +33,23 @@ class SkyfieldSkyCoordinate(VectorFunction):
         return self.r, v, self.center, "SkyfieldSkyCoordinate"
 
 
-def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.epoch):
+def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.epoch, plot=False):
     """Determines whether a position is in line of sight of this actor
 
     Args:
         actor (SpacecraftActor): The actors to check line of sight from
         other_actor (SpacecraftActor): The actor to check line of sight with
         epoch (pk,.epoch): Epoch at which to check the line of sight
+        plot (bool): Whether to plot a diagram illustrating the positions.
 
     Returns:
         bool: true if in line-of-sight.
     """
     # Check actor has central body
     assert (
-        actor._central_body_sphere is not None
+        actor.central_body is not None
     ), f"Please set the central body on actor {actor} for line of sight computations."
-    actor.central_body.is_between_actors(actor, other_actor, epoch)
+    actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
 
 
 def _is_in_line_of_sight_ground_station_to_spacecraft(
@@ -153,8 +154,8 @@ def is_in_line_of_sight(
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
         assert (
-            actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {actor} for line of sight computations."
+            actor.central_body is not None
+        ), f"Please set the central body on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch, plot)
     elif (
         type(actor).__name__ == "GroundstationActor"
@@ -163,8 +164,8 @@ def is_in_line_of_sight(
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
         assert (
-            other_actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {other_actor} for line of sight computations."
+            other_actor.central_body is not None
+        ), f"Please set the central body on actor {other_actor} for line of sight computations."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -175,8 +176,8 @@ def is_in_line_of_sight(
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
         assert (
-            actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {actor} for line of sight computations."
+            actor.central_body is not None
+        ), f"Please set the central body on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )

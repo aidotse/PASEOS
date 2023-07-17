@@ -9,6 +9,7 @@ from skyfield.api import wgs84
 from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
 from .ground_station_actor import GroundstationActor
+from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
@@ -108,15 +109,17 @@ class ActorBuilder:
             mesh (tuple): A tuple of vertices and triangles defining a mesh.
             radius (float): Radius of the central body in meters. Only used if no mesh is provided.
             rotation_declination (float): Declination of the rotation axis in degrees in the
-            central body's inertial frame.
+            central body's inertial frame. Rotation at current actor local time is presumed to be 0.
             rotation_right_ascension (float): Right ascension of the rotation axis in degrees in
-            the central body's inertial frame.
-            rotation_period (float): Rotation period in seconds.
+            the central body's inertial frame. Rotation at current actor local time is presumed to be 0.
+            rotation_period (float): Rotation period in seconds. Rotation at current actor local time is presumed to be 0.
         """
         assert isinstance(
             actor, SpacecraftActor
         ), "Central body only supported for SpacecraftActors"
-        assert isinstance(pykep_planet, pk.planet), "pykep_planet has to be a pykep planet."
+
+        # Fuzzy type check for pykep planet
+        assert "pykep.planet" in str(type(pykep_planet)), "pykep_planet has to be a pykep planet."
         assert mesh is not None or radius is not None, "Either mesh or radius has to be provided."
         assert mesh is None or radius is None, "Either mesh or radius has to be provided, not both."
 
@@ -125,7 +128,6 @@ class ActorBuilder:
             assert (
                 rotation_declination >= -90 and rotation_declination <= 90
             ), "Rotation declination has to be -90 <= dec <= 90"
-
         if rotation_right_ascension is not None:
             assert (
                 rotation_right_ascension >= -180 and rotation_right_ascension <= 180
@@ -133,6 +135,7 @@ class ActorBuilder:
         if rotation_period is not None:
             assert rotation_period > 0, "Rotation period has to be > 0"
 
+        # Check if rotation parameters are set
         if (
             rotation_period is not None
             or rotation_right_ascension is not None
@@ -145,6 +148,18 @@ class ActorBuilder:
                 rotation_declination is not None
             ), "Rotation declination has to be set. for rotation."
             assert rotation_period is not None, "Rotation period has to be set for rotation."
+            assert mesh is not None, "Radius cannot only be set for mesh-defined bodies."
+
+        if mesh is not None:
+            # Check mesh
+            assert isinstance(mesh, tuple), "Mesh has to be a tuple."
+            assert len(mesh) == 2, "Mesh has to be a tuple of length 2."
+            assert isinstance(mesh[0], np.ndarray), "Mesh vertices have to be a numpy array."
+            assert isinstance(mesh[1], np.ndarray), "Mesh triangles have to be a numpy array."
+            assert len(mesh[0].shape) == 2, "Mesh vertices have to be a numpy array of shape (n,3)."
+            assert (
+                len(mesh[1].shape) == 2
+            ), "Mesh triangles have to be a numpy array of shape (n,3)."
 
         # Check if pykep planet is either orbiting the sun or is the sunitself
         # by comparing mu values
@@ -152,7 +167,22 @@ class ActorBuilder:
             pykep_planet.mu_self, 1.32712440018e20
         ), "Central body has to either be the sun or orbiting the sun."
 
-        # TODO
+        # Check if the actor already had a central body
+        if actor.has_central_body:
+            logger.warning(
+                "The actor already had a central body. Only one central body is supported. Overriding old body."
+            )
+
+        # Set central body
+        actor._central_body = CentralBody(
+            planet=pykep_planet,
+            initial_epoch=actor.local_time,
+            mesh=mesh,
+            encompassing_sphere_radius=radius,
+            rotation_declination=rotation_declination,
+            rotation_right_ascension=rotation_right_ascension,
+            rotation_period=rotation_period,
+        )
 
         logger.debug(f"Added central body {pykep_planet} to actor {actor}")
 
@@ -216,7 +246,7 @@ class ActorBuilder:
         try:
             actor._orbital_parameters = pk.planet.tle(line1, line2)
             # TLE only works around Earth
-            actor._central_body = pk.planet.jpl_lp("earth")
+            ActorBuilder.set_central_body(actor, pk.planet.jpl_lp("earth"), radius=6371000)
         except RuntimeError:
             logger.error("Error reading TLE \n", line1, "\n", line2)
             raise RuntimeError("Error reading TLE")
@@ -240,11 +270,9 @@ class ActorBuilder:
             epoch (pk.epoch): Time of position / velocity.
             central_body (pk.planet): Central body around which the actor is orbiting as a pykep planet.
         """
-        # TODO Add checks for sensibility of orbit
-
         assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
 
-        actor._central_body = central_body
+        ActorBuilder.set_central_body(actor, central_body, radius=central_body.radius)
         actor._orbital_parameters = pk.planet.keplerian(
             epoch,
             position,
