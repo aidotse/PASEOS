@@ -140,3 +140,4 @@ results
 pytest-coverage.txt
 pytest.xml
 examples/Orekit_example/orekit-data.zip
+mesh_test.png
