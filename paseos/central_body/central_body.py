@@ -142,7 +142,8 @@ class CentralBody:
             point_1 (np.array): First point
             point_2 (np.array): Second point
             t (pk.epoch): Epoch at which to check
-            reference_frame (ReferenceFrame, optional): Reference frame of the points. Defaults to ReferenceFrame.CentralBodyInertial.
+            reference_frame (ReferenceFrame, optional): Reference frame of the points.
+            Defaults to ReferenceFrame.CentralBodyInertial.
             plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:

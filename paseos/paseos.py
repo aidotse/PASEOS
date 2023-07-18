@@ -5,7 +5,6 @@ import sys
 from dotmap import DotMap
 from loguru import logger
 import pykep as pk
-from skspatial.objects import Sphere
 
 from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager

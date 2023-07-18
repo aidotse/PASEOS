@@ -3,8 +3,6 @@ import sys
 
 sys.path.append("../..")
 
-from skspatial.objects import Sphere
-
 from paseos import SpacecraftActor, ActorBuilder, GroundstationActor
 from paseos.central_body.is_in_line_of_sight import is_in_line_of_sight
 
