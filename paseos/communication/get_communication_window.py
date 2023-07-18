@@ -58,7 +58,7 @@ def get_communication_window(
         window_length_in_s += dt
         current_epoch = pk.epoch(t0.mjd2000 + window_length_in_s * pk.SEC2DAY)
         # (This is the quantum of information that you can transmit)
-        transmitted_data_in_b += local_actor_comm_link.bandwidth_in_kbps * dt * 1000
+        transmitted_data_in_b += int(local_actor_comm_link.bandwidth_in_kbps * dt * 1000)
 
     if window_length_in_s >= window_timeout_value_in_s:
         logger.debug("Timeout reached for the estimation of the communication window.")
