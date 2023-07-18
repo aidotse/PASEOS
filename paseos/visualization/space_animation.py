@@ -202,7 +202,7 @@ class SpaceAnimation(Animation):
                 battery_level = actor.state_of_charge * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
-             if actor.has_thermal_model:
+            if actor.has_thermal_model:
                 info_str += f"\nTemp.: {actor.temperature_in_K-273.15:.2f}C"
 
             # Disabled for now as fixed values atm
