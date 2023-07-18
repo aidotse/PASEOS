@@ -18,12 +18,13 @@ from paseos.visualization.animation import Animation
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    def __init__(self, sim: PASEOS, n_trajectory: int = 32) -> None:
+    def __init__(self, sim: PASEOS, n_trajectory: int = 32, filename: str = None) -> None:
         """Initialize the space animation object
 
         Args:
             sim (PASEOS): simulation object
             n_trajectory (int): number of samples in tail of actor
+            filename (str, optional): filename to save the animation to. Defaults to None.
         """
         super().__init__(sim)
         logger.debug("Initializing animation")
@@ -34,6 +35,7 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             pos = known_actor.get_position(self._local_actor.local_time)
             pos_norm = [x / self._norm_coeff for x in pos]
+            print(pos_norm)
             self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
 
         with plt.style.context("dark_background"):
@@ -102,16 +104,33 @@ class SpaceAnimation(Animation):
             plt.show()
             plt.pause(0.0001)
 
-    def _plot_central_body(self) -> None:
-        """Plot the central object as a sphere of radius 1"""
-        central_body = self._local_actor._central_body._planet
-        central_body.radius
+            if filename is not None:
+                logger.debug("Saving figure to file " + filename)
+                plt.savefig(filename, dpi=300, bbox_inches="tight")
 
-        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
-        x = np.cos(u) * np.sin(v)
-        y = np.sin(u) * np.sin(v)
-        z = np.cos(v)
-        self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
+    def _plot_central_body(self) -> None:
+        """Plot the central object"""
+
+        # Plot mesh if available
+        if self._local_actor._central_body._mesh is not None:
+            mesh_points, mesh_triangles = self._local_actor._central_body._mesh
+            self.ax_3d.plot_trisurf(
+                mesh_points[:, 0],
+                mesh_points[:, 1],
+                mesh_points[:, 2],
+                triangles=mesh_triangles,
+                edgecolor=[[0.75, 0.75, 0.75]],
+                linewidth=0.2,
+                alpha=0.0,
+                shade=False,
+            )
+        else:
+            u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
+            x = np.cos(u) * np.sin(v)
+            y = np.sin(u) * np.sin(v)
+            z = np.cos(v)
+            # print(x, y, z)
+            self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
         """Compute line-of-sight (LOS) between all actors
@@ -194,9 +213,9 @@ class SpaceAnimation(Animation):
             data = obj.positions
             if data.ndim == 1:
                 data = data[..., np.newaxis].T
+            logger.trace(f"Position for object: {data}")
             n_points = np.minimum(data.shape[0], self.n_trajectory)
 
-            logger.trace(f"Position for object: {data}")
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
                 if isinstance(obj.actor, SpacecraftActor) or isinstance(
