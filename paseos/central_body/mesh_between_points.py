@@ -60,7 +60,8 @@ def _rays_triangle_intersect(ray_o, ray_d, v0, v1, v2):
         v0, v1, v2 (3D np.array): triangle vertices
 
     Returns:
-        boolean value if the intersection exist (includes the edges)
+        boolean value if the intersection exist (includes the edges) and the t value
+        of the intersection. (0 if no intersection)
 
     See: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     """
@@ -73,20 +74,20 @@ def _rays_triangle_intersect(ray_o, ray_d, v0, v1, v2):
     a = np.dot(edge1, h)
 
     if a < 0.000001 and a > -0.000001:
-        return False
+        return False, 0
 
     f = 1.0 / a
     s = ray_o - v0
     u = np.dot(s, h) * f
 
     if u < 0 or u > 1:
-        return False
+        return False, 0
 
     q = np.cross(s, edge1)
     v = np.dot(ray_d, q) * f
 
     if v < 0 or u + v > 1:
-        return False
+        return False, 0
 
     t = f * np.dot(edge2, q)
 
