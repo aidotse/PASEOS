@@ -32,13 +32,10 @@ class SpaceAnimation(Animation):
 
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
-        self._norm_coeff = self._local_actor._central_body._planet.radius
 
         for known_actor in current_actors:
-            pos = known_actor.get_position(self._local_actor.local_time)
-            pos_norm = [x / self._norm_coeff for x in pos]
-            print(pos_norm)
-            self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
+            pos = np.array(known_actor.get_position(self._local_actor.local_time))
+            self.objects.append(DotMap(actor=known_actor, positions=pos))
 
         with plt.style.context("dark_background"):
             # Create figure for 3d animation
@@ -137,7 +134,9 @@ class SpaceAnimation(Animation):
                     z1z2 = [pos_i[2], pos_j[2]]
 
                     self.comm_lines.append(
-                        self.ax_3d.plot3D(x1x2, y1y2, z1z2, "--", color="lightblue", zorder=10)
+                        self.ax_3d.plot3D(
+                            x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10
+                        )
                     )
 
     def _plot_central_body(self) -> None:
@@ -157,11 +156,11 @@ class SpaceAnimation(Animation):
                 shade=False,
             )
         else:
+            radius = self._local_actor._central_body._planet.radius
             u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
-            x = np.cos(u) * np.sin(v)
-            y = np.sin(u) * np.sin(v)
-            z = np.cos(v)
-            # print(x, y, z)
+            x = np.cos(u) * np.sin(v) * radius
+            y = np.sin(u) * np.sin(v) * radius
+            z = np.cos(v) * radius
             self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
@@ -203,12 +202,13 @@ class SpaceAnimation(Animation):
                 battery_level = actor.state_of_charge * 100
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
-            if actor.has_thermal_model:
-                info_str += f"\nTemperature: {actor.temperature_in_K:.2f}K,{actor.temperature_in_K-273.15:.2f}C"
+             if actor.has_thermal_model:
+                info_str += f"\nTemp.: {actor.temperature_in_K-273.15:.2f}C"
 
-            for name in actor.communication_devices.keys():
-                info = actor.communication_devices[name]
-                info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
+            # Disabled for now as fixed values atm
+            # for name in actor.communication_devices.keys():
+            #     info = actor.communication_devices[name]
+            #     info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
         else:
             raise NotImplementedError(
                 "SpacePlot is currently not implemented for actor type" + type(actor)
@@ -362,16 +362,15 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos = known_actor.get_position(self._local_actor.local_time)
-                    pos_norm = [x / self._norm_coeff for x in pos]
+                    pos = np.array(known_actor.get_position(self._local_actor.local_time))
                     if "positions" in obj:
                         if obj.positions.shape[0] > self.n_trajectory:
                             obj.positions = np.roll(obj.positions, shift=-1, axis=0)
-                            obj.positions[-1, :] = pos_norm
+                            obj.positions[-1, :] = pos
                         else:
-                            obj.positions = np.vstack((obj.positions, pos_norm))
+                            obj.positions = np.vstack((obj.positions, pos))
                     else:
-                        obj.positions = np.array(pos_norm)
+                        obj.positions = np.array(pos)
         self._plot_actors()
 
         # Step through trajectories to find max and min values in each direction
