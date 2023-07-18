@@ -42,6 +42,7 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#thermal-modelling">Thermal Modelling</a></li>
     <li><a href="#radiation-modelling">Radiation Modelling</a></li>
     <li><a href="#custom-modelling">Custom Modelling</a></li>
+    <li><a href="#simulation-settings">Custom Central Bodies</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -500,6 +501,62 @@ ActorBuilder.add_custom_property(
 # One can easily access the property at any point with
 print(local_actor.get_custom_property("altitude"))
 ```
+
+#### Custom Central Bodies
+
+In most examples here you will see Earth via the pykep API being used as a spherical, central body for Keplerian orbits. However, you can also use any other central body defined via a mesh. This is especially useful in conjunction with [custom propagators](#custom-propagators). To use a custom central body, you need to define a mesh and add it to the simulation configuration. The following example shows how to do this for the comet 67P/Churyumov–Gerasimenko.
+
+We assume `polyhedral_propagator` to be a custom propagator as explained in [Custom Propagators](#custom-propagators).
+
+To correctly compute eclipses, we also need to know the orbit of the custom central body around the Sun. In this case we use the [orbital elements](https://en.wikipedia.org/wiki/Orbital_elements) one [can find online for 67P/Churyumov–Gerasimenko](https://en.wikipedia.org/wiki/67P/Churyumov–Gerasimenko).
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+
+# Define the epoch and orbital elements
+epoch = pk.epoch(2460000.5, "jd")
+elements = (3.457 * pk.AU, 0.64989, 3.8719 * pk.DEG2RAD, 36.33 * pk.DEG2RAD, 22.15 * pk.DEG2RAD, 73.57 * pk.DEG2RAD)
+
+# Create a planet object from pykep for 67P
+comet = pk.planet.keplerian(epoch, elements, pk.MU_SUN, 666.19868, 2000, 2000, "67P")
+
+# Load the 67P mesh with pickle
+with open(mesh_path, "rb") as f:
+    mesh_points, mesh_triangles = pickle.load(f)
+    mesh_points = np.array(mesh_points) * 3126.6064453124995  # Scale to m
+    mesh_triangles = np.array(mesh_triangles)
+
+# Define local actor
+my_sat = ActorBuilder.get_actor_scaffold("my_sat", SpacecraftActor, epoch=epoch)
+
+# Set the custom propagator
+ActorBuilder.set_custom_orbit(my_sat, polyhedral_propagator, epoch)
+
+# Set the mesh
+ActorBuilder.set_central_body(my_sat, comet, (mesh_points, mesh_triangles))
+
+# Below computations will now use the mesh instead spherical approximations
+print(my_sat.is_in_eclipse())
+print(my_sat.is_in_line_of_sight(some_other_actor))
+
+# You could even specify a rotation of the central body.
+# Set a rotation period of 1 second around the z axis
+ActorBuilder.set_central_body(
+    my_sat,
+    comet,
+    (mesh_points, mesh_triangles),
+    rotation_declination=90,
+    rotation_right_ascension=0,
+    rotation_period=1,
+)
+
+```
+
+This is particularly useful if you want to use a central body that is not included in pykep or if you want to use a central body that is not a planet (e.g. an asteroid).
+
+N.B. `get_altitude` computes the altitude above [0,0,0] in the central body's frame, thus is not affected by the central body's rotation or mesh.
+N.B. #2 Any custom central body still has to orbit the Sun for PASEOS to function correctly.
 
 ### Simulation Settings
 
@@ -1076,28 +1133,28 @@ print(local_actor.get_custom_property("channel_bandwidth"))
 
 Description of the physical model parameters and default values in PASEOS with indications on sensitivity of parameters and suggested ranges.
 
-| Name                              | Datatype | Description                                                                 | Default    | Suggested Range | Sensitivity |
-|:---------------------------------:|:--------:|:---------------------------------------------------------------------------:|:----------:|:---------------:|:-----------:|
-| Battery Level [Ws]                | float    | Current battery level                                                       | -          | > 0             | high        |
-| Maximum Battery Level [Ws]        | float    | Maximum battery level                                                       | -          | > 0             | high        |
-| Charging Rate [W]                 | float    | Charging rate of the battery                                                | -          | > 0             | high        |
-| Power Device Type                 | enum     | Type of power device. Can be either "SolarPanel" or "RTG"                   | SolarPanel | -               | medium      |
-| Data Corruption Events [Hz]       | float    | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) | -          | >= 0            | low         |
-| Restart Events [Hz]               | float    | Rate of device restart being triggered                                      | -          | >= 0            | medium      |
-| Failure Events [Hz]               | float    | Rate of complete device failure due to a Single Event Latch-Up (SEL)        | -          | >= 0            | high        |
-| Mass [kg]                         | float    | Actor's mass                                                                | -          | > 0             | low         |
-| Initial Temperature [K]           | float    | Actor's initial temperature                                                 | -          | >= 0            | medium      |
-| Sun Absorptance                   | float    | Actor's absorptance of solar light                                          | -          | [0,1]           | high        |
-| Infrared Absorptance              | float    | Actor's absportance of infrared light                                       | -          | [0,1]           | medium      |
-| Sun-Facing Area [$m^2$]           | float    | Actor's area facing the sun                                                 | -          | >= 0            | high        |
-| Central Body-Facing Area [$m^2$]  | float    | Actor's area facing central body                                            | -          | >= 0            | medium      |
-| Emissive Area [$m^2$]             | float    | Actor's area emitting (radiating) heat                                      | -          | >= 0            | high        |
-| Thermal Capacity [$J / (kg * K)$] | float    | Actor's thermal capacity                                                    | -          | >= 0            | low         |
-| Body Solar Irradiance [W]         | float    | Irradiance from the sun                                                     | 1360       | >= 0            | medium      |
-| Body Surface Temperature [K]      | float    | Central body surface temperature                                            | 288        | >= 0            | low         |
-| Body Emissivity                   | float    | Central body emissivity in infrared                                         | 0.6        | [0,1]           | medium      |
-| Body Reflectance                  | float    | Central body reflectance of sunlight                                        | 0.3        | [0,1]           | medium      |
-| Heat Conversion Ratio [-]         | float    | Conversion ratio for activities, 0 leads to know heat-up due to activity    | 0.5        | [0,1]           | high        |
+|               Name                | Datatype |                                 Description                                 |  Default   | Suggested Range | Sensitivity |
+| :-------------------------------: | :------: | :-------------------------------------------------------------------------: | :--------: | :-------------: | :---------: |
+|        Battery Level [Ws]         |  float   |                            Current battery level                            |     -      |       > 0       |    high     |
+|    Maximum Battery Level [Ws]     |  float   |                            Maximum battery level                            |     -      |       > 0       |    high     |
+|         Charging Rate [W]         |  float   |                        Charging rate of the battery                         |     -      |       > 0       |    high     |
+|         Power Device Type         |   enum   |          Type of power device. Can be either "SolarPanel" or "RTG"          | SolarPanel |        -        |   medium    |
+|    Data Corruption Events [Hz]    |  float   | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) |     -      |      >= 0       |     low     |
+|        Restart Events [Hz]        |  float   |                   Rate of device restart being triggered                    |     -      |      >= 0       |   medium    |
+|        Failure Events [Hz]        |  float   |    Rate of complete device failure due to a Single Event Latch-Up (SEL)     |     -      |      >= 0       |    high     |
+|             Mass [kg]             |  float   |                                Actor's mass                                 |     -      |       > 0       |     low     |
+|      Initial Temperature [K]      |  float   |                         Actor's initial temperature                         |     -      |      >= 0       |   medium    |
+|          Sun Absorptance          |  float   |                     Actor's absorptance of solar light                      |     -      |      [0,1]      |    high     |
+|       Infrared Absorptance        |  float   |                    Actor's absportance of infrared light                    |     -      |      [0,1]      |   medium    |
+|      Sun-Facing Area [$m^2$]      |  float   |                         Actor's area facing the sun                         |     -      |      >= 0       |    high     |
+| Central Body-Facing Area [$m^2$]  |  float   |                      Actor's area facing central body                       |     -      |      >= 0       |   medium    |
+|       Emissive Area [$m^2$]       |  float   |                   Actor's area emitting (radiating) heat                    |     -      |      >= 0       |    high     |
+| Thermal Capacity [$J / (kg * K)$] |  float   |                          Actor's thermal capacity                           |     -      |      >= 0       |     low     |
+|     Body Solar Irradiance [W]     |  float   |                           Irradiance from the sun                           |    1360    |      >= 0       |   medium    |
+|   Body Surface Temperature [K]    |  float   |                      Central body surface temperature                       |    288     |      >= 0       |     low     |
+|          Body Emissivity          |  float   |                     Central body emissivity in infrared                     |    0.6     |      [0,1]      |   medium    |
+|         Body Reflectance          |  float   |                    Central body reflectance of sunlight                     |    0.3     |      [0,1]      |   medium    |
+|     Heat Conversion Ratio [-]     |  float   |  Conversion ratio for activities, 0 leads to know heat-up due to activity   |    0.5     |      [0,1]      |    high     |
 
 
 ## Contributing
