@@ -48,8 +48,6 @@ def test_mesh_for_central_body():
     # Set the mesh and create some more satellites around 67P
     ActorBuilder.set_central_body(sat1, comet, (mesh_points, mesh_triangles))
 
-    sat1.get_position(epoch)
-
     sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, epoch=epoch)
     ActorBuilder.set_orbit(sat2, [-8000, 1e-8, 1e-8], [0, -2.0, 0], epoch, comet)
     ActorBuilder.set_central_body(sat2, comet, (mesh_points, mesh_triangles))

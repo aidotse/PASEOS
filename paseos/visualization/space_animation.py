@@ -28,6 +28,8 @@ class SpaceAnimation(Animation):
         """
         super().__init__(sim)
         logger.debug("Initializing animation")
+        self.comm_lines = []
+
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
         self._norm_coeff = self._local_actor._central_body._planet.radius
@@ -86,6 +88,7 @@ class SpaceAnimation(Animation):
             self._plot_actors()
             los_matrix = self._get_los_matrix(current_actors)
             self._plot_los(los_matrix)
+            self._plot_comm_lines()
 
             # Write text labels
             self.date_label = plt.annotate(
@@ -107,6 +110,35 @@ class SpaceAnimation(Animation):
             if filename is not None:
                 logger.debug("Saving figure to file " + filename)
                 plt.savefig(filename, dpi=300, bbox_inches="tight")
+
+    def _plot_comm_lines(self):
+        # Clear old
+        for idx in range(len(self.comm_lines)):
+            self.comm_lines[idx][0].set_visible(False)
+        del self.comm_lines
+        self.comm_lines = []
+
+        # Create lines between connected actors
+        for i in range(len(self.objects)):
+            for j in range(i + 1, len(self.objects)):
+                if isinstance(self.objects[i].actor, GroundstationActor) and isinstance(
+                    self.objects[j].actor, GroundstationActor
+                ):
+                    continue
+                elif self.objects[i].actor.is_in_line_of_sight(
+                    self.objects[j].actor, self.objects[i].actor.local_time
+                ):
+                    pos_i, pos_j = self.objects[i].positions, self.objects[j].positions
+                    if isinstance(pos_i[0], np.ndarray):
+                        pos_i = pos_i[-1]
+                        pos_j = pos_j[-1]
+                    x1x2 = [pos_i[0], pos_j[0]]
+                    y1y2 = [pos_i[1], pos_j[1]]
+                    z1z2 = [pos_i[2], pos_j[2]]
+
+                    self.comm_lines.append(
+                        self.ax_3d.plot3D(x1x2, y1y2, z1z2, "--", color="lightblue", zorder=10)
+                    )
 
     def _plot_central_body(self) -> None:
         """Plot the central object"""
@@ -364,6 +396,7 @@ class SpaceAnimation(Animation):
         # Update LOS heatmap
         current_actors = list(current_actors)
         los_matrix = self._get_los_matrix(current_actors)
+        self._plot_comm_lines()
         self._los_plot.set_data(los_matrix)
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
