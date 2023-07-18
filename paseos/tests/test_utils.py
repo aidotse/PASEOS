@@ -11,7 +11,11 @@ import pykep as pk
 
 
 def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):
-    """Sets up a instance of paseos with a satellite in orbit around Earth"""
+    """Sets up a instance of paseos with a satellite in orbit around Earth
+
+    Returns:
+        (paseos.PASEOS, SpacecraftActor, pk.planet): The simulation, the satellite and the central body
+    """
 
     # Set log level for tests low
     paseos.set_log_level("TRACE")
