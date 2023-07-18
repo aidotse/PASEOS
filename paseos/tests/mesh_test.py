@@ -23,9 +23,11 @@ M = 73.57 * pk.DEG2RAD
 # MU = 666.19868
 MU = 1e5
 
+plot = False
+
 
 def get_default_setup():
-    paseos.set_log_level("DEBUG")
+    paseos.set_log_level("INFO")
 
     # Create a planet object from pykep for 67P
     comet = pk.planet.keplerian(epoch, (a, e, i, W, w, M), pk.MU_SUN, MU, 2000, 2000, "67P")
@@ -110,7 +112,8 @@ def test_mesh_los():
     assert sat4.is_in_line_of_sight(sat6, epoch)
 
     # Write a plot to file, for debugging
-    # paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test.png")
+    if plot:
+        paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test.png")
 
     # Propagate for a bit, just to check we can
     sim.advance_time(600, 0)
@@ -127,11 +130,95 @@ def test_mesh_eclipse():
 
     assert not sat1.is_in_eclipse(epoch)
     assert sat1.battery_level_in_Ws == 500
-    # paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test_no_eclipse.png")
+    if plot:
+        paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test_no_eclipse.png")
 
     # Advance time and consume power we are generating
     sim.advance_time(2260, 10)
 
     assert sat1.is_in_eclipse()
     assert np.isclose(sat1.battery_level_in_Ws, 400)
-    # paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test_eclipse.png")
+    if plot:
+        paseos.plot(sim, paseos.PlotType.SpacePlot, "results/mesh_test_eclipse.png")
+
+
+def test_mesh_rotation():
+    sim, sat1, comet, mesh_points, mesh_triangles = get_default_setup()
+
+    # Set a rotation period of 1 second around the z axis
+    ActorBuilder.set_central_body(
+        sat1,
+        comet,
+        (mesh_points, mesh_triangles),
+        rotation_declination=90,
+        rotation_right_ascension=0,
+        rotation_period=1,
+    )
+
+    # Epochs after a quarter and half rotation
+    epoch_quarter = pk.epoch(epoch.mjd2000 + 0.25 * pk.SEC2DAY, "mjd2000")
+    epoch_half = pk.epoch(epoch.mjd2000 + 0.5 * pk.SEC2DAY, "mjd2000")
+
+    central_body = sat1.central_body
+
+    # NOTE the we move the points in the opposite direction of the rotation
+    # to avoid rotating the mesh
+    rotate_p = central_body._apply_rotation([1, 0, 0], epoch_quarter)
+    assert all(np.isclose(rotate_p, [0, -1, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 1, 0], epoch_quarter)
+    assert all(np.isclose(rotate_p, [1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, -1, 0], epoch_quarter)
+    assert all(np.isclose(rotate_p, [-1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 1, 0], epoch_half)
+    assert all(np.isclose(rotate_p, [0, -1, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([-1, 0, 0], epoch_half)
+    assert all(np.isclose(rotate_p, [1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 0, 1], epoch_quarter)
+    assert all(np.isclose(rotate_p, [0, 0, 1], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 0, -1], epoch_half)
+    assert all(np.isclose(rotate_p, [0, 0, -1], atol=1e-6))
+
+    # Set a rotation period of 2 second around the y axis
+    ActorBuilder.set_central_body(
+        sat1,
+        comet,
+        (mesh_points, mesh_triangles),
+        rotation_declination=0,
+        rotation_right_ascension=90,
+        rotation_period=2,
+    )
+
+    # Epochs after a quarter and half rotation
+    epoch_quarter = pk.epoch(epoch.mjd2000 + 0.5 * pk.SEC2DAY, "mjd2000")
+    epoch_half = pk.epoch(epoch.mjd2000 + 1 * pk.SEC2DAY, "mjd2000")
+
+    central_body = sat1.central_body
+
+    # NOTE the we move the points in the opposite direction of the rotation
+    # to avoid rotating the mesh
+    rotate_p = central_body._apply_rotation([1, 0, 0], epoch_quarter)
+    assert all(np.isclose(rotate_p, [0, 0, 1], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 0, -1], epoch_quarter)
+    assert all(np.isclose(rotate_p, [1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 0, 1], epoch_quarter)
+    assert all(np.isclose(rotate_p, [-1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 0, 1], epoch_half)
+    assert all(np.isclose(rotate_p, [0, 0, -1], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([-1, 0, 0], epoch_half)
+    assert all(np.isclose(rotate_p, [1, 0, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, 1, 0], epoch_quarter)
+    assert all(np.isclose(rotate_p, [0, 1, 0], atol=1e-6))
+
+    rotate_p = central_body._apply_rotation([0, -1, 0], epoch_half)
+    assert all(np.isclose(rotate_p, [0, -1, 0], atol=1e-6))
