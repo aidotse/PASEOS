@@ -14,7 +14,6 @@ def sphere_between_points(point_1, point_2, sphere: Sphere, plot=False) -> bool:
     Returns:
         bool: true if blocking line-of-sight.
     """
-
     # Compute line between points
     line_between_points = Line(
         point=point_1,
@@ -44,6 +43,7 @@ def sphere_between_points(point_1, point_2, sphere: Sphere, plot=False) -> bool:
                 p2.plotter(c="r", s=100),
             )
     except ValueError:
+        logger.trace("No intersections observed.")
         if plot:
             from skspatial.plotting import plot_3d
 

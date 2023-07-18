@@ -49,7 +49,7 @@ def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.
     assert (
         actor.central_body is not None
     ), f"Please set the central body on actor {actor} for line of sight computations."
-    actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
+    return not actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
 
 
 def _is_in_line_of_sight_ground_station_to_spacecraft(

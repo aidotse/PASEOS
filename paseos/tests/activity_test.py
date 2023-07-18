@@ -79,7 +79,7 @@ async def test_activity():
 @pytest.mark.asyncio
 async def test_running_two_activities():
     """This test ensures that you cannot run two activities at the same time."""
-    sim, sat1, earth = get_default_instance()
+    sim, _, _ = get_default_instance()
 
     # Declare two activities, one calls the other
     test_value = [0]
@@ -111,7 +111,7 @@ async def test_activity_constraints():
     Here we start a function that counts up until we stop charging our solar panels and then prints the value.
     """
 
-    sim, sat1, earth = get_default_instance()
+    sim, sat1, _ = get_default_instance()
     assert sat1.battery_level_in_Ws == 500
 
     # Out test case is a function that increments a value, genius.
