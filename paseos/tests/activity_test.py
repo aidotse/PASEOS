@@ -124,7 +124,7 @@ async def test_activity_constraints():
             args[0][0] += 1
             await asyncio.sleep(1.0)
 
-    # Constraint that becomes false once the actor has charge it's battery over 510
+    # Constraint that becomes false once the actor has charged it's battery over 510
     async def constraint(args):
         local_actor: SpacecraftActor = args[0]
         return local_actor.battery_level_in_Ws < 505
