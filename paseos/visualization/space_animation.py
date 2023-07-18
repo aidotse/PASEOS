@@ -104,7 +104,7 @@ class SpaceAnimation(Animation):
 
     def _plot_central_body(self) -> None:
         """Plot the central object as a sphere of radius 1"""
-        central_body = self._local_actor._central_body
+        central_body = self._local_actor._central_body._planet
         central_body.radius
 
         u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]

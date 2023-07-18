@@ -9,9 +9,11 @@ from .actors.base_actor import BaseActor
 from .actors.actor_builder import ActorBuilder
 from .actors.ground_station_actor import GroundstationActor
 from .actors.spacecraft_actor import SpacecraftActor
+from .central_body.central_body import CentralBody
 from .communication.get_communication_window import get_communication_window
 from .communication.find_next_window import find_next_window
 from .power.power_device_type import PowerDeviceType
+from .utils.reference_frame import ReferenceFrame
 from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
 
@@ -56,6 +58,7 @@ def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoc
 __all__ = [
     "ActorBuilder",
     "BaseActor",
+    "CentralBody",
     "find_next_window",
     "get_communication_window",
     "GroundstationActor",
@@ -64,6 +67,7 @@ __all__ = [
     "plot",
     "PlotType",
     "PowerDeviceType",
+    "ReferenceFrame",
     "set_log_level",
     "SpacecraftActor",
 ]

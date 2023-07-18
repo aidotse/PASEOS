@@ -11,6 +11,7 @@ import numpy as np
 from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.central_body.sphere_between_points import sphere_between_points
 from paseos.central_body.mesh_between_points import mesh_between_points
+from paseos.utils.reference_frame import ReferenceFrame
 
 
 class CentralBody:
@@ -48,7 +49,7 @@ class CentralBody:
             planet (pk.planet): The planet object from pykep.
             initial_epoch (pk.epoch): The initial epoch of the simulation (important rotation computation).
             mesh (tuple, optional): A tuple containing the vertices and faces of the mesh. Defaults to None.
-            encompassing_sphere (float, optional): The radius of the encompassing sphere. Defaults to None.
+            encompassing_sphere_radius (float, optional): The radius of the encompassing sphere. Defaults to None.
             rotation_declination (float, optional): The declination of the rotation axis. Defaults to None.
             rotation_right_ascension (float, optional): The right ascension of the rotation axis. Defaults to None.
             rotation_period (float, optional): The rotation period of the body. Defaults to None.
@@ -102,7 +103,9 @@ class CentralBody:
         r_sat_heliocentric = r_central_body_heliocentric + r_sat_central_body_frame
         logger.trace("r_sat_heliocentric is" + str(r_sat_heliocentric))
 
-        return self.is_between_points([0, 0, 0], r_sat_heliocentric, t, plot)
+        return self.is_between_points(
+            [0, 0, 0], r_sat_heliocentric, t, ReferenceFrame.Heliocentric, plot
+        )
 
     def is_between_actors(
         self, actor_1: SpacecraftActor, actor_2: SpacecraftActor, t: pk.epoch, plot=False
@@ -124,13 +127,21 @@ class CentralBody:
 
         return self.is_between_points(pos_1[0], pos_2[0], t, plot)
 
-    def is_between_points(self, point_1, point_2, t: pk.epoch, plot: bool = False) -> bool:
+    def is_between_points(
+        self,
+        point_1,
+        point_2,
+        t: pk.epoch,
+        reference_frame: ReferenceFrame = ReferenceFrame.CentralBodyInertial,
+        plot: bool = False,
+    ) -> bool:
         """Checks whether the central body is between the two points.
 
         Args:
             point_1 (np.array): First point
             point_2 (np.array): Second point
             t (pk.epoch): Epoch at which to check
+            reference_frame (ReferenceFrame, optional): Reference frame of the points. Defaults to ReferenceFrame.CentralBodyInertial.
             plot (bool): Whether to plot a diagram illustrating the positions.
 
         Returns:
@@ -140,6 +151,11 @@ class CentralBody:
 
         point_1 = np.array(point_1)
         point_2 = np.array(point_2)
+
+        # Convert to CentralBodyInertial reference frame ()
+        if reference_frame == ReferenceFrame.Heliocentric:
+            point_1 = point_1 - np.array(self._planet.eph(t)[0])
+            point_2 = point_2 - np.array(self._planet.eph(t)[0])
 
         if self._encompassing_sphere is not None:
             return sphere_between_points(
