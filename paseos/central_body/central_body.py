@@ -4,11 +4,10 @@ from math import radians, pi
 
 from loguru import logger
 from pyquaternion import Quaternion
-from skspatial.objects import Sphere, LineSegment, Line, Point
+from skspatial.objects import Sphere
 import pykep as pk
 import numpy as np
 
-from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.central_body.sphere_between_points import sphere_between_points
 from paseos.central_body.mesh_between_points import mesh_between_points
 from paseos.utils.reference_frame import ReferenceFrame
@@ -70,17 +69,21 @@ class CentralBody:
                     "You provided rotation parameters but no mesh. This will result in a non-rotating body."
                 )
 
-            # Setup spin axis of the body
-            # Rotate spin axis according to declination
-            q_dec = Quaternion(axis=[1, 0, 0], angle=radians(rotation_declination))
-            # Rotate spin axis accordining to right ascension
-            q_ra = Quaternion(axis=[0, 0, 1], angle=radians(rotation_right_ascension))
-            # Composite rotation of q1 then q2 expressed as standard multiplication
-            q_axis = q_dec * q_ra
-            self._rotation_axis = q_axis.rotate([0, 0, 1])
+            # Convert to rad
+            rotation_declination = radians(rotation_declination)
+            rotation_right_ascension = radians(rotation_right_ascension)
+            # Define the rotation axis as a unit vector
+            self._rotation_axis = np.array(
+                [
+                    np.cos(rotation_declination) * np.cos(rotation_right_ascension),
+                    np.cos(rotation_declination) * np.sin(rotation_right_ascension),
+                    np.sin(rotation_declination),
+                ]
+            )
+
             self._rotation_angular_velocity = 2.0 * pi / rotation_period
 
-    def blocks_sun(self, actor: SpacecraftActor, t: pk.epoch, plot=False) -> bool:
+    def blocks_sun(self, actor, t: pk.epoch, plot=False) -> bool:
         """Checks whether the central body blocks the sun for the given actor.
 
         Args:
@@ -107,9 +110,7 @@ class CentralBody:
             [0, 0, 0], r_sat_heliocentric, t, ReferenceFrame.Heliocentric, plot
         )
 
-    def is_between_actors(
-        self, actor_1: SpacecraftActor, actor_2: SpacecraftActor, t: pk.epoch, plot=False
-    ) -> bool:
+    def is_between_actors(self, actor_1, actor_2, t: pk.epoch, plot=False) -> bool:
         """Checks whether the central body is between the two actors.
 
         Args:
