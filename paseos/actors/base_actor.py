@@ -7,6 +7,7 @@ import numpy as np
 from dotmap import DotMap
 
 from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from ..central_body.central_body import CentralBody
 
 
 class BaseActor(ABC):
@@ -88,7 +89,7 @@ class BaseActor(ABC):
         return self._custom_properties.toDict()
 
     @property
-    def central_body(self):
+    def central_body(self) -> CentralBody:
         """Returns the central body this actor is orbiting."""
         return self._central_body
 
