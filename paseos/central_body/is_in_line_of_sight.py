@@ -149,6 +149,8 @@ def is_in_line_of_sight(
     """
 
     # Can't import types given circular import then, thus check with names
+    # Delegate call to correct function, ground stations are done with skyfield
+    # and only work with Earth as central body for now.
     if (
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "SpacecraftActor"
@@ -164,8 +166,8 @@ def is_in_line_of_sight(
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
         assert (
-            other_actor.central_body is not None
-        ), f"Please set the central body on actor {other_actor} for line of sight computations."
+            other_actor.central_body.planet.name.lower() == "earth"
+        ), f"Ground stations can only be used with Earth for now (not {other_actor.central_body.planet.name})."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -175,9 +177,9 @@ def is_in_line_of_sight(
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
-        assert (
-            actor.central_body is not None
-        ), f"Please set the central body on actor {actor} for line of sight computations."
+        assert actor.central_body is not None, (
+            other_actor.central_body.planet.name.lower() == "earth"
+        )
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )

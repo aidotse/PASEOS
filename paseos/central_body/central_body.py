@@ -83,6 +83,10 @@ class CentralBody:
 
             self._rotation_angular_velocity = 2.0 * pi / rotation_period
 
+    @property
+    def planet(self):
+        return self._planet
+
     def blocks_sun(self, actor, t: pk.epoch, plot=False) -> bool:
         """Checks whether the central body blocks the sun for the given actor.
 
