@@ -524,7 +524,7 @@ comet = pk.planet.keplerian(epoch, elements, pk.MU_SUN, 666.19868, 2000, 2000, "
 # Load the 67P mesh with pickle
 with open(mesh_path, "rb") as f:
     mesh_points, mesh_triangles = pickle.load(f)
-    mesh_points = np.array(mesh_points) * 3126.6064453124995  # Scale to m
+    mesh_points = np.array(mesh_points)
     mesh_triangles = np.array(mesh_triangles)
 
 # Define local actor
