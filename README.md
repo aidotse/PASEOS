@@ -504,7 +504,28 @@ print(local_actor.get_custom_property("altitude"))
 
 #### Custom Central Bodies
 
-In most examples here you will see Earth via the pykep API being used as a spherical, central body for Keplerian orbits. However, you can also use any other central body defined via a mesh. This is especially useful in conjunction with [custom propagators](#custom-propagators). To use a custom central body, you need to define a mesh and add it to the simulation configuration. The following example shows how to do this for the comet 67P/Churyumov–Gerasimenko.
+In most examples here you will see Earth via the pykep API being used as a spherical, central body for Keplerian orbits. For Keplerian orbits around spherical bodies, you can simply use pykep with an type of [pykep planet](https://esa.github.io/pykep/documentation/planets.html) just as the above examples used Earth. E.g.
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+# Define an actor of type SpacecraftActor of name mySat
+sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
+                                       actor_type=SpacecraftActor,
+                                       epoch=pk.epoch(0))
+
+# Define the central body as Mars by using pykep APIs.
+mars = pk.planet.jpl_lp("mars")
+
+# Let's set the orbit of sat_actor.
+ActorBuilder.set_orbit(actor=sat_actor,
+                       position=[10000000, 1, 1],
+                       velocity=[1, 1000.0, 1],
+                       epoch=pk.epoch(0), 
+                       central_body=mars)
+```
+
+However, you can also use any other central body defined via a mesh. This is especially useful in conjunction with [custom propagators](#custom-propagators). To use a custom central body, you need to define a mesh and add it to the simulation configuration. The following example shows how to do this for the comet 67P/Churyumov–Gerasimenko.
 
 We assume `polyhedral_propagator` to be a custom propagator as explained in [Custom Propagators](#custom-propagators).
 
