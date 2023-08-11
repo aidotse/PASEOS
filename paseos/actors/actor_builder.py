@@ -548,7 +548,7 @@ class ActorBuilder:
             )
 
         # Check that the update function returns a value of the same type as the initial value
-        if type(new_value) != type(initial_value):
+        if type(new_value) is not type(initial_value):
             # remove property if this failed
             del actor._custom_properties[property_name]
             raise TypeError(
