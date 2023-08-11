@@ -6,8 +6,8 @@ import pykep as pk
 import numpy as np
 from dotmap import DotMap
 
-from ..communication.is_in_line_of_sight import is_in_line_of_sight
-from ..power.is_in_eclipse import is_in_eclipse
+from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from ..central_body.central_body import CentralBody
 
 
 class BaseActor(ABC):
@@ -30,9 +30,6 @@ class BaseActor(ABC):
 
     # Position if not defined by orbital parameters
     _position = None
-
-    # Is specified by user / paseos instance but required for line of sight computations
-    _central_body_sphere = None
 
     # Central body this actor is orbiting
     _central_body = None
@@ -91,6 +88,11 @@ class BaseActor(ABC):
         """Returns a dictionary of custom properties for this actor."""
         return self._custom_properties.toDict()
 
+    @property
+    def central_body(self) -> CentralBody:
+        """Returns the central body this actor is orbiting."""
+        return self._central_body
+
     def set_custom_property(self, property_name: str, value: Any) -> None:
         """Sets the value of the specified custom property.
 
@@ -118,6 +120,15 @@ class BaseActor(ABC):
             raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         return self._custom_properties_update_function[property_name]
+
+    @property
+    def has_central_body(self) -> bool:
+        """Returns true if actor has a central body, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_central_body") and self._central_body is not None
 
     @property
     def has_power_model(self) -> bool:
@@ -199,14 +210,6 @@ class BaseActor(ABC):
 
     def __str__(self):
         return self.name
-
-    def set_central_body_shape(self, sphere) -> None:
-        """Sets the central body of this actor.
-
-        Args:
-            sphere (skspatial.Sphere): Sphere blocking line of sight.
-        """
-        self._central_body_sphere = sphere
 
     def set_time(self, t: pk.epoch):
         """Updates the local time of the actor.
@@ -358,6 +361,6 @@ class BaseActor(ABC):
         if t.mjd2000 == self._time_of_previous_eclipse_status:
             return self._previous_eclipse_status
         else:
-            self._previous_eclipse_status = is_in_eclipse(self, self._central_body, t)
+            self._previous_eclipse_status = self._central_body.blocks_sun(self, t)
             self._time_of_last_eclipse_status = t.mjd2000
         return self._previous_eclipse_status

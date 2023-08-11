@@ -3,11 +3,9 @@ import sys
 
 sys.path.append("../..")
 
-from skspatial.objects import Sphere
-
 from paseos import ActorBuilder, SpacecraftActor
 from paseos.visualization.space_animation import SpaceAnimation
-from test_utils import get_default_instance, _PASEOS_TESTS_EARTH_RADIUS
+from test_utils import get_default_instance
 import pykep as pk
 
 
@@ -18,7 +16,6 @@ def test_animation():
     sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat2, [0, 10000000, 0], [0, 0, 8000.0], pk.epoch(0), earth)
     ActorBuilder.set_power_devices(sat2, 5000, 10000, 1)
-    sat2.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
     sim.add_known_actor(sat2)
     anim = SpaceAnimation(sim)
 

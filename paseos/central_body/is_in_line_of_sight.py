@@ -2,11 +2,9 @@ from loguru import logger
 import pykep as pk
 import os
 import numpy as np
-from skspatial.objects import Line
 from skyfield.units import AU_M
 from skyfield.api import load
 from skyfield.vectorlib import VectorFunction
-
 
 _SKYFIELD_EARTH_PATH = os.path.join(os.path.dirname(__file__) + "/../resources/", "de421.bsp")
 # Skyfield Earth, in the future we may not always want to load this.
@@ -47,43 +45,11 @@ def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.
     Returns:
         bool: true if in line-of-sight.
     """
-    logger.debug("Computing line of sight between actors: " + str(actor) + " " + str(other_actor))
-    my_pos, _ = actor.get_position_velocity(epoch)
-    other_actor_pos, _ = other_actor.get_position_velocity(epoch)
-
-    logger.trace(
-        "Computed positions for actors are " + str(my_pos) + " and " + str(other_actor_pos)
-    )
-    line_between_actors = Line(
-        my_pos,
-        [
-            other_actor_pos[0] - my_pos[0],
-            other_actor_pos[1] - my_pos[1],
-            other_actor_pos[2] - my_pos[2],
-        ],
-    )
-    if plot:
-        from skspatial.plotting import plot_3d
-
-    # Currently skspatial throws a ValueError if there is no intersection so we have to use this rather ugly way.
-    try:
-        p1, p2 = actor._central_body_sphere.intersect_line(line_between_actors)
-        logger.trace("Intersections observed at " + str(p1) + " and " + str(p2))
-        if plot:
-            plot_3d(
-                line_between_actors.plotter(t_1=0, t_2=1, c="k"),
-                actor._central_body_sphere.plotter(alpha=0.2),
-                p1.plotter(c="r", s=100),
-                p2.plotter(c="r", s=100),
-            )
-    except ValueError:
-        if plot:
-            plot_3d(
-                line_between_actors.plotter(t_1=0, t_2=1, c="k"),
-                actor._central_body_sphere.plotter(alpha=0.2),
-            )
-        return True
-    return False
+    # Check actor has central body
+    assert (
+        actor.central_body is not None
+    ), f"Please set the central body on actor {actor} for line of sight computations."
+    return not actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
 
 
 def _is_in_line_of_sight_ground_station_to_spacecraft(
@@ -183,13 +149,15 @@ def is_in_line_of_sight(
     """
 
     # Can't import types given circular import then, thus check with names
+    # Delegate call to correct function, ground stations are done with skyfield
+    # and only work with Earth as central body for now.
     if (
         type(actor).__name__ == "SpacecraftActor"
         and type(other_actor).__name__ == "SpacecraftActor"
     ):
         assert (
-            actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {actor} for line of sight computations."
+            actor.central_body is not None
+        ), f"Please set the central body on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch, plot)
     elif (
         type(actor).__name__ == "GroundstationActor"
@@ -198,8 +166,8 @@ def is_in_line_of_sight(
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
         assert (
-            other_actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {other_actor} for line of sight computations."
+            other_actor.central_body.planet.name.lower() == "earth"
+        ), f"Ground stations can only be used with Earth for now (not {other_actor.central_body.planet.name})."
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
@@ -209,9 +177,9 @@ def is_in_line_of_sight(
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
-        assert (
-            actor._central_body_sphere is not None
-        ), f"Please set the central sphere on actor {actor} for line of sight computations."
+        assert actor.central_body is not None, (
+            other_actor.central_body.planet.name.lower() == "earth"
+        )
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )

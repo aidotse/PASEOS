@@ -1,10 +1,4 @@
 """Test to check the communication function(s)"""
-import sys
-
-sys.path.append("../..")
-
-from skspatial.objects import Sphere
-
 from paseos import (
     SpacecraftActor,
     GroundstationActor,
@@ -15,12 +9,6 @@ from paseos import (
 
 import pykep as pk
 import numpy as np
-
-from test_utils import _PASEOS_TESTS_EARTH_RADIUS
-
-
-def from_epoch_to_s(epoch: pk.epoch):
-    return (epoch.mjd2000 - pk.epoch(0).mjd2000) / pk.SEC2DAY
 
 
 def setup_sentinel_example(t0):
@@ -44,8 +32,6 @@ def setup_sentinel_example(t0):
         epoch=t0,
         central_body=earth,
     )
-
-    sentinel2B.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
 
     # Define ground station
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
@@ -125,6 +111,7 @@ def test_communication_link_sat_to_ground():
 def test_communication_link_sat_to_sat():
     # create satellites where sat1 and sat2 starts from the same point but move along different orbit.
     # At t=1470s they will not be in line of sight anymore.
+
     earth = pk.planet.jpl_lp("earth")
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
@@ -144,9 +131,6 @@ def test_communication_link_sat_to_sat():
         central_body=earth,
     )
 
-    sat1.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
-    sat2.set_central_body_shape(Sphere([0, 0, 0], _PASEOS_TESTS_EARTH_RADIUS))
-
     # Add communication link
     ActorBuilder.add_comm_device(sat1, device_name="link1", bandwidth_in_kbps=1)
 
@@ -164,7 +148,7 @@ def test_communication_link_sat_to_sat():
         data_to_send_in_b=10000,
     )
 
-    assert (from_epoch_to_s(communication_window_end_time) >= 10) and (
+    assert (communication_window_end_time.mjd2000 * pk.DAY2SEC >= 10) and (
         transmitted_data_in_b == 10000
     )
 
@@ -182,9 +166,8 @@ def test_communication_link_sat_to_sat():
         data_to_send_in_b=10000,
     )
 
-    assert (transmitted_data_in_b == 0) and (
-        from_epoch_to_s(communication_window_end_time)
-        == from_epoch_to_s(communication_window_start_time)
+    assert (transmitted_data_in_b == 0) and np.isclose(
+        communication_window_end_time.mjd2000, communication_window_start_time.mjd2000
     )
 
 

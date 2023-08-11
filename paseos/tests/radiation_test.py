@@ -11,7 +11,7 @@ import paseos
 
 
 def test_radiation_model():
-    paseos.set_log_level("TRACE")
+    paseos.set_log_level("INFO")
 
     # Has to be seeded for reproducibility
     np.random.seed(42)

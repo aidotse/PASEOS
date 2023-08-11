@@ -12,12 +12,13 @@ class PlotType(Enum):
     SpacePlot = 1
 
 
-def plot(sim: PASEOS, plot_type: PlotType):
+def plot(sim: PASEOS, plot_type: PlotType, filename: str = None):
     """Creates the animation object
 
     Args:
         sim (PASEOS): simulation object
         plot_type (PlotType): enum deciding what kind of plot object to be made
+        filename (str, optional): filename to save the animation to. Defaults to None.
 
     Raises:
         ValueError: supplied plot type not supported
@@ -26,6 +27,6 @@ def plot(sim: PASEOS, plot_type: PlotType):
         Animation: Animation object
     """
     if plot_type is PlotType.SpacePlot:
-        return SpaceAnimation(sim)
+        return SpaceAnimation(sim, filename=filename)
     else:
         raise ValueError(f"PlotType {plot_type} not known. Available are {[e for e in PlotType]}")

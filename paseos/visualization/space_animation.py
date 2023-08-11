@@ -18,23 +18,24 @@ from paseos.visualization.animation import Animation
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    def __init__(self, sim: PASEOS, n_trajectory: int = 32) -> None:
+    def __init__(self, sim: PASEOS, n_trajectory: int = 32, filename: str = None) -> None:
         """Initialize the space animation object
 
         Args:
             sim (PASEOS): simulation object
             n_trajectory (int): number of samples in tail of actor
+            filename (str, optional): filename to save the animation to. Defaults to None.
         """
         super().__init__(sim)
         logger.debug("Initializing animation")
+        self.comm_lines = []
+
         # Create list of objects to be plotted
         current_actors = self._make_actor_list(sim)
-        self._norm_coeff = self._local_actor._central_body.radius
 
         for known_actor in current_actors:
-            pos = known_actor.get_position(self._local_actor.local_time)
-            pos_norm = [x / self._norm_coeff for x in pos]
-            self.objects.append(DotMap(actor=known_actor, positions=np.array(pos_norm)))
+            pos = np.array(known_actor.get_position(self._local_actor.local_time))
+            self.objects.append(DotMap(actor=known_actor, positions=pos))
 
         with plt.style.context("dark_background"):
             # Create figure for 3d animation
@@ -84,6 +85,7 @@ class SpaceAnimation(Animation):
             self._plot_actors()
             los_matrix = self._get_los_matrix(current_actors)
             self._plot_los(los_matrix)
+            self._plot_comm_lines()
 
             # Write text labels
             self.date_label = plt.annotate(
@@ -102,16 +104,64 @@ class SpaceAnimation(Animation):
             plt.show()
             plt.pause(0.0001)
 
-    def _plot_central_body(self) -> None:
-        """Plot the central object as a sphere of radius 1"""
-        central_body = self._local_actor._central_body
-        central_body.radius
+            if filename is not None:
+                logger.debug("Saving figure to file " + filename)
+                plt.savefig(filename, dpi=300, bbox_inches="tight")
 
-        u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
-        x = np.cos(u) * np.sin(v)
-        y = np.sin(u) * np.sin(v)
-        z = np.cos(v)
-        self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
+    def _plot_comm_lines(self):
+        # Clear old
+        for idx in range(len(self.comm_lines)):
+            self.comm_lines[idx][0].set_visible(False)
+        del self.comm_lines
+        self.comm_lines = []
+
+        # Create lines between connected actors
+        for i in range(len(self.objects)):
+            for j in range(i + 1, len(self.objects)):
+                if isinstance(self.objects[i].actor, GroundstationActor) and isinstance(
+                    self.objects[j].actor, GroundstationActor
+                ):
+                    continue
+                elif self.objects[i].actor.is_in_line_of_sight(
+                    self.objects[j].actor, self.objects[i].actor.local_time
+                ):
+                    pos_i, pos_j = self.objects[i].positions, self.objects[j].positions
+                    if isinstance(pos_i[0], np.ndarray):
+                        pos_i = pos_i[-1]
+                        pos_j = pos_j[-1]
+                    x1x2 = [pos_i[0], pos_j[0]]
+                    y1y2 = [pos_i[1], pos_j[1]]
+                    z1z2 = [pos_i[2], pos_j[2]]
+
+                    self.comm_lines.append(
+                        self.ax_3d.plot3D(
+                            x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10
+                        )
+                    )
+
+    def _plot_central_body(self) -> None:
+        """Plot the central object"""
+
+        # Plot mesh if available
+        if self._local_actor._central_body._mesh is not None:
+            mesh_points, mesh_triangles = self._local_actor._central_body._mesh
+            self.ax_3d.plot_trisurf(
+                mesh_points[:, 0],
+                mesh_points[:, 1],
+                mesh_points[:, 2],
+                triangles=mesh_triangles,
+                edgecolor=[[0.75, 0.75, 0.75]],
+                linewidth=0.2,
+                alpha=0.0,
+                shade=False,
+            )
+        else:
+            radius = self._local_actor._central_body._planet.radius
+            u, v = np.mgrid[0 : 2 * np.pi : 30j, 0 : np.pi : 20j]
+            x = np.cos(u) * np.sin(v) * radius
+            y = np.sin(u) * np.sin(v) * radius
+            z = np.cos(v) * radius
+            self.ax_3d.plot_surface(x, y, z, color="blue", alpha=0.5)
 
     def _get_los_matrix(self, current_actors: List[BaseActor]) -> np.ndarray:
         """Compute line-of-sight (LOS) between all actors
@@ -153,11 +203,12 @@ class SpaceAnimation(Animation):
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
             if actor.has_thermal_model:
-                info_str += f"\nTemperature: {actor.temperature_in_K:.2f}K,{actor.temperature_in_K-273.15:.2f}C"
+                info_str += f"\nTemp.: {actor.temperature_in_K-273.15:.2f}C"
 
-            for name in actor.communication_devices.keys():
-                info = actor.communication_devices[name]
-                info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
+            # Disabled for now as fixed values atm
+            # for name in actor.communication_devices.keys():
+            #     info = actor.communication_devices[name]
+            #     info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
         else:
             raise NotImplementedError(
                 "SpacePlot is currently not implemented for actor type" + type(actor)
@@ -194,9 +245,9 @@ class SpaceAnimation(Animation):
             data = obj.positions
             if data.ndim == 1:
                 data = data[..., np.newaxis].T
+            logger.trace(f"Position for object: {data}")
             n_points = np.minimum(data.shape[0], self.n_trajectory)
 
-            logger.trace(f"Position for object: {data}")
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
                 if isinstance(obj.actor, SpacecraftActor) or isinstance(
@@ -311,16 +362,15 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos = known_actor.get_position(self._local_actor.local_time)
-                    pos_norm = [x / self._norm_coeff for x in pos]
+                    pos = np.array(known_actor.get_position(self._local_actor.local_time))
                     if "positions" in obj:
                         if obj.positions.shape[0] > self.n_trajectory:
                             obj.positions = np.roll(obj.positions, shift=-1, axis=0)
-                            obj.positions[-1, :] = pos_norm
+                            obj.positions[-1, :] = pos
                         else:
-                            obj.positions = np.vstack((obj.positions, pos_norm))
+                            obj.positions = np.vstack((obj.positions, pos))
                     else:
-                        obj.positions = np.array(pos_norm)
+                        obj.positions = np.array(pos)
         self._plot_actors()
 
         # Step through trajectories to find max and min values in each direction
@@ -345,6 +395,7 @@ class SpaceAnimation(Animation):
         # Update LOS heatmap
         current_actors = list(current_actors)
         los_matrix = self._get_los_matrix(current_actors)
+        self._plot_comm_lines()
         self._los_plot.set_data(los_matrix)
         xaxis = np.arange(len(current_actors))
         self.ax_los.set_xticks(xaxis)
