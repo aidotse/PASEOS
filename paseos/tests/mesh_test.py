@@ -35,7 +35,9 @@ def get_default_setup():
     # Load the 67P mesh with pickle
     with open(mesh_path, "rb") as f:
         mesh_points, mesh_triangles = pickle.load(f)
-        mesh_points = np.array(mesh_points) * 3126.6064453124995  # Scale to m
+        # The mesh file for the test is normalized to -1,1
+        # Thus we convert back to meters
+        mesh_points = np.array(mesh_points) * 3126.6064453124995
         mesh_triangles = np.array(mesh_triangles)
 
     # Define local actor
