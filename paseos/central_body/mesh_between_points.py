@@ -38,8 +38,9 @@ def mesh_between_points(
     # Check that the computed intersection is actually on the linesegment not infinite line
     if intersect_point is None:
         return False
-     # True if intersection and between the points, otherwise not on the line segment
-    return np.linalg.norm(intersect_point - point_1) < np.linalg.norm(point_2 - point_1):
+    # True if intersection and between the points, otherwise not on the line segment
+    return np.linalg.norm(intersect_point - point_1) < np.linalg.norm(point_2 - point_1)
+
 
 def _rays_triangle_intersect(ray_o, ray_d, v0, v1, v2):
     """Möller-Trumbore intersection algorithm (vectorized).
