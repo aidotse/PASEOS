@@ -30,11 +30,13 @@ setup(
         "Topic :: Scientific/Engineering :: Mathematics",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     packages=[
         "paseos",
         "paseos.activities",
         "paseos.actors",
+        "paseos.central_body",
         "paseos.communication",
         "paseos.power",
         "paseos.radiation",
@@ -42,7 +44,7 @@ setup(
         "paseos.utils",
         "paseos.visualization",
     ],
-    python_requires=">=3.8,<3.9",
+    python_requires=">=3.8",
     project_urls={
         "Source": "https://github.com/aidotse/paseos/",
     },
