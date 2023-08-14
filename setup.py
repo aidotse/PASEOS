@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="paseos",
-    version="0.1.3",
+    version="0.2.0",
     description="A package which simulates the space environment for operating multiple spacecraft.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
