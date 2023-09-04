@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="paseos",
-    version="0.1.3",
+    version="0.2.0",
     description="A package which simulates the space environment for operating multiple spacecraft.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -30,11 +30,13 @@ setup(
         "Topic :: Scientific/Engineering :: Mathematics",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     packages=[
         "paseos",
         "paseos.activities",
         "paseos.actors",
+        "paseos.central_body",
         "paseos.communication",
         "paseos.power",
         "paseos.radiation",
@@ -42,7 +44,7 @@ setup(
         "paseos.utils",
         "paseos.visualization",
     ],
-    python_requires=">=3.8,<3.9",
+    python_requires=">=3.8",
     project_urls={
         "Source": "https://github.com/aidotse/paseos/",
     },
