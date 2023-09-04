@@ -3,7 +3,6 @@ from loguru import logger
 import pykep as pk
 
 from paseos.power.power_device_type import PowerDeviceType
-from paseos.power.is_in_eclipse import is_in_eclipse
 
 
 def charge(
@@ -37,18 +36,14 @@ def charge(
     # If solar panels are used, check for eclipse
     if actor.power_device_type == PowerDeviceType.SolarPanel:
         # Check for eclipse at start / end
-        if is_in_eclipse(
-            actor, central_body=actor._central_body, t=actor.local_time
-        ) or is_in_eclipse(actor, central_body=actor._central_body, t=t1):
+        if actor.is_in_eclipse() or actor.is_in_eclipse(t1):
             logger.debug("Actor is in eclipse, not charging.")
             return actor
 
     # Apply specified charging model
     if model == "simple":
         actor._battery_level_in_Ws += actor._charging_rate_in_W * charging_time_in_s
-        actor._battery_level_in_Ws = min(
-            actor.battery_level_in_Ws, actor._max_battery_level_in_Ws
-        )
+        actor._battery_level_in_Ws = min(actor.battery_level_in_Ws, actor._max_battery_level_in_Ws)
         return actor
     else:
         raise NotImplementedError("Unknown charging model " + model)

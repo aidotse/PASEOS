@@ -4,6 +4,7 @@
 ![GitHub](https://img.shields.io/github/license/aidotse/PASEOS?style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/aidotse/PASEOS?style=flat-square)
 ![GitHub issues](https://img.shields.io/github/issues/aidotse/PASEOS?style=flat-square) ![GitHub pull requests](https://img.shields.io/github/issues-pr/aidotse/PASEOS?style=flat-square)
+![Conda](https://img.shields.io/conda/dn/conda-forge/paseos?style=flat-square) ![PyPI - Downloads](https://img.shields.io/pypi/dm/paseos?style=flat-square)
 
 ![Alt Text](resources/images/sat_gif.gif)
 
@@ -40,6 +41,8 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#how-to-add-a-power-device">How to add a power device</a></li>
     <li><a href="#thermal-modelling">Thermal Modelling</a></li>
     <li><a href="#radiation-modelling">Radiation Modelling</a></li>
+    <li><a href="#custom-modelling">Custom Modelling</a></li>
+    <li><a href="#simulation-settings">Custom Central Bodies</a></li>
     </ul>
     <li><a href="#simulation-settings">Simulation Settings</a></li>
     <ul>
@@ -61,9 +64,17 @@ Disclaimer: This project is currently under development. Use at your own risk.
     <li><a href="#monitoring-simulation-status">Monitoring Simulation Status</a></li>
     <li><a href="#writing-simulation-results-to-a-file">Writing Simulation Results to a File</a></li>
     </ul>
+    <li><a href="#wrapping-other-software-and-tools">Wrapping Other Software and Tools</a></li>
+    <ul>
+    <li><a href="#via-activities">Via Activities</a></li>
+    <li><a href="#via-constraint-functions">Via Constraint Functions</a></li>
+    <li><a href="#via-custom-properties">Via Custom Properties</a></li>
     </ul>
-    <li><a href="#system-design-of-paseos">System Design of PASEOS</a></li>
+    </ul>
     <li><a href="#glossary">Glossary</a></li>
+    <ul>
+    <li><a href="#physical-model-parameters">Physical Model Parameters</a></li>
+    </ul>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -89,9 +100,15 @@ PASEOS allows simulating the effect of onboard and operational constraints on us
 
 ### pip / conda
 
-`conda` support will follow in the near future.
+The recommended way to install PASEOS is via [conda](https://docs.conda.io/en/latest/) / [mamba](https://github.com/conda-forge/miniforge#mambaforge) using
 
-On Linux you can install via `pip` using
+```
+
+conda install paseos -c conda-forge
+
+```
+
+Alternatively, on Linux you can install via `pip` using
 
 ```
 
@@ -99,14 +116,11 @@ pip install paseos
 
 ```
 
-This requires `Python 3.8.16` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). 
-
-On Windows / OS X or if you encounter problems, please consider [setting up a dedicated](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) `conda` environment to install dependencies with the provided `environment.yml`
-
+The pip version requires `Python 3.8.16` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). 
 
 ### Building from source
 
-For now, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
+To build from source, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
 
 ```
 git clone https://github.com/aidotse/PASEOS.git
@@ -132,7 +146,9 @@ Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as f
 cd PASEOS
 pip install -e .
 ```
+
 ### Using Docker
+
 Two [Docker](https://www.docker.com/) images are available:
 * [paseos](https://hub.docker.com/r/gabrielemeoni/paseos): corresponding to the latest release.
 * [paseos-nightly](https://hub.docker.com/r/gabrielemeoni/paseos-nightly): based on the latest commit on the branch `main`. 
@@ -149,6 +165,7 @@ Comprehensive, self-contained examples can also be found in the `examples` folde
 * Modelling distributed learning on heterogeneous data in a constellation
 * Using PASEOS with MPI to run PASEOS on supercomputers
 * Using PASEOS to model the task of onboard satellite volcanic eruptions detection
+* An example showing how total ionizing dose could be considered using a PASEOS [custom property](#customproperty)
 
 The following are small snippets on specific topics.
 
@@ -174,7 +191,7 @@ sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
 
 #### Local and Known Actors
 
-Once you have instantiated a [PASEOS simulation](#initializing-paseos) to know how to create an instance of PASEOS)), you can add other PASEOS [actors](#actor) ([Known actors](#known-actors)) to the simulation. You can use this, e.g., to facilitate communications between actors and to automatically monitor communication windows.<br>
+Once you have instantiated a [PASEOS simulation](#initializing-paseos) you can add other PASEOS [actors](#actor) ([Known actors](#known-actors)) to the simulation. You can use this, e.g., to study communications between actors and to automatically monitor communication windows.<br>
 The next code snippet will add both a [SpacecraftActor](#spacecraftactor) and a [GroundstationActor](#ground-stationactor) (`other_sat`). An orbit is set for `other_sat`, which is placed around Earth at position `(x,y,z)=(-10000,0,0)` and velocity `(vx,vy,vz)=(0,-8000,0)` at epoch `epoch=pk.epoch(0)`.
 The latter (`grndStation`) will be placed at coordinates `(lat,lon)=(79.002723, 14.642972)` and elevation of 0 m. <br> You cannot add a power device and an orbit to a `GroundstationActor`.
 
@@ -182,18 +199,18 @@ The latter (`grndStation`) will be placed at coordinates `(lat,lon)=(79.002723, 
 import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, GroundstationActor
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
 
-# Let's set the orbit of local_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       central_body=pk.epoch(0))
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Initialize PASEOS simulation
 sim = paseos.init_sim(local_actor)
@@ -207,7 +224,7 @@ other_spacraft_actor = ActorBuilder.get_actor_scaffold(name="other_sat",
 ActorBuilder.set_orbit(actor=other_spacraft_actor,
                        position=[-10000000, 0, 0],
                        velocity=[0, -8000.0, 0],
-                       epoch=pk.epoch(0), central_body=pk.epoch(0))
+                       epoch=pk.epoch(0), central_body=earth)
 
 #Create GroundstationActor
 grndStation = GroundstationActor(name="grndStation", epoch=pk.epoch(0))
@@ -230,7 +247,11 @@ sim.add_known_actor(grndStation)
 
 #### Set an orbit for a PASEOS SpacecraftActor
 
-Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [Keplerian orbit](https://en.wikipedia.org/wiki/Kepler_orbit) to it. To this aim, you need to define the central body the [SpacecraftActor](#spacecraftactor) is orbiting around and specify its position and velocity (in the central body's [inertial frame](https://en.wikipedia.org/wiki/Inertial_frame_of_reference)) and an epoch. In this case, we will use `Earth` as a central body.
+Once you have defined a [SpacecraftActor](#spacecraftactor), you can assign a [Keplerian orbit](https://en.wikipedia.org/wiki/Kepler_orbit) or use [SGP4 (Earth orbit only)](https://en.wikipedia.org/wiki/Simplified_perturbations_models). 
+
+##### Keplerian Orbit
+
+To this aim, you need to define the central body the [SpacecraftActor](#spacecraftactor) is orbiting around and specify its position and velocity (in the central body's [inertial frame](https://en.wikipedia.org/wiki/Inertial_frame_of_reference)) and an epoch. In this case, we will use `Earth` as a central body.
 
 ```py
 import pykep as pk
@@ -249,6 +270,61 @@ ActorBuilder.set_orbit(actor=sat_actor,
                        velocity=[0, 8000.0, 0],
                        epoch=pk.epoch(0), central_body=earth)
 ```
+
+##### SGP4 / Two-line element (TLE) 
+
+For using SGP4 / [Two-line element (TLE)](https://en.wikipedia.org/wiki/Two-line_element_set) you need to specify the TLE of the [SpacecraftActor](#spacecraftactor). In this case, we will use the TLE of the [Sentinel-2A](https://en.wikipedia.org/wiki/Sentinel-2) satellite from [celestrak](https://celestrak.com/).
+
+```py
+from paseos import ActorBuilder, SpacecraftActor
+# Define an actor of type SpacecraftActor
+sat_actor = ActorBuilder.get_actor_scaffold(name="Sentinel-2A",
+                                       actor_type=SpacecraftActor,
+                                       epoch=pk.epoch(0))
+
+# Specify your TLE
+line1 = "1 40697U 15028A   23188.15862373  .00000171  00000+0  81941-4 0  9994"
+line2 = "2 40697  98.5695 262.3977 0001349  91.8221 268.3116 14.30817084419867"
+
+# Set the orbit of the actor
+ActorBuilder.set_TLE(sat_actor, line1, line2)
+```
+
+##### Custom Propagators
+
+You can define any kind of function you would like to determine actor positions and velocities. This allows integrating more sophisticated propagators such as [orekit](https://www.orekit.org/). A dedicated example on this topic can be found in the `examples` folder.
+
+In short, you need to define a propagator function that returns the position and velocity of the actor at a given time. The function shall take the current epoch as arguments. You can then set the propagator function with
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+# Create a SpacecraftActor
+starting_epoch = pk.epoch(42)
+my_sat = ActorBuilder.get_actor_scaffold(
+    name="my_sat", actor_type=SpacecraftActor, epoch=starting_epoch
+)
+
+# Define a custom propagator function that just returns a sinus position
+def my_propagator(epoch: pk.epoch):
+  position,velocity = your_external_propagator(epoch)
+  return position,velocity
+
+# Set the custom propagator
+ActorBuilder.set_custom_orbit(my_sat, my_propagator, starting_epoch)
+```
+
+##### Accessing the orbit
+You can access the orbit of a [SpacecraftActor](#spacecraftactor) with
+
+```py
+# Position, velocity and altitude can be accessed like this
+t0 = pk.epoch("2022-06-16 00:00:00.000") # Define the time (epoch)
+print(sat_actor.get_position(t0)) 
+print(sat_actor.get_position_velocity(t0))
+print(sat_actor.get_altitude(t0))
+```
+
 
 #### How to add a communication device
 
@@ -313,7 +389,7 @@ The model is only available for a [SpacecraftActor](#spacecraftactor) and (like 
 
 The following parameters have to be specified for this:
 
-- Spacecraft mass [kg], initial temperature [K], emissive area (for heat disspiation) and thermal capacity [J / (kg * K)]
+- Spacecraft mass [kg], initial temperature [K], emissive area (for heat dissipation) and thermal capacity [J / (kg * K)]
 - Spacecraft absorptance of Sun light, infrared light. [0 to 1]
 - Spacecraft area [m^2] facing Sun and central body, respectively
 - Solar irradiance in this orbit [W] (defaults to 1360W)
@@ -329,7 +405,7 @@ my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch
 ActorBuilder.set_thermal_model(
     actor=my_actor,
     actor_mass=50.0, # Setting mass to 50kg
-    actor_initial_temperature_in_K=273.15, # Setting initialtemperature to 0°C
+    actor_initial_temperature_in_K=273.15, # Setting initial temperature to 0°C
     actor_sun_absorptance=1.0, # Depending on material, define absorptance
     actor_infrared_absorptance=1.0, # Depending on material, define absorptance
     actor_sun_facing_area=1.0, # Area in m2
@@ -382,6 +458,127 @@ mask = paseos_instance.model_data_corruption(data_shape=your_data_shape,
                                              exposure_time_in_s=your_time)
 ```
 
+#### Custom Modelling
+
+Beyond the default supported physical quantities (power, thermal, etc.) it possible to model any type of parameter by using custom properties. These are defined by a name, an update function and an initial value. The initial value is used to initialize the property. As for the other physical models, you can specify an update rate via the `cfg.sim.dt` [cfg parameter](#using-the-cfg).
+
+Custom properties are automatically logged in the [operations monitor](##monitoring-simulation-status).
+Below is a simple example tracking actor altitude.
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+
+# Define the local actor as a SpacecraftActor of name mySat and some orbit
+local_actor = ActorBuilder.get_actor_scaffold(
+    name="mySat", actor_type=SpacecraftActor, epoch=pk.epoch(0)
+)
+
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
+
+
+# Define the update function for the custom property
+# PASEOS will always pass you the actor, the time step and the current power consumption
+# The function shall return the new value of the custom property
+def update_function(actor, dt, power_consumption):
+    return actor.get_altitude()  # get current altitude
+
+
+# Add the custom property to the actor, defining name, update fn and initial value
+ActorBuilder.add_custom_property(
+    actor=local_actor,
+    property_name="altitude",
+    update_function=update_function,
+    initial_value=local_actor.get_altitude(),
+)
+
+# One can easily access the property at any point with
+print(local_actor.get_custom_property("altitude"))
+```
+
+#### Custom Central Bodies
+
+In most examples here you will see Earth via the pykep API being used as a spherical, central body for Keplerian orbits. For Keplerian orbits around spherical bodies, you can simply use pykep with an type of [pykep planet](https://esa.github.io/pykep/documentation/planets.html) just as the above examples used Earth. E.g.
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+# Define an actor of type SpacecraftActor of name mySat
+sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
+                                       actor_type=SpacecraftActor,
+                                       epoch=pk.epoch(0))
+
+# Define the central body as Mars by using pykep APIs.
+mars = pk.planet.jpl_lp("mars")
+
+# Let's set the orbit of sat_actor.
+ActorBuilder.set_orbit(actor=sat_actor,
+                       position=[10000000, 1, 1],
+                       velocity=[1, 1000.0, 1],
+                       epoch=pk.epoch(0), 
+                       central_body=mars)
+```
+
+However, you can also use any other central body defined via a mesh. This is especially useful in conjunction with [custom propagators](#custom-propagators). To use a custom central body, you need to define a mesh and add it to the simulation configuration. The following example shows how to do this for the comet 67P/Churyumov–Gerasimenko.
+
+We assume `polyhedral_propagator` to be a custom propagator as explained in [Custom Propagators](#custom-propagators).
+
+To correctly compute eclipses, we also need to know the orbit of the custom central body around the Sun. In this case we use the [orbital elements](https://en.wikipedia.org/wiki/Orbital_elements) one [can find online for 67P/Churyumov–Gerasimenko](https://en.wikipedia.org/wiki/67P/Churyumov–Gerasimenko).
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+
+# Define the epoch and orbital elements
+epoch = pk.epoch(2460000.5, "jd")
+elements = (3.457 * pk.AU, 0.64989, 3.8719 * pk.DEG2RAD, 36.33 * pk.DEG2RAD, 22.15 * pk.DEG2RAD, 73.57 * pk.DEG2RAD)
+
+# Create a planet object from pykep for 67P
+comet = pk.planet.keplerian(epoch, elements, pk.MU_SUN, 666.19868, 2000, 2000, "67P")
+
+# Load the 67P mesh with pickle
+with open(mesh_path, "rb") as f:
+    mesh_points, mesh_triangles = pickle.load(f)
+    mesh_points = np.array(mesh_points)
+    mesh_triangles = np.array(mesh_triangles)
+
+# Define local actor
+my_sat = ActorBuilder.get_actor_scaffold("my_sat", SpacecraftActor, epoch=epoch)
+
+# Set the custom propagator
+ActorBuilder.set_custom_orbit(my_sat, polyhedral_propagator, epoch)
+
+# Set the mesh
+ActorBuilder.set_central_body(my_sat, comet, (mesh_points, mesh_triangles))
+
+# Below computations will now use the mesh instead spherical approximations
+print(my_sat.is_in_eclipse())
+print(my_sat.is_in_line_of_sight(some_other_actor))
+
+# You could even specify a rotation of the central body.
+# Set a rotation period of 1 second around the z axis
+ActorBuilder.set_central_body(
+    my_sat,
+    comet,
+    (mesh_points, mesh_triangles),
+    rotation_declination=90,
+    rotation_right_ascension=0,
+    rotation_period=1,
+)
+
+```
+
+This is particularly useful if you want to use a central body that is not included in pykep or if you want to use a central body that is not a planet (e.g. an asteroid).
+
+N.B. `get_altitude` computes the altitude above [0,0,0] in the central body's frame, thus is not affected by the central body's rotation or mesh.
+N.B. #2 Any custom central body still has to orbit the Sun for PASEOS to function correctly.
+
 ### Simulation Settings
 
 #### Initializing PASEOS
@@ -394,20 +591,17 @@ We will now show how to create an instance of PASEOS. An instance of PASEOS shal
 import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
-# Let's set the orbit of local_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       central_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor)
@@ -430,23 +624,21 @@ from paseos import ActorBuilder, SpacecraftActor
 #please, refer to https://esa.github.io/pykep/documentation/core.html#pykep.epoch
 today = pk.epoch_from_string('2022-06-16 00:00:00.000')
 
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat
 # pk.epoch is set to today
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=today)
 
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
 # Let's set the orbit of local_actor.
 # pk.epoch is set to today
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=today,
-                       central_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Loading cfg to modify defaults
 cfg=load_default_cfg()
@@ -488,19 +680,19 @@ Alternatively, you can rely on an event-based mode where PASEOS will simulate th
     earth = pk.planet.jpl_lp("earth")
 
     # Define a satellite with some orbit and simple power model
-    my_sat = ActorBuilder.get_actor_scaffold("MySat", SpacecraftActor, pk.epoch(0))
-    ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_power_devices(sat1, 500, 1000, 1)
+    local_actor = ActorBuilder.get_actor_scaffold("MySat", SpacecraftActor, pk.epoch(0))
+    ActorBuilder.set_orbit(local_actor, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
+    ActorBuilder.set_power_devices(local_actor, 500, 1000, 1)
 
     # Abort when sat is at 10% battery
     def constraint_func():
-        return sat1.state_of_charge > 0.1
+        return local_actor.state_of_charge > 0.1
 
     # Set some settings to control evaluation of the constraint
     cfg = load_default_cfg()  # loading cfg to modify defaults
     cfg.sim.dt = 0.1  # setting timestep of physical models (power, thermal, ...)
     cfg.sim.activity_timestep = 1.0  # how often constraint func is evaluated
-    sim = paseos.init_sim(sat1, cfg) # Init simulation
+    sim = paseos.init_sim(local_actor, cfg) # Init simulation
 
     # Advance for a long time, will interrupt much sooner due to constraint function
     sim.advance_time(3600, 10, constraint_function=constraint_func)
@@ -529,21 +721,18 @@ import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 import asyncio
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
 
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
-# Let's set the orbit of sat_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       central_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Add a power device
 ActorBuilder.set_power_devices(actor=local_actor,
@@ -594,21 +783,18 @@ import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 import asyncio
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
 
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
-# Let's set the orbit of sat_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       entral_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Add a power device
 ActorBuilder.set_power_devices(actor=local_actor,
@@ -665,21 +851,18 @@ import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 import asyncio
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
 
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
-# Let's set the orbit of sat_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       central_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Add a power device
 ActorBuilder.set_power_devices(actor=local_actor,
@@ -734,21 +917,18 @@ import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
 import asyncio
-# Define an actor of type SpacecraftActor of name mySat
-# (that will be the local actor)
+# Define the local actor as a SpacecraftActor of name mySat and its orbit
 local_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
 
-# Define the central body as Earth by using pykep APIs.
-earth = pk.planet.jpl_lp("earth")
-
-# Let's set the orbit of sat_actor.
-ActorBuilder.set_orbit(actor=local_actor,
-                       position=[10000000, 0, 0],
-                       velocity=[0, 8000.0, 0],
-                       epoch=pk.epoch(0),
-                       central_body=earth)
+ActorBuilder.set_orbit(
+    actor=local_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+)
 
 # Add a power device
 ActorBuilder.set_power_devices(actor=local_actor,
@@ -823,7 +1003,7 @@ state_of_charge = instance.monitor["state_of_charge"]
 
 #### Writing Simulation Results to a File
 
-To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activitiy etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
+To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activity etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
 
 ```py
 cfg = load_default_cfg() # loading cfg to modify defaults
@@ -835,10 +1015,98 @@ paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos insta
 paseos_instance.save_status_log_csv("output.csv")
 ```
 
+### Wrapping Other Software and Tools
+
+PASEOS is designed to allow easily wrapping other software and tools to, e.g., use more sophisticated models for specific aspects of interest to the user. There are three ways to do this:
+
+* [Via Activities](#via-activities) - An [activity](#simple-activity) using an external software is registered and executed as any other [activity](#activity), e.g. to perform some computations while tracking runtime of that operation.
+* [Via Constraint Functions](#via-constraint-functions) - A [constraint function](#constraint-function) using an external software. This is useful to use a more sophisticated model to check whether, e.g., a physical constraint modelled outside of PASEOS is met. 
+* [Via Custom Properties](#via-custom-properties) - A [custom property](#custom-property) using an external software. This is useful to, e.g., use a more sophisticated model for a physical quantity such as total ionization dose or current channel bandwidth.
+
+#### Via Activities
+
+The wrapping via activities is quite straight forward. Follow the [instructions on registering and performing activities](#simple-activity) and make use of your external software inside the activity function.
+
+```py
+import my_external_software
+#Activity function
+async def activity_function_A(args):
+  my_external_software.complex_task_to_model()
+  await asyncio.sleep(0.01)
+```
+
+#### Via Constraint Functions
+
+Inside constraint functions, external software can be used to check whether a constraint is met or not. This works both for [activity constraints](#constraint-function) and for [constraints in event-based mode](#event-based-mode). 
+
+
+The constraint function should return `True` if the constraint is met and `False` otherwise.
+
+```py
+import pykep as pk
+from paseos import ActorBuilder, SpacecraftActor
+
+import my_complex_radiation_model
+
+# Defining a local actor
+local_actor = ActorBuilder.get_actor_scaffold("MySat", SpacecraftActor, pk.epoch(0))
+
+def constraint_func():
+  t = local_actor.local_time
+  device_has_failed = my_complex_radiation_model.check_for_device_failure(t)
+  return not device_has_failed
+
+# Can be passed either with event-based mode, will run until constraint is not met
+sim.advance_time(3600, 10, constraint_function=constraint_func)
+
+# (...)
+
+# or via activity constraints, will run until constraint is not met
+# N.B: this is an excerpt follow the #constraint-function link for more details
+sim.register_activity(
+    "activity_A_with_constraint_function",
+    activity_function=activity_function_A,
+    power_consumption_in_watt=10,
+    constraint_function=constraint_func
+)
+```
+
+#### Via Custom Properties
+
+Finally, [custom properties](#custom-modelling) can be used to wrap external software. This is useful to use a more sophisticated model for a physical quantity, e.g. one could use a simulator like [ns-3](https://www.nsnam.org/) to model the current channel bandwidth.
+
+For more details see [custom properties](#custom-modelling).
+
+```py
+import my_channel_model
+
+# Will be automatically called during PASEOS simulation
+def update_function(actor, dt, power_consumption):
+    # Get the current channel bandwidth from the external model
+    channel_bandwidth = my_channel_model.get_channel_bandwidth(actor)
+    return channel_bandwidth
+
+# Add the custom property to the actor, defining name, update fn and initial value
+ActorBuilder.add_custom_property(
+    actor=local_actor,
+    property_name="channel_bandwidth",
+    update_function=update_function,
+    initial_value=1000,
+)
+
+# (... run simulation)
+
+# One can easily access the property at any point with
+print(local_actor.get_custom_property("channel_bandwidth"))
+
+```
+
+<!-- Commented out since they are not quite up to date anymore
 ## System Design of PASEOS
 
 ![Alt Text](resources/images/datastructure.svg)
-![Alt Text](resources/images/flowchart.svg)
+![Alt Text](resources/images/flowchart.svg) 
+-->
 
 ## Glossary
 
@@ -859,6 +1127,10 @@ paseos_instance.save_status_log_csv("output.csv")
 
   A constraint function is an asynchronous function that can be used by the PASEOS user to specify some constraints that shall be met during the execution of an activity.
 
+- ### Custom Property
+  
+  Users can define their own physical quantity to track parameters not natively simulated by PASEOS. This is described in detail [above](#custom-modelling) and in a dedicated example notebook on modelling total ionizing dose.
+
 - ### GroundstationActor
 
   `PASEOS actor` emulating a ground station.
@@ -877,6 +1149,34 @@ paseos_instance.save_status_log_csv("output.csv")
 
 - ### SpacecraftActor
   PASEOS [actor](#actor) emulating a spacecraft or a satellite.
+
+### Physical Model Parameters
+
+Description of the physical model parameters and default values in PASEOS with indications on sensitivity of parameters and suggested ranges.
+
+|               Name                | Datatype |                                 Description                                 |  Default   | Suggested Range | Sensitivity |
+| :-------------------------------: | :------: | :-------------------------------------------------------------------------: | :--------: | :-------------: | :---------: |
+|        Battery Level [Ws]         |  float   |                            Current battery level                            |     -      |       > 0       |    high     |
+|    Maximum Battery Level [Ws]     |  float   |                            Maximum battery level                            |     -      |       > 0       |    high     |
+|         Charging Rate [W]         |  float   |                        Charging rate of the battery                         |     -      |       > 0       |    high     |
+|         Power Device Type         |   enum   |          Type of power device. Can be either "SolarPanel" or "RTG"          | SolarPanel |        -        |   medium    |
+|    Data Corruption Events [Hz]    |  float   | Rate of single bit of data being corrupted, i.e. a Single Event Upset (SEU) |     -      |      >= 0       |     low     |
+|        Restart Events [Hz]        |  float   |                   Rate of device restart being triggered                    |     -      |      >= 0       |   medium    |
+|        Failure Events [Hz]        |  float   |    Rate of complete device failure due to a Single Event Latch-Up (SEL)     |     -      |      >= 0       |    high     |
+|             Mass [kg]             |  float   |                                Actor's mass                                 |     -      |       > 0       |     low     |
+|      Initial Temperature [K]      |  float   |                         Actor's initial temperature                         |     -      |      >= 0       |   medium    |
+|          Sun Absorptance          |  float   |                     Actor's absorptance of solar light                      |     -      |      [0,1]      |    high     |
+|       Infrared Absorptance        |  float   |                    Actor's absportance of infrared light                    |     -      |      [0,1]      |   medium    |
+|      Sun-Facing Area [$m^2$]      |  float   |                         Actor's area facing the sun                         |     -      |      >= 0       |    high     |
+| Central Body-Facing Area [$m^2$]  |  float   |                      Actor's area facing central body                       |     -      |      >= 0       |   medium    |
+|       Emissive Area [$m^2$]       |  float   |                   Actor's area emitting (radiating) heat                    |     -      |      >= 0       |    high     |
+| Thermal Capacity [$J / (kg * K)$] |  float   |                          Actor's thermal capacity                           |     -      |      >= 0       |     low     |
+|     Body Solar Irradiance [W]     |  float   |                           Irradiance from the sun                           |    1360    |      >= 0       |   medium    |
+|   Body Surface Temperature [K]    |  float   |                      Central body surface temperature                       |    288     |      >= 0       |     low     |
+|          Body Emissivity          |  float   |                     Central body emissivity in infrared                     |    0.6     |      [0,1]      |   medium    |
+|         Body Reflectance          |  float   |                    Central body reflectance of sunlight                     |    0.3     |      [0,1]      |   medium    |
+|     Heat Conversion Ratio [-]     |  float   |  Conversion ratio for activities, 0 leads to know heat-up due to activity   |    0.5     |      [0,1]      |    high     |
+
 
 ## Contributing
 
@@ -898,7 +1198,7 @@ Distributed under the GPL-3.0 License.
 Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 
 - Pablo Gómez - pablo.gomez at esa.int, pablo.gomez at ai.se
-- Gabriele Meoni - gabriele.meoni at esa.int, gabriele.meoni at ai.se
+- Gabriele Meoni - gabriele.meoni at esa.int, g.meoni at tudelft.nl
 - Johan Östman - johan.ostman at ai.se
 - Vinutha Magal Shreenath - vinutha at ai.se
 

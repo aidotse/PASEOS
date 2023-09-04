@@ -54,9 +54,7 @@ async def test_activity():
             await asyncio.sleep(0.2)
 
     # Register an activity that draws 10 watt per second
-    sim.register_activity(
-        "Testing", activity_function=func, power_consumption_in_watt=10
-    )
+    sim.register_activity("Testing", activity_function=func, power_consumption_in_watt=10)
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])
@@ -81,7 +79,7 @@ async def test_activity():
 @pytest.mark.asyncio
 async def test_running_two_activities():
     """This test ensures that you cannot run two activities at the same time."""
-    sim, sat1, earth = get_default_instance()
+    sim, _, _ = get_default_instance()
 
     # Declare two activities, one calls the other
     test_value = [0]
@@ -113,7 +111,7 @@ async def test_activity_constraints():
     Here we start a function that counts up until we stop charging our solar panels and then prints the value.
     """
 
-    sim, sat1, earth = get_default_instance()
+    sim, sat1, _ = get_default_instance()
     assert sat1.battery_level_in_Ws == 500
 
     # Out test case is a function that increments a value, genius.
@@ -126,7 +124,7 @@ async def test_activity_constraints():
             args[0][0] += 1
             await asyncio.sleep(1.0)
 
-    # Constraint that becomes false once the actor has charge it's battery over 510
+    # Constraint that becomes false once the actor has charged it's battery over 510
     async def constraint(args):
         local_actor: SpacecraftActor = args[0]
         return local_actor.battery_level_in_Ws < 505

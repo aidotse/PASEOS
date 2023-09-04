@@ -41,33 +41,30 @@ def get_communication_window(
         "Trying to use a not-existing communication link with the name: "
         + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor.communication_devices[
-        local_actor_communication_link_name
-    ]
+    local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
     assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandiwidth has to be positive."
     assert dt > 0, "dt has to be positive."
     assert data_to_send_in_b > 0, "data_to_send_in_b has to be positive."
 
     # Getting t0 in s
-    t0_in_s = (t0.mjd2000 - pk.epoch(0).mjd2000) / pk.SEC2DAY
     transmitted_data_in_b = 0
-    current_time_in_s = t0_in_s
+    current_epoch = t0
+    window_length_in_s = 0
     while (
-        local_actor.is_in_line_of_sight(
-            target_actor, pk.epoch(current_time_in_s * pk.SEC2DAY)
-        )
-    ) and (current_time_in_s - t0_in_s < window_timeout_value_in_s):
-        current_time_in_s += dt
-        transmitted_data_in_b += int(
-            local_actor_comm_link.bandwidth_in_kbps * dt * 1000
-        )  # (This is the quantum of information that you can transmit)
+        local_actor.is_in_line_of_sight(target_actor, current_epoch)
+        and window_length_in_s < window_timeout_value_in_s
+    ):
+        window_length_in_s += dt
+        current_epoch = pk.epoch(t0.mjd2000 + window_length_in_s * pk.SEC2DAY)
+        # (This is the quantum of information that you can transmit)
+        transmitted_data_in_b += int(local_actor_comm_link.bandwidth_in_kbps * dt * 1000)
 
-    if current_time_in_s - t0_in_s >= window_timeout_value_in_s:
+    if window_length_in_s >= window_timeout_value_in_s:
         logger.debug("Timeout reached for the estimation of the communication window.")
 
     return (
         t0,
-        pk.epoch(current_time_in_s * pk.SEC2DAY),
+        current_epoch,
         min(transmitted_data_in_b, data_to_send_in_b),
     )

@@ -8,6 +8,7 @@ dependencies:
   - numpy==1.23.5 # core non-optional depedency
   - myst-parser # for markdown math in docs
   - pykep>=2.6 # core non-optional dependency
+  - pyquaternion>=0.9.9 # core non-optional dependency
   - pytest # for tests
   - pytest-asyncio # for tests involving activities
   - python>=3.8 # core non-optional dependency

@@ -4,7 +4,6 @@ from test_utils import get_default_instance
 
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-from paseos.power.is_in_eclipse import is_in_eclipse
 
 import pykep as pk
 
@@ -18,15 +17,10 @@ def test_power_charging():
     sim.advance_time(42, 0)
     assert sat1.battery_level_in_Ws == 542
 
-    # Define central body
-    earth = pk.planet.jpl_lp("earth")
-
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_power_devices(
-        sat1, 500, 10000, 1, paseos.PowerDeviceType.SolarPanel
-    )
+    ActorBuilder.set_power_devices(sat1, 500, 10000, 1, paseos.PowerDeviceType.SolarPanel)
 
     # init simulation
     sim = paseos.init_sim(sat1)
@@ -35,7 +29,7 @@ def test_power_charging():
     sim.advance_time(12 * 3600, 0)
 
     # Check we are in eclipse
-    assert is_in_eclipse(sat1, earth, sat1.local_time, plot=True)
+    assert sat1.is_in_eclipse()
 
     # Check we are fully charged
     assert sat1.battery_level_in_Ws == 10000
@@ -47,7 +41,6 @@ def test_power_charging():
 
 
 def test_RTG_charging_in_eclipse():
-
     # Define central body
     earth = pk.planet.jpl_lp("earth")
 
@@ -63,7 +56,7 @@ def test_RTG_charging_in_eclipse():
     sim.advance_time(12 * 3600, 1)
 
     # Check we are in eclipse
-    assert is_in_eclipse(sat1, earth, sat1.local_time, plot=True)
+    assert sat1.is_in_eclipse()
 
     # Initial power was 500m check charging works
     assert sat1.battery_level_in_Ws == 500

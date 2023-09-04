@@ -11,7 +11,7 @@ import paseos
 
 
 def test_radiation_model():
-    paseos.set_log_level("TRACE")
+    paseos.set_log_level("INFO")
 
     # Has to be seeded for reproducibility
     np.random.seed(42)
@@ -79,9 +79,7 @@ async def test_radiation_model_device_death():
         await asyncio.sleep(1.0)
 
     # Register an activity that draws 10 watt per second
-    sim.register_activity(
-        "Testing", activity_function=func, power_consumption_in_watt=0
-    )
+    sim.register_activity("Testing", activity_function=func, power_consumption_in_watt=0)
 
     # Run the activity
     sim.perform_activity("Testing")
@@ -118,9 +116,7 @@ async def test_radiation_model_interruption():
             await asyncio.sleep(0.2)
 
     # Register an activity that draws 10 watt per second
-    sim.register_activity(
-        "Testing", activity_function=func, power_consumption_in_watt=0
-    )
+    sim.register_activity("Testing", activity_function=func, power_consumption_in_watt=0)
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])
