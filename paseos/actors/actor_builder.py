@@ -13,6 +13,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
+from ..attitude.geometric_model import GeometricModel
 
 
 class ActorBuilder:
@@ -305,6 +306,37 @@ class ActorBuilder:
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
 
+    @staticmethod
+    def set_geometrical_model(
+            actor: SpacecraftActor,
+            mass: float,
+            height: float,
+            length: float,
+            width: float,
+    ):
+        """Define geometry of the spacecraft actor.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            mass (float): Mass of the spacecraft in kg
+            height (float): Size of the spacecraft in z (nadir) direction in meters
+            length (float): Size of the spacecraft in y (along-track) direction in meters
+            width (float): Size of the spacecraft in x (across-track) direction in meters
+        """
+        assert mass >= 0, "Mass is <= 0"
+        assert height >= 0, "Height is <= 0"
+        assert length >= 0, "Length is <= 0"
+        assert width >= 0, "Width is <= 0"
+
+        actor._mass = mass
+        geometric_model = GeometricModel(
+            local_actor=actor,
+            actor_mass=mass,
+            actor_height=height,
+            actor_length=length,
+            actor_width=width,
+        )
+        actor._moi = geometric_model._find_moi
     @staticmethod
     def set_power_devices(
         actor: SpacecraftActor,
