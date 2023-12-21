@@ -95,3 +95,12 @@ def test_add_comm_device():
     assert len(sat1.communication_devices) == 2
     assert sat1.communication_devices["dev1"].bandwidth_in_kbps == 10
     assert sat1.communication_devices["dev2"].bandwidth_in_kbps == 42
+
+def test_set_geometric_model():
+    """Check if we can set the geometry, and if the moments of inertia are calculated correctly"""
+    _, sat1, _ = get_default_instance()
+    ActorBuilder.set_geometric_model(sat1, mass=100, height=0.5, length=0.5, width=0.5)
+
+    assert sat1.mass == 100
+    assert round(sat1.moi[0,0],3) == 4.167      # Value for a h,w,l of each 0.5
+    assert sat1.moi[1,1] == 0                   # Should be zero if the mass distribution is even
