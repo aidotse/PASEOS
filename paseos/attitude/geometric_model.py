@@ -1,11 +1,12 @@
 from loguru import logger
 import numpy as np
 import trimesh
-# import matplotlib.pyplot as plt
+
 
 class CuboidGeometricModel:
     """This model describes the geometry of the spacecraft
-    Currently it assumes the spacecraft to be a cuboid shape, with width, length and height """
+    Currently it assumes the spacecraft to be a cuboid shape, with width, length and height
+    """
 
     _actor = None
     _actor_mass = None
@@ -14,12 +15,7 @@ class CuboidGeometricModel:
     _actor_width = None
 
     def __init__(
-            self,
-            local_actor,
-            actor_mass,
-            actor_height,
-            actor_length,
-            actor_width
+        self, local_actor, actor_mass, actor_height, actor_length, actor_width
     ) -> None:
         """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
         Width is the size on the x-direction, Length in the y-direction, and height in the z-direction.
@@ -50,13 +46,13 @@ class CuboidGeometricModel:
                           [Iyx Iyy Iyx]
                           [Izx Izy Izz]]
         """
-        Ixx = self._actor_mass * (self._actor_height ** 2 + self._actor_length ** 2) / 12
-        Iyy = self._actor_mass * (self._actor_height ** 2 + self._actor_width ** 2) / 12
-        Izz = self._actor_mass * (self._actor_width ** 2 + self._actor_length ** 2) / 12
+        Ixx = (
+            self._actor_mass * (self._actor_height**2 + self._actor_length**2) / 12
+        )
+        Iyy = self._actor_mass * (self._actor_height**2 + self._actor_width**2) / 12
+        Izz = self._actor_mass * (self._actor_width**2 + self._actor_length**2) / 12
         # assume uniform mass distribution, hence Ixy, etc. are all zero
-        self._actor_I = np.array([[Ixx, 0, 0],
-                      [0, Iyy, 0],
-                      [0, 0, Izz]])
+        self._actor_I = np.array([[Ixx, 0, 0], [0, Iyy, 0], [0, 0, Izz]])
         return self._actor_I
 
     def _find_cg(self):
@@ -65,7 +61,7 @@ class CuboidGeometricModel:
         Returns:
             np.array: Coordinates of the center of gravity of the mesh
         """
-        return np.array([0,0,0])
+        return np.array([0, 0, 0])
 
     # potentially add later for disturbances
     # def _find_cp(self):
@@ -80,13 +76,10 @@ class ImportGeometricModel:
 
     _actor = None
     _actor_mass = None
+    _actor_cg = None
+    _actor_I = None
 
-    def __init__(
-            self,
-            local_actor,
-            actor_mass,
-            model_name
-    ) -> None:
+    def __init__(self, local_actor, actor_mass, model_name) -> None:
         """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
 
 
@@ -99,7 +92,8 @@ class ImportGeometricModel:
 
         self._actor = local_actor
         self._actor_mass = actor_mass
-        self._mesh = trimesh.load_mesh('objects/' + model_name + '.obj')
+        file_path = "../../objects/" + model_name + ".obj"
+        self._mesh = trimesh.load_mesh(file_path)
 
     @property
     def _find_moi(self):
@@ -115,7 +109,7 @@ class ImportGeometricModel:
         self._actor_I = self._mesh.moment_inertia
         return self._actor_I
 
-    def _find_cg(self):
+    def find_cg(self):
         """Gives the volumetric center of mass of the actor.
 
         Returns:
@@ -123,7 +117,6 @@ class ImportGeometricModel:
         """
         self._actor_cg = self._mesh.center_mass
         return self._actor_cg
-
 
     # potentially add later for disturbances
     # def _find_cp(self):

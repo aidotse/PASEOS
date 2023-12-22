@@ -360,7 +360,7 @@ class ActorBuilder:
             model_name=file_name
         )
         actor._moi = geometric_model._find_moi
-        actor._cg = geometric_model._find_cg
+        actor._center_of_gravity = geometric_model.find_cg()
         actor._mesh = geometric_model._mesh
 
     @staticmethod
