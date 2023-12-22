@@ -13,7 +13,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
-from ..attitude.geometric_model import GeometricModel
+from ..attitude.geometric_model import CuboidGeometricModel, ImportGeometricModel
 
 
 class ActorBuilder:
@@ -307,7 +307,7 @@ class ActorBuilder:
         logger.debug(f"Setting position {position} on actor {actor}")
 
     @staticmethod
-    def set_geometrical_model(
+    def set_cuboid_geometric_model(
             actor: SpacecraftActor,
             mass: float,
             height: float,
@@ -329,7 +329,7 @@ class ActorBuilder:
         assert width >= 0, "Width is <= 0"
 
         actor._mass = mass
-        geometric_model = GeometricModel(
+        geometric_model = CuboidGeometricModel(
             local_actor=actor,
             actor_mass=mass,
             actor_height=height,
@@ -337,6 +337,32 @@ class ActorBuilder:
             actor_width=width,
         )
         actor._moi = geometric_model._find_moi
+
+    @staticmethod
+    def set_geometric_model_from_import(
+            actor: SpacecraftActor,
+            mass: float,
+            file_name: str,
+    ):
+        """Define geometry of the spacecraft actor.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            mass (float): Mass of the spacecraft in kg
+            file_name (string): Name of the .obj file to use as geometric mesh
+        """
+        assert mass >= 0, "Mass is <= 0"
+
+        actor._mass = mass
+        geometric_model = ImportGeometricModel(
+            local_actor=actor,
+            actor_mass=mass,
+            model_name=file_name
+        )
+        actor._moi = geometric_model._find_moi
+        actor._cg = geometric_model._find_cg
+        actor._mesh = geometric_model._mesh
+
     @staticmethod
     def set_power_devices(
         actor: SpacecraftActor,

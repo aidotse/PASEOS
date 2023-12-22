@@ -2,6 +2,7 @@
 import numpy as np
 import pykep as pk
 import sys
+import plotly.graph_objects as go
 
 sys.path.append("../..")
 
@@ -99,8 +100,34 @@ def test_add_comm_device():
 def test_set_geometric_model():
     """Check if we can set the geometry, and if the moments of inertia are calculated correctly"""
     _, sat1, _ = get_default_instance()
-    ActorBuilder.set_geometric_model(sat1, mass=100, height=0.5, length=0.5, width=0.5)
+    ActorBuilder.set_cuboid_geometric_model(sat1, mass=100, height=0.5, length=0.5, width=0.5)
 
     assert sat1.mass == 100
     assert round(sat1.moi[0,0],3) == 4.167      # Value for a h,w,l of each 0.5
     assert sat1.moi[1,1] == 0                   # Should be zero if the mass distribution is even
+
+def test_view_geometric_model():
+    """Provide a visualisation of the imported geometric model, and test if the cg is in the correct location
+    """
+    _, sat1, _ = get_default_instance()
+    ActorBuilder.set_geometric_model_from_import(sat1,mass=100,file_name='20265_Hexagonal_prism_v1')
+
+    assert sat1._cg == np.array([0,0,5])
+    # Create trace for the mesh and axis
+    mesh = sat1._mesh
+    mesh_trace = go.Mesh3d(x=mesh.vertices[:, 0], y=mesh.vertices[:, 1], z=mesh.vertices[:, 2],
+                           i=mesh.faces[:, 0], j=mesh.faces[:, 1], k=mesh.faces[:, 2],
+                           color='lightblue', opacity=0.5)
+    axis_length = 5  # Length of the axes
+    axis_end = [[0, 0, 0], [axis_length, 0, 0]], [[0, 0, 0], [0, axis_length, 0]], [[0, 0, 0], [0, 0, axis_length]]
+    axis_traces = [go.Scatter3d(x=[end[0][0], end[1][0]], y=[end[0][1], end[1][1]], z=[end[0][2], end[1][2]],
+                                marker=dict(color=col), line=dict(color=col, width=4), name=lab)
+                   for end, col, lab in zip(axis_end, ['red', 'green', 'blue'], ['X-axis', 'Y-axis', 'Z-axis'])]
+    point_coordinates = sat1._cg
+
+    # Create a trace for the single point
+    point_trace = go.Scatter3d(x=[point_coordinates[0]], y=[point_coordinates[1]], z=[point_coordinates[2]],
+                               mode='markers', marker=dict(size=5, color='red'), name='Single Point')
+    fig = go.Figure(data=[mesh_trace] + axis_traces + [point_trace])
+    fig.update_layout(scene=dict(aspectmode='data'))
+    fig.show()
