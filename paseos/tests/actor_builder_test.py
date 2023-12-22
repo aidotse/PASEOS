@@ -133,6 +133,3 @@ def test_view_geometric_model():
     fig = go.Figure(data=[mesh_trace] + axis_traces + [point_trace])
     fig.update_layout(scene=dict(aspectmode='data'))
     fig.show()
-
-
-test1 = test_view_geometric_model()
