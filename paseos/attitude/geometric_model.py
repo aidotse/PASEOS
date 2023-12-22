@@ -92,7 +92,7 @@ class ImportGeometricModel:
 
         self._actor = local_actor
         self._actor_mass = actor_mass
-        file_path = "../../objects/" + model_name + ".obj"
+        file_path = "objects/" + model_name + ".obj"
         self._mesh = trimesh.load_mesh(file_path)
 
     @property
