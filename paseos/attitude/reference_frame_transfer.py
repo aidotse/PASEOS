@@ -34,7 +34,6 @@ def transformation_matrix_eci_rpy(r, v):
 
     return T
 
-
 def transformation_matrix_rpy_body(euler_angles_in_rad):
     """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body
     fixed reference frame of the spacecraft.
@@ -101,10 +100,10 @@ def eci_to_rpy(u, r, v):
 
 def rpy_to_eci(u, r, v):
     """Converts a vector in the Roll-Pitch-Yaw (RPY) of the spacecraft to the Earth-Centered Inertial Frame (ECI)
-    reference frame, using transformation matrix from transformation_matrix_eci_rpy function.
+    reference frame, using the inverse transformation matrix from transformation_matrix_eci_rpy function.
 
     Args:
-        u: vector in ECI
+        u: vector in RPY
         r: position vector of RPY reference frame wrt ECI frame
         v: velocity of the spacecraft in earth reference frame, centered on spacecraft
 
@@ -117,3 +116,30 @@ def rpy_to_eci(u, r, v):
     # transform u vector with matrix multiplication
     return T@u
 
+def rpy_to_body(u, euler_angles_in_rad):
+    """Converts a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body fixed reference frame of the
+    spacecraft, using transformation matrix from transformation_matrix_rpy_body function.
+
+    Args:
+        u (list of floats): vector in RPY
+        euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
+
+    Returns:
+        vector u w.r.t. the body fixed frame
+    """
+    T = transformation_matrix_rpy_body(euler_angles_in_rad)
+    return T@u
+
+def body_to_rpy(u, euler_angles_in_rad):
+    """Converts a vector in the body fixed reference frame to the Roll-Pitch-Yaw (RPY) reference frame of the
+    spacecraft, using the inverse transformation matrix from transformation_matrix_rpy_body function.
+
+    Args:
+        u (list of floats): vector in the body fixed frame
+        euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
+
+    Returns:
+        vector u w.r.t. the RPY frame
+    """
+    T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
+    return T @ u
