@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def transformation_matrix_eci_rpy(r, v):
     """
     Creates the transformation matrix to transform a vector in the Earth-Centered Inertial Frame (ECI) to the
@@ -14,15 +15,18 @@ def transformation_matrix_eci_rpy(r, v):
     To go from RPY to ECI, the inverse is used.
 
     Args:
-        r (numpy array): position vector of RPY reference frame wrt ECI frame
-        v (numpy array): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        r (list of floats): position vector of RPY reference frame wrt ECI frame
+        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
     Returns:
         T (numpy array): transformation matrix
     """
+    # convert list of floats to numpy arrays
+    r = np.array(r)
+    v = np.array(v)
 
     # determine y' base by use of the cross product: (V x r)/||(V x r)||
-    cross_vp = np.cross(v, r)
-    y = cross_vp / np.linalg.norm(cross_vp)
+    cross_vr = np.cross(v, r)
+    y = cross_vr / np.linalg.norm(cross_vr)
     # determine z' base by use of the nadir pointing vector
     z = -r / np.linalg.norm(r)
     # determine x' base by use of the cross product: (y' x z')/||(y' x z')||
@@ -33,6 +37,7 @@ def transformation_matrix_eci_rpy(r, v):
     T = np.array([x, y, z])
 
     return T
+
 
 def transformation_matrix_rpy_body(euler_angles_in_rad):
     """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body
@@ -80,17 +85,18 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
 
     return T
 
+
 def eci_to_rpy(u, r, v):
     """Converts a vector in the Earth-Centered Inertial Frame (ECI) to the Roll-Pitch-Yaw (RPY) reference frame of the
     spacecraft, using transformation matrix from transformation_matrix_eci_rpy function.
 
     Args:
-        u: vector in ECI
-        r: position vector of RPY reference frame wrt ECI frame
-        v: velocity of the spacecraft in earth reference frame, centered on spacecraft
+        u (list of floats): vector in ECI
+        r (list of floats): position vector of RPY reference frame wrt ECI frame
+        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
 
     Returns:
-        vector u w.r.t. RPY frame
+        numpy array of floats: vector u w.r.t. RPY frame
     """
 
     T = transformation_matrix_eci_rpy(r, v)
@@ -98,23 +104,25 @@ def eci_to_rpy(u, r, v):
     # transform u vector with matrix multiplication
     return T@u
 
+
 def rpy_to_eci(u, r, v):
     """Converts a vector in the Roll-Pitch-Yaw (RPY) of the spacecraft to the Earth-Centered Inertial Frame (ECI)
     reference frame, using the inverse transformation matrix from transformation_matrix_eci_rpy function.
 
     Args:
-        u: vector in RPY
-        r: position vector of RPY reference frame wrt ECI frame
-        v: velocity of the spacecraft in earth reference frame, centered on spacecraft
+        u (list of floats): vector in RPY
+        r (list of floats): position vector of RPY reference frame wrt ECI frame
+        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
 
     Returns:
-        vector u w.r.t. ECI frame
+        numpy array of floats: vector u w.r.t. ECI frame
     """
 
     T = np.linalg.inv(transformation_matrix_eci_rpy(r, v))
 
     # transform u vector with matrix multiplication
-    return T@u
+    return T@np.array(u)
+
 
 def rpy_to_body(u, euler_angles_in_rad):
     """Converts a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body fixed reference frame of the
@@ -125,10 +133,11 @@ def rpy_to_body(u, euler_angles_in_rad):
         euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
 
     Returns:
-        vector u w.r.t. the body fixed frame
+        numpy array of floats: vector u w.r.t. the body fixed frame
     """
     T = transformation_matrix_rpy_body(euler_angles_in_rad)
-    return T@u
+    return T@np.array(u)
+
 
 def body_to_rpy(u, euler_angles_in_rad):
     """Converts a vector in the body fixed reference frame to the Roll-Pitch-Yaw (RPY) reference frame of the
@@ -142,4 +151,4 @@ def body_to_rpy(u, euler_angles_in_rad):
         vector u w.r.t. the RPY frame
     """
     T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
-    return T @ u
+    return T @ np.array(u)
