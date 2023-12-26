@@ -1,3 +1,15 @@
+"""This file contains functions to transform vectors between three reference frames:
+
+- Earth-centered inertial frame (ECI)
+
+- Roll-Pitch-Yaw frame (RPY):   x: along track direction
+                                y: -ĥ (angular momentum of the orbit). perpendicular to the orbital plane
+                                z: -r̂ (nadir)
+
+- Body fixed frame:     when body is unperturbed, frame coincides with RPY frame. Perturbations result in non-zero roll
+                        pitch and yaw angles, rotating the body fixed frame w.r.t the RPY frame.
+"""
+
 import numpy as np
 
 
@@ -6,10 +18,6 @@ def transformation_matrix_eci_rpy(r, v):
     Creates the transformation matrix to transform a vector in the Earth-Centered Inertial Frame (ECI) to the
     Roll-Pitch-Yaw (RPY) reference frame of the spacecraft (variant to Gaussian reference frame, useful for attitude
     disturbance modelling)
-
-    RPY reference frame:    x: along track direction
-                            y: -ĥ (angular momentum of the orbit). perpendicular to the orbital plane
-                            z: -r̂ (nadir)
 
     To go from ECI to RPY, this transformation matrix is used
     To go from RPY to ECI, the inverse is used.
@@ -42,13 +50,6 @@ def transformation_matrix_eci_rpy(r, v):
 def transformation_matrix_rpy_body(euler_angles_in_rad):
     """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body
     fixed reference frame of the spacecraft.
-
-    RPY reference frame:    x: along track direction
-                            y: -ĥ (angular momentum of the orbit). perpendicular to the orbital plane
-                            z: -r̂ (nadir)
-
-    body fixed frame:       when unperturbed, coincides with RPY frame. Perturbations result in non-zero roll pitch and
-                            yaw angles, rotating the body fixed frame.
 
     To go from RPY to body fixed, this transformation matrix is used
     To go from body fixed to RPY, the inverse is used.
