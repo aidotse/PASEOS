@@ -136,8 +136,13 @@ def rpy_to_body(u, euler_angles_in_rad):
     Returns:
         numpy array of floats: vector u w.r.t. the body fixed frame
     """
-    T = transformation_matrix_rpy_body(euler_angles_in_rad)
-    return T@np.array(u)
+    # for undisturbed calculations: zero euler angles result in no transformation
+    # numpy default absolute tolerance: 1e-0.8
+    if np.isclose(euler_angles_in_rad, np.zeros(3)):
+        return u
+    else:
+        T = transformation_matrix_rpy_body(euler_angles_in_rad)
+        return T@np.array(u)
 
 
 def body_to_rpy(u, euler_angles_in_rad):
@@ -151,5 +156,10 @@ def body_to_rpy(u, euler_angles_in_rad):
     Returns:
         vector u w.r.t. the RPY frame
     """
-    T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
-    return T @ np.array(u)
+    # for undisturbed calculations: zero euler angles result in no transformation
+    # numpy default absolute tolerance: 1e-0.8
+    if np.isclose(euler_angles_in_rad, np.zeros(3)):
+        return u
+    else:
+        T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
+        return T @ np.array(u)
