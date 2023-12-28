@@ -13,6 +13,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
+from ..attitude.attitude_model import AttitudeModel
 
 
 class ActorBuilder:
@@ -488,6 +489,35 @@ class ActorBuilder:
             body_emissivity=body_emissivity,
             body_reflectance=body_reflectance,
             power_consumption_to_heat_ratio=power_consumption_to_heat_ratio,
+        )
+
+    @staticmethod
+    def set_disturbances(
+            actor: SpacecraftActor,
+            aerodynamic: bool = False,
+            gravitational: bool = False,
+            magnetic: bool = False,
+    ):
+        disturbance_list = []
+        if aerodynamic:
+            disturbance_list.append("aerodynamic")
+        if gravitational:
+            disturbance_list.append("gravitational")
+        if magnetic:
+            disturbance_list.append("magnetic")
+        actor._disturbances = disturbance_list
+
+    @staticmethod
+    def set_attitude_model(
+            actor: SpacecraftActor,
+            actor_initial_attitude_in_rad: list[float] = [0, 0, 0],
+
+    ):
+
+        actor._attitude_model = AttitudeModel(
+            local_actor=actor,
+            actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
+
         )
 
     @staticmethod

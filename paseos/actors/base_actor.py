@@ -47,6 +47,9 @@ class BaseActor(ABC):
     # Tracks the current activity
     _current_activity = None
 
+    # Attitude disturbances experienced by the actor
+    _disturbances = None
+
     # The following variables are used to track last evaluated state vectors to avoid recomputation.
     _previous_position = None
     _time_of_previous_position = None
@@ -327,6 +330,9 @@ class BaseActor(ABC):
         self._previous_velocity = vel
         self._time_of_previous_position = epoch.mjd2000
         return pos, vel
+
+    def get_disturbances(self):
+        return self._disturbances
 
     def is_in_line_of_sight(
         self,
