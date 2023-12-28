@@ -342,6 +342,8 @@ class BaseActor(ABC):
 
     def get_disturbances(self):
         return self._disturbances
+    def get_previous_position(self):
+        return self._previous_position
 
     def is_in_line_of_sight(
         self,
