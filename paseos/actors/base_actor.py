@@ -161,6 +161,15 @@ class BaseActor(ABC):
         return hasattr(self, "_thermal_model") and self._thermal_model is not None
 
     @property
+    def has_attitude_model(self) -> bool:
+        """Returns true if actor's attitude is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_attitude_model") and self._attitude_model is not None
+
+    @property
     def mass(self) -> float:
         """Returns actor's mass in kg.
 
