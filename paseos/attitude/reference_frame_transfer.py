@@ -87,7 +87,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
     return T
 
 
-def eci_to_rpy(u, r, v):
+def eci_to_rpy(u, r, v, translation=True):
     """Converts a vector in the Earth-Centered Inertial Frame (ECI) to the Roll-Pitch-Yaw (RPY) reference frame of the
     spacecraft, using transformation matrix from transformation_matrix_eci_rpy function.
 
@@ -95,6 +95,7 @@ def eci_to_rpy(u, r, v):
         u (list of floats): vector in ECI
         r (list of floats): position vector of RPY reference frame wrt ECI frame
         v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        translation (boolean): does the vector need to be translated? (default=True)
 
     Returns:
         numpy array of floats: vector u w.r.t. RPY frame
@@ -102,11 +103,16 @@ def eci_to_rpy(u, r, v):
 
     T = transformation_matrix_eci_rpy(r, v)
 
+    if translation:
+        shift = r
+    else:
+        shift = 0
+
     # transform u vector with matrix multiplication
-    return T@u
+    return T@np.array(u) - shift
 
 
-def rpy_to_eci(u, r, v):
+def rpy_to_eci(u, r, v, translation=True):
     """Converts a vector in the Roll-Pitch-Yaw (RPY) of the spacecraft to the Earth-Centered Inertial Frame (ECI)
     reference frame, using the inverse transformation matrix from transformation_matrix_eci_rpy function.
 
@@ -114,15 +120,19 @@ def rpy_to_eci(u, r, v):
         u (list of floats): vector in RPY
         r (list of floats): position vector of RPY reference frame wrt ECI frame
         v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        translation (boolean): does the vector need to be translated? (default=True)
 
     Returns:
         numpy array of floats: vector u w.r.t. ECI frame
     """
 
     T = np.linalg.inv(transformation_matrix_eci_rpy(r, v))
-
+    if translation:
+        shift = r
+    else:
+        shift = 0
     # transform u vector with matrix multiplication
-    return T@np.array(u)
+    return T@np.array(u) + shift
 
 
 def rpy_to_body(u, euler_angles_in_rad):
@@ -138,7 +148,7 @@ def rpy_to_body(u, euler_angles_in_rad):
     """
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
-    if np.isclose(euler_angles_in_rad, np.zeros(3)):
+    if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
         return u
     else:
         T = transformation_matrix_rpy_body(euler_angles_in_rad)
@@ -158,7 +168,7 @@ def body_to_rpy(u, euler_angles_in_rad):
     """
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
-    if np.isclose(euler_angles_in_rad, np.zeros(3)):
+    if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
         return u
     else:
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
