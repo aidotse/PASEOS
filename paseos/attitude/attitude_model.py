@@ -3,16 +3,22 @@ import pykep as pk
 import numpy as np
 
 from disturbance_calculations import calculate_aero_torque, calculate_magnetic_torque, calculate_grav_torque
+from reference_frame_transfer import eci_to_rpy, rpy_to_eci, rpy_to_body, body_to_rpy
 
 class AttitudeModel:
 
 
     _actor = None
     _actor_attitude_in_rad = None
+    _actor_angular_velocity = None
+    _actor_angular_acceleration = None
     def __init__(
             self,
             local_actor,
+            # initial angular conditions: (defaults to 0)
             actor_initial_attitude_in_rad: list[float] = [0, 0, 0],
+            actor_initial_angular_velocity: list[float] = [0, 0, 0],
+            actor_initial_angular_acceleration: list[float] = [0, 0, 0],
             ## add args with default value = None, if
             # actor_dipole
             # actor_drag_coefficient
@@ -21,6 +27,8 @@ class AttitudeModel:
     ):
         self._actor = local_actor
         self._actor_attitude_in_rad = actor_initial_attitude_in_rad
+        self._actor_angular_velocity = actor_initial_angular_velocity
+        self._actor_angular_acceleration = actor_initial_angular_acceleration
 
     def nadir_vector(self):
         """computes unit vector pointing towards earth, inertial body frame
@@ -31,11 +39,11 @@ class AttitudeModel:
         u = np.array(self._actor.get_position)
         return -u/np.linalg.norm(u)
 
-    def disturbance_torque(self):
+    def calculate_disturbance_torque(self):
         """Computes total torque due to user specified disturbances
 
         Returns:
-            list [Tx, Ty, Tz]: total torques in Nm
+            list [Tx, Ty, Tz]: total combined torques in Nm
         """
         T = np.array([0,0,0])
         if "aerodynamic" in self._actor.get_disturbances:
@@ -56,5 +64,7 @@ class AttitudeModel:
         Returns:
             np array
         """
+        # disturbance torque vector
+        disturbance_torque = self.calculate_disturbance_torque()
+
         # out: new euler angles
-        #T = self._actor.get_disturbance

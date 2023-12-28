@@ -1,5 +1,7 @@
 # this functions could be implemented inside the attitude model class but I'd rather have it
 # separately right now.
+
+# OUTPUT NUMPY ARRAYS
 import numpy as np
 
 def calculate_aero_torque():
