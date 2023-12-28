@@ -1,3 +1,4 @@
+import numpy as np
 from loguru import logger
 import pykep as pk
 
@@ -21,6 +22,7 @@ class SpacecraftActor(BaseActor):
 
     _thermal_model = None
     _radiation_model = None
+    _attitude_model = None
 
     # If radiation randomly restarted the device
     _was_interrupted = False
@@ -164,3 +166,26 @@ class SpacecraftActor(BaseActor):
         self = charge_model.charge(self, duration_in_s)
 
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")
+
+    def attitude_in_rad(self):
+        """Returns the current attitude of the actor in radians
+
+        Returns:
+            list[floats]: actor attitude in radians
+        """
+        if type(self._attitude_model._actor_attitude_in_rad) == np.ndarray:
+            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad)
+        else:
+            return self._attitude_model._actor_attitude_in_rad
+
+    def attitude_in_deg(self):
+        """Returns the current attitude of the actor in degrees
+
+        Returns:
+            list[floats]: actor attitude in degrees
+        """
+        if type(self._attitude_model._actor_attitude_in_rad) == np.ndarray:
+            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad * 360/np.pi)
+        else:
+            return np.ndarray.tolist(np.array(self._attitude_model._actor_attitude_in_rad) * 360 / np.pi)
+
