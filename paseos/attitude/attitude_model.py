@@ -78,14 +78,17 @@ class AttitudeModel:
 
         # disturbance torque vector
         disturbance_torque = self.calculate_disturbance_torque()
-        disturbance_torque = np.array([1,2,3])  # placeholder
+        disturbance_torque = np.array([1,0,0])  # placeholder
 
-        #dynamics:
+        # dynamics:
+        # acceleration
         self._actor_angular_acceleration = (
                 np.linalg.inv(I) @ (disturbance_torque -
                                     np.cross(np.array(self._actor_angular_velocity),
                                              I @ np.array(self._actor_angular_velocity))))
 
-
+        # velocity
+        self._actor_angular_velocity += self._actor_angular_acceleration * dt
         # update attitude
+        self._actor_attitude_in_rad += self._actor_angular_velocity * dt
         # out: new euler angles
