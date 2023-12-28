@@ -2,8 +2,13 @@ from loguru import logger
 import pykep as pk
 import numpy as np
 
-from disturbance_calculations import calculate_aero_torque, calculate_magnetic_torque, calculate_grav_torque
-from reference_frame_transfer import eci_to_rpy, rpy_to_eci, rpy_to_body, body_to_rpy
+from paseos.attitude.disturbance_calculations import (calculate_aero_torque,
+                                                      calculate_magnetic_torque,
+                                                      calculate_grav_torque)
+from paseos.attitude.reference_frame_transfer import (eci_to_rpy,
+                                                      rpy_to_eci,
+                                                      rpy_to_body,
+                                                      body_to_rpy)
 
 class AttitudeModel:
 
@@ -45,12 +50,13 @@ class AttitudeModel:
         Returns:
             list [Tx, Ty, Tz]: total combined torques in Nm
         """
+
         T = np.array([0,0,0])
-        if "aerodynamic" in self._actor.get_disturbances:
+        if "aerodynamic" in self._actor.get_disturbances():
             T += calculate_aero_torque()
-        if "gravitational" in self._actor.get_disturbances:
+        if "gravitational" in self._actor.get_disturbances():
             T += calculate_grav_torque()
-        if "magnetic" in self._actor.get_disturbances:
+        if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
         return T
 
@@ -64,7 +70,22 @@ class AttitudeModel:
         Returns:
             np array
         """
+        # constants:
+        # self._actor_I =
+        # self._actor_mass = 50
+
+        I = np.array([[1,0,0], [0,1,0], [0,0,1]])
+
         # disturbance torque vector
         disturbance_torque = self.calculate_disturbance_torque()
+        disturbance_torque = np.array([1,2,3])  # placeholder
 
+        #dynamics:
+        self._actor_angular_acceleration = (
+                np.linalg.inv(I) @ (disturbance_torque -
+                                    np.cross(np.array(self._actor_angular_velocity),
+                                             I @ np.array(self._actor_angular_velocity))))
+
+
+        # update attitude
         # out: new euler angles
