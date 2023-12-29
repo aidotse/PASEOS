@@ -100,11 +100,11 @@ for i in range(20):
                    sat1.get_position_velocity(sat1.local_time)[0],
                    sat1.get_position_velocity(sat1.local_time)[1]))
     """
-
-    #vector = rpy_to_eci(body_to_rpy([0,0,1], euler),
+    """
+    vector = rpy_to_eci(body_to_rpy([0,0,1], euler),
                    sat1.get_position_velocity(sat1.local_time)[0],
                    sat1.get_position_velocity(sat1.local_time)[1])
-
+    """
     vector = sat1._attitude_model.nadir_vector()*1000000
     # print(pos, sat1.attitude_in_deg())
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
