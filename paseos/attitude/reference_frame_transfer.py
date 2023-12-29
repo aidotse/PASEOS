@@ -173,3 +173,38 @@ def body_to_rpy(u, euler_angles_in_rad):
     else:
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
         return T @ np.array(u)
+
+def get_euler(u, v):
+    """Returns euler angles between two vectors in the same reference frame
+
+    Args:
+        u (numpy ndarray): vector 1
+        v (numpy ndarray): vector 2
+
+    Returns: numpy ndarray ([roll, pitch, yaw]) in radians
+    """
+    # roll: angle between yz components
+    # components may be zero: (zero denominator)
+    if all(np.isclose(u[1:3], np.zeros(2))) or all(np.isclose(v[1:3], np.zeros(2))):
+        roll = 0
+    else:
+        roll = float(np.arccos((np.linalg.multi_dot([u[1:3], v[1:3]]))/
+                         (np.linalg.norm(u[1:3])*np.linalg.norm(v[1:3]))))
+
+    # pitch: angle between xz components
+    # components may be zero: (zero denominator)
+    if all(np.isclose(u[0:3:2], np.zeros(2))) or all(np.isclose(v[0:3:2], np.zeros(2))):
+        pitch = 0
+    else:
+        pitch = np.arccos((np.linalg.multi_dot([u[0:3:2], v[0:3:2]]))/
+                    (np.linalg.norm(u[0:3:2])*np.linalg.norm(v[0:3:2])))
+
+    # yaw: angle between xy components
+    # components may be zero: (zero denominator)
+    if all(np.isclose(u[0:2], np.zeros(2))) or all(np.isclose(v[0:2], np.zeros(2))):
+        yaw = 0
+    else:
+        yaw = np.arccos((np.linalg.multi_dot([u[0:2], v[0:2]])) /
+                          (np.linalg.norm(u[0:2]) * np.linalg.norm(v[0:2])))
+
+    return [roll, pitch, yaw]
