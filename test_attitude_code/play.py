@@ -1,23 +1,33 @@
 # We use pykep for orbit determination
 import pykep as pk
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 import paseos
 from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.actor_builder import ActorBuilder
 from paseos.attitude.reference_frame_transfer import body_to_rpy, rpy_to_eci
 
+matplotlib.use("Qt5Agg")
+
 # Define central body
 earth = pk.planet.jpl_lp("earth")
 
 sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
-
+"""
 ActorBuilder.set_orbit(
     sat1,
     position=[10000000, 1e-3, 1e-3],
     velocity=[1e-3, 8000, 1e-3],
+    epoch=pk.epoch(0),
+    central_body=earth,
+)
+"""
+ActorBuilder.set_orbit(
+    sat1,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000, 0],
     epoch=pk.epoch(0),
     central_body=earth,
 )
@@ -73,7 +83,8 @@ for i in range(100):
     z.append(sat1.get_position(sat1.local_time)[2])
     print(sat1.attitude_in_deg(), i)
 """
-ax = plt.figure().add_subplot(111, projection='3d')
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 for i in range(20):
     sim.advance_time(100,0)
 
@@ -89,19 +100,31 @@ for i in range(20):
                    sat1.get_position_velocity(sat1.local_time)[0],
                    sat1.get_position_velocity(sat1.local_time)[1]))
     """
-    vector = rpy_to_eci(body_to_rpy([0,0,1], euler),
+
+    #vector = rpy_to_eci(body_to_rpy([0,0,1], euler),
                    sat1.get_position_velocity(sat1.local_time)[0],
                    sat1.get_position_velocity(sat1.local_time)[1])
-    print(pos, sat1.attitude_in_deg())
-    ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2], length=0.2)
-axmin = min(pos)
-axmax = max(pos)
+
+    vector = sat1._attitude_model.nadir_vector()*1000000
+    # print(pos, sat1.attitude_in_deg())
+    ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
+axmin = min(min([x,y,z]))*1.2
+axmax = max(max([x,y,z]))*1.2
+
 ax.axes.set_xlim3d(left=axmin, right=axmax)
 ax.axes.set_ylim3d(bottom=axmin, top=axmax)
 ax.axes.set_zlim3d(bottom=axmin, top=axmax)
+
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+
 ax.plot(x,y,z)
 ax.scatter(0,0,0)
+"""
+plt.plot([1,2,3,4,5])
 plt.show()
+"""
 #%%
 # Write an animation of the next 50 steps a 100s to a file called test.mp4
 # plotter.animate(sim,dt=200,steps=100,save_to_file="test")
