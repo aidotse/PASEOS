@@ -44,7 +44,7 @@ ActorBuilder.set_thermal_model(
     actor_thermal_capacity=0.89,
 )
 
-ActorBuilder.set_attitude_model(sat1)
+ActorBuilder.set_attitude_model(sat1, actor_initial_angular_velocity=[0,10,0])
 
 ActorBuilder.set_disturbances(sat1,True, True)
 
@@ -86,9 +86,8 @@ for i in range(100):
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 for i in range(20):
-    sim.advance_time(100,0)
-
     pos = (sat1.get_position(sat1.local_time))
+    print(pos)
     x.append(sat1.get_position(sat1.local_time)[0])
     y.append(sat1.get_position(sat1.local_time)[1])
     z.append(sat1.get_position(sat1.local_time)[2])
@@ -105,9 +104,16 @@ for i in range(20):
                    sat1.get_position_velocity(sat1.local_time)[0],
                    sat1.get_position_velocity(sat1.local_time)[1])
     """
-    vector = sat1._attitude_model.nadir_vector()*1000000
+    # vector = sat1._attitude_model.nadir_vector()*1000000
+    vector = sat1.pointing_vector()
+    #print(vector)
+    vector[np.isclose(vector, np.zeros(3))] = 0
+    #print(vector)
+    vector = vector * 1e6
+    print(vector)
     # print(pos, sat1.attitude_in_deg())
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
+    sim.advance_time(100, 0)
 axmin = min(min([x,y,z]))*1.2
 axmax = max(max([x,y,z]))*1.2
 
