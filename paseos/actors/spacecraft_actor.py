@@ -189,3 +189,11 @@ class SpacecraftActor(BaseActor):
         else:
             return np.ndarray.tolist(np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi)
 
+
+    def pointing_vector(self):
+        """Returns the spacecraft pointing vector
+
+        Returns:
+            numpy ndarray (x, y, z)
+        """
+        return self._attitude_model._actor_pointing_vector_eci
