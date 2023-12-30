@@ -341,9 +341,12 @@ class BaseActor(ABC):
         return pos, vel
 
     def get_disturbances(self):
+        """Get the user specified spacecraft attitude disturbances
+
+        Returns:
+            list[string]: name of disturbances
+        """
         return self._disturbances
-    def get_previous_position(self):
-        return self._previous_position
 
     def is_in_line_of_sight(
         self,
