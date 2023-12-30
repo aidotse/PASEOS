@@ -174,6 +174,21 @@ def body_to_rpy(u, euler_angles_in_rad):
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
         return T @ np.array(u)
 
+def angle_between_vectors(u, v, n):
+    """Returns right-handed rotation angle between  u and v, with u being the reference for measuring the right-handed
+    rotation. Formula:
+                        angle = arctan2( u x v . n, u . v)
+
+    Args:
+        u (numpy ndarray): reference vector
+        v (numpy ndarray): rotated vector
+        n (numpy ndarray): plane normal vector
+
+    Returns: float angle in radians
+
+    """
+    return np.arctan2(np.linalg.multi_dot([np.cross(u, v), n]), np.linalg.multi_dot([u, v]))
+
 def get_euler(u, v):
     """Returns euler angles between two vectors in the same reference frame
 
@@ -182,6 +197,7 @@ def get_euler(u, v):
         v (numpy ndarray): vector 2
 
     Returns: numpy ndarray ([roll, pitch, yaw]) in radians
+    """
     """
     # roll: angle between yz components
     # components may be zero: (zero denominator)
@@ -206,5 +222,23 @@ def get_euler(u, v):
     else:
         yaw = np.arccos((np.linalg.multi_dot([u[0:2], v[0:2]])) /
                           (np.linalg.norm(u[0:2]) * np.linalg.norm(v[0:2])))
+    """
+    # roll: angle between yz components
+    # normal vector = x-axis
+    u_yz = np.array([0, u[1], u[2]])
+    v_yz = np.array([0, v[1], v[2]])
+    roll = angle_between_vectors(u_yz, v_yz, np.array([1,0,0]))
+
+    # pitch: angle between xz components
+    # normal vector = y-axis
+    u_xz = np.array([u[0], 0, u[2]])
+    v_xz = np.array([v[0], 0, v[2]])
+    pitch = angle_between_vectors(u_xz, v_xz, np.array([0,1,0]))
+
+    # yaw: angle between xy components
+    # normal vector = z-axis
+    u_xy = np.array([u[0], u[1], 0])
+    v_xy = np.array([v[0], v[1], 0])
+    yaw = angle_between_vectors(u_xy, v_xy, np.array([0,0,1]))
 
     return [roll, pitch, yaw]
