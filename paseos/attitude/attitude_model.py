@@ -250,7 +250,7 @@ class AttitudeModel:
             # set values close to zero equal to zero.
             self._actor_pointing_vector_eci[np.isclose(self._actor_pointing_vector_eci, np.zeros(3))] = 0
 
-
+            # todo: fix: with only z rotaion, roll is introduced to pointing vector
             # convert to list
             self._actor_attitude_in_rad = np.ndarray.tolist(self._actor_attitude_in_rad)
             """
