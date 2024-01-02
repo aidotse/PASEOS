@@ -87,7 +87,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
     return T
 
 
-def eci_to_rpy(u, r, v, translation=True):
+def eci_to_rpy(u, r, v, translation=False):
     """Converts a vector in the Earth-Centered Inertial Frame (ECI) to the Roll-Pitch-Yaw (RPY) reference frame of the
     spacecraft, using transformation matrix from transformation_matrix_eci_rpy function.
 
@@ -112,7 +112,7 @@ def eci_to_rpy(u, r, v, translation=True):
     return T@np.array(u) - shift
 
 
-def rpy_to_eci(u, r, v, translation=True):
+def rpy_to_eci(u, r, v, translation=False):
     """Converts a vector in the Roll-Pitch-Yaw (RPY) of the spacecraft to the Earth-Centered Inertial Frame (ECI)
     reference frame, using the inverse transformation matrix from transformation_matrix_eci_rpy function.
 
@@ -187,9 +187,12 @@ def angle_between_vectors(u, v, n):
     Returns: float angle in radians
 
     """
+    # todo: solve problem when two
     return np.arctan2(np.linalg.multi_dot([np.cross(u, v), n]), np.linalg.multi_dot([u, v]))
 
+# getting euler angls from one vector is impossible
 def get_euler(u, v):
+#def get_euler(u):
     """Returns euler angles between two vectors in the same reference frame
 
     Args:
@@ -198,30 +201,6 @@ def get_euler(u, v):
 
     Returns: numpy ndarray ([roll, pitch, yaw]) in radians
     """
-    """
-    # roll: angle between yz components
-    # components may be zero: (zero denominator)
-    if all(np.isclose(u[1:3], np.zeros(2))) or all(np.isclose(v[1:3], np.zeros(2))):
-        roll = 0
-    else:
-        roll = float(np.arccos((np.linalg.multi_dot([u[1:3], v[1:3]]))/
-                         (np.linalg.norm(u[1:3])*np.linalg.norm(v[1:3]))))
-
-    # pitch: angle between xz components
-    # components may be zero: (zero denominator)
-    if all(np.isclose(u[0:3:2], np.zeros(2))) or all(np.isclose(v[0:3:2], np.zeros(2))):
-        pitch = 0
-    else:
-        pitch = np.arccos((np.linalg.multi_dot([u[0:3:2], v[0:3:2]]))/
-                    (np.linalg.norm(u[0:3:2])*np.linalg.norm(v[0:3:2])))
-
-    # yaw: angle between xy components
-    # components may be zero: (zero denominator)
-    if all(np.isclose(u[0:2], np.zeros(2))) or all(np.isclose(v[0:2], np.zeros(2))):
-        yaw = 0
-    else:
-        yaw = np.arccos((np.linalg.multi_dot([u[0:2], v[0:2]])) /
-                          (np.linalg.norm(u[0:2]) * np.linalg.norm(v[0:2])))
     """
     # roll: angle between yz components
     # normal vector = x-axis
@@ -240,5 +219,15 @@ def get_euler(u, v):
     u_xy = np.array([u[0], u[1], 0])
     v_xy = np.array([v[0], v[1], 0])
     yaw = angle_between_vectors(u_xy, v_xy, np.array([0,0,1]))
+    """
 
+    roll = angle_between_vectors(u, v, np.array([1, 0, 0]))
+    pitch = angle_between_vectors(u, v, np.array([0,1,0]))
+    yaw = angle_between_vectors(u, v, np.array([0,0,1]))
+    """
+    # just vector u wrt rpy frame.
+    roll =  angle_between_vectors(u, np.array([0, 0, 1]), np.array([1, 0, 0]))
+    pitch = angle_between_vectors(u, np.array([0, 0, 1]), np.array([0, 1, 0]))
+    yaw =   angle_between_vectors(u, np.array([0, 0, 1]), np.array([0, 0, 1]))
+    """
     return [roll, pitch, yaw]
