@@ -43,8 +43,11 @@ ActorBuilder.set_thermal_model(
     actor_emissive_area=18,
     actor_thermal_capacity=0.89,
 )
-
-ActorBuilder.set_attitude_model(sat1, actor_initial_angular_velocity=[0,10,0])
+# when i = 21 in loop, 0.00158 rad/sec will rotate 180 deg about 1 axis
+ActorBuilder.set_attitude_model(
+    sat1,
+    actor_initial_angular_velocity=[0.00158, 0.0, 0.0],
+    actor_pointing_vector_body=[0.0, 0.0, 1.0])
 
 ActorBuilder.set_disturbances(sat1,True, True)
 
@@ -85,9 +88,8 @@ for i in range(100):
 """
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-for i in range(20):
+for i in range(21):
     pos = (sat1.get_position(sat1.local_time))
-    print(pos)
     x.append(sat1.get_position(sat1.local_time)[0])
     y.append(sat1.get_position(sat1.local_time)[1])
     z.append(sat1.get_position(sat1.local_time)[2])
@@ -108,14 +110,15 @@ for i in range(20):
     vector = sat1.pointing_vector()
     #print(vector)
     vector[np.isclose(vector, np.zeros(3))] = 0
+    print(vector, "test test test test test")
     #print(vector)
-    vector = vector * 1e6
-    print(vector)
+    vector = vector * 2e6
     # print(pos, sat1.attitude_in_deg())
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
     sim.advance_time(100, 0)
-axmin = min(min([x,y,z]))*1.2
-axmax = max(max([x,y,z]))*1.2
+axmin = min([min(x), min(y), min(z)])*1.1
+axmax = max([max(x), max(y), max(z)])*1.1
+print(axmin, axmax)
 
 ax.axes.set_xlim3d(left=axmin, right=axmax)
 ax.axes.set_ylim3d(bottom=axmin, top=axmax)
@@ -127,11 +130,3 @@ ax.set_zlabel("z")
 
 ax.plot(x,y,z)
 ax.scatter(0,0,0)
-"""
-plt.plot([1,2,3,4,5])
-plt.show()
-"""
-#%%
-# Write an animation of the next 50 steps a 100s to a file called test.mp4
-# plotter.animate(sim,dt=200,steps=100,save_to_file="test")
-
