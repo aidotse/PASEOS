@@ -43,12 +43,17 @@ ActorBuilder.set_thermal_model(
     actor_emissive_area=18,
     actor_thermal_capacity=0.89,
 )
+pure_axis_rotation = [[0.00158, 0.0, 0.0], [0.0, 0.00158, 0.0], [0.0, 0.0, 0.00158]]
+axes_list = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+axis = 2    # x:0, y:1, z:2
 # when i = 21 in loop, 0.00158 rad/sec will rotate 180 deg about 1 axis
 ActorBuilder.set_attitude_model(
     sat1,
+    #actor_initial_angular_velocity=pure_axis_rotation[axis],
+    #actor_pointing_vector_body=axes_list[axis])
     actor_initial_angular_velocity=[0.00158, 0.0, 0.0],
-    actor_pointing_vector_body=[1.0, 0.0, 0.0])
-
+    actor_pointing_vector_body=[0.0, 0.0, 1.0]
+)
 ActorBuilder.set_disturbances(sat1,True, True)
 
 """
