@@ -1,123 +1,92 @@
 from loguru import logger
-import numpy as np
 import trimesh
 
 
-class CuboidGeometricModel:
+class GeometricModel:
     """This model describes the geometry of the spacecraft
     Currently it assumes the spacecraft to be a cuboid shape, with width, length and height
     """
 
     _actor = None
-    _actor_mass = None
-    _actor_height = None
-    _actor_length = None
-    _actor_width = None
+    _actor_mesh = None
+    _actor_center_of_gravity = None
+    _actor_moment_of_inertia = None
 
     def __init__(
-        self, local_actor, actor_mass, actor_height, actor_length, actor_width
+        self, local_actor, actor_mass, vertices=None, faces=None, scale=1
     ) -> None:
         """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
-        Width is the size on the x-direction, Length in the y-direction, and height in the z-direction.
+        If no vertices or faces are provided, defaults to a cube with unit length sides
 
         Args:
             actor (SpacecraftActor): Actor to model.
             actor_mass (float): Actor's mass in kg.
-            actor_height: Actor's size in the z-direction.
-            actor_length: Actor's size in the y-direction.
-            actor_width: Actor's size in the x-direction.
+            vertices (list): List of all vertices of the mesh
+            faces (list): List of the indexes of the vertices of a face
+            scale (float): Parameter to scale the cuboid by, defaults to 1
         """
         logger.trace("Initializing cuboid geometrical model.")
 
         self._actor = local_actor
         self._actor_mass = actor_mass
-        self._actor_height = actor_height
-        self._actor_length = actor_length
-        self._actor_width = actor_width
+        self.vertices = vertices
+        self.faces = faces
+        self.scale = scale
 
-    @property
-    def _find_moi(self):
-        """Actor moment of inertia, currently only suitable for a rectangular prism
-
-        Returns:
-            np.array: Mass moments of inertia for the actor
-
-        I in the form of [[Ixx Ixy Ixz]
-                          [Iyx Iyy Iyx]
-                          [Izx Izy Izz]]
-        """
-        Ixx = (
-            self._actor_mass * (self._actor_height**2 + self._actor_length**2) / 12
-        )
-        Iyy = self._actor_mass * (self._actor_height**2 + self._actor_width**2) / 12
-        Izz = self._actor_mass * (self._actor_width**2 + self._actor_length**2) / 12
-        # assume uniform mass distribution, hence Ixy, etc. are all zero
-        self._actor_I = np.array([[Ixx, 0, 0], [0, Iyy, 0], [0, 0, Izz]])
-        return self._actor_I
-
-    def _find_cg(self):
-        """Gives the volumetric center of mass of the actor.
+    def set_mesh(self):
+        """Creates the mesh of the satellite, defaults to a cuboid scales by the scale value
 
         Returns:
-            np.array: Coordinates of the center of gravity of the mesh
+            mesh: Trimesh mesh of the satellite
         """
-        return np.array([0, 0, 0])
-
-    # potentially add later for disturbances
-    # def _find_cp(self):
-    # def _find_dipole(self):
-
-
-class ImportGeometricModel:
-    """This model describes the geometry of the spacecraft
-    It uses the package Trimesh to be able to import an .obj file and use this as the satellite's shape.
-    The coordinate system of the mesh is adopted for the satellite
-    """
-
-    _actor = None
-    _actor_mass = None
-    _actor_cg = None
-    _actor_I = None
-
-    def __init__(self, local_actor, actor_mass, model_name) -> None:
-        """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
-
-
-        Args:
-            actor (SpacecraftActor): Actor to model.
-            actor_mass (float): Actor's mass in kg.
-            model_name (string): Name of the .obj file to use as satellite geometry
-        """
-        logger.trace("Initializing import geometrical model.")
-
-        self._actor = local_actor
-        self._actor_mass = actor_mass
-        file_path = "objects/" + model_name + ".obj"
-        self._mesh = trimesh.load_mesh(file_path)
+        if self.vertices is None:
+            self.vertices = [
+                [-0.5, -0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, 0.5, 0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, -0.5],
+                [0.5, 0.5, 0.5],
+            ]
+            self.faces = [
+                [0, 1, 3],
+                [0, 3, 2],
+                [0, 2, 6],
+                [0, 6, 4],
+                [1, 5, 3],
+                [3, 5, 7],
+                [2, 3, 7],
+                [2, 7, 6],
+                [4, 6, 7],
+                [4, 7, 5],
+                [0, 4, 1],
+                [1, 4, 5],
+            ]
+        mesh = trimesh.Trimesh(self.vertices, self.faces)
+        self._actor_mesh = mesh.apply_scale(self.scale)
+        return self._actor_mesh
 
     @property
-    def _find_moi(self):
+    def find_moment_of_inertia(self):
         """Gives the moment of inertia of the actor, assuming constant density
 
         Returns:
             np.array: Mass moments of inertia for the actor
 
-        I in the form of [[Ixx Ixy Ixz]
-                          [Iyx Iyy Iyx]
-                          [Izx Izy Izz]]
+        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
+                                                    [Iyx Iyy Iyx]
+                                                    [Izx Izy Izz]]
         """
-        self._actor_I = self._mesh.moment_inertia
-        return self._actor_I
+        self._actor_moment_of_inertia = self._actor_mesh.moment_inertia
+        return self._actor_moment_of_inertia
 
-    def find_cg(self):
+    def find_center_of_gravity(self):
         """Gives the volumetric center of mass of the actor.
 
         Returns:
             np.array: Coordinates of the center of gravity of the mesh
         """
-        self._actor_cg = self._mesh.center_mass
-        return self._actor_cg
-
-    # potentially add later for disturbances
-    # def _find_cp(self):
-    # def _find_dipole(self):
+        self._actor_center_of_gravity = self._actor_mesh.center_mass
+        return self._actor_center_of_gravity
