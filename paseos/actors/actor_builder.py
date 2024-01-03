@@ -323,7 +323,7 @@ class ActorBuilder:
             length (float): Size of the spacecraft in y (along-track) direction in meters
             width (float): Size of the spacecraft in x (across-track) direction in meters
         """
-        assert mass >= 0, "Mass is <= 0"
+        assert mass > 0, "Mass is > 0"
         assert height >= 0, "Height is <= 0"
         assert length >= 0, "Length is <= 0"
         assert width >= 0, "Width is <= 0"
