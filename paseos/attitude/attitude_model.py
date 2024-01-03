@@ -63,6 +63,7 @@ class AttitudeModel:
         # todo: make function transforming a vector from body to eci
         # todo: consistency in ndarray or lists
         # todo: allow for initial attitude
+        # todo: positive roll seems to result in negative rotations
         self._actor_pointing_vector_eci = rpy_to_eci(
             body_to_rpy(self._actor_pointing_vector_body, actor_initial_attitude_in_rad),
             self._actor.get_position(self._actor.local_time),
@@ -257,7 +258,7 @@ class AttitudeModel:
             # attitude change due to two rotations:
             #   theta_1: rotation of the body frame wrt RPY, because of its fixed attitude in the inertial frame.
             #   theta_2: rotation of the body frame wrt RPY due to the body angular velocity * dt
-
+            # todo: both thetas are negative. change?
             # theta_1:
             # rotation angle: arccos( (p . p_previous) / (||p|| ||p_previous||) )
             rpy_inertial_rotation_angle = np.arccos(np.linalg.multi_dot([position, previous_position]) /
@@ -274,7 +275,7 @@ class AttitudeModel:
             else:
                 body_rotation = np.array(self._actor_angular_velocity) * dt
                 # theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad) # this seems to break it
-                self._actor_theta_2 += body_rotation
+                self._actor_theta_2 += -body_rotation
 
             # updated attitude
             self._actor_attitude_in_rad = self._actor_theta_1 + self._actor_theta_2
