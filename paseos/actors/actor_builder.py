@@ -324,7 +324,7 @@ class ActorBuilder:
             faces (list): List of the indexes of the vertices of a face
             scale (float): Parameter to scale the cuboid by, defaults to 1
         """
-        assert mass >= 0, "Mass is <= 0"
+        assert mass > 0, "Mass is > 0"
 
         actor._mass = mass
         geometric_model = GeometricModel(

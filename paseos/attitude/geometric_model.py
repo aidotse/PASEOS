@@ -19,7 +19,7 @@ class GeometricModel:
         If no vertices or faces are provided, defaults to a cube with unit length sides
 
         Args:
-            actor (SpacecraftActor): Actor to model.
+            local_actor (SpacecraftActor): Actor to model.
             actor_mass (float): Actor's mass in kg.
             vertices (list): List of all vertices of the mesh
             faces (list): List of the indexes of the vertices of a face
