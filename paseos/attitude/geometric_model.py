@@ -21,7 +21,7 @@ class CuboidGeometricModel:
         Width is the size on the x-direction, Length in the y-direction, and height in the z-direction.
 
         Args:
-            actor (SpacecraftActor): Actor to model.
+            local_actor (SpacecraftActor): Actor to model.
             actor_mass (float): Actor's mass in kg.
             actor_height: Actor's size in the z-direction.
             actor_length: Actor's size in the y-direction.
