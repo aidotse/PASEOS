@@ -61,7 +61,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         T (numpy array of floats): transformation matrix
     """
     roll, pitch, yaw = euler_angles_in_rad
-
+    """
     # individual axis rotations:
     A = np.array([
         [1, 0, 0],
@@ -79,6 +79,24 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         [np.cos(yaw), np.sin(yaw), 0],
         [-np.sin(yaw), np.cos(yaw), 0],
         [0, 0, 1]
+    ])
+    """
+    A = np.array([
+        [np.cos(yaw), np.sin(yaw), 0],
+        [-np.sin(yaw), np.cos(yaw), 0],
+        [0, 0, 1]
+    ])
+
+    B = np.array([
+        [np.cos(pitch), 0, -np.sin(pitch)],
+        [0, 1, 0],
+        [np.sin(pitch), 0, np.cos(pitch)]
+    ])
+
+    C = np.array([
+        [1, 0, 0],
+        [0, np.cos(roll), np.sin(roll)],
+        [0, -np.sin(roll), np.cos(roll)]
     ])
 
     # Transformation matrix:
@@ -149,7 +167,7 @@ def rpy_to_body(u, euler_angles_in_rad):
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
-        return u
+        return np.array(u)
     else:
         T = transformation_matrix_rpy_body(euler_angles_in_rad)
         return T@np.array(u)
@@ -169,7 +187,7 @@ def body_to_rpy(u, euler_angles_in_rad):
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
-        return u
+        return np.array(u)
     else:
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
         return T @ np.array(u)
