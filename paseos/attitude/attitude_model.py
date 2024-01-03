@@ -48,7 +48,9 @@ class AttitudeModel:
         self._actor_angular_velocity = actor_initial_angular_velocity
         self._actor_angular_acceleration = actor_initial_angular_acceleration
         # pointing vectors: default body: z-axis, eci: initial nadir pointing
-        self._actor_pointing_vector_body = actor_pointing_vector_body
+        # normalize inputted pointing vector
+        self._actor_pointing_vector_body = (np.array(actor_pointing_vector_body) /
+                                            np.linalg.norm(np.array(actor_pointing_vector_body)))
         """
         if actor_initial_attitude_in_rad == [0, 0, 0]:
             self._actor_pointing_vector_eci = self.nadir_vector()
@@ -60,8 +62,9 @@ class AttitudeModel:
         """
         # todo: make function transforming a vector from body to eci
         # todo: consistency in ndarray or lists
+        # todo: allow for initial attitude
         self._actor_pointing_vector_eci = rpy_to_eci(
-            body_to_rpy(actor_pointing_vector_body, actor_initial_attitude_in_rad),
+            body_to_rpy(self._actor_pointing_vector_body, actor_initial_attitude_in_rad),
             self._actor.get_position(self._actor.local_time),
             self._actor.get_position_velocity(self._actor.local_time)[1])
         self._actor_t = 0
