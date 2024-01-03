@@ -47,7 +47,7 @@ ActorBuilder.set_thermal_model(
 ActorBuilder.set_attitude_model(
     sat1,
     actor_initial_angular_velocity=[0.00158, 0.0, 0.0],
-    actor_pointing_vector_body=[0.0, 0.0, 1.0])
+    actor_pointing_vector_body=[1.0, 0.0, 0.0])
 
 ActorBuilder.set_disturbances(sat1,True, True)
 

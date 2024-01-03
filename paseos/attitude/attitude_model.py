@@ -195,7 +195,7 @@ class AttitudeModel:
         # call previous position before velocity, as "get_position_velocity" sets previous position to current one
         # todo: solve this? constrained to get previous position only before doing "get_pos_vel()"
         # todo: velocity function starts previous position... when initializing pointing vector,
-        #       looks like this means next line is not needed
+        #       looks like this means next line is not needed:
         if not previous_position:  # first timestep
 
             # velocity, called only to update previous position.
@@ -203,36 +203,38 @@ class AttitudeModel:
             starting_position = position
 
         else:
+            # step:
             step = self._actor_t
+
             # velocity
             velocity = self._actor.get_position_velocity(self._actor.local_time)[1]
+
             # orbital plane normal unit vector
             self._actor_orbital_plane_normal = (np.cross(position, velocity) /
                                                  np.linalg.norm(np.cross(position, velocity)))
-            # nadir pointing vector in ECI
-            nadir_eci = self.nadir_vector()
-
-            # print(self._actor_t, "difference ", np.array(position) - np.array(previous_position))
-            # print(position, previous_position)
 
             # attitude change due to two rotations:
             #   theta_1: rotation of the body frame wrt RPY, because of its fixed attitude in the inertial frame.
             #   theta_2: rotation of the body frame wrt RPY due to the body angular velocity * dt
 
             # theta_1:
+            # rotation angle: arccos( (p . p_previous) / (||p|| ||p_previous||) )
             rpy_inertial_rotation_angle = np.arccos(np.linalg.multi_dot([position, previous_position]) /
                                 (np.linalg.norm(position) * np.linalg.norm(previous_position)))
+            # assign this rotation to the vector perpendicular to rotation plane
             rpy_inertial_rotation_vector = self._actor_orbital_plane_normal * rpy_inertial_rotation_angle
+            # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
             theta_1 = -eci_to_rpy(rpy_inertial_rotation_vector, position, velocity)
 
             # theta_2:
-            body_rotation = np.ndarray.tolist(np.array(self._actor_angular_velocity) * dt)
-            #theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad)
-            theta_2 = np.array(body_rotation)
-
-            body_z_in_rpy = body_to_rpy([0,0,1], self._actor_attitude_in_rad)
-            body_x_in_rpy = body_to_rpy([1,0,0], self._actor_attitude_in_rad)
-
+            # to not have the spacecraft rotate in the first timestep:
+            if self._actor_t == 0:
+                theta_2 = np.array([0,0,0])
+            else:
+                body_rotation = np.ndarray.tolist(np.array(self._actor_angular_velocity) * dt)
+                #theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad) # this seems to break it
+                theta_2 = np.array(body_rotation)
+    
             # updated attitude
             self._actor_attitude_in_rad += theta_1 + theta_2
 
@@ -242,39 +244,16 @@ class AttitudeModel:
             # attitude in range [-π, π]:
             self._actor_attitude_in_rad = np.arctan2(
                 np.sin(self._actor_attitude_in_rad), np.cos(self._actor_attitude_in_rad))
-
-            ### pointing vector
-
+            # pointing vector
             self._actor_pointing_vector_eci = rpy_to_eci(body_to_rpy(
                 self._actor_pointing_vector_body, np.ndarray.tolist(self._actor_attitude_in_rad)), position, velocity)
+            
             # set values close to zero equal to zero.
             self._actor_pointing_vector_eci[np.isclose(self._actor_pointing_vector_eci, np.zeros(3))] = 0
 
             # todo: fix: with only z rotaion, roll is introduced to pointing vector
             # convert to list
             self._actor_attitude_in_rad = np.ndarray.tolist(self._actor_attitude_in_rad)
-            """
-            # attitude wrt rpy changes from previous timestep.
-            # due to rotation of the rpy frame itself wrt eci, and the angular velocity of the body wrt eci.
-            rpy_rotation_in_eci = get_euler(nadir_eci, self._actor_pointing_vector_eci)
-
-            body_rotation_in_rpy = np.ndarray.tolist(np.array(body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad)) * dt)
-
-            change_in_attitude_due_to_ang_rotation_in_rpy = np.array(rpy_to_eci(body_rotation_in_rpy, position, velocity, translation=False))
-            self._actor_attitude_in_rad = \
-                (np.array(eci_to_rpy(rpy_rotation_in_eci + change_in_attitude_due_to_ang_rotation_in_rpy, position, velocity, translation=False)))
-
-            # self._actor_angular_velocity = changes with acceleration in body frame only
-
-            self._actor_pointing_vector_eci = rpy_to_eci(body_to_rpy([0,0,1], self._actor_attitude_in_rad), position, velocity, translation=False)
-            self._actor_pointing_vector_eci = self._actor_pointing_vector_eci / np.linalg.norm(self._actor_pointing_vector_eci)
-            self._actor_pointing_vector_eci[np.isclose(self._actor_pointing_vector_eci, np.zeros(3))] = 0
-
-            self._actor_attitude_in_rad = np.arctan2(
-                np.sin(self._actor_attitude_in_rad), np.cos(self._actor_attitude_in_rad))
-            """
-
-        #print(self._actor_t, self._actor.attitude_in_deg(), self._actor_pointing_vector_eci)
 
         self._actor_t += 1
 
