@@ -10,7 +10,6 @@ from paseos.attitude.reference_frame_transfer import (eci_to_rpy,
                                                       rpy_to_eci,
                                                       rpy_to_body,
                                                       body_to_rpy,
-                                                      get_euler,
                                                       rodriguez_rotation)
 
 class AttitudeModel:
@@ -81,7 +80,8 @@ class AttitudeModel:
         self._actor_body_rotation = np.array([0.0,0.0,0.0])
 
         self._actor_theta_1 = np.array([0.0,0.0,0.0])
-        self._actor_theta_2 = np.array([0.0,0.0,0.0])
+        #self._actor_theta_2 = np.array([0.0,0.0,0.0])
+        self._actor_theta_2 = actor_initial_attitude_in_rad
 
     def nadir_vector(self):
         """computes unit vector pointing towards earth, inertial body frame
@@ -201,9 +201,9 @@ class AttitudeModel:
         # previous position (will be None at first timestep)
         previous_position = self._actor._previous_position
         # call previous position before velocity, as "get_position_velocity" sets previous position to current one
-        # todo: solve this? constrained to get previous position only before doing "get_pos_vel()"
         # todo: velocity function starts previous position... when initializing pointing vector,
         #       looks like this means next line is not needed:
+        # todo: find correct way of relating roll, pitch, yaw angles to a vector (to have initial attitude)
         if not previous_position:  # first timestep
 
             # velocity, called only to update previous position.
@@ -322,7 +322,8 @@ class AttitudeModel:
             # theta_2:
             # to not have the spacecraft rotate in the first timestep:
             if self._actor_t == 0:
-                self._actor_theta_2 = np.array([0.0, 0.0, 0.0])
+                #self._actor_theta_2 = np.array([0.0, 0.0, 0.0])
+                pass
             else:
                 body_rotation = np.array(self._actor_angular_velocity) * dt
                 # theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad) # this seems to break it
@@ -348,11 +349,11 @@ class AttitudeModel:
             pointing_vector = rodriguez_rotation(self._actor_pointing_vector_body, self._actor_theta_2)
 
             # secondly rotate body pointing vector with theta 1:
-            """
+
             # todo: figure out how this works:
             # pointing vector is rotated every step wrt beginning position, in the beginning body coincides with rpy,
             # thus rodriguez rotations happen in rpy frame, not body.
-            
+            """
             # therefore the following actually rotates the body within rpy with theta 1:
             pointing_vector = body_to_rpy(np.ndarray.tolist(pointing_vector), np.ndarray.tolist(self._actor_theta_1))
             self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)

@@ -61,7 +61,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         T (numpy array of floats): transformation matrix
     """
     roll, pitch, yaw = euler_angles_in_rad
-    """
+
     # individual axis rotations:
     A = np.array([
         [1, 0, 0],
@@ -98,6 +98,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         [0, np.cos(roll), np.sin(roll)],
         [0, -np.sin(roll), np.cos(roll)]
     ])
+    """
 
     # Transformation matrix:
     T = A @ B @ C
@@ -192,6 +193,7 @@ def body_to_rpy(u, euler_angles_in_rad):
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
         return T @ np.array(u)
 
+# next two functions don't work
 def angle_between_vectors(u, v, n):
     """Returns right-handed rotation angle between  u and v, with u being the reference for measuring the right-handed
     rotation. Formula:
@@ -277,3 +279,22 @@ def rodriguez_rotation(p, angles):
                       (np.cross(k, p)) * np.sin(theta)) +
                      k * (np.linalg.multi_dot([k, p])) *(1 - np.cos(theta)))
         return p_rotated
+
+def rpy_to_body_two(u, rpy_angles):
+    x = np.array([rpy_angles[0], 0, 0])
+    y = np.array([0, rpy_angles[1], 0])
+    z = np.array([0, 0, rpy_angles[2]])
+
+    # yaw: rotation around z-axis
+    u = rodriguez_rotation(u, z)
+    y = rodriguez_rotation(y, z)
+    x = rodriguez_rotation(x, z)
+
+    # pitch: rotation about new y-axis
+    u = rodriguez_rotation(u, y)
+    x = rodriguez_rotation(x, y)
+
+    # roll: rotation about new x-axis
+    u = rodriguez_rotation(u, x)
+
+    return u
