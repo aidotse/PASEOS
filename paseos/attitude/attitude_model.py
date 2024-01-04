@@ -10,7 +10,8 @@ from paseos.attitude.reference_frame_transfer import (eci_to_rpy,
                                                       rpy_to_eci,
                                                       rpy_to_body,
                                                       body_to_rpy,
-                                                      get_euler)
+                                                      get_euler,
+                                                      rodriguez_rotation)
 
 class AttitudeModel:
 
@@ -342,21 +343,22 @@ class AttitudeModel:
             # the following sequence of rotations is very important in order to make the model work
             # more insight into the transformation functions rotation sequences is needed to make sense of this
             # first rotate body pointing vector with theta 2:
-            body_p = self._actor_pointing_vector_body
-            if np.linalg.norm(self._actor_theta_2) == 0.0:
-                body_rotation_vector_k = np.zeros(3)
-            else:
-                body_rotation_vector_k = self._actor_theta_2 / np.linalg.norm(self._actor_theta_2)
-            body_rotation_angle = np.linalg.norm(self._actor_theta_2)
 
-            # rotate the body frame around the angular velocity vector:
-            pointing_vector = ((body_p * np.cos(body_rotation_angle) +
-                               (np.cross(body_rotation_vector_k, body_p)) * np.sin(body_rotation_angle)) +
-                               body_rotation_vector_k*(np.linalg.multi_dot([body_rotation_vector_k, body_p])) *
-                               (1-np.cos(body_rotation_angle)))
+            # body rotation in body frame
+            pointing_vector = rodriguez_rotation(self._actor_pointing_vector_body, self._actor_theta_2)
 
             # secondly rotate body pointing vector with theta 1:
+            """
+            # todo: figure out how this works:
+            # pointing vector is rotated every step wrt beginning position, in the beginning body coincides with rpy,
+            # thus rodriguez rotations happen in rpy frame, not body.
+            
+            # therefore the following actually rotates the body within rpy with theta 1:
             pointing_vector = body_to_rpy(np.ndarray.tolist(pointing_vector), np.ndarray.tolist(self._actor_theta_1))
+            self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
+            """
+            # body rotation in rpy frame
+            pointing_vector = rodriguez_rotation(pointing_vector, self._actor_theta_1)
             self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
 
             # set values close to zero equal to zero.
