@@ -249,3 +249,31 @@ def get_euler(u, v):
     yaw =   angle_between_vectors(u, np.array([0, 0, 1]), np.array([0, 0, 1]))
     """
     return [roll, pitch, yaw]
+
+def rodriguez_rotation(p, angles):
+    """Rotates vector p around the rotation vector v in the same reference frame.
+    
+    Args:
+        p (numpy ndarray): vector to be rotated [x, y, z]
+        angles (numpy ndarray): vector with decomposed rotation angles [theta_x, theta_y, theta_z]
+
+    Returns:
+        numpy ndarray, new vector p rotated with given angles
+
+    """
+    # scalar rotation:
+    theta = np.linalg.norm(angles)
+    
+    # no rotation: 
+    if theta == 0.0:
+        return p
+    # non-zero rotation
+    else:
+        # unit rotation vector
+        k = angles / theta
+
+        # Rodriguez' formula:
+        p_rotated = ((p * np.cos(theta) +
+                      (np.cross(k, p)) * np.sin(theta)) +
+                     k * (np.linalg.multi_dot([k, p])) *(1 - np.cos(theta)))
+        return p_rotated
