@@ -80,25 +80,6 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         [-np.sin(yaw), np.cos(yaw), 0],
         [0, 0, 1]
     ])
-    """
-    A = np.array([
-        [np.cos(yaw), np.sin(yaw), 0],
-        [-np.sin(yaw), np.cos(yaw), 0],
-        [0, 0, 1]
-    ])
-
-    B = np.array([
-        [np.cos(pitch), 0, -np.sin(pitch)],
-        [0, 1, 0],
-        [np.sin(pitch), 0, np.cos(pitch)]
-    ])
-
-    C = np.array([
-        [1, 0, 0],
-        [0, np.cos(roll), np.sin(roll)],
-        [0, -np.sin(roll), np.cos(roll)]
-    ])
-    """
 
     # Transformation matrix:
     T = A @ B @ C
@@ -281,6 +262,7 @@ def rodriguez_rotation(p, angles):
         return p_rotated
 
 def rpy_to_body_two(u, rpy_angles):
+    # same as rpy_to_body but just a test
     x = np.array([rpy_angles[0], 0, 0])
     y = np.array([0, rpy_angles[1], 0])
     z = np.array([0, 0, rpy_angles[2]])
@@ -298,3 +280,39 @@ def rpy_to_body_two(u, rpy_angles):
     u = rodriguez_rotation(u, x)
 
     return u
+
+def get_rpy_angles(x, y, z):
+    """Returns Roll, Pitch, Yaw angles of rotated frame wrt fixed frame. 
+    example: input body frame primary axes expressed wrt rpy frame, returns roll, pitch, yaw of body
+    
+    Args:
+        x (numpy ndarray): new orientation of [1,0,0] vector expressed in fixed reference frame
+        y (numpy ndarray): new orientation of [0,1,0] vector expressed in fixed reference frame
+        z (numpy ndarray): new orientation of [0,0,1] vector expressed in fixed reference frame
+
+    Returns: list of floats [roll, pitch, yaw]
+
+    """                           # | R11   R12   R13 |
+    # create rotation matrix:   R = | R21   R22   R23 |
+                                  # | R31   R32   R33 |
+    R = np.c_[x, y, z]
+    # when pitch = +- 90 degrees(R_13 = +-1), yaw and roll have the same effect. Choose roll to be zero
+    if np.isclose(R[0][2], -1):
+        pitch = np.pi/2
+        roll = 0.0
+        yaw = -np.arctan2(R[1][0], R[2][0])
+        # or yaw = -np.arctan2( - R[2][1], R[1][1])
+    elif np.isclose(R[0][2], 1):
+        pitch = - np.pi/2
+        roll = 0.0
+        yaw = np.arctan2( - R[1][0], R[2][0])
+        # or yaw = np.arctan2( - R[2][1], - R[1][1])
+    else:
+        # problem: two rpy sets possible as pitch = atan2( ..., +- sqrt(..)). Positive x component of atan2 is chosen
+        pitch = np.arctan2(-R[0][2], np.sqrt((R[1][2]) ** 2 + (R[2][2]) ** 2))
+        roll = np.arctan2(R[1][2] / np.cos(pitch), R[2][2] / np.cos(pitch))
+        yaw = np.arctan2(R[0][1] / np.cos(pitch), R[0][0] / np.cos(pitch))
+
+    return [roll, pitch, yaw]
+
+
