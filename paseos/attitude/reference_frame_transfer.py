@@ -281,22 +281,27 @@ def rpy_to_body_two(u, rpy_angles):
 
     return u
 
-def get_rpy_angles(x, y, z):
-    """Returns Roll, Pitch, Yaw angles of rotated frame wrt fixed frame. 
+#todo: gives negative angles
+def get_rpy_angles(x, y, z, vectors_in_rpy_frame = True):
+    """Returns Roll, Pitch, Yaw angles of rotated frame wrt fixed frame.
     example: input body frame primary axes expressed wrt rpy frame, returns roll, pitch, yaw of body
     
     Args:
         x (numpy ndarray): new orientation of [1,0,0] vector expressed in fixed reference frame
         y (numpy ndarray): new orientation of [0,1,0] vector expressed in fixed reference frame
         z (numpy ndarray): new orientation of [0,0,1] vector expressed in fixed reference frame
+        vectors_in_rpy_frame (boolean): are the input vectors expressed in the rpy frame? (default: True)
 
     Returns: list of floats [roll, pitch, yaw]
 
-    """                           # | R11   R12   R13 |
-    # create rotation matrix:   R = | R21   R22   R23 |
-                                  # | R31   R32   R33 |
+    """                           # | R00   R01   R02 |
+    # create rotation matrix:   R = | R10   R11   R12 |
+                                  # | R20   R21   R22 |
     R = np.c_[x, y, z]
-    # when pitch = +- 90 degrees(R_13 = +-1), yaw and roll have the same effect. Choose roll to be zero
+    if vectors_in_rpy_frame:
+        # different transformation matrix
+        R = np.linalg.inv(R)
+    # when pitch = +- 90 degrees(R_03 = +-1), yaw and roll have the same effect. Choose roll to be zero
     if np.isclose(R[0][2], -1):
         pitch = np.pi/2
         roll = 0.0
@@ -316,3 +321,9 @@ def get_rpy_angles(x, y, z):
     return [roll, pitch, yaw]
 
 
+def rotate_body_vectors(x, y, z, p, angle):
+    x = rodriguez_rotation(x, angle)
+    y = rodriguez_rotation(y, angle)
+    z = rodriguez_rotation(z, angle)
+    p = rodriguez_rotation(p, angle)
+    return x, y, z, p

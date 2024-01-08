@@ -10,7 +10,9 @@ from paseos.attitude.reference_frame_transfer import (eci_to_rpy,
                                                       rpy_to_eci,
                                                       rpy_to_body,
                                                       body_to_rpy,
-                                                      rodriguez_rotation)
+                                                      rodriguez_rotation,
+                                                      get_rpy_angles,
+                                                      rotate_body_vectors)
 
 class AttitudeModel:
 
@@ -81,8 +83,9 @@ class AttitudeModel:
 
         self._actor_theta_1 = np.array([0.0,0.0,0.0])
         #self._actor_theta_2 = np.array([0.0,0.0,0.0])
-        self._actor_theta_2 = actor_initial_attitude_in_rad
+        self._actor_theta_2 = np.array([0.0,0.0,0.0])
 
+        #self._actor_xb_rpy = np.array([])
     def nadir_vector(self):
         """computes unit vector pointing towards earth, inertial body frame
 
@@ -192,8 +195,9 @@ class AttitudeModel:
 
         self._actor_attitude_in_rad = np.arctan2(
             np.sin(self._actor_attitude_in_rad), np.cos(self._actor_attitude_in_rad))
-    """
-
+        """
+        """
+        # this code works, but not for an initial attitude (wrong maths), commented out to implement that
         #################################### STARTING CONDITIONS OF UPDATE ATTITUDE ####################################
         # position
         position = self._actor.get_position(self._actor.local_time)
@@ -220,92 +224,7 @@ class AttitudeModel:
             # orbital plane normal unit vector
             self._actor_orbital_plane_normal = (np.cross(position, velocity) /
                                                  np.linalg.norm(np.cross(position, velocity)))
-            """
-            # attitude change due to two rotations:
-            #   theta_1: rotation of the body frame wrt RPY, because of its fixed attitude in the inertial frame.
-            #   theta_2: rotation of the body frame wrt RPY due to the body angular velocity * dt
 
-            # theta_1:
-            # rotation angle: arccos( (p . p_previous) / (||p|| ||p_previous||) )
-            rpy_inertial_rotation_angle = np.arccos(np.linalg.multi_dot([position, previous_position]) /
-                                (np.linalg.norm(position) * np.linalg.norm(previous_position)))
-            # assign this rotation to the vector perpendicular to rotation plane
-            rpy_inertial_rotation_vector = self._actor_orbital_plane_normal * rpy_inertial_rotation_angle
-            # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
-            theta_1 = -eci_to_rpy(rpy_inertial_rotation_vector, position, velocity)
-
-            # theta_2:
-            # to not have the spacecraft rotate in the first timestep:
-            if self._actor_t == 0:
-                theta_2 = np.array([0,0,0])
-            else:
-                body_rotation = np.ndarray.tolist(np.array(self._actor_angular_velocity) * dt)
-                #theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad) # this seems to break it
-                theta_2 = np.array(body_rotation)
-    
-            # updated attitude
-            self._actor_attitude_in_rad += theta_1 + theta_2
-
-            # set values close to zero equal to zero.
-            self._actor_attitude_in_rad[np.isclose(self._actor_attitude_in_rad, np.zeros(3))] = 0
-
-            # attitude in range [-π, π]:
-            self._actor_attitude_in_rad = np.arctan2(
-                np.sin(self._actor_attitude_in_rad), np.cos(self._actor_attitude_in_rad))
-            # pointing vector
-            self._actor_pointing_vector_eci = rpy_to_eci(body_to_rpy(
-                self._actor_pointing_vector_body, np.ndarray.tolist(self._actor_attitude_in_rad)), position, velocity)
-            """
-            """
-            # following code works for constant angular velocity on one axis (x, y, z) not other vectors.
-            # attitude change due to two rotations:
-            #   theta_1: rotation of the body frame wrt RPY, because of its fixed attitude in the inertial frame.
-            #   theta_2: rotation of the body frame wrt RPY due to the body angular velocity * dt
-            # todo: both thetas are negative. change?
-            # theta_1:
-            # rotation angle: arccos( (p . p_previous) / (||p|| ||p_previous||) )
-            rpy_inertial_rotation_angle = np.arccos(np.linalg.multi_dot([position, previous_position]) /
-                                                    (np.linalg.norm(position) * np.linalg.norm(previous_position)))
-            # assign this rotation to the vector perpendicular to rotation plane
-            rpy_inertial_rotation_vector = self._actor_orbital_plane_normal * rpy_inertial_rotation_angle
-            # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
-            self._actor_theta_1 += -eci_to_rpy(rpy_inertial_rotation_vector, position, velocity)
-
-            # theta_2:
-            # to not have the spacecraft rotate in the first timestep:
-            if self._actor_t == 0:
-                self._actor_theta_2 = np.array([0.0, 0.0, 0.0])
-            else:
-                body_rotation = np.array(self._actor_angular_velocity) * dt
-                # theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad) # this seems to break it
-                self._actor_theta_2 += -body_rotation
-
-            # updated attitude
-            self._actor_attitude_in_rad = self._actor_theta_1 + self._actor_theta_2
-
-            # set values close to zero equal to zero.
-            self._actor_attitude_in_rad[np.isclose(self._actor_attitude_in_rad, np.zeros(3))] = 0
-
-            # attitude in range [-π, π]:
-            self._actor_attitude_in_rad = np.arctan2(
-                np.sin(self._actor_attitude_in_rad), np.cos(self._actor_attitude_in_rad))
-
-            # pointing vector
-            # todo: change function names to make sense
-            # the following sequence of rotations is very important in order to make the model work
-            # more insight into the transformation functions rotation sequences is needed to make sense of this
-            # first rotate body pointing vector with theta 2:
-            pointing_vector = rpy_to_body(self._actor_pointing_vector_body, np.ndarray.tolist(self._actor_theta_2))
-            # secondly rotate body pointing vector with theta 1:
-            pointing_vector = body_to_rpy(np.ndarray.tolist(pointing_vector), np.ndarray.tolist(self._actor_theta_1))
-            self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
-
-            # set values close to zero equal to zero.
-            self._actor_pointing_vector_eci[np.isclose(self._actor_pointing_vector_eci, np.zeros(3))] = 0
-
-            # convert to list
-            self._actor_attitude_in_rad = np.ndarray.tolist(self._actor_attitude_in_rad)
-            """
             # attitude change due to two rotations:
             #   theta_1: rotation of the body frame wrt RPY, because of its fixed attitude in the inertial frame.
             #   theta_2: rotation of the body frame wrt RPY due to the body angular velocity * dt
@@ -353,11 +272,11 @@ class AttitudeModel:
             # todo: figure out how this works:
             # pointing vector is rotated every step wrt beginning position, in the beginning body coincides with rpy,
             # thus rodriguez rotations happen in rpy frame, not body.
-            """
+            
             # therefore the following actually rotates the body within rpy with theta 1:
-            pointing_vector = body_to_rpy(np.ndarray.tolist(pointing_vector), np.ndarray.tolist(self._actor_theta_1))
-            self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
-            """
+            # pointing_vector = body_to_rpy(np.ndarray.tolist(pointing_vector), np.ndarray.tolist(self._actor_theta_1))
+            # self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
+            
             # body rotation in rpy frame
             pointing_vector = rodriguez_rotation(pointing_vector, self._actor_theta_1)
             self._actor_pointing_vector_eci = rpy_to_eci(np.ndarray.tolist(pointing_vector), position, velocity)
@@ -367,5 +286,87 @@ class AttitudeModel:
 
             # convert to list
             self._actor_attitude_in_rad = np.ndarray.tolist(self._actor_attitude_in_rad)
+            """
+        # position
+        position = self._actor.get_position(self._actor.local_time)
+
+        # previous position (will be None at first timestep)
+        previous_position = self._actor._previous_position
+        # call previous position before velocity, as "get_position_velocity" sets previous position to current one
+        # todo: velocity function starts previous position... when initializing pointing vector,
+        #       looks like this means next line is not needed:
+        # todo: find correct way of relating roll, pitch, yaw angles to a vector (to have initial attitude)
+        if not previous_position:  # first timestep
+
+            # velocity, called only to update previous position.
+            velocity = self._actor.get_position_velocity(self._actor.local_time)[1]
+            starting_position = position
+
+        else:
+            # step:
+            step = self._actor_t
+
+            # velocity
+            velocity = self._actor.get_position_velocity(self._actor.local_time)[1]
+
+            # orbital plane normal unit vector
+            self._actor_orbital_plane_normal = (np.cross(position, velocity) /
+                                                np.linalg.norm(np.cross(position, velocity)))
+
+            # attitude change due to two rotations:
+
+            # theta_1:
+            # rotation angle: arccos( (p . p_previous) / (||p|| ||p_previous||) )
+            rpy_frame_rotation_angle_in_eci = np.arccos(np.linalg.multi_dot([position, previous_position]) /
+                                                        (np.linalg.norm(position) * np.linalg.norm(previous_position)))
+            # assign this scalar rotation angle to the vector perpendicular to rotation plane
+            rpy_frame_rotation_vector_in_eci = self._actor_orbital_plane_normal * rpy_frame_rotation_angle_in_eci
+            # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
+            self._actor_theta_1 = -eci_to_rpy(np.ndarray.tolist(rpy_frame_rotation_vector_in_eci), position, velocity)
+
+            # theta_2:
+            # to not have the spacecraft rotate in the first timestep:
+            # self._actor_theta_2 = np.array([0.0, 0.0, 0.0])
+            if self._actor_t != 0:
+                body_rotation = np.array(self._actor_angular_velocity) * dt
+                self._actor_theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad)
+                #self._actor_theta_2 = body_rotation
+
+            xb_rpy = body_to_rpy([1,0,0], self._actor_attitude_in_rad)
+            yb_rpy = body_to_rpy([0,1,0], self._actor_attitude_in_rad)
+            zb_rpy = body_to_rpy([0,0,1], self._actor_attitude_in_rad)
+            #att = self._actor_attitude_in_rad
+            #point_b = self._actor_pointing_vector_body
+            # transform body pointing vector to RPY "fixed" frame
+            pointing_vector_rpy = body_to_rpy(self._actor_pointing_vector_body, self._actor_attitude_in_rad)
+
+            # rotate the body within the rpy frame with these angles
+            xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = (
+                rotate_body_vectors(xb_rpy,
+                                    yb_rpy,
+                                    zb_rpy,
+                                    pointing_vector_rpy,
+                                    self._actor_theta_1)
+
+            )
+
+            new_theta_2 = rodriguez_rotation(self._actor_theta_2, self._actor_theta_1)
+
+            xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = (
+                rotate_body_vectors(xb_rpy,
+                                    yb_rpy,
+                                    zb_rpy,
+                                    pointing_vector_rpy,
+                                    new_theta_2)
+            )
+
+            # update new attitude:
+            self._actor_attitude_in_rad = np.ndarray.tolist(np.array(get_rpy_angles(xb_rpy, yb_rpy, zb_rpy)))
+
+
+            # update pointing vector
+            self._actor_pointing_vector_eci = rpy_to_eci(pointing_vector_rpy, position, velocity)
+
+
         self._actor_t += 1
 
