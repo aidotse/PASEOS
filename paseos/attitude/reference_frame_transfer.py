@@ -211,20 +211,23 @@ def get_rpy_angles(x, y, z, vectors_in_rpy_frame=True):
 
     Returns: roll, pitch, yaw angles
 
-    """  # | R00   R01   R02 |
-    # create rotation matrix:   R = | R10   R11   R12 |
-    # | R20   R21   R22 |
+    """
+    # create rotation matrix:
+    # ____| R00   R01   R02 |
+    # R = | R10   R11   R12 |
+    # ____| R20   R21   R22 |
     R = np.c_[x, y, z]
     if vectors_in_rpy_frame:
         # different transformation matrix
         R = np.linalg.inv(R)
     # when pitch = +- 90 degrees(R_03 = +-1), yaw and roll have the same effect. Choose roll to be zero
-    if np.isclose(R[0][2], -1):
+    # (avoid dividing by zero)
+    if R[0][2] == -1:
         pitch = np.pi / 2
         roll = 0.0
         yaw = -np.arctan2(R[1][0], R[2][0])
         # or yaw = -np.arctan2( - R[2][1], R[1][1])
-    elif np.isclose(R[0][2], 1):
+    elif R[0][2] == 1:
         pitch = -np.pi / 2
         roll = 0.0
         yaw = np.arctan2(-R[1][0], R[2][0])

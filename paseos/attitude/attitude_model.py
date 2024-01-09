@@ -175,7 +175,7 @@ class AttitudeModel:
         Args:
             dt (float): How far to advance the attitude computation.
         """
-
+        # todo: long simulations result in sudden small change
         # position
         position = np.array(self._actor.get_position(self._actor.local_time))
 
