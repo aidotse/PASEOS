@@ -1,6 +1,3 @@
-import numpy
-from loguru import logger
-import pykep as pk
 import numpy as np
 
 from paseos.attitude.disturbance_calculations import (
@@ -8,19 +5,29 @@ from paseos.attitude.disturbance_calculations import (
     calculate_magnetic_torque,
     calculate_grav_torque,
 )
-from paseos.attitude.reference_frame_transfer import (
+from paseos.utils.reference_frame_transfer import (
     eci_to_rpy,
     rpy_to_eci,
-    rpy_to_body,
     body_to_rpy,
-    rodriguez_rotation,
+    rodrigues_rotation,
     get_rpy_angles,
     rotate_body_vectors,
 )
 
 
 class AttitudeModel:
+    """This model describes the attitude (Roll, Pitch and Yaw) evolution of a spacecraft actor.
+    Starting from an initial attitude and angular velocity, the spacecraft response to disturbance torques is simulated.
+
+    The model allows for one pointing vector to be defined in the actor body frame for visualization and possibly
+    could be used for future antenna pointing applications. Its position in time within the Earth-centered inertial
+    frame is also calculated alongside the general body attitude
+
+    The attitude calculations are based in three reference frames, refer to reference_frame_transfer.py in utils folder.
+    """
+
     _actor = None
+
     _actor_attitude_in_rad = None
     _actor_angular_velocity = None
     _actor_angular_acceleration = None
@@ -39,9 +46,8 @@ class AttitudeModel:
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
         ## add args with default value = ...
         # actor_dipole
-        # actor_drag_coefficient
+        # actor_drag_coefficient (more for geometric model)
         # body_J2
-        #
     ):
         self._actor = local_actor
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
@@ -61,7 +67,7 @@ class AttitudeModel:
         self._first_run = True
 
     def nadir_vector(self):
-        # unused
+        # unused but might be useful during disturbance calculations or pointing vector relative position
         """compute unit vector pointing towards earth, inertial body frame
 
         Returns:
@@ -90,7 +96,7 @@ class AttitudeModel:
     def calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
         # todo: implement geometric model
-        #I = self._actor_I
+        # I = self._actor_I
         I = np.array([[50, 0, 0], [0, 50, 0], [0, 0, 50]])  # placeholder
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
@@ -152,7 +158,6 @@ class AttitudeModel:
         # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
 
-
     def body_axes_in_rpy(self):
         """Transforms vectors expressed in the spacecraft body frame to the roll pitch yaw frame.
         Vectors: - x, y, z axes
@@ -204,7 +209,7 @@ class AttitudeModel:
         )
 
         # rotate the body rotation vector as well
-        theta_2 = rodriguez_rotation(theta_2, theta_1)
+        theta_2 = rodrigues_rotation(theta_2, theta_1)
         # rotate the body vectors in rpy frame with body rotation
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = rotate_body_vectors(
             xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy, theta_2
