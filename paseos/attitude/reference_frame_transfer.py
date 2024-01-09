@@ -23,14 +23,11 @@ def transformation_matrix_eci_rpy(r, v):
     To go from RPY to ECI, the inverse is used.
 
     Args:
-        r (list of floats): position vector of RPY reference frame wrt ECI frame
-        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        r (np.ndarray): position vector of RPY reference frame wrt ECI frame
+        v (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
     Returns:
-        T (numpy array): transformation matrix
+        T (np.ndarray): transformation matrix
     """
-    # convert list of floats to numpy arrays
-    r = np.array(r)
-    v = np.array(v)
 
     # determine y' base by use of the cross product: (V x r)/||(V x r)||
     cross_vr = np.cross(v, r)
@@ -55,31 +52,29 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
     To go from body fixed to RPY, the inverse is used.
 
     Args:
-        euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
+        euler_angles_in_rad (np.ndarray): [roll, pitch, yaw] in radians
 
     Returns:
-        T (numpy array of floats): transformation matrix
+        T (np.ndarray): transformation matrix
     """
     roll, pitch, yaw = euler_angles_in_rad
 
     # individual axis rotations:
-    A = np.array([
-        [1, 0, 0],
-        [0, np.cos(roll), np.sin(roll)],
-        [0, -np.sin(roll), np.cos(roll)]
-    ])
+    A = np.array(
+        [[1, 0, 0], [0, np.cos(roll), np.sin(roll)], [0, -np.sin(roll), np.cos(roll)]]
+    )
 
-    B = np.array([
-        [np.cos(pitch), 0, -np.sin(pitch)],
-        [0, 1, 0],
-        [np.sin(pitch), 0, np.cos(pitch)]
-    ])
+    B = np.array(
+        [
+            [np.cos(pitch), 0, -np.sin(pitch)],
+            [0, 1, 0],
+            [np.sin(pitch), 0, np.cos(pitch)],
+        ]
+    )
 
-    C = np.array([
-        [np.cos(yaw), np.sin(yaw), 0],
-        [-np.sin(yaw), np.cos(yaw), 0],
-        [0, 0, 1]
-    ])
+    C = np.array(
+        [[np.cos(yaw), np.sin(yaw), 0], [-np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]
+    )
 
     # Transformation matrix:
     T = A @ B @ C
@@ -92,13 +87,13 @@ def eci_to_rpy(u, r, v, translation=False):
     spacecraft, using transformation matrix from transformation_matrix_eci_rpy function.
 
     Args:
-        u (list of floats): vector in ECI
-        r (list of floats): position vector of RPY reference frame wrt ECI frame
-        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
-        translation (boolean): does the vector need to be translated? (default=True)
+        u (np.ndarray): vector in ECI
+        r (np.ndarray): position vector of RPY reference frame wrt ECI frame
+        v (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        translation (bool): does the vector need to be translated? (default=True)
 
     Returns:
-        numpy array of floats: vector u w.r.t. RPY frame
+        vector u w.r.t. RPY frame
     """
 
     T = transformation_matrix_eci_rpy(r, v)
@@ -109,7 +104,7 @@ def eci_to_rpy(u, r, v, translation=False):
         shift = 0
 
     # transform u vector with matrix multiplication
-    return T@np.array(u) - shift
+    return T @ u - shift
 
 
 def rpy_to_eci(u, r, v, translation=False):
@@ -117,13 +112,13 @@ def rpy_to_eci(u, r, v, translation=False):
     reference frame, using the inverse transformation matrix from transformation_matrix_eci_rpy function.
 
     Args:
-        u (list of floats): vector in RPY
-        r (list of floats): position vector of RPY reference frame wrt ECI frame
-        v (list of floats): velocity of the spacecraft in earth reference frame, centered on spacecraft
-        translation (boolean): does the vector need to be translated? (default=True)
+        u (np.ndarray): vector in RPY
+        r (np.ndarray): position vector of RPY reference frame wrt ECI frame
+        v (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
+        translation (bool): does the vector need to be translated? (default=True)
 
     Returns:
-        numpy array of floats: vector u w.r.t. ECI frame
+        vector u w.r.t. ECI frame
     """
 
     T = np.linalg.inv(transformation_matrix_eci_rpy(r, v))
@@ -132,7 +127,7 @@ def rpy_to_eci(u, r, v, translation=False):
     else:
         shift = 0
     # transform u vector with matrix multiplication
-    return T@np.array(u) + shift
+    return T @ u + shift
 
 
 def rpy_to_body(u, euler_angles_in_rad):
@@ -140,19 +135,19 @@ def rpy_to_body(u, euler_angles_in_rad):
     spacecraft, using transformation matrix from transformation_matrix_rpy_body function.
 
     Args:
-        u (list of floats): vector in RPY
-        euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
+        u (np.ndarray): vector in RPY
+        euler_angles_in_rad (np.ndarray): [roll, pitch, yaw] in radians
 
     Returns:
-        numpy array of floats: vector u w.r.t. the body fixed frame
+        vector u w.r.t. the body fixed frame
     """
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
-        return np.array(u)
+        return u
     else:
         T = transformation_matrix_rpy_body(euler_angles_in_rad)
-        return T@np.array(u)
+        return T @ u
 
 
 def body_to_rpy(u, euler_angles_in_rad):
@@ -160,8 +155,8 @@ def body_to_rpy(u, euler_angles_in_rad):
     spacecraft, using the inverse transformation matrix from transformation_matrix_rpy_body function.
 
     Args:
-        u (list of floats): vector in the body fixed frame
-        euler_angles_in_rad (list of floats): [roll, pitch, yaw] in radians
+        u (np.ndarray): vector in the body fixed frame
+        euler_angles_in_rad (np.ndarray): [roll, pitch, yaw] in radians
 
     Returns:
         vector u w.r.t. the RPY frame
@@ -169,85 +164,27 @@ def body_to_rpy(u, euler_angles_in_rad):
     # for undisturbed calculations: zero euler angles result in no transformation
     # numpy default absolute tolerance: 1e-0.8
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
-        return np.array(u)
+        return u
     else:
         T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
-        return T @ np.array(u)
+        return T @ u
 
-# next two functions don't work
-def angle_between_vectors(u, v, n):
-    """Returns right-handed rotation angle between  u and v, with u being the reference for measuring the right-handed
-    rotation. Formula:
-                        angle = arctan2( u x v . n, u . v)
-
-    Args:
-        u (numpy ndarray): reference vector
-        v (numpy ndarray): rotated vector
-        n (numpy ndarray): plane normal vector
-
-    Returns: float angle in radians
-
-    """
-    # todo: solve problem when two
-    return np.arctan2(np.linalg.multi_dot([np.cross(u, v), n]), np.linalg.multi_dot([u, v]))
-
-# getting euler angls from one vector is impossible
-def get_euler(u, v):
-#def get_euler(u):
-    """Returns euler angles between two vectors in the same reference frame
-
-    Args:
-        u (numpy ndarray): vector 1
-        v (numpy ndarray): vector 2
-
-    Returns: numpy ndarray ([roll, pitch, yaw]) in radians
-    """
-    """
-    # roll: angle between yz components
-    # normal vector = x-axis
-    u_yz = np.array([0, u[1], u[2]])
-    v_yz = np.array([0, v[1], v[2]])
-    roll = angle_between_vectors(u_yz, v_yz, np.array([1,0,0]))
-
-    # pitch: angle between xz components
-    # normal vector = y-axis
-    u_xz = np.array([u[0], 0, u[2]])
-    v_xz = np.array([v[0], 0, v[2]])
-    pitch = angle_between_vectors(u_xz, v_xz, np.array([0,1,0]))
-
-    # yaw: angle between xy components
-    # normal vector = z-axis
-    u_xy = np.array([u[0], u[1], 0])
-    v_xy = np.array([v[0], v[1], 0])
-    yaw = angle_between_vectors(u_xy, v_xy, np.array([0,0,1]))
-    """
-
-    roll = angle_between_vectors(u, v, np.array([1, 0, 0]))
-    pitch = angle_between_vectors(u, v, np.array([0,1,0]))
-    yaw = angle_between_vectors(u, v, np.array([0,0,1]))
-    """
-    # just vector u wrt rpy frame.
-    roll =  angle_between_vectors(u, np.array([0, 0, 1]), np.array([1, 0, 0]))
-    pitch = angle_between_vectors(u, np.array([0, 0, 1]), np.array([0, 1, 0]))
-    yaw =   angle_between_vectors(u, np.array([0, 0, 1]), np.array([0, 0, 1]))
-    """
-    return [roll, pitch, yaw]
 
 def rodriguez_rotation(p, angles):
     """Rotates vector p around the rotation vector v in the same reference frame.
-    
+
     Args:
-        p (numpy ndarray): vector to be rotated [x, y, z]
-        angles (numpy ndarray): vector with decomposed rotation angles [theta_x, theta_y, theta_z]
+        p (np.ndarray): vector to be rotated [x, y, z]
+        angles (np.ndarray): vector with decomposed rotation angles [theta_x, theta_y, theta_z]
 
     Returns:
-        numpy ndarray, new vector p rotated with given angles
+        new vector p rotated with given angles
 
     """
     # scalar rotation:
     theta = np.linalg.norm(angles)
-    
-    # no rotation: 
+
+    # no rotation:
     if theta == 0.0:
         return p
     # non-zero rotation
@@ -256,61 +193,41 @@ def rodriguez_rotation(p, angles):
         k = angles / theta
 
         # Rodriguez' formula:
-        p_rotated = ((p * np.cos(theta) +
-                      (np.cross(k, p)) * np.sin(theta)) +
-                     k * (np.linalg.multi_dot([k, p])) *(1 - np.cos(theta)))
+        p_rotated = (p * np.cos(theta) + (np.cross(k, p)) * np.sin(theta)) + k * (
+            np.linalg.multi_dot([k, p])
+        ) * (1 - np.cos(theta))
         return p_rotated
 
-def rpy_to_body_two(u, rpy_angles):
-    # same as rpy_to_body but just a test
-    x = np.array([rpy_angles[0], 0, 0])
-    y = np.array([0, rpy_angles[1], 0])
-    z = np.array([0, 0, rpy_angles[2]])
 
-    # yaw: rotation around z-axis
-    u = rodriguez_rotation(u, z)
-    y = rodriguez_rotation(y, z)
-    x = rodriguez_rotation(x, z)
-
-    # pitch: rotation about new y-axis
-    u = rodriguez_rotation(u, y)
-    x = rodriguez_rotation(x, y)
-
-    # roll: rotation about new x-axis
-    u = rodriguez_rotation(u, x)
-
-    return u
-
-#todo: gives negative angles
-def get_rpy_angles(x, y, z, vectors_in_rpy_frame = True):
+def get_rpy_angles(x, y, z, vectors_in_rpy_frame=True):
     """Returns Roll, Pitch, Yaw angles of rotated frame wrt fixed frame.
     example: input body frame primary axes expressed wrt rpy frame, returns roll, pitch, yaw of body
-    
+
     Args:
-        x (numpy ndarray): new orientation of [1,0,0] vector expressed in fixed reference frame
-        y (numpy ndarray): new orientation of [0,1,0] vector expressed in fixed reference frame
-        z (numpy ndarray): new orientation of [0,0,1] vector expressed in fixed reference frame
+        x (np.ndarray): new orientation of [1,0,0] vector expressed in fixed reference frame
+        y (np.ndarray): new orientation of [0,1,0] vector expressed in fixed reference frame
+        z (np.ndarray): new orientation of [0,0,1] vector expressed in fixed reference frame
         vectors_in_rpy_frame (boolean): are the input vectors expressed in the rpy frame? (default: True)
 
-    Returns: list of floats [roll, pitch, yaw]
+    Returns: roll, pitch, yaw angles
 
-    """                           # | R00   R01   R02 |
+    """  # | R00   R01   R02 |
     # create rotation matrix:   R = | R10   R11   R12 |
-                                  # | R20   R21   R22 |
+    # | R20   R21   R22 |
     R = np.c_[x, y, z]
     if vectors_in_rpy_frame:
         # different transformation matrix
         R = np.linalg.inv(R)
     # when pitch = +- 90 degrees(R_03 = +-1), yaw and roll have the same effect. Choose roll to be zero
     if np.isclose(R[0][2], -1):
-        pitch = np.pi/2
+        pitch = np.pi / 2
         roll = 0.0
         yaw = -np.arctan2(R[1][0], R[2][0])
         # or yaw = -np.arctan2( - R[2][1], R[1][1])
     elif np.isclose(R[0][2], 1):
-        pitch = - np.pi/2
+        pitch = -np.pi / 2
         roll = 0.0
-        yaw = np.arctan2( - R[1][0], R[2][0])
+        yaw = np.arctan2(-R[1][0], R[2][0])
         # or yaw = np.arctan2( - R[2][1], - R[1][1])
     else:
         # problem: two rpy sets possible as pitch = atan2( ..., +- sqrt(..)). Positive x component of atan2 is chosen
@@ -318,7 +235,7 @@ def get_rpy_angles(x, y, z, vectors_in_rpy_frame = True):
         roll = np.arctan2(R[1][2] / np.cos(pitch), R[2][2] / np.cos(pitch))
         yaw = np.arctan2(R[0][1] / np.cos(pitch), R[0][0] / np.cos(pitch))
 
-    return [roll, pitch, yaw]
+    return np.array([roll, pitch, yaw])
 
 
 def rotate_body_vectors(x, y, z, p, angle):

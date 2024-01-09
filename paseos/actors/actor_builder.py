@@ -512,7 +512,6 @@ class ActorBuilder:
             actor: SpacecraftActor,
             actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
             actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-            actor_initial_angular_acceleration: list[float] = [0.0, 0.0, 0.0],
             actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
 
     ):
@@ -521,7 +520,6 @@ class ActorBuilder:
             local_actor=actor,
             actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
             actor_initial_angular_velocity=actor_initial_angular_velocity,
-            actor_initial_angular_acceleration=actor_initial_angular_acceleration,
             actor_pointing_vector_body=actor_pointing_vector_body,
 
 
