@@ -247,12 +247,12 @@ def get_rpy_angles(x, y, z, vectors_in_rpy_frame=True):
 
     # when pitch = +- 90 degrees(R_03 = +-1), yaw and roll have the same effect. Choose roll to be zero
     # (avoid dividing by zero)
-    if R[0][2] == -1:
+    if R[0][2] == -1.0:
         pitch = np.pi / 2
         roll = 0.0
         yaw = -np.arctan2(R[1][0], R[2][0])
         # or yaw = -np.arctan2( - R[2][1], R[1][1])
-    elif R[0][2] == 1:
+    elif R[0][2] == 1.0:
         pitch = -np.pi / 2
         roll = 0.0
         yaw = np.arctan2(-R[1][0], R[2][0])

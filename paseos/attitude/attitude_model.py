@@ -90,14 +90,14 @@ class AttitudeModel:
             T += calculate_grav_torque()
         if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
-        # T += np.array([0.0, 0.0001, 0.0]) test placeholder
+        # T += np.array([0.0, 0.0001, 0.0]) # test placeholder
         return T
 
     def calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
         # todo: implement geometric model
-        # I = self._actor_I
-        I = np.array([[50, 0, 0], [0, 50, 0], [0, 0, 50]])  # placeholder
+        # I = self._actor_moment_of_inertia
+        I = np.array([[50, 0, 0], [0, 50, 0], [0, 0, 50]])  # test placeholder
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
@@ -180,7 +180,6 @@ class AttitudeModel:
         Args:
             dt (float): How far to advance the attitude computation.
         """
-        # todo: long simulations result in sudden small change
         # position
         position = np.array(self._actor.get_position(self._actor.local_time))
 
