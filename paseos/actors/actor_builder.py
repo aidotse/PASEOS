@@ -315,13 +315,19 @@ class ActorBuilder:
             scale: float=1
 
     ):
-        """Define geometry of the spacecraft actor.
+        """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
+        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        model. When used in the attitude model, the geometric model is in the body reference frame.
 
         Args:
             actor (SpacecraftActor): Actor to update.
             mass (float): Mass of the spacecraft in kg
-            vertices (list): List of all vertices of the mesh
-            faces (list): List of the indexes of the vertices of a face
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled
+                by the scale. Uses Trimesh to create the mesh from this and the list of faces.
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+                triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1
         """
         assert mass > 0, "Mass is > 0"

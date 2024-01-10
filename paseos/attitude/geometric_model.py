@@ -16,13 +16,19 @@ class GeometricModel:
         self, local_actor, actor_mass, vertices=None, faces=None, scale=1
     ) -> None:
         """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
-        If no vertices or faces are provided, defaults to a cube with unit length sides
+        If no vertices or faces are provided, defaults to a cube with unit length sides. This is in the spacecraft body
+        reference frame, and can be transformed to the inertial/PASEOS reference frame using the transformations in the
+        attitude model
 
         Args:
             local_actor (SpacecraftActor): Actor to model.
             actor_mass (float): Actor's mass in kg.
-            vertices (list): List of all vertices of the mesh
-            faces (list): List of the indexes of the vertices of a face
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled
+                by the scale. Uses Trimesh to create the mesh from this and the list of faces.
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+                triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1
         """
         logger.trace("Initializing cuboid geometrical model.")
