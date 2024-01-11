@@ -80,7 +80,7 @@ class AttitudeModel:
         """Compute total torque due to user specified disturbances
 
         Returns:
-            np.array([Tx, Ty, Tz]): total combined torques in Nm
+            np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame
         """
 
         T = np.array([0.0, 0.0, 0.0])
@@ -90,13 +90,13 @@ class AttitudeModel:
             T += calculate_grav_torque()
         if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
-        # T += np.array([0.0, 0.0001, 0.0]) # test placeholder
         return T
 
     def calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
-        # todo: implement geometric model
+        # TODO implement geometric model
         # I = self._actor_moment_of_inertia
+        # TODO in the future control torques could be added
         I = np.array([[50, 0, 0], [0, 50, 0], [0, 0, 50]])  # test placeholder
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))

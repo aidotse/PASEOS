@@ -1,7 +1,7 @@
-# this functions could be implemented inside the attitude model class but I'd rather have it
-# separately right now.
+"""this file contains functions that return attitude disturbance torque vectors expressed in the actor body frame"""
 
 # OUTPUT NUMPY ARRAYS
+# OUTPUT IN BODY FRAME
 import numpy as np
 
 
