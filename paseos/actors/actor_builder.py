@@ -13,7 +13,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
-from ..attitude.geometric_model import GeometricModel
+from paseos.geometric_model.geometric_model import GeometricModel
 
 
 class ActorBuilder:
