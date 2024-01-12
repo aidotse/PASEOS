@@ -40,7 +40,8 @@ class GeometricModel:
         self.scale = scale
 
     def set_mesh(self):
-        """Creates the mesh of the satellite, defaults to a cuboid scales by the scale value
+        """Creates the mesh of the satellite. If no vertices input is given, it defaults to a cuboid scaled by the
+        scale value. The default without scale values is a cube with 1m sides. This uses the python module Trimesh.
 
         Returns:
             mesh: Trimesh mesh of the satellite
@@ -55,7 +56,7 @@ class GeometricModel:
                 [0.5, -0.5, 0.5],
                 [0.5, 0.5, -0.5],
                 [0.5, 0.5, 0.5],
-            ]
+            ]       # defines the corners of the mesh, values are in meters, from the origin of the body frame.
             self.faces = [
                 [0, 1, 3],
                 [0, 3, 2],
@@ -69,9 +70,10 @@ class GeometricModel:
                 [4, 7, 5],
                 [0, 4, 1],
                 [1, 4, 5],
-            ]
+            ]       # List of three vertices to form a triangular face of the satellite. Two triangular faces are used
+            # per side of the cuboid
         mesh = trimesh.Trimesh(self.vertices, self.faces)
-        self._actor_mesh = mesh.apply_scale(self.scale)
+        self._actor_mesh = mesh.apply_scale(self.scale)     # Scales the mesh by the scale factor
         return self._actor_mesh
 
     @property
