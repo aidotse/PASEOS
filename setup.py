@@ -22,6 +22,7 @@ setup(
         "skyfield>=1.45",
         "toml>=0.10.2",
         "tqdm>=4.64.1",
+        "trimesh>=4.0.7",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

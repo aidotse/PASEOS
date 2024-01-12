@@ -13,6 +13,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
+from paseos.geometric_model.geometric_model import GeometricModel
 
 
 class ActorBuilder:
@@ -304,6 +305,34 @@ class ActorBuilder:
         ), "Position has to be list of 3 floats."
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
+
+    @staticmethod
+    def set_geometric_model(
+        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
+    ):
+        """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
+        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        model. When used in the attitude model, the geometric model is in the body reference frame.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            mass (float): Mass of the spacecraft in kg.
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
+                by the scale. Uses Trimesh to create the mesh from this and the list of faces.
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+                triangles. Uses Trimesh to create the mesh from this and the list of vertices.
+            scale (float): Parameter to scale the cuboid by, defaults to 1.
+        """
+        assert mass > 0, "Mass is > 0"
+
+        actor._mass = mass
+        geometric_model = GeometricModel(
+            local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
+        )
+        actor._mesh = geometric_model.set_mesh()
+        actor._moment_of_inertia = geometric_model.find_moment_of_inertia
 
     @staticmethod
     def set_power_devices(
