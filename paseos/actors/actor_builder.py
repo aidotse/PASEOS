@@ -308,12 +308,7 @@ class ActorBuilder:
 
     @staticmethod
     def set_geometric_model(
-            actor: SpacecraftActor,
-            mass: float,
-            vertices=None,
-            faces=None,
-            scale: float = 1
-
+        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
     ):
         """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
         transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
@@ -334,16 +329,10 @@ class ActorBuilder:
 
         actor._mass = mass
         geometric_model = GeometricModel(
-            local_actor=actor,
-            actor_mass=mass,
-            vertices=vertices,
-            faces=faces,
-            scale=scale
+            local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
         actor._mesh = geometric_model.set_mesh()
         actor._moment_of_inertia = geometric_model.find_moment_of_inertia
-
-
 
     @staticmethod
     def set_power_devices(
