@@ -316,14 +316,14 @@ class ActorBuilder:
 
         Args:
             actor (SpacecraftActor): Actor to update.
-            mass (float): Mass of the spacecraft in kg
+            mass (float): Mass of the spacecraft in kg.
             vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
-                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled
+                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
                 by the scale. Uses Trimesh to create the mesh from this and the list of faces.
             faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
                 defining the three vertices to form a triangular face. For a cuboid each face is split into two
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
-            scale (float): Parameter to scale the cuboid by, defaults to 1
+            scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
         assert mass > 0, "Mass is > 0"
 

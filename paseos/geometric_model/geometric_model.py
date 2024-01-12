@@ -13,10 +13,10 @@ class GeometricModel:
     _actor_moment_of_inertia = None
 
     def __init__(self, local_actor, actor_mass, vertices=None, faces=None, scale=1) -> None:
-        """Describes the geometry of the spacecraft, and outputs relevant parameters related to the spacecraft body.
+        """Describes the geometry of the spacecraft and outputs relevant parameters related to the spacecraft body.
         If no vertices or faces are provided, defaults to a cube with unit length sides. This is in the spacecraft body
-        reference frame, and can be transformed to the inertial/PASEOS reference frame using the transformations in the
-        attitude model
+        reference frame and can be transformed to the inertial/PASEOS reference frame by using the transformations in the
+        attitude model.
 
         Args:
             local_actor (SpacecraftActor): Actor to model.
@@ -27,7 +27,7 @@ class GeometricModel:
             faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
                 defining the three vertices to form a triangular face. For a cuboid each face is split into two
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
-            scale (float): Parameter to scale the cuboid by, defaults to 1
+            scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
         logger.trace("Initializing cuboid geometrical model.")
 
@@ -45,6 +45,7 @@ class GeometricModel:
             mesh: Trimesh mesh of the satellite
         """
         if self.vertices is None:
+            # Defines the corners of the mesh, values are in meters, from the origin of the body frame.
             self.vertices = [
                 [-0.5, -0.5, -0.5],
                 [-0.5, -0.5, 0.5],
@@ -54,7 +55,9 @@ class GeometricModel:
                 [0.5, -0.5, 0.5],
                 [0.5, 0.5, -0.5],
                 [0.5, 0.5, 0.5],
-            ]  # defines the corners of the mesh, values are in meters, from the origin of the body frame.
+            ]
+            # List of three vertices to form a triangular face of the satellite.
+            # Two triangular faces are used per side of the cuboid.
             self.faces = [
                 [0, 1, 3],
                 [0, 3, 2],
@@ -68,15 +71,16 @@ class GeometricModel:
                 [4, 7, 5],
                 [0, 4, 1],
                 [1, 4, 5],
-            ]  # List of three vertices to form a triangular face of the satellite. Two triangular faces are used
-            # per side of the cuboid
+            ]
+
         mesh = trimesh.Trimesh(self.vertices, self.faces)
-        self._actor_mesh = mesh.apply_scale(self.scale)  # Scales the mesh by the scale factor
+        # Scales the mesh by the scale factor.
+        self._actor_mesh = mesh.apply_scale(self.scale)
         return self._actor_mesh
 
     @property
     def find_moment_of_inertia(self):
-        """Gives the moment of inertia of the actor, assuming constant density
+        """Gives the moment of inertia of the actor, assuming constant density.
 
         Returns:
             np.array: Mass moments of inertia for the actor
@@ -92,7 +96,7 @@ class GeometricModel:
         """Gives the volumetric center of mass of the actor.
 
         Returns:
-            np.array: Coordinates of the center of gravity of the mesh
+            np.array: Coordinates of the center of gravity of the mesh.
         """
         self._actor_center_of_gravity = self._actor_mesh.center_mass
         return self._actor_center_of_gravity
