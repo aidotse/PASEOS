@@ -167,6 +167,10 @@ class PASEOS:
             if self.local_actor.has_power_model:
                 self.local_actor.discharge(current_power_consumption_in_W, dt)
 
+            # Update actor attitude
+            if self.local_actor.has_attitude_model:
+                self.local_actor._attitude_model.update_attitude(dt)
+
             # Update user-defined properties in the actor
             for property_name in self.local_actor.custom_properties.keys():
                 update_function = self.local_actor.get_custom_property_update_function(
