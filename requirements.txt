@@ -8,3 +8,4 @@ scikit-spatial>=6.5.0
 skyfield>=1.45
 toml>=0.10.2
 tqdm>=4.64.1
+trimesh>=4.0.7
