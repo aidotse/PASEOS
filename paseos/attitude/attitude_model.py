@@ -63,7 +63,11 @@ class AttitudeModel:
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
-
+        self._actor_angular_velocity_eci = rpy_to_eci(
+            body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
+            np.array(self._actor.get_position(self._actor.local_time)),
+            np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
+        )
         self._first_run = True
 
     def nadir_vector(self):
@@ -94,13 +98,13 @@ class AttitudeModel:
 
     def calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
-        # TODO implement geometric model
-        # I = self._actor_moment_of_inertia
         # TODO in the future control torques could be added
-        I = np.array([[50, 0, 0], [0, 50, 0], [0, 0, 50]])  # test placeholder
+
+        # moment of Inertia matrix:
+        I = self._actor._moment_of_inertia
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
-        # a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
+        # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
         self._actor_angular_acceleration = np.linalg.inv(I) @ (
             self.calculate_disturbance_torque()
             - np.cross(self._actor_angular_velocity, I @ self._actor_angular_velocity)
@@ -214,14 +218,15 @@ class AttitudeModel:
             xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy, theta_2
         )
 
-        """
-        xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = rotate_body_vectors(
-            xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy, theta_1 + theta_2
-        )
-        """
-
-        # update new attitude:
+        # update new attitude in ECI:
         self._actor_attitude_in_rad = get_rpy_angles(xb_rpy, yb_rpy, zb_rpy)
+
+        # update new angular velocity vector in ECI:
+        self._actor_angular_velocity_eci = rpy_to_eci(
+            body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
+            position,
+            velocity,
+        )
 
         # update pointing vector
         self._actor_pointing_vector_eci = rpy_to_eci(

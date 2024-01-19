@@ -191,9 +191,18 @@ class SpacecraftActor(BaseActor):
 
 
     def pointing_vector(self):
-        """Returns the spacecraft pointing vector
+        """Returns the spacecraft pointing vector in the Earth-centered inertial frame
 
         Returns:
-            numpy ndarray (x, y, z)
+            np.ndarray (x, y, z)
         """
         return self._attitude_model._actor_pointing_vector_eci
+
+
+    def angular_velocity(self):
+        """Returns the spacecraft angular velocity vector in the Earth-centered inertial frame
+
+        Returns:
+            np.ndarray (owega_x, omega_y, omega_z)
+        """
+        return self._attitude_model._actor_angular_velocity_eci
