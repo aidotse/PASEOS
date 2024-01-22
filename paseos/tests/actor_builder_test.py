@@ -105,5 +105,5 @@ def test_set_geometric_model():
     assert sat1.mass == 100
     assert all(sat1._mesh.center_mass == np.array([0,0,0]))      # check the default mesh is centered
     assert sat1._mesh.volume == 1                                # check the default volume is correct
-    assert round(sat1._moment_of_inertia[0,0], 4) == 100*0.1667  # for the default mesh
+    assert round(sat1._moment_of_inertia[0,0], 4) == 16.6667  # for the default mesh
     assert sat1._moment_of_inertia[0,1] == 0.0                   # Should be zero if the mass distribution is even
