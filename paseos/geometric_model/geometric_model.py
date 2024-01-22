@@ -89,7 +89,7 @@ class GeometricModel:
                                                     [Iyx Iyy Iyx]
                                                     [Izx Izy Izz]]
         """
-        self._actor_moment_of_inertia = self._actor_mesh.moment_inertia
+        self._actor_moment_of_inertia = self._actor_mesh.moment_inertia * self._actor_mass
         return self._actor_moment_of_inertia
 
     def find_center_of_gravity(self):
