@@ -12,6 +12,7 @@ from paseos.utils.reference_frame_transfer import (
     rodrigues_rotation,
     get_rpy_angles,
     rotate_body_vectors,
+    rpy_to_body,
 )
 
 
@@ -80,18 +81,29 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-    def calculate_disturbance_torque(self):
+    def calculate_disturbance_torque(self, position, velocity, euler_angles):
         """Compute total torque due to user specified disturbances
+
+        Args:
+            position (np.ndarray): position vector of RPY reference frame wrt ECI frame
+            velocity (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
+            euler_angles (np.ndarray): [roll, pitch, yaw] in radians
 
         Returns:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame
         """
 
+        # Transform the earth rotation vector to the body reference frame, assuming the rotation vector is the z-axis
+        # of the earth-centered-inertial (eci) frame
+        earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
+        earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
+
         T = np.array([0.0, 0.0, 0.0])
         if "aerodynamic" in self._actor.get_disturbances():
             T += calculate_aero_torque()
         if "gravitational" in self._actor.get_disturbances():
-            T += calculate_grav_torque()
+            T += calculate_grav_torque(self._actor_pointing_vector_body,earth_rotation_vector_in_body,
+                                       self._actor._moment_of_inertia, self._actor._previous_altitude)
         if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
         return T
