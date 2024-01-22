@@ -95,3 +95,15 @@ def test_add_comm_device():
     assert len(sat1.communication_devices) == 2
     assert sat1.communication_devices["dev1"].bandwidth_in_kbps == 10
     assert sat1.communication_devices["dev2"].bandwidth_in_kbps == 42
+
+
+def test_set_geometric_model():
+    """Check if we can set the geometry, and if the moments of inertia are calculated correctly"""
+    _, sat1, _ = get_default_instance()
+    ActorBuilder.set_geometric_model(sat1, mass=100)
+
+    assert sat1.mass == 100
+    assert all(sat1._mesh.center_mass == np.array([0,0,0]))      # check the default mesh is centered
+    assert sat1._mesh.volume == 1                                # check the default volume is correct
+    assert round(sat1._moment_of_inertia[0,0], 4) == 0.1667      # for the default mesh
+    assert sat1._moment_of_inertia[0,1] == 0.0                   # Should be zero if the mass distribution is even
