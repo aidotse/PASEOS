@@ -47,6 +47,9 @@ class BaseActor(ABC):
     # Tracks the current activity
     _current_activity = None
 
+    # Mass
+    _mass = None
+
     # The following variables are used to track last evaluated state vectors to avoid recomputation.
     _previous_position = None
     _time_of_previous_position = None
@@ -121,6 +124,7 @@ class BaseActor(ABC):
 
         return self._custom_properties_update_function[property_name]
 
+
     @property
     def has_central_body(self) -> bool:
         """Returns true if actor has a central body, else false.
@@ -129,6 +133,7 @@ class BaseActor(ABC):
             bool: bool indicating presence.
         """
         return hasattr(self, "_central_body") and self._central_body is not None
+
 
     @property
     def has_power_model(self) -> bool:
@@ -149,6 +154,15 @@ class BaseActor(ABC):
         return hasattr(self, "_radiation_model") and self._radiation_model is not None
 
     @property
+    def has_spacecraft_body_model(self) -> bool:
+        """Returns true if actor's body is modeled, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_spacecraft_body_model") and self._spacecraft_body_model is not None
+
+    @property
     def has_thermal_model(self) -> bool:
         """Returns true if actor's temperature is modeled, else false.
 
@@ -156,6 +170,7 @@ class BaseActor(ABC):
             bool: bool indicating presence.
         """
         return hasattr(self, "_thermal_model") and self._thermal_model is not None
+
 
     @property
     def mass(self) -> float:

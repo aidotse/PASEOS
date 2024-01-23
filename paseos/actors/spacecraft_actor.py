@@ -1,4 +1,5 @@
 from loguru import logger
+import numpy as np
 import pykep as pk
 
 from paseos.actors.base_actor import BaseActor
@@ -19,6 +20,7 @@ class SpacecraftActor(BaseActor):
     # Actor's mass in kg
     _mass = None
 
+    _spacecraft_body_model = None
     _thermal_model = None
     _radiation_model = None
 
@@ -103,6 +105,38 @@ class SpacecraftActor(BaseActor):
             float: Mass
         """
         return self._mass
+
+    @property
+    def body_mesh(self) -> np.array:
+        """Gives the mesh of the satellite.
+
+        Returns:
+            np.array: Mesh of the satellite.
+        """
+        return self._spacecraft_body_model._body_mesh
+
+    @property
+    def body_moment_of_inertia(self) -> np.array:
+        """Gives the moment of inertia of the actor, assuming constant density.
+
+        Returns:
+            np.array: Mass moments of inertia for the actor
+
+        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
+                                                    [Iyx Iyy Iyx]
+                                                    [Izx Izy Izz]]
+        """
+        return self._spacecraft_body_model._body_moment_of_inertia
+
+    @property
+    def body_center_of_gravity(self) -> np.array:
+        """Gives the volumetric center of mass of the actor.
+
+        Returns:
+            np.array: Coordinates of the center of gravity of the mesh.
+        """
+        return self._spacecraft_body_model._body_center_of_gravity
+
 
     @property
     def temperature_in_K(self) -> float:
