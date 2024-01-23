@@ -179,7 +179,7 @@ class SpacecraftActor(BaseActor):
             return self._attitude_model._actor_attitude_in_rad
 
     def attitude_in_deg(self):
-        """Returns the current attitude of the actor in degrees
+        """Returns the current attitude of the actor in degrees.
 
         Returns:
             list[floats]: actor attitude in degrees
