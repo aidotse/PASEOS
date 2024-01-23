@@ -132,7 +132,8 @@ class AttitudeModel:
         body_rotation = self._actor_angular_velocity * dt
         return body_to_rpy(body_rotation, self._actor_attitude_in_rad)
 
-    def frame_rotation(self, position, previous_position, velocity):
+    @staticmethod
+    def frame_rotation(position, previous_position, velocity):
         """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
         This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
 
