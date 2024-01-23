@@ -138,10 +138,10 @@ class AttitudeModel:
 
         Args:
             position (np.ndarray): actor position vector.
-            previous_position (np.ndarray): actor position vector in previous timestep
-            velocity (np.ndarray): actor velocity vector
+            previous_position (np.ndarray): actor position vector in previous timestep.
+            velocity (np.ndarray): actor velocity vector.
 
-        Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame
+        Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame.
         """
         # orbital plane normal unit vector: (p x v)/||p x v||
         orbital_plane_normal = np.cross(position, velocity) / np.linalg.norm(
@@ -159,7 +159,7 @@ class AttitudeModel:
             orbital_plane_normal * rpy_frame_rotation_angle_in_eci
         )
 
-        # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
+        # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
 
     def body_axes_in_rpy(self):
@@ -167,7 +167,7 @@ class AttitudeModel:
         Vectors: - x, y, z axes
                  - user specified pointing vector
 
-        Returns: transformed vectors
+        Returns: transformed vectors.
         """
         # principal axes:
         x = body_to_rpy(np.array([1, 0, 0]), self._actor_attitude_in_rad)
@@ -179,7 +179,7 @@ class AttitudeModel:
         return x, y, z, p
 
     def update_attitude(self, dt):
-        """Updates the actor attitude based on initial conditions and disturbance torques over time
+        """Updates the actor attitude based on initial conditions and disturbance torques over time.
 
         Args:
             dt (float): How far to advance the attitude computation.

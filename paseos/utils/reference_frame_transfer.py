@@ -22,9 +22,9 @@ def transformation_matrix_eci_rpy(r, v):
     """
     Creates the transformation matrix to transform a vector in the Earth-Centered Inertial Frame (ECI) to the
     Roll-Pitch-Yaw (RPY) reference frame of the spacecraft (variant to Gaussian reference frame, useful for attitude
-    disturbance modelling)
+    disturbance modelling).
 
-    To go from ECI to RPY, this transformation matrix is used
+    To go from ECI to RPY, this transformation matrix is used.
     To go from RPY to ECI, the inverse is used.
 
     Args:
@@ -55,17 +55,17 @@ def transformation_matrix_eci_rpy(r, v):
 
 
 def transformation_matrix_rpy_body(euler_angles_in_rad):
-    """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body
+    """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body.
     fixed reference frame of the spacecraft.
 
-    To go from RPY to body fixed, this transformation matrix is used
+    To go from RPY to body fixed, this transformation matrix is used.
     To go from body fixed to RPY, the inverse is used.
 
     Args:
-        euler_angles_in_rad (np.ndarray): [roll, pitch, yaw] in radians
+        euler_angles_in_rad (np.ndarray): [roll, pitch, yaw] in radians.
 
     Returns:
-        T (np.ndarray): transformation matrix
+        T (np.ndarray): transformation matrix.
     """
     roll, pitch, yaw = euler_angles_in_rad
 
@@ -188,7 +188,7 @@ def body_to_rpy(u, euler_angles_in_rad):
 
 
 def rodrigues_rotation(p, angles):
-    """Rotates vector p around the rotation vector v in the same reference frame. Using Rodrigues' rotation formula
+    """Rotates vector p around the rotation vector v in the same reference frame. Using Rodrigues' rotation formula.
 
     Args:
         p (np.ndarray): vector to be rotated [x, y, z]
