@@ -171,7 +171,7 @@ class SpacecraftActor(BaseActor):
         """Returns the current attitude of the actor in radians.
 
         Returns:
-            list[floats]: actor attitude in radians
+            list[floats]: actor attitude in radians.
         """
         if type(self._attitude_model._actor_attitude_in_rad) == np.ndarray:
             return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad)
