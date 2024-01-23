@@ -341,7 +341,7 @@ class BaseActor(ABC):
         return pos, vel
 
     def get_disturbances(self):
-        """Get the user specified spacecraft attitude disturbances
+        """Get the user-specified spacecraft attitude disturbances.
 
         Returns:
             list[string]: name of disturbances
