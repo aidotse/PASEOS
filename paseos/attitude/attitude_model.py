@@ -117,7 +117,7 @@ class AttitudeModel:
         Args:
             dt (float): time to advance.
 
-        Returns: rotation vector of spacecraft body expressed in the body frame
+        Returns: rotation vector of spacecraft body expressed in the RPY frame
         """
         # todo: check if need to skip first step
         # theta_2:
