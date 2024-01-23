@@ -7,6 +7,7 @@ class SpacecraftBodyModel:
     """This model describes the geometry of the spacecraft
     Currently it assumes the spacecraft to be a cuboid shape, with width, length and height
     """
+
     _body_mesh = None
     _body_center_of_gravity = None
     _body_moment_of_inertia = None
@@ -30,10 +31,11 @@ class SpacecraftBodyModel:
         logger.trace("Initializing cuboid geometrical model.")
 
         self._body_mass = actor_mass
-        self._body_mesh = self._create_body_mesh(vertices=vertices, faces=faces, scale=scale)
+        self._body_mesh = self._create_body_mesh(
+            vertices=vertices, faces=faces, scale=scale
+        )
         self._body_moment_of_inertia = self._body_mesh.moment_inertia * self._body_mass
         self._body_center_of_gravity = self._body_mesh.center_mass
-
 
     def _create_body_mesh(self, vertices=None, faces=None, scale=1):
         """Creates the mesh of the satellite. If no vertices input is given, it defaults to a cuboid scaled by the
@@ -80,8 +82,13 @@ class SpacecraftBodyModel:
             ]
 
         else:
-            assert len(np.asarray(vertices).shape) == 2 and np.asarray(vertices).shape[1] == 3, "Vertices shall be [N, 3] shaped."
-            assert np.asarray(faces).shape[0] < len(vertices), "All the entries in faces are < len(vertices)"
+            assert (
+                len(np.asarray(vertices).shape) == 2
+                and np.asarray(vertices).shape[1] == 3
+            ), "Vertices shall be [N, 3] shaped."
+            assert np.asarray(faces).shape[0] < len(
+                vertices
+            ), "All the entries in faces are < len(vertices)"
 
         # Create mesh
         logger.trace("Creating the spacecraft body mesh.")

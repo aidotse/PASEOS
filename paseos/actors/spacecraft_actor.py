@@ -137,7 +137,6 @@ class SpacecraftActor(BaseActor):
         """
         return self._spacecraft_body_model._body_center_of_gravity
 
-
     @property
     def temperature_in_K(self) -> float:
         """Returns the current temperature of the actor in K.

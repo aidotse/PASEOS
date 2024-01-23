@@ -82,7 +82,9 @@ class BaseActor(ABC):
             Any: The value of the custom property.
         """
         if property_name not in self._custom_properties:
-            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+            raise ValueError(
+                f"Custom property '{property_name}' does not exist for actor {self}."
+            )
 
         return self._custom_properties[property_name]
 
@@ -104,11 +106,15 @@ class BaseActor(ABC):
             value (Any): The value to set for the custom property.
         """
         if property_name not in self._custom_properties:
-            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+            raise ValueError(
+                f"Custom property '{property_name}' does not exist for actor {self}."
+            )
 
         self._custom_properties[property_name] = value
 
-        logger.debug(f"Set custom property '{property_name}' to {value} for actor {self}.")
+        logger.debug(
+            f"Set custom property '{property_name}' to {value} for actor {self}."
+        )
 
     def get_custom_property_update_function(self, property_name: str) -> Callable:
         """Returns the update function for the specified custom property.
@@ -120,10 +126,11 @@ class BaseActor(ABC):
             Callable: The update function for the custom property.
         """
         if property_name not in self._custom_properties_update_function:
-            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
+            raise ValueError(
+                f"Custom property '{property_name}' does not exist for actor {self}."
+            )
 
         return self._custom_properties_update_function[property_name]
-
 
     @property
     def has_central_body(self) -> bool:
@@ -134,7 +141,6 @@ class BaseActor(ABC):
         """
         return hasattr(self, "_central_body") and self._central_body is not None
 
-
     @property
     def has_power_model(self) -> bool:
         """Returns true if actor's battery is modeled, else false.
@@ -142,7 +148,10 @@ class BaseActor(ABC):
         Returns:
             bool: bool indicating presence.
         """
-        return hasattr(self, "_battery_level_in_Ws") and self._battery_level_in_Ws is not None
+        return (
+            hasattr(self, "_battery_level_in_Ws")
+            and self._battery_level_in_Ws is not None
+        )
 
     @property
     def has_radiation_model(self) -> bool:
@@ -160,7 +169,10 @@ class BaseActor(ABC):
         Returns:
             bool: bool indicating presence.
         """
-        return hasattr(self, "_spacecraft_body_model") and self._spacecraft_body_model is not None
+        return (
+            hasattr(self, "_spacecraft_body_model")
+            and self._spacecraft_body_model is not None
+        )
 
     @property
     def has_thermal_model(self) -> bool:
@@ -170,7 +182,6 @@ class BaseActor(ABC):
             bool: bool indicating presence.
         """
         return hasattr(self, "_thermal_model") and self._thermal_model is not None
-
 
     @property
     def mass(self) -> float:
@@ -267,10 +278,15 @@ class BaseActor(ABC):
         """
         if t0 is None:
             t0 = self._local_time
-        if t0.mjd2000 == self._time_of_previous_position and self._previous_altitude is not None:
+        if (
+            t0.mjd2000 == self._time_of_previous_position
+            and self._previous_altitude is not None
+        ):
             return self._previous_altitude
         else:
-            self._previous_altitude = np.sqrt(np.sum(np.power(self.get_position(t0), 2)))
+            self._previous_altitude = np.sqrt(
+                np.sum(np.power(self.get_position(t0), 2))
+            )
             return self._previous_altitude
 
     def get_position(self, epoch: pk.epoch):
@@ -283,11 +299,16 @@ class BaseActor(ABC):
             np.array: [x,y,z] in meters
         """
         logger.trace(
-            "Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000)."
+            "Computing "
+            + self.name
+            + " position at time "
+            + str(epoch.mjd2000)
+            + " (mjd2000)."
         )
 
         if (
-            self._orbital_parameters is not None or self._custom_orbit_propagator is not None
+            self._orbital_parameters is not None
+            or self._custom_orbit_propagator is not None
         ) and self._position is not None:
             raise ValueError(
                 "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
@@ -363,7 +384,9 @@ class BaseActor(ABC):
         Returns:
             bool: true if in line-of-sight.
         """
-        return is_in_line_of_sight(self, other_actor, epoch, minimum_altitude_angle, plot)
+        return is_in_line_of_sight(
+            self, other_actor, epoch, minimum_altitude_angle, plot
+        )
 
     def is_in_eclipse(self, t: pk.epoch = None):
         """Checks if the actors is in eclipse at the specified time.
