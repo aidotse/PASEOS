@@ -168,7 +168,7 @@ class SpacecraftActor(BaseActor):
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")
 
     def attitude_in_rad(self):
-        """Returns the current attitude of the actor in radians
+        """Returns the current attitude of the actor in radians.
 
         Returns:
             list[floats]: actor attitude in radians
