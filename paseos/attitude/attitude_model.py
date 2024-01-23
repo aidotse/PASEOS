@@ -21,7 +21,7 @@ class AttitudeModel:
 
     The model allows for one pointing vector to be defined in the actor body frame for visualization and possibly
     could be used for future antenna pointing applications. Its position in time within the Earth-centered inertial
-    frame is also calculated alongside the general body attitude
+    frame is also calculated alongside the general body attitude.
 
     The attitude calculations are based in three reference frames, refer to reference_frame_transfer.py in utils folder.
     """
@@ -72,7 +72,7 @@ class AttitudeModel:
 
     def nadir_vector(self):
         # unused but might be useful during disturbance calculations or pointing vector relative position
-        """compute unit vector pointing towards earth, inertial body frame
+        """Compute unit vector pointing towards earth, inertial body frame.
 
         Returns:
             np array ([x, y, z]): unit nadir vector in ECIF (Earth-centered inertial frame)
@@ -81,10 +81,10 @@ class AttitudeModel:
         return -u / np.linalg.norm(u)
 
     def calculate_disturbance_torque(self):
-        """Compute total torque due to user specified disturbances
+        """Compute total torque due to user specified disturbances.
 
         Returns:
-            np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame
+            np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
 
         T = np.array([0.0, 0.0, 0.0])
@@ -97,7 +97,7 @@ class AttitudeModel:
         return T
 
     def calculate_angular_acceleration(self):
-        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
+        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)."""
         # TODO in the future control torques could be added
 
         # moment of Inertia matrix:
@@ -112,10 +112,10 @@ class AttitudeModel:
 
     def body_rotation(self, dt):
         """Calculates the rotation vector around which the spacecraft body rotates
-        based on angular acceleration and velocity
+        based on angular acceleration and velocity.
 
         Args:
-            dt (float): time to advance
+            dt (float): time to advance.
 
         Returns: rotation vector of spacecraft body expressed in the body frame
         """
@@ -134,10 +134,10 @@ class AttitudeModel:
 
     def frame_rotation(self, position, previous_position, velocity):
         """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
-        this rotation component makes the actor body attitude stay constant w.r.t. inertial frame,
+        This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
 
         Args:
-            position (np.ndarray): actor position vector
+            position (np.ndarray): actor position vector.
             previous_position (np.ndarray): actor position vector in previous timestep
             velocity (np.ndarray): actor velocity vector
 
