@@ -78,7 +78,6 @@ class GeometricModel:
         self._actor_mesh = mesh.apply_scale(self.scale)
         return self._actor_mesh
 
-    @property
     def find_moment_of_inertia(self):
         """Gives the moment of inertia of the actor, assuming constant density.
 
