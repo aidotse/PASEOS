@@ -37,15 +37,16 @@ ActorBuilder.set_thermal_model(
     actor_thermal_capacity=0.89,
 )
 
-# when i = 21 in loop, 0.00158 rad/sec will rotate 180 deg about 1 axis
+# when i = 21 in loop and advance time =100, pi/2000 rad/sec will rotate 180 deg about 1 axis
 ActorBuilder.set_attitude_model(
     sat1,
-    actor_initial_angular_velocity=[0.0, 0.00158, 0.0],
+    actor_initial_angular_velocity=[0.0, np.pi / 2000, 0.0],
     actor_pointing_vector_body=[0.0, 0.0, 1.0],
-    actor_initial_attitude_in_rad=[0.0, 0.0, 0.0]
+    actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
 )
 # disturbances:
-ActorBuilder.set_disturbances(sat1,True, True)
+# ActorBuilder.set_disturbances(sat1,True, True)
+ActorBuilder.set_disturbances(sat1)
 
 sim = paseos.init_sim(sat1)
 plt.close()
@@ -57,9 +58,9 @@ z = []
 pointing_vector = []
 
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+ax = fig.add_subplot(111, projection="3d")
 for i in range(21):
-
+    print("----------", i, "----------")
     pos = sat1.get_position(sat1.local_time)
     x.append(sat1.get_position(sat1.local_time)[0])
     y.append(sat1.get_position(sat1.local_time)[1])
@@ -84,15 +85,18 @@ for i in range(21):
     # scale for plotting
     ang_vel = ang_vel * 2e6
 
+    print("plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector/2e6)
     # plot vectors
     ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
 
+    # sim.advance_time(100, 0)
     sim.advance_time(100, 0)
 
+
 # 3D figure limits
-axmin = min([min(x), min(y), min(z)])*1.1
-axmax = max([max(x), max(y), max(z)])*1.1
+axmin = min([min(x), min(y), min(z)]) * 1.1
+axmax = max([max(x), max(y), max(z)]) * 1.1
 
 ax.axes.set_xlim3d(left=axmin, right=axmax)
 ax.axes.set_ylim3d(bottom=axmin, top=axmax)
@@ -102,5 +106,5 @@ ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
 
-ax.plot(x,y,z)
-ax.scatter(0,0,0)
+ax.plot(x, y, z)
+ax.scatter(0, 0, 0)

@@ -1,4 +1,5 @@
 import numpy as np
+import pykep as pk
 
 from paseos.attitude.disturbance_calculations import (
     calculate_aero_torque,
@@ -117,29 +118,28 @@ class AttitudeModel:
         Args:
             dt (float): time to advance.
 
-        Returns: rotation vector of spacecraft body expressed in the RPY frame
+        Returns: rotation vector of spacecraft body expressed in the RPY frame.
         """
-        # todo: check if need to skip first step
-        # theta_2:
-
-        # to not have the spacecraft rotate in the first timestep:
-        # if self._first_run:
-        #    body_rotation = self._actor_angular_velocity * dt
-        #    self._actor_theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad)
-        #    self._first_run = False
+        # Calculate angular acceleration
         self.calculate_angular_acceleration()
+
+        # Add angular velocity
         self._actor_angular_velocity += self._actor_angular_acceleration * dt
+
+        # Body rotation vector:
         body_rotation = self._actor_angular_velocity * dt
+
+        # Return rotation vector in RPY frame
         return body_to_rpy(body_rotation, self._actor_attitude_in_rad)
 
     @staticmethod
-    def frame_rotation(position, previous_position, velocity):
+    def frame_rotation(position, next_position, velocity):
         """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
         This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
 
         Args:
             position (np.ndarray): actor position vector.
-            previous_position (np.ndarray): actor position vector in previous timestep.
+            next_position (np.ndarray): actor position vector in the next timestep.
             velocity (np.ndarray): actor velocity vector.
 
         Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame.
@@ -151,8 +151,8 @@ class AttitudeModel:
 
         # rotation angle: arccos((p . p_previous) / (||p|| ||p_previous||))
         rpy_frame_rotation_angle_in_eci = np.arccos(
-            np.linalg.multi_dot([position, previous_position])
-            / (np.linalg.norm(position) * np.linalg.norm(previous_position))
+            np.linalg.multi_dot([position, next_position])
+            / (np.linalg.norm(position) * np.linalg.norm(next_position))
         )
 
         # assign this scalar rotation angle to the vector perpendicular to rotation plane
@@ -185,25 +185,28 @@ class AttitudeModel:
         Args:
             dt (float): How far to advance the attitude computation.
         """
-        # position
-        position = np.array(self._actor.get_position(self._actor.local_time))
+        # time
+        t = self._actor.local_time
 
-        # previous position
-        previous_position = self._actor._previous_position
+        # position
+        position = np.array(self._actor.get_position(t))
+
+        # next position
+        next_position = np.array(
+            self._actor.get_position(pk.epoch(t.mjd2000 + dt * pk.SEC2DAY, "mjd2000"))
+        )
 
         # velocity
         velocity = np.array(
             self._actor.get_position_velocity(self._actor.local_time)[1]
         )
 
-        # body axes expressed in rpy frame: (x, y, z, custom pointing vector)
+        # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self.body_axes_in_rpy()
-
-        # todo: check if possible to do both angles at once
 
         # attitude change due to two rotations
         # rpy frame rotation, in inertial frame:
-        theta_1 = self.frame_rotation(position, previous_position, velocity)
+        theta_1 = self.frame_rotation(position, next_position, velocity)
         # body rotation due to its physical rotation
         theta_2 = self.body_rotation(dt)
 
@@ -225,11 +228,10 @@ class AttitudeModel:
         # update new angular velocity vector in ECI:
         self._actor_angular_velocity_eci = rpy_to_eci(
             body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
-            position,
+            next_position,
             velocity,
         )
-
         # update pointing vector
         self._actor_pointing_vector_eci = rpy_to_eci(
-            pointing_vector_rpy, position, velocity
+            pointing_vector_rpy, next_position, velocity
         )
