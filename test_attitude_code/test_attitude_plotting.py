@@ -85,7 +85,9 @@ for i in range(21):
     # scale for plotting
     ang_vel = ang_vel * 2e6
 
-    print("plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector/2e6)
+    print(
+        "plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6
+    )
     # plot vectors
     ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])

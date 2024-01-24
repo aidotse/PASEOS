@@ -532,7 +532,7 @@ class ActorBuilder:
         Args:
             actor (SpacecraftActor): The actor to add to.
             aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False
-            gravitational (bool): Whether to consider gravitational disturbances in the attitude model. Defaults to False
+            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False
             magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False
         """
         # Create a list with user specified disturbances which are considered in the attitude modelling.
@@ -562,7 +562,7 @@ class ActorBuilder:
         Args:
             actor (SpacecraftActor): Actor to model.
             actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
-            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity Defaults to [0.0, 0.0, 0.0].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
             actor_pointing_vector_body (list of floats): Actor's pointing vector. Defaults to [0.0, 0.0, 1.0].
         """
 
