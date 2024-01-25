@@ -95,6 +95,7 @@ class AttitudeModel:
             if "gravitational" in self._actor.get_disturbances():
                 T += calculate_grav_torque()
             if "magnetic" in self._actor.get_disturbances():
+                # add something like this: self.central_body.rotate_body()
                 T += calculate_magnetic_torque()
         return T
 
