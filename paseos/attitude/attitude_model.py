@@ -103,7 +103,7 @@ class AttitudeModel:
             T += calculate_aero_torque()
         if "gravitational" in self._actor.get_disturbances():
             T += calculate_grav_torque(self._actor_pointing_vector_body,earth_rotation_vector_in_body,
-                                       self._actor._moment_of_inertia, self._actor._previous_altitude)
+                                       self._actor._moment_of_inertia, position[0])
         if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
         return T
@@ -118,7 +118,9 @@ class AttitudeModel:
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
         self._actor_angular_acceleration = np.linalg.inv(I) @ (
-            self.calculate_disturbance_torque()
+            self.calculate_disturbance_torque(position=np.array(self._actor.get_position(self._actor.local_time)),
+                                              velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
+                                              euler_angles=self._actor_attitude_in_rad)
             - np.cross(self._actor_angular_velocity, I @ self._actor_angular_velocity)
         )
 

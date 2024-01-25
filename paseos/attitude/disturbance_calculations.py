@@ -41,7 +41,8 @@ def calculate_grav_torque(u_r, u_n, J, h):
     tg_term_2 = 30 * np.dot(u_r, u_n) * (np.cross(u_n, J * u_r) + np.cross(u_r, J * u_n))
     tg_term_3 = np.cross((15 - 105 * np.dot(u_r, u_n) ** 2 * u_r), J * u_r) + np.cross(6 * u_n, J * u_r)
     tg = tg_term_1 + mu * J2 * Re ** 2 / (2 * r ** 5) * (tg_term_2 + tg_term_3)
-    return np.array(tg)
+    T = [tg[0,0], tg[1,1], tg[2,2]]
+    return np.array(T)
 
 
 def calculate_magnetic_torque():
