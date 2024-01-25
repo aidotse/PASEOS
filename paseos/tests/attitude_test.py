@@ -20,7 +20,6 @@ def attitude_model_test():
     ActorBuilder.set_attitude_model(sat1,
                                     actor_initial_angular_velocity=[0.0, np.pi/2000, 0.0],
                                     actor_pointing_vector_body=[0, 0, 1])
-    ActorBuilder.set_disturbances(sat1)
 
     # Check Initial values
     assert np.all(sat1._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
