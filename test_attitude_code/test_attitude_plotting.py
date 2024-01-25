@@ -46,7 +46,7 @@ ActorBuilder.set_attitude_model(
 )
 # disturbances:
 # ActorBuilder.set_disturbances(sat1,True, True)
-ActorBuilder.set_disturbances(sat1)
+# ActorBuilder.set_disturbances(sat1)
 
 sim = paseos.init_sim(sat1)
 plt.close()
@@ -110,3 +110,4 @@ ax.set_zlabel("z")
 
 ax.plot(x, y, z)
 ax.scatter(0, 0, 0)
+plt.show()

@@ -87,14 +87,15 @@ class AttitudeModel:
         Returns:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
-
         T = np.array([0.0, 0.0, 0.0])
-        if "aerodynamic" in self._actor.get_disturbances():
-            T += calculate_aero_torque()
-        if "gravitational" in self._actor.get_disturbances():
-            T += calculate_grav_torque()
-        if "magnetic" in self._actor.get_disturbances():
-            T += calculate_magnetic_torque()
+
+        if self._actor.has_attitude_disturbances:
+            if "aerodynamic" in self._actor.get_disturbances():
+                T += calculate_aero_torque()
+            if "gravitational" in self._actor.get_disturbances():
+                T += calculate_grav_torque()
+            if "magnetic" in self._actor.get_disturbances():
+                T += calculate_magnetic_torque()
         return T
 
     def calculate_angular_acceleration(self):
