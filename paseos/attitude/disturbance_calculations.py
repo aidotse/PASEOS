@@ -19,7 +19,7 @@ def calculate_grav_torque():
     return np.array(T)
 
 
-def calculate_magnetic_torque():
+def calculate_magnetic_torque(earth_m, sat_m, pos):
     # calculations for torques
     # T must be in actor body fixed frame (to be discussed)
     T = [0, 0, 0]
