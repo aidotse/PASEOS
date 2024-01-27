@@ -102,8 +102,10 @@ class AttitudeModel:
         if "aerodynamic" in self._actor.get_disturbances():
             T += calculate_aero_torque()
         if "gravitational" in self._actor.get_disturbances():
-            T += calculate_grav_torque(self._actor_pointing_vector_body,earth_rotation_vector_in_body,
-                                       self._actor._moment_of_inertia, position[0])
+            nadir_vector_in_rpy = eci_to_rpy(self.nadir_vector(), position, velocity)
+            nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
+            T += calculate_grav_torque(nadir_vector_in_body,earth_rotation_vector_in_body,
+                                       self._actor._moment_of_inertia, np.linalg.norm(position))
         if "magnetic" in self._actor.get_disturbances():
             T += calculate_magnetic_torque()
         return T
