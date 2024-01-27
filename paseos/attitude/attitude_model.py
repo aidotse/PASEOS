@@ -38,7 +38,6 @@ class AttitudeModel:
     _actor_pointing_vector_body = None
     _actor_pointing_vector_eci = None
 
-
     def __init__(
         self,
         local_actor,
@@ -47,7 +46,7 @@ class AttitudeModel:
         actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         # pointing vector in body frame: (defaults to z-axis)
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-        actor_residual_magnetic_field: list[float] = None
+        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
     ):
         self._actor = local_actor
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
@@ -69,6 +68,7 @@ class AttitudeModel:
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
         self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
+        self._actor_magnetic_flux = np.array([0, 0, 0])
 
     def nadir_vector(self):
         # unused but might be useful during disturbance calculations or pointing vector relative position
@@ -119,6 +119,12 @@ class AttitudeModel:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
         T = np.array([0.0, 0.0, 0.0])
+        dt = 10
+        # time
+        t = self._actor.local_time
+        next_position = np.array(
+            self._actor.get_position(pk.epoch(t.mjd2000 + dt * pk.SEC2DAY, "mjd2000"))
+        )
 
         if self._actor.has_attitude_disturbances:
             if "aerodynamic" in self._actor.get_disturbances():
@@ -126,12 +132,18 @@ class AttitudeModel:
             if "gravitational" in self._actor.get_disturbances():
                 T += calculate_grav_torque()
             if "magnetic" in self._actor.get_disturbances():
-                T += calculate_magnetic_torque(
+                t, b = calculate_magnetic_torque(
                     m_earth=self.earth_magnetic_dipole_moment(),
                     m_sat=self._actor_residual_magnetic_field,
-                    position=self._actor.get_position(self._actor.local_time),
-                    velocity=self._actor.get_position_velocity(self._actor.local_time)[1],
-                    attitude=self._actor_attitude_in_rad)
+                    # position=self._actor.get_position(self._actor.local_time),
+                    position=next_position,
+                    velocity=self._actor.get_position_velocity(self._actor.local_time)[
+                        1
+                    ],
+                    attitude=self._actor_attitude_in_rad,
+                )
+                T += t
+                self._actor_magnetic_flux = b
         return T
 
     def calculate_angular_acceleration(self):

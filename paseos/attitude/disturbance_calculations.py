@@ -34,23 +34,27 @@ def calculate_magnetic_torque(m_earth, m_sat, position, velocity, attitude):
     Args:
         m_earth (np.ndarray): magnetic dipole moment vector of the Earth in Am²
         m_sat (np.ndarray): magnetic dipole moment vector of the actor, magnitude usually between 0.1 - 20 Am²
-        position (np.ndarray): actor position
-        velocity (np.ndarray): actor velocity (used for frame transformation)
+        position (tuple or np.ndarray): actor position
+        velocity (tuple or np.ndarray): actor velocity (used for frame transformation)
         attitude (np.ndarray): actor velocity (used for frame transformation)
 
     Returns: Disturbance torque vector T (nd.array) in Nm in the actor body frame
     """
+    # convert to np.ndarray
+    position = np.array(position)
+    velocity = np.array(velocity)
+
     # actor distance and unit position vector
     r = np.linalg.norm(position)
     r_hat = position / r
 
     # magnetic field flux density at actor's position in Earth inertial frame
     B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r ** 3)
-
+    B_test = B
     # transform field vector to body frame
     B = rpy_to_body(eci_to_rpy(B, position, velocity), attitude)
 
     # disturbance torque:
     T = np.cross(m_sat, B)
-
-    return T
+    print("B ", B, " x m ", m_sat, " = ", T)
+    return T, B_test
