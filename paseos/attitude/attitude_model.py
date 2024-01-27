@@ -131,7 +131,9 @@ class AttitudeModel:
             if "magnetic" in self._actor.get_disturbances():
                 # Earth magnetic dipole moment at right position
                 magnetic_dipole_moment = self.earth_magnetic_dipole_moment()
-                T += calculate_magnetic_torque(magnetic_dipole_moment)
+                m_sat = "placeholder"
+                position = "placeholder"
+                T += calculate_magnetic_torque(magnetic_dipole_moment, m_sat, position)
         return T
 
     def calculate_angular_acceleration(self):

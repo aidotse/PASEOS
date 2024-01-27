@@ -25,18 +25,6 @@ ActorBuilder.set_orbit(
 )
 ActorBuilder.set_geometric_model(sat1, mass=500)
 
-ActorBuilder.set_thermal_model(
-    sat1,
-    actor_mass=100,
-    actor_initial_temperature_in_K=270,
-    actor_sun_absorptance=0.5,
-    actor_infrared_absorptance=0.5,
-    actor_sun_facing_area=1,
-    actor_central_body_facing_area=4,
-    actor_emissive_area=18,
-    actor_thermal_capacity=0.89,
-)
-
 # when i = 21 in loop and advance time =100, pi/2000 rad/sec will rotate 180 deg about 1 axis
 ActorBuilder.set_attitude_model(
     sat1,
@@ -45,7 +33,7 @@ ActorBuilder.set_attitude_model(
     actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
 )
 # disturbances:
-# ActorBuilder.set_disturbances(sat1,True, True)
+ActorBuilder.set_disturbances(sat1, False, False, True)
 # ActorBuilder.set_disturbances(sat1)
 
 sim = paseos.init_sim(sat1)
@@ -88,11 +76,12 @@ for i in range(21):
     print(
         "plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6
     )
+    m = sat1._attitude_model.earth_magnetic_dipole_moment() * 1e-16
     # plot vectors
     ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
+    ax.quiver(0, 0, 0, m[0], m[1], m[2], color="g")
 
-    # sim.advance_time(100, 0)
     sim.advance_time(100, 0)
 
 
@@ -111,3 +100,4 @@ ax.set_zlabel("z")
 ax.plot(x, y, z)
 ax.scatter(0, 0, 0)
 plt.show()
+
