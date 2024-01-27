@@ -38,7 +38,7 @@ class AttitudeModel:
     _actor_pointing_vector_body = None
     _actor_pointing_vector_eci = None
 
-    # _actor_prev_pos = None
+
     def __init__(
         self,
         local_actor,
@@ -46,11 +46,8 @@ class AttitudeModel:
         actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
         actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         # pointing vector in body frame: (defaults to z-axis)
-        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
-        ## add args with default value = ...
-        # actor_dipole
-        # actor_drag_coefficient (more for geometric model)
-        # body_J2
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field: list[float] = None
     ):
         self._actor = local_actor
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
@@ -71,7 +68,7 @@ class AttitudeModel:
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
-        self._first_run = True
+        self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
 
     def nadir_vector(self):
         # unused but might be useful during disturbance calculations or pointing vector relative position
@@ -91,7 +88,7 @@ class AttitudeModel:
         Pole position and dipole moment strength values from the year 2000:
         Latitude: 79.6° N
         Longitude: 71.6° W
-        Dipole moment: 7.79 x 10²²
+        Dipole moment: 7.79 x 10²² Am²
         https://wdc.kugi.kyoto-u.ac.jp/poles/polesexp.html
 
         (The same method used as ground station actor position determination)
@@ -129,11 +126,12 @@ class AttitudeModel:
             if "gravitational" in self._actor.get_disturbances():
                 T += calculate_grav_torque()
             if "magnetic" in self._actor.get_disturbances():
-                # Earth magnetic dipole moment at right position
-                magnetic_dipole_moment = self.earth_magnetic_dipole_moment()
-                m_sat = "placeholder"
-                position = "placeholder"
-                T += calculate_magnetic_torque(magnetic_dipole_moment, m_sat, position)
+                T += calculate_magnetic_torque(
+                    m_earth=self.earth_magnetic_dipole_moment(),
+                    m_sat=self._actor_residual_magnetic_field,
+                    position=self._actor.get_position(self._actor.local_time),
+                    velocity=self._actor.get_position_velocity(self._actor.local_time)[1],
+                    attitude=self._actor_attitude_in_rad)
         return T
 
     def calculate_angular_acceleration(self):
