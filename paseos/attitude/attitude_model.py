@@ -113,7 +113,7 @@ class AttitudeModel:
         # TODO in the future control torques could be added
 
         # moment of Inertia matrix:
-        I = self._actor._moment_of_inertia
+        I = self._actor._moment_of_inertia()
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
