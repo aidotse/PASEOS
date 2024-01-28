@@ -5,6 +5,7 @@
 import numpy as np
 from ..utils.reference_frame_transfer import rpy_to_body, eci_to_rpy
 
+
 def calculate_aero_torque():
     # calculations for torques
     # T must be in actor body fixed frame (to be discussed)
@@ -44,17 +45,17 @@ def calculate_magnetic_torque(m_earth, m_sat, position, velocity, attitude):
     position = np.array(position)
     velocity = np.array(velocity)
 
-    # actor distance and unit position vector
+    # actor distance
     r = np.linalg.norm(position)
+    # actor unit position vector
     r_hat = position / r
 
     # magnetic field flux density at actor's position in Earth inertial frame
-    B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r ** 3)
-    B_test = B
+    B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r**3)
+
     # transform field vector to body frame
     B = rpy_to_body(eci_to_rpy(B, position, velocity), attitude)
 
     # disturbance torque:
     T = np.cross(m_sat, B)
-    print("B ", B, " x m ", m_sat, " = ", T)
-    return T, B_test
+    return T
