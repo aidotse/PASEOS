@@ -41,14 +41,27 @@ class AttitudeModel:
     def __init__(
         self,
         local_actor,
-        # initial conditions: (defaults to 0)
-        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
-        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-        # pointing vector in body frame: (defaults to z-axis)
-        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
+        # initial conditions:
+        actor_initial_attitude_in_rad: list[float] = [0., 0., 0.],
+        actor_initial_angular_velocity: list[float] = [0., 0., 0.],
+        # pointing vector in body frame: (defaults to body z-axis)
+        actor_pointing_vector_body: list[float] = [0., 0., 1.],
+        actor_residual_magnetic_field: list[float] = [0., 0., 0.],
     ):
+        """Creates an attitude model to model actor attitude based on
+        initial conditions (initial attitude and angular velocity) and
+        external disturbance torques.
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude ([roll, pitch, yaw]) angles.
+                Defaults to [0., 0., 0.].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
+                Defaults to [0., 0., 0.].
+            actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
+        """
         self._actor = local_actor
+        # convert to np.ndarray
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
         self._actor_angular_velocity = np.array(actor_initial_angular_velocity)
 
@@ -56,12 +69,15 @@ class AttitudeModel:
         self._actor_pointing_vector_body = np.array(
             actor_pointing_vector_body
         ) / np.linalg.norm(np.array(actor_pointing_vector_body))
+
         # pointing vector expressed in Earth-centered inertial frame
         self._actor_pointing_vector_eci = rpy_to_eci(
             body_to_rpy(self._actor_pointing_vector_body, self._actor_attitude_in_rad),
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
+
+        # angular velocity vector expressed in Earth-centered inertial frame
         self._actor_angular_velocity_eci = rpy_to_eci(
             body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
             np.array(self._actor.get_position(self._actor.local_time)),
@@ -136,7 +152,9 @@ class AttitudeModel:
                     m_earth=self.earth_magnetic_dipole_moment(),
                     m_sat=self._actor_residual_magnetic_field,
                     position=next_position,
-                    velocity=self._actor.get_position_velocity(self._actor.local_time)[1],
+                    velocity=self._actor.get_position_velocity(self._actor.local_time)[
+                        1
+                    ],
                     attitude=self._actor_attitude_in_rad,
                 )
         return T
