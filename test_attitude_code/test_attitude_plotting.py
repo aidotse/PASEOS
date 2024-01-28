@@ -15,32 +15,60 @@ earth = pk.planet.jpl_lp("earth")
 
 # Define spacecraft actor
 sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
-R = 3000000+6371000
-theta = 11*np.pi/180
+sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
+# geostationary orbit:
+
+lat = 79.6 * np.pi / 180
+lon = -71.6 * np.pi / 180
+
+R = 6371000 + 35786000
+v = 3074.66
+
+arr = np.array([-1.24217547e-09, 1.01735657e-07, -3.87201400e-08])
+initial_magn = np.ndarray.tolist(arr / np.linalg.norm(arr) * 20)
+initial_pointing = np.ndarray.tolist(arr / np.linalg.norm(arr))
 
 ActorBuilder.set_orbit(
     sat1,
-    position=[R * np.cos(theta), 0, -R * np.sin(theta)],
-    #velocity=[0, 8000, 0],
-    velocity=[0, 6519.49, 0],
+    position=[R * np.cos(np.pi / 2 + lon), R * np.sin(np.pi / 2 + lon), 0],
+    velocity=[-v * np.sin(np.pi / 2 + lon), v * np.cos(np.pi / 2 + lon), 0],
     epoch=pk.epoch(0),
     central_body=earth,
 )
-ActorBuilder.set_geometric_model(sat1, mass=500)
+ActorBuilder.set_orbit(
+    sat2,
+    position=[R * np.cos(np.pi / 2 + lon), R * np.sin(np.pi / 2 + lon), 0],
+    velocity=[-v * np.sin(np.pi / 2 + lon), v * np.cos(np.pi / 2 + lon), 0],
+    epoch=pk.epoch(0),
+    central_body=earth,
+)
+
+ActorBuilder.set_geometric_model(sat1, mass=100)
+ActorBuilder.set_geometric_model(sat2, mass=100)
 
 # when i = 21 in loop and advance time =100, pi/2000 rad/sec will rotate 180 deg about 1 axis
 ActorBuilder.set_attitude_model(
     sat1,
-    actor_initial_angular_velocity=[0.0, 0 * np.pi / 2000, 0.0],
-    actor_pointing_vector_body=[0.0, 0.0, 1.0],
+    actor_initial_angular_velocity=[0.0, 0.0, 0.0],
+    actor_pointing_vector_body=initial_pointing,
     actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
-    actor_residual_magnetic_field=[0.0, 0.0, 0.05],
+    actor_residual_magnetic_field=initial_magn,
 )
+ActorBuilder.set_attitude_model(
+    sat2,
+    actor_initial_angular_velocity=[0.0, 0.0, 0.0],
+    actor_pointing_vector_body=initial_pointing,
+    actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
+    actor_residual_magnetic_field=[0.0, 0.0, 0.0],
+)
+
 # disturbances:
-ActorBuilder.set_disturbances(sat1, False, False, True)
-# ActorBuilder.set_disturbances(sat1)
+ActorBuilder.set_disturbances(sat1, magnetic=True)
+ActorBuilder.set_disturbances(sat2, magnetic=True)
+
 
 sim = paseos.init_sim(sat1)
+sim.add_known_actor(sat2)
 plt.close()
 
 pos = []
@@ -51,7 +79,7 @@ pointing_vector = []
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
-for i in range(21):
+for i in range(46):
     print("----------", i, "----------")
     pos = sat1.get_position(sat1.local_time)
     x.append(sat1.get_position(sat1.local_time)[0])
@@ -64,7 +92,13 @@ for i in range(21):
     vector = sat1.pointing_vector()
     vector[np.isclose(vector, np.zeros(3))] = 0
     # scale for plotting
-    vector = vector * 2e6
+    vector = vector * 8e6
+
+    # pointing vector:
+    vector2 = sat2.pointing_vector()
+    vector2[np.isclose(vector2, np.zeros(3))] = 0
+    # scale for plotting
+    vector2 = vector2 * 8e6
 
     # angular velocity vector:
     # normalize first:
@@ -75,20 +109,23 @@ for i in range(21):
         ang_vel = sat1.angular_velocity() / np.linalg.norm(sat1.angular_velocity())
         ang_vel[np.isclose(ang_vel, np.zeros(3))] = 0
     # scale for plotting
-    ang_vel = ang_vel * 2e6
+    ang_vel = ang_vel * 2e7
 
-    print(
-        "plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6
-    )
-    m = sat1._attitude_model.earth_magnetic_dipole_moment() * 1e-16
-    B = sat1._attitude_model._actor_magnetic_flux * 1e12
+    # print("plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6)
+
+    m = sat1._attitude_model.earth_magnetic_dipole_moment() * 6e-16
+    B = sat1._attitude_model._actor_magnetic_flux * 2e14
+    print(sat1._attitude_model._actor_magnetic_flux)
     # plot vectors
-    ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
-    ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2])
-    ax.quiver(0, 0, 0, m[0], m[1], m[2], color="g")
+    # ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
+    ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2], linewidths=3, color="r")
+    ax.quiver(pos[0], pos[1], pos[2], vector2[0], vector2[1], vector2[2], linewidths=3, color="m")
+    if not i % 10:
+        ax.quiver(0, 0, 0, m[0], m[1], m[2], color="y")
     ax.quiver(pos[0], pos[1], pos[2], B[0], B[1], B[2], color="y")
 
-    sim.advance_time(300, 0)
+    sim.advance_time(1000, 0)
+    # sim.advance_time(3446, 0)
 
 
 # 3D figure limits
