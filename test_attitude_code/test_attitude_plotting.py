@@ -7,6 +7,7 @@ import numpy as np
 import paseos
 from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.actor_builder import ActorBuilder
+from paseos.utils.reference_frame_transfer import rpy_to_body, eci_to_rpy
 
 matplotlib.use("Qt5Agg")
 
@@ -24,8 +25,9 @@ lon = -71.6 * np.pi / 180
 R = 6371000 + 35786000
 v = 3074.66
 
-arr = np.array([-1.24217547e-09, 1.01735657e-07, -3.87201400e-08])
-initial_magn = np.ndarray.tolist(arr / np.linalg.norm(arr) * 20)
+#arr = np.array([-1.24217547e-09, 1.01735657e-07, -3.87201400e-08])
+arr = np.array([-3.18159529e-09, 1.02244882e-07, -3.72362170e-08])
+initial_magn = np.ndarray.tolist(arr / np.linalg.norm(arr) * 1000)
 initial_pointing = np.ndarray.tolist(arr / np.linalg.norm(arr))
 
 ActorBuilder.set_orbit(
@@ -46,7 +48,6 @@ ActorBuilder.set_orbit(
 ActorBuilder.set_geometric_model(sat1, mass=100)
 ActorBuilder.set_geometric_model(sat2, mass=100)
 
-# when i = 21 in loop and advance time =100, pi/2000 rad/sec will rotate 180 deg about 1 axis
 ActorBuilder.set_attitude_model(
     sat1,
     actor_initial_angular_velocity=[0.0, 0.0, 0.0],
@@ -114,8 +115,18 @@ for i in range(46):
     # print("plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6)
 
     m = sat1._attitude_model.earth_magnetic_dipole_moment() * 6e-16
-    B = sat1._attitude_model._actor_magnetic_flux * 2e14
-    print(sat1._attitude_model._actor_magnetic_flux)
+
+    # get new Earth B vector
+    m_earth = sat1._attitude_model.earth_magnetic_dipole_moment()
+    actor_position = np.array(sat1.get_position(sat1.local_time))
+    actor_velocity = np.array(sat1.get_position_velocity(sat1.local_time)[1])
+    r = np.linalg.norm(actor_position)
+    r_hat = actor_position / r
+
+    B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r**3)
+    #B = rpy_to_body(eci_to_rpy(B, actor_position, actor_velocity), sat1.attitude_in_rad())
+
+    B = B * 2e14
     # plot vectors
     # ax.quiver(pos[0], pos[1], pos[2], ang_vel[0], ang_vel[1], ang_vel[2], color="m")
     ax.quiver(pos[0], pos[1], pos[2], vector[0], vector[1], vector[2], linewidths=3, color="r")
@@ -125,8 +136,6 @@ for i in range(46):
     ax.quiver(pos[0], pos[1], pos[2], B[0], B[1], B[2], color="y")
 
     sim.advance_time(1000, 0)
-    # sim.advance_time(3446, 0)
-
 
 # 3D figure limits
 axmin = min([min(x), min(y), min(z)]) * 1.1

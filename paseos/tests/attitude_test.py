@@ -7,6 +7,7 @@ import sys
 sys.path.append("../..")
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
+from paseos.utils.reference_frame_transfer import eci_to_rpy, rpy_to_body
 
 
 def attitude_model_test():
@@ -20,7 +21,7 @@ def attitude_model_test():
     earth = pk.planet.jpl_lp("earth")
 
     # First actor constant angular acceleration
-    omega = np.pi/2000
+    omega = np.pi / 2000
 
     # Define first local actor with angular velocity
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
@@ -49,7 +50,9 @@ def attitude_model_test():
     assert np.all(sat1._attitude_model._actor_pointing_vector_eci == [-1.0, 0.0, 0.0])
     assert np.all(sat1._attitude_model._actor_attitude_in_rad == [0.0, 0.0, 0.0])
     # positive angular velocity in body y direction is negative angular velocity in Earth inertial z direction:
-    assert np.all(sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega])
+    assert np.all(
+        sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega]
+    )
 
     # sat2
     assert np.all(sat2._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
@@ -84,7 +87,9 @@ def attitude_model_test():
     # Pointing vector from sat2 must not be rotated.
     assert np.all(sat2.pointing_vector() == np.array([-1.0, 0.0, 0.0]))
     # Sat2 angular velocity in the body frame must stay zero:
-    assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
+    assert np.all(
+        sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0])
+    )
 
 
 def attitude_thermal_model_test():
@@ -167,4 +172,132 @@ def attitude_and_orbit_test():
     assert vector[0] == -1.0
 
 
-attitude_model_test()
+def magnetic_disturbance_test():
+    """Tests the magnetic disturbance torques applied in the attitude model.
+    First: put two spacecraft actors in a geostationary orbit (disregarding the relative magnetic field rotation of the
+    Earth). Both actor's own magnetic dipole moment aligned with the local magnetic flux density vector of the Earth
+    magnetic field. One is non-magnetic and is expected to have a fixed attitude in the Earth inertial frame.
+    The other (magnetic) actor should stay aligned with the Earth magnetic field.
+    """
+    # Define central body
+    earth = pk.planet.jpl_lp("earth")
+
+    # Define spacecraft actors
+    sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
+    sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
+
+    # geostationary orbital parameters:
+    r = 6371000 + 35786000  # radius [km]
+    v = 3074.66  # velocity [m/s]
+
+    # To have a more symmetric case, let the actors be on same longitude as Earth magnetic dipole vector
+    longitude = -71.6 * np.pi / 180
+
+    # set orbits:
+    ActorBuilder.set_orbit(
+        sat1,
+        position=[
+            r * np.cos(np.pi / 2 + longitude),
+            r * np.sin(np.pi / 2 + longitude),
+            0,
+        ],
+        velocity=[
+            -v * np.sin(np.pi / 2 + longitude),
+            v * np.cos(np.pi / 2 + longitude),
+            0,
+        ],
+        epoch=pk.epoch(0),
+        central_body=earth,
+    )
+    ActorBuilder.set_orbit(
+        sat2,
+        position=[
+            r * np.cos(np.pi / 2 + longitude),
+            r * np.sin(np.pi / 2 + longitude),
+            0,
+        ],
+        velocity=[
+            -v * np.sin(np.pi / 2 + longitude),
+            v * np.cos(np.pi / 2 + longitude),
+            0,
+        ],
+        epoch=pk.epoch(0),
+        central_body=earth,
+    )
+    print([
+            r * np.cos(np.pi / 2 + longitude),
+            r * np.sin(np.pi / 2 + longitude),
+            0,
+        ],)
+    # set geometric model
+    ActorBuilder.set_geometric_model(sat1, mass=100)
+    ActorBuilder.set_geometric_model(sat2, mass=100)
+
+    # now, align the body magnetic dipole with the local Earth magnetic flux density vector
+    # Earth magnetic flux density vector at start position is approximately:
+
+    B = np.array([-3.18159529e-09, 1.02244882e-07, -3.72362170e-08])
+
+    B_direction = B / np.linalg.norm(B)
+    # define a very large dipole moment for magnetic actor to compensate for the low magnetic field at GEO orbit
+    m_body = 500  # Am²
+    actor_dipole = np.ndarray.tolist(B_direction * m_body)
+    initial_pointing_vector_body = np.ndarray.tolist(B_direction)
+
+    # set attitude models
+    ActorBuilder.set_attitude_model(
+        sat1,
+        actor_initial_angular_velocity=[0.0, 0.0, 0.0],
+        actor_pointing_vector_body=initial_pointing_vector_body,
+        actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
+        actor_residual_magnetic_field=actor_dipole,
+    )
+
+    ActorBuilder.set_attitude_model(
+        sat2,
+        actor_initial_angular_velocity=[0.0, 0.0, 0.0],
+        actor_pointing_vector_body=initial_pointing_vector_body,
+        actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
+        actor_residual_magnetic_field=[0.0, 0.0, 0.0],
+    )
+
+    # disturbances:
+    ActorBuilder.set_disturbances(sat1, magnetic=True)
+    ActorBuilder.set_disturbances(sat2, magnetic=True)
+
+    # Initial pointing vector in Earth inertial frame
+    initial_pointing_vector_eci = np.array(sat1.pointing_vector())
+    # Check if pointing vectors in Earth inertial frame are equal
+    assert np.all(sat1.pointing_vector() == sat2.pointing_vector())
+
+    # start simulation
+    sim = paseos.init_sim(sat1)
+    sim.add_known_actor(sat2)
+
+    for i in range(20):
+        sim.advance_time(200, 0)
+
+        # get Earth B vector at timestep
+        # Earth magnetic dipole moment:
+        m_earth = sat1._attitude_model.earth_magnetic_dipole_moment()
+        # parameters to calculate local B vector:
+        actor_position = np.array(sat1.get_position(sat1.local_time))
+        r = np.linalg.norm(actor_position)
+        r_hat = actor_position / r
+        # local B vector:
+        B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r**3)
+
+        # B vector direction:
+        B_direction = B / np.linalg.norm(B)
+
+        # angle between the B vector and the actor's magnetic dipole vector (which is in the pointing vector direction):
+        angle = np.arccos(np.dot(B_direction, sat1.pointing_vector())) * 180/np.pi
+
+        # check if the magnetic actor dipole moment vector doesn't deviate more than 1° from the  B vector.
+        assert angle < 1
+
+    # check if the non-magnetic actor didn't rotate
+    assert np.all(sat2.pointing_vector() == initial_pointing_vector_eci)
+
+
+magnetic_disturbance_test()
