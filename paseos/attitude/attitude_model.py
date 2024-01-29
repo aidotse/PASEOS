@@ -139,6 +139,7 @@ class AttitudeModel:
         T = np.array([0.0, 0.0, 0.0])
 
         if self._actor.has_attitude_disturbances:
+            # TODO add solar disturbance
             if "aerodynamic" in self._actor.get_disturbances():
                 T += calculate_aero_torque()
             if "gravitational" in self._actor.get_disturbances():
