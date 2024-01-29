@@ -7,7 +7,6 @@ import numpy as np
 import paseos
 from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.actor_builder import ActorBuilder
-from paseos.utils.reference_frame_transfer import rpy_to_body, eci_to_rpy
 
 matplotlib.use("Qt5Agg")
 
@@ -104,7 +103,7 @@ for i in range(46):
     # angular velocity vector:
     # normalize first:
     ang_vel = sat1.angular_velocity()
-    if all(ang_vel == np.zeros(3)):
+    if np.all(ang_vel == np.zeros(3)):
         ang_vel = np.zeros(3)
     else:
         ang_vel = sat1.angular_velocity() / np.linalg.norm(sat1.angular_velocity())
@@ -114,17 +113,16 @@ for i in range(46):
 
     # print("plotted attitude:", euler, " at position: ", pos, " pointing v: ", vector / 2e6)
 
-    m = sat1._attitude_model.earth_magnetic_dipole_moment() * 6e-16
+    m = sat1._attitude_model._earth_magnetic_dipole_moment() * 6e-16
 
     # get new Earth B vector
-    m_earth = sat1._attitude_model.earth_magnetic_dipole_moment()
+    m_earth = sat1._attitude_model._earth_magnetic_dipole_moment()
     actor_position = np.array(sat1.get_position(sat1.local_time))
     actor_velocity = np.array(sat1.get_position_velocity(sat1.local_time)[1])
     r = np.linalg.norm(actor_position)
     r_hat = actor_position / r
 
     B = 1e-7 * (3 * np.dot(m_earth, r_hat) * r_hat - m_earth) / (r**3)
-    #B = rpy_to_body(eci_to_rpy(B, actor_position, actor_velocity), sat1.attitude_in_rad())
 
     B = B * 2e14
     # plot vectors

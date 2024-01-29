@@ -59,6 +59,8 @@ class AttitudeModel:
             actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
                 Defaults to [0., 0., 0.].
             actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
+            actor_residual_magnetic_field (list of floats): Actor's own magnetic field modeled as dipole moment vector.
+                Defaults to [0., 0., 0.].
         """
         self._actor = local_actor
         # convert to np.ndarray
@@ -83,6 +85,8 @@ class AttitudeModel:
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
+
+        # actor residual magnetic field (modeled as dipole)
         self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
 
     def _nadir_vector(self):
@@ -94,7 +98,7 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-    def earth_magnetic_dipole_moment(self):
+    def _earth_magnetic_dipole_moment(self):
         """Returns the Earth magnetic dipole moment vector from the northern geomagnetic pole position using skyfield
         api, and actor epoch. To model the simplified Earth magnetic field as a magnetic dipole with an offset from
         the Earth rotational axis, at a specific point in time.
@@ -142,7 +146,7 @@ class AttitudeModel:
             if "magnetic" in self._actor.get_disturbances():
                 time = self._actor.local_time
                 T += calculate_magnetic_torque(
-                    m_earth=self.earth_magnetic_dipole_moment(),
+                    m_earth=self._earth_magnetic_dipole_moment(),
                     m_sat=self._actor_residual_magnetic_field,
                     position=self._actor.get_position(time),
                     velocity=self._actor.get_position_velocity(time)[1],
