@@ -174,15 +174,15 @@ def attitude_and_orbit_test():
 
 def magnetic_disturbance_test():
     """Tests the magnetic disturbance torques applied in the attitude model.
-    First: put two spacecraft actors in a geostationary orbit (disregarding the relative magnetic field rotation of the
-    Earth). Both actor's own magnetic dipole moment aligned with the local magnetic flux density vector of the Earth
+    Put two spacecraft actors in a geostationary orbit (disregarding the relative magnetic field rotation of the Earth).
+    Both actor's own magnetic dipole moment aligned with the local magnetic flux density vector of the Earth
     magnetic field. One is non-magnetic and is expected to have a fixed attitude in the Earth inertial frame.
     The other (magnetic) actor should stay aligned with the Earth magnetic field.
     """
 
     def flux_density_vector(actor, frame="eci"):
         """Function to calculate the local magnetic field flux density vector (B) at the actor's location.
-        B vector is calculated multiple times. Use of this function for clarity.
+        B vector is calculated multiple times. Use of this function for code clarity.
 
         Args:
             actor (SpacecraftActor): Spacecraft actor
