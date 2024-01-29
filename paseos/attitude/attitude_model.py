@@ -85,9 +85,8 @@ class AttitudeModel:
         )
         self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
 
-    def nadir_vector(self):
-        # unused but might be useful during disturbance calculations or pointing vector relative position
-        """Compute unit vector pointing towards earth, inertial body frame.
+    def _nadir_vector(self):
+        """Compute unit vector pointing towards earth, in the inertial frame.
 
         Returns:
             np array ([x, y, z]): unit nadir vector in ECIF (Earth-centered inertial frame)
@@ -127,7 +126,7 @@ class AttitudeModel:
         )
         return magnetic_dipole_moment
 
-    def calculate_disturbance_torque(self):
+    def _calculate_disturbance_torque(self):
         """Compute total torque due to user specified disturbances.
 
         Returns:
@@ -151,7 +150,7 @@ class AttitudeModel:
                 )
         return T
 
-    def calculate_angular_acceleration(self):
+    def _calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)."""
         # TODO in the future control torques could be added
 
@@ -161,11 +160,11 @@ class AttitudeModel:
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
         self._actor_angular_acceleration = np.linalg.inv(I) @ (
-            self.calculate_disturbance_torque()
+            self._calculate_disturbance_torque()
             - np.cross(self._actor_angular_velocity, I @ self._actor_angular_velocity)
         )
 
-    def body_rotation(self, dt):
+    def _body_rotation(self, dt):
         """Calculates the rotation vector around which the spacecraft body rotates
         based on angular acceleration and velocity.
 
@@ -175,7 +174,7 @@ class AttitudeModel:
         Returns: rotation vector of spacecraft body expressed in the RPY frame.
         """
         # Calculate angular acceleration
-        self.calculate_angular_acceleration()
+        self._calculate_angular_acceleration()
 
         # Add angular velocity
         self._actor_angular_velocity += self._actor_angular_acceleration * dt
@@ -187,7 +186,7 @@ class AttitudeModel:
         return body_to_rpy(body_rotation, self._actor_attitude_in_rad)
 
     @staticmethod
-    def frame_rotation(position, next_position, velocity):
+    def _frame_rotation(position, next_position, velocity):
         """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
         This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
 
@@ -217,7 +216,7 @@ class AttitudeModel:
         # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
 
-    def body_axes_in_rpy(self):
+    def _body_axes_in_rpy(self):
         """Transforms vectors expressed in the spacecraft body frame to the roll pitch yaw frame.
         Vectors: - x, y, z axes
                  - user specified pointing vector
@@ -256,13 +255,13 @@ class AttitudeModel:
         )
 
         # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
-        xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self.body_axes_in_rpy()
+        xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self._body_axes_in_rpy()
 
         # attitude change due to two rotations
         # rpy frame rotation, in inertial frame:
-        theta_1 = self.frame_rotation(position, next_position, velocity)
+        theta_1 = self._frame_rotation(position, next_position, velocity)
         # body rotation due to its physical rotation
-        theta_2 = self.body_rotation(dt)
+        theta_2 = self._body_rotation(dt)
 
         # rotate the body vectors in rpy frame with frame rotation
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = rotate_body_vectors(

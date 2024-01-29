@@ -50,9 +50,7 @@ def attitude_model_test():
     assert np.all(sat1._attitude_model._actor_pointing_vector_eci == [-1.0, 0.0, 0.0])
     assert np.all(sat1._attitude_model._actor_attitude_in_rad == [0.0, 0.0, 0.0])
     # positive angular velocity in body y direction is negative angular velocity in Earth inertial z direction:
-    assert np.all(
-        sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega]
-    )
+    assert np.all(sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega])
 
     # sat2
     assert np.all(sat2._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
@@ -87,9 +85,7 @@ def attitude_model_test():
     # Pointing vector from sat2 must not be rotated.
     assert np.all(sat2.pointing_vector() == np.array([-1.0, 0.0, 0.0]))
     # Sat2 angular velocity in the body frame must stay zero:
-    assert np.all(
-        sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0])
-    )
+    assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
 
 
 def attitude_thermal_model_test():
@@ -313,10 +309,10 @@ def magnetic_disturbance_test():
     # The actor's magnetic field will not stay perfectly aligned with the Earth's field but needs to stay close.
     for i in range(20):
         sim.advance_time(200, 0)
-        
+
         # Get the magnetic flux density vector:
         B = flux_density_vector(sat1)
-        
+
         # B vector direction:
         B_direction = B / np.linalg.norm(B)
 
