@@ -134,13 +134,6 @@ class AttitudeModel:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
         T = np.array([0.0, 0.0, 0.0])
-        dt = 10
-        # time
-        t = self._actor.local_time
-        next_position = np.array(
-            self._actor.get_position(pk.epoch(t.mjd2000 + dt * pk.SEC2DAY, "mjd2000"))
-        )
-        position = np.array(self._actor.get_position(t))
 
         if self._actor.has_attitude_disturbances:
             if "aerodynamic" in self._actor.get_disturbances():
@@ -148,13 +141,12 @@ class AttitudeModel:
             if "gravitational" in self._actor.get_disturbances():
                 T += calculate_grav_torque()
             if "magnetic" in self._actor.get_disturbances():
+                time = self._actor.local_time
                 T += calculate_magnetic_torque(
                     m_earth=self.earth_magnetic_dipole_moment(),
                     m_sat=self._actor_residual_magnetic_field,
-                    position=next_position,
-                    velocity=self._actor.get_position_velocity(self._actor.local_time)[
-                        1
-                    ],
+                    position=self._actor.get_position(time),
+                    velocity=self._actor.get_position_velocity(time)[1],
                     attitude=self._actor_attitude_in_rad,
                 )
         return T
