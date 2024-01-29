@@ -82,7 +82,7 @@ class AttitudeModel:
         )
 
     def _nadir_vector(self):
-        """Compute unit vector pointing towards earth, inertial body frame.
+        """Compute unit vector pointing towards earth, in the inertial frame.
 
         Returns:
             np array ([x, y, z]): unit nadir vector in ECIF (Earth-centered inertial frame)
