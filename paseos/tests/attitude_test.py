@@ -186,9 +186,8 @@ def magnetic_disturbance_test():
         Returns: B vector (np.ndarray)
         """
         # get Earth B vector at specific timestep
-
         # Earth magnetic dipole moment:
-        m_earth = actor._attitude_model.earth_magnetic_dipole_moment()
+        m_earth = actor.central_body.magnetic_dipole_moment(actor.local_time)
 
         # parameters to calculate local B vector:
         actor_position = np.array(actor.get_position(actor.local_time))

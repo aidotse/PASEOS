@@ -1,6 +1,5 @@
 import numpy as np
 import pykep as pk
-from skyfield.api import wgs84, load
 
 
 from paseos.attitude.disturbance_calculations import (
@@ -98,38 +97,6 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-    def _earth_magnetic_dipole_moment(self):
-        """Returns the Earth magnetic dipole moment vector from the northern geomagnetic pole position using skyfield
-        api, and actor epoch. To model the simplified Earth magnetic field as a magnetic dipole with an offset from
-        the Earth rotational axis, at a specific point in time.
-
-        Pole position and dipole moment strength values from the year 2000:
-        Latitude: 79.6° N
-        Longitude: 71.6° W
-        Dipole moment: 7.79 x 10²² Am²
-        https://wdc.kugi.kyoto-u.ac.jp/poles/polesexp.html
-
-        (The same method used as ground station actor position determination)
-
-        Returns: Time-dependent Earth dipole moment vector in ECI (np.ndarray): [mx, my, mz]
-        """
-        # North geomagnetic pole location
-        lat = 79.6
-        lon = -71.6
-
-        # Converting time to skyfield to use its API
-        t_skyfield = load.timescale().tt_jd(self._actor.local_time.jd)
-
-        # North geomagnetic pole location on Earth surface in cartesian coordinates
-        dipole_north_direction = np.array(
-            wgs84.latlon(lat, lon).at(t_skyfield).position.m
-        )
-        # Multiply geomagnetic pole position unit vector with dipole moment strength
-        magnetic_dipole_moment = (
-            dipole_north_direction / np.linalg.norm(dipole_north_direction) * 7.79e22
-        )
-        return magnetic_dipole_moment
-
     def _calculate_disturbance_torque(self):
         """Compute total torque due to user specified disturbances.
 
@@ -147,7 +114,7 @@ class AttitudeModel:
             if "magnetic" in self._actor.get_disturbances():
                 time = self._actor.local_time
                 T += calculate_magnetic_torque(
-                    m_earth=self._earth_magnetic_dipole_moment(),
+                    m_earth=self._actor.central_body.magnetic_dipole_moment(time),
                     m_sat=self._actor_residual_magnetic_field,
                     position=self._actor.get_position(time),
                     velocity=self._actor.get_position_velocity(time)[1],
