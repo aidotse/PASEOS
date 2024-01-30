@@ -32,7 +32,8 @@ def gravity_disturbance_cube_test():
     nadir = sat1._attitude_model.nadir_vector()
 
     # check conditions after 1 orbit
-    assert np.all(sat1._attitude_model._actor_angular_acceleration == 0.0)
+    assert np.all(np.round(sat1._attitude_model._actor_angular_acceleration,10) == 0.0)
+
 
 def gravity_disturbance_pole_test():
     """This test checks whether a 2-axis symmetric, uniform body (a pole (10x1x1) with constant density, and cg at
@@ -90,6 +91,7 @@ def gravity_disturbance_pole_test():
     # check conditions after 0.1 orbit, satellite should have acceleration around y-axis to align pole towards earth
     assert np.round(sat1._attitude_model._actor_angular_acceleration[0],10) == 0.0
     assert not np.round(sat1._attitude_model._actor_angular_acceleration[1],10) == 0.0
+
 
 def attitude_model_test():
     """Testing the attitude model with no disturbances and known angular velocity.
