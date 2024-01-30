@@ -528,13 +528,25 @@ class ActorBuilder:
             gravitational: bool = False,
             magnetic: bool = False,
     ):
+        """Enables the attitude disturbances to be considered in the attitude modelling for an actor.
+
+        Args:
+            actor (SpacecraftActor): The actor to add to.
+            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False
+            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False
+            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False
+        """
+        # Create a list with user specified disturbances which are considered in the attitude modelling.
         disturbance_list = []
+
         if aerodynamic:
             disturbance_list.append("aerodynamic")
         if gravitational:
             disturbance_list.append("gravitational")
         if magnetic:
             disturbance_list.append("magnetic")
+
+        # Assign disturbance list to actor.
         actor._disturbances = disturbance_list
 
     @staticmethod
@@ -545,6 +557,15 @@ class ActorBuilder:
             actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
 
     ):
+        """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
+        and angular velocity vector, modeling the evolution of the user specified pointing vector.
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
+            actor_pointing_vector_body (list of floats): Actor's pointing vector. Defaults to [0.0, 0.0, 1.0].
+        """
 
         actor._attitude_model = AttitudeModel(
             local_actor=actor,

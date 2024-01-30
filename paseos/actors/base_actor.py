@@ -170,6 +170,15 @@ class BaseActor(ABC):
         return hasattr(self, "_attitude_model") and self._attitude_model is not None
 
     @property
+    def has_attitude_disturbances(self) -> bool:
+        """Returns true if actor has attitude disturbances attributed, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_disturbances") and self._disturbances is not None
+
+    @property
     def mass(self) -> float:
         """Returns actor's mass in kg.
 
@@ -341,7 +350,7 @@ class BaseActor(ABC):
         return pos, vel
 
     def get_disturbances(self):
-        """Get the user specified spacecraft attitude disturbances
+        """Get the user-specified spacecraft attitude disturbances.
 
         Returns:
             list[string]: name of disturbances

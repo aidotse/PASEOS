@@ -1,4 +1,5 @@
 import numpy as np
+import pykep as pk
 
 from paseos.attitude.disturbance_calculations import (
     calculate_aero_torque,
@@ -22,7 +23,7 @@ class AttitudeModel:
 
     The model allows for one pointing vector to be defined in the actor body frame for visualization and possibly
     could be used for future antenna pointing applications. Its position in time within the Earth-centered inertial
-    frame is also calculated alongside the general body attitude
+    frame is also calculated alongside the general body attitude.
 
     The attitude calculations are based in three reference frames, refer to reference_frame_transfer.py in utils folder.
     """
@@ -36,21 +37,29 @@ class AttitudeModel:
     _actor_pointing_vector_body = None
     _actor_pointing_vector_eci = None
 
-    # _actor_prev_pos = None
     def __init__(
         self,
         local_actor,
-        # initial conditions: (defaults to 0)
-        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
-        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-        # pointing vector in body frame: (defaults to z-axis)
-        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
-        ## add args with default value = ...
-        # actor_dipole
-        # actor_drag_coefficient (more for geometric model)
-        # body_J2
+        # initial conditions:
+        actor_initial_attitude_in_rad: list[float] = [0., 0., 0.],
+        actor_initial_angular_velocity: list[float] = [0., 0., 0.],
+        # pointing vector in body frame: (defaults to body z-axis)
+        actor_pointing_vector_body: list[float] = [0., 0., 1.]
     ):
+        """ Creates an attitude model to model actor attitude based on
+        initial conditions (initial attitude and angular velocity) and
+        external disturbance torques.
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude ([roll, pitch, yaw]) angles.
+                Defaults to [0., 0., 0.].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
+                Defaults to [0., 0., 0.].
+            actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
+        """
         self._actor = local_actor
+        # convert to np.ndarray
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
         self._actor_angular_velocity = np.array(actor_initial_angular_velocity)
 
@@ -58,22 +67,24 @@ class AttitudeModel:
         self._actor_pointing_vector_body = np.array(
             actor_pointing_vector_body
         ) / np.linalg.norm(np.array(actor_pointing_vector_body))
+
         # pointing vector expressed in Earth-centered inertial frame
         self._actor_pointing_vector_eci = rpy_to_eci(
             body_to_rpy(self._actor_pointing_vector_body, self._actor_attitude_in_rad),
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
+
+        # angular velocity vector expressed in Earth-centered inertial frame
         self._actor_angular_velocity_eci = rpy_to_eci(
             body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
             np.array(self._actor.get_position(self._actor.local_time)),
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
-        self._first_run = True
 
     def nadir_vector(self):
         # unused but might be useful during disturbance calculations or pointing vector relative position
-        """compute unit vector pointing towards earth, inertial body frame
+        """Compute unit vector pointing towards earth, inertial body frame.
 
         Returns:
             np array ([x, y, z]): unit nadir vector in ECIF (Earth-centered inertial frame)
@@ -90,7 +101,7 @@ class AttitudeModel:
             euler_angles (np.ndarray): [roll, pitch, yaw] in radians
 
         Returns:
-            np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame
+            np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
 
         # Transform the earth rotation vector to the body reference frame, assuming the rotation vector is the z-axis
@@ -99,23 +110,25 @@ class AttitudeModel:
         earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
 
         T = np.array([0.0, 0.0, 0.0])
-        if "aerodynamic" in self._actor.get_disturbances():
-            T += calculate_aero_torque()
-        if "gravitational" in self._actor.get_disturbances():
-            nadir_vector_in_rpy = eci_to_rpy(self.nadir_vector(), position, velocity)
-            nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
-            T += calculate_grav_torque(nadir_vector_in_body,earth_rotation_vector_in_body,
-                                       self._actor._moment_of_inertia, np.linalg.norm(position))
-        if "magnetic" in self._actor.get_disturbances():
-            T += calculate_magnetic_torque()
+
+        if self._actor.has_attitude_disturbances:
+            if "aerodynamic" in self._actor.get_disturbances():
+                T += calculate_aero_torque()
+            if "gravitational" in self._actor.get_disturbances():
+                nadir_vector_in_rpy = eci_to_rpy(self.nadir_vector(), position, velocity)
+                nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
+                T += calculate_grav_torque(nadir_vector_in_body,earth_rotation_vector_in_body,
+                                           self._actor._moment_of_inertia, np.linalg.norm(position))
+            if "magnetic" in self._actor.get_disturbances():
+                T += calculate_magnetic_torque()
         return T
 
     def calculate_angular_acceleration(self):
-        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)"""
+        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)."""
         # TODO in the future control torques could be added
 
         # moment of Inertia matrix:
-        I = self._actor._moment_of_inertia
+        I = self._actor._moment_of_inertia()
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
@@ -128,36 +141,36 @@ class AttitudeModel:
 
     def body_rotation(self, dt):
         """Calculates the rotation vector around which the spacecraft body rotates
-        based on angular acceleration and velocity
+        based on angular acceleration and velocity.
 
         Args:
-            dt (float): time to advance
+            dt (float): time to advance.
 
-        Returns: rotation vector of spacecraft body expressed in the body frame
+        Returns: rotation vector of spacecraft body expressed in the RPY frame.
         """
-        # todo: check if need to skip first step
-        # theta_2:
-
-        # to not have the spacecraft rotate in the first timestep:
-        # if self._first_run:
-        #    body_rotation = self._actor_angular_velocity * dt
-        #    self._actor_theta_2 = body_to_rpy(body_rotation, self._actor_attitude_in_rad)
-        #    self._first_run = False
+        # Calculate angular acceleration
         self.calculate_angular_acceleration()
+
+        # Add angular velocity
         self._actor_angular_velocity += self._actor_angular_acceleration * dt
+
+        # Body rotation vector:
         body_rotation = self._actor_angular_velocity * dt
+
+        # Return rotation vector in RPY frame
         return body_to_rpy(body_rotation, self._actor_attitude_in_rad)
 
-    def frame_rotation(self, position, previous_position, velocity):
+    @staticmethod
+    def frame_rotation(position, next_position, velocity):
         """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
-        this rotation component makes the actor body attitude stay constant w.r.t. inertial frame,
+        This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
 
         Args:
-            position (np.ndarray): actor position vector
-            previous_position (np.ndarray): actor position vector in previous timestep
-            velocity (np.ndarray): actor velocity vector
+            position (np.ndarray): actor position vector.
+            next_position (np.ndarray): actor position vector in the next timestep.
+            velocity (np.ndarray): actor velocity vector.
 
-        Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame
+        Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame.
         """
         # orbital plane normal unit vector: (p x v)/||p x v||
         orbital_plane_normal = np.cross(position, velocity) / np.linalg.norm(
@@ -166,8 +179,8 @@ class AttitudeModel:
 
         # rotation angle: arccos((p . p_previous) / (||p|| ||p_previous||))
         rpy_frame_rotation_angle_in_eci = np.arccos(
-            np.linalg.multi_dot([position, previous_position])
-            / (np.linalg.norm(position) * np.linalg.norm(previous_position))
+            np.linalg.multi_dot([position, next_position])
+            / (np.linalg.norm(position) * np.linalg.norm(next_position))
         )
 
         # assign this scalar rotation angle to the vector perpendicular to rotation plane
@@ -175,7 +188,7 @@ class AttitudeModel:
             orbital_plane_normal * rpy_frame_rotation_angle_in_eci
         )
 
-        # this rotation needs to be compensated in the rotation of the body frame, so it's attitude stays fixed
+        # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
 
     def body_axes_in_rpy(self):
@@ -183,7 +196,7 @@ class AttitudeModel:
         Vectors: - x, y, z axes
                  - user specified pointing vector
 
-        Returns: transformed vectors
+        Returns: transformed vectors.
         """
         # principal axes:
         x = body_to_rpy(np.array([1, 0, 0]), self._actor_attitude_in_rad)
@@ -195,30 +208,33 @@ class AttitudeModel:
         return x, y, z, p
 
     def update_attitude(self, dt):
-        """Updates the actor attitude based on initial conditions and disturbance torques over time
+        """Updates the actor attitude based on initial conditions and disturbance torques over time.
 
         Args:
             dt (float): How far to advance the attitude computation.
         """
-        # position
-        position = np.array(self._actor.get_position(self._actor.local_time))
+        # time
+        t = self._actor.local_time
 
-        # previous position
-        previous_position = self._actor._previous_position
+        # position
+        position = np.array(self._actor.get_position(t))
+
+        # next position
+        next_position = np.array(
+            self._actor.get_position(pk.epoch(t.mjd2000 + dt * pk.SEC2DAY, "mjd2000"))
+        )
 
         # velocity
         velocity = np.array(
             self._actor.get_position_velocity(self._actor.local_time)[1]
         )
 
-        # body axes expressed in rpy frame: (x, y, z, custom pointing vector)
+        # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self.body_axes_in_rpy()
-
-        # todo: check if possible to do both angles at once
 
         # attitude change due to two rotations
         # rpy frame rotation, in inertial frame:
-        theta_1 = self.frame_rotation(position, previous_position, velocity)
+        theta_1 = self.frame_rotation(position, next_position, velocity)
         # body rotation due to its physical rotation
         theta_2 = self.body_rotation(dt)
 
@@ -240,11 +256,10 @@ class AttitudeModel:
         # update new angular velocity vector in ECI:
         self._actor_angular_velocity_eci = rpy_to_eci(
             body_to_rpy(self._actor_angular_velocity, self._actor_attitude_in_rad),
-            position,
+            next_position,
             velocity,
         )
-
         # update pointing vector
         self._actor_pointing_vector_eci = rpy_to_eci(
-            pointing_vector_rpy, position, velocity
+            pointing_vector_rpy, next_position, velocity
         )
