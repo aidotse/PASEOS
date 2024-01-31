@@ -232,7 +232,6 @@ def attitude_and_orbit_test():
         actor_initial_angular_velocity=[0.0, 2 * np.pi / orbit_period, 0.0],
         actor_pointing_vector_body=[0, 0, 1],
     )
-    ActorBuilder.set_disturbances(sat1)
 
     # Check Initial values
     assert np.all(sat1._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
