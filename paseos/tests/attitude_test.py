@@ -10,7 +10,8 @@ from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
 def gravity_disturbance_cube_test():
     """This test checks whether a 3-axis symmetric, uniform body (a cube with constant density, and cg at origin)
-    creates no angular acceleration/velocity due to gravity"""
+    creates no angular acceleration/velocity due to gravity. The spacecraft is initially positioned with the z-axis
+    aligned with the nadir vector."""
     earth = pk.planet.jpl_lp("earth")
 
     # Define local actor
@@ -37,7 +38,8 @@ def gravity_disturbance_cube_test():
 
 def gravity_disturbance_pole_test():
     """This test checks whether a 2-axis symmetric, uniform body (a pole (10x1x1) with constant density, and cg at
-    origin) stabilises in orbit due to gravitational acceleration
+    origin) stabilises in orbit due to gravitational acceleration. The attitude at time zero is the z-axis pointing
+    towards earth. Hence, the accelerations should occur only in the y-axis.
     It additionally checks the implementation of custom meshes of the geometric model"""
 
     vertices = [

@@ -12,7 +12,7 @@ def calculate_aero_torque():
     return np.array(T)
 
 
-def calculate_grav_torque(u_r, u_n, J, r):
+def calculate_grav_torque(central_body, u_r, u_n, J, r):
     """
     Equation for gravity gradient torque with up to J2 effect from:
     https://doi.org/10.1016/j.asr.2018.06.025, chapter 3.3
@@ -24,15 +24,15 @@ def calculate_grav_torque(u_r, u_n, J, r):
         J (np.array): The satellites moment of inertia, in the form of [[Ixx Ixy Ixz]
                                                                         [Iyx Iyy Iyx]
                                                                         [Izx Izy Izz]]
-        h (float): The distance from the center of the Earth to the satellite
+        r (float): The distance from the center of the Earth to the satellite
 
     Returns:
         np.array: total gravitational torques in Nm expressed in the spacecraft body frame
     """
     # Constants
-    mu = 3.986004418e14  # Earth's gravitational parameter, [m^3/s^2]
+    mu = central_body.mu_self  # Earth's gravitational parameter, [m^3/s^2]
     J2 = 1.0826267e-3  # Earth's J2 coefficient, from https://ocw.tudelft.nl/wp-content/uploads/AE2104-Orbital-Mechanics-Slides_8.pdf
-    Re = 6371000  # Earth's radius, [m]
+    Re = central_body.radius  # Earth's radius, [m]
 
 
     tg_term_1 = (3 * mu / (r ** 3))*np.cross(u_r, np.dot(J,u_r))

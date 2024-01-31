@@ -118,7 +118,7 @@ class AttitudeModel:
                 nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
                 earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
                 earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
-                T += calculate_grav_torque(nadir_vector_in_body,earth_rotation_vector_in_body,
+                T += calculate_grav_torque(self._actor.central_body.planet, nadir_vector_in_body,earth_rotation_vector_in_body,
                                            self._actor._moment_of_inertia(), np.linalg.norm(position))
             if "magnetic" in self._actor.get_disturbances():
                 T += calculate_magnetic_torque()
