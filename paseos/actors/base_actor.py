@@ -355,7 +355,10 @@ class BaseActor(ABC):
         Returns:
             list[string]: name of disturbances
         """
-        return self._disturbances
+        if self.has_attitude_disturbances:
+            return self._disturbances
+        else:
+            return "No disturbances"
 
     def is_in_line_of_sight(
         self,

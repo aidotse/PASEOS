@@ -1,6 +1,7 @@
 import numpy as np
 import pykep as pk
 
+
 from paseos.attitude.disturbance_calculations import (
     calculate_aero_torque,
     calculate_magnetic_torque,
@@ -43,9 +44,10 @@ class AttitudeModel:
         actor_initial_attitude_in_rad: list[float] = [0., 0., 0.],
         actor_initial_angular_velocity: list[float] = [0., 0., 0.],
         # pointing vector in body frame: (defaults to body z-axis)
-        actor_pointing_vector_body: list[float] = [0., 0., 1.]
+        actor_pointing_vector_body: list[float] = [0., 0., 1.],
+        actor_residual_magnetic_field: list[float] = [0., 0., 0.],
     ):
-        """ Creates an attitude model to model actor attitude based on
+        """Creates an attitude model to model actor attitude based on
         initial conditions (initial attitude and angular velocity) and
         external disturbance torques.
 
@@ -56,6 +58,8 @@ class AttitudeModel:
             actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
                 Defaults to [0., 0., 0.].
             actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
+            actor_residual_magnetic_field (list of floats): Actor's own magnetic field modeled as dipole moment vector.
+                Defaults to [0., 0., 0.].
         """
         self._actor = local_actor
         # convert to np.ndarray
@@ -81,6 +85,9 @@ class AttitudeModel:
             np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
         )
 
+        # actor residual magnetic field (modeled as dipole)
+        self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
+
     def _nadir_vector(self):
         """Compute unit vector pointing towards earth, in the inertial frame.
 
@@ -99,12 +106,20 @@ class AttitudeModel:
         T = np.array([0.0, 0.0, 0.0])
 
         if self._actor.has_attitude_disturbances:
+            # TODO add solar disturbance
             if "aerodynamic" in self._actor.get_disturbances():
                 T += calculate_aero_torque()
             if "gravitational" in self._actor.get_disturbances():
                 T += calculate_grav_torque()
             if "magnetic" in self._actor.get_disturbances():
-                T += calculate_magnetic_torque()
+                time = self._actor.local_time
+                T += calculate_magnetic_torque(
+                    m_earth=self._actor.central_body.magnetic_dipole_moment(time),
+                    m_sat=self._actor_residual_magnetic_field,
+                    position=self._actor.get_position(time),
+                    velocity=self._actor.get_position_velocity(time)[1],
+                    attitude=self._actor_attitude_in_rad,
+                )
         return T
 
     def _calculate_angular_acceleration(self):
