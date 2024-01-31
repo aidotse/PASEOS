@@ -93,7 +93,7 @@ class AttitudeModel:
 
 
     def calculate_disturbance_torque(self, position, velocity, euler_angles):
-        """Compute total torque due to user specified disturbances
+        """Compute total torque due to user-specified disturbances.
 
         Args:
             position (np.ndarray): position vector of RPY reference frame wrt ECI frame
