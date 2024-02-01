@@ -10,7 +10,7 @@ from paseos import ActorBuilder, SpacecraftActor
 from paseos.utils.reference_frame_transfer import eci_to_rpy, rpy_to_body
 
 
-def attitude_model_test():
+def test_attitude_model():
     """Testing the attitude model with no disturbances and known angular velocity.
     One actor has orbit in Earth inertial x-y plane (equatorial) with initial velocity which rotates the actor with 180°
     in 20 steps advancing time 100 seconds (pi/ (20 * 100)).
@@ -88,7 +88,7 @@ def attitude_model_test():
     assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
 
 
-def attitude_thermal_model_test():
+def test_attitude_thermal_model():
     """Testing the attitude model with no disturbances and no angular velocity, and ensuring the attitude model doesn't
     break the thermal model (or vice versa)"""
     earth = pk.planet.jpl_lp("earth")
@@ -130,7 +130,7 @@ def attitude_thermal_model_test():
     assert np.round(sat1.temperature_in_K, 3) == 278.522
 
 
-def attitude_and_orbit_test():
+def test_attitude_and_orbit():
     """This test checks both the orbit calculations, as well as the attitude.
     The input is a simple orbit, and the angular velocity if 2pi/period. This means the initial conditions should be
     the same as the conditions after one orbit"""
@@ -167,7 +167,7 @@ def attitude_and_orbit_test():
     assert vector[0] == -1.0
 
 
-def magnetic_disturbance_test():
+def test_magnetic_disturbance():
     """Tests the magnetic disturbance torques applied in the attitude model.
     Put two spacecraft actors in a geostationary orbit (disregarding the relative magnetic field rotation of the Earth).
     Both actor's own magnetic dipole moment aligned with the local magnetic flux density vector of the Earth
