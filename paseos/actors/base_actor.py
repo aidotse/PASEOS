@@ -170,6 +170,15 @@ class BaseActor(ABC):
         return hasattr(self, "_attitude_model") and self._attitude_model is not None
 
     @property
+    def has_attitude_disturbances(self) -> bool:
+        """Returns true if actor has attitude disturbances attributed, else false.
+
+        Returns:
+            bool: bool indicating presence.
+        """
+        return hasattr(self, "_disturbances") and self._disturbances is not None
+
+    @property
     def mass(self) -> float:
         """Returns actor's mass in kg.
 
@@ -346,7 +355,10 @@ class BaseActor(ABC):
         Returns:
             list[string]: name of disturbances
         """
-        return self._disturbances
+        if self.has_attitude_disturbances:
+            return self._disturbances
+        else:
+            return "No disturbances"
 
     def is_in_line_of_sight(
         self,

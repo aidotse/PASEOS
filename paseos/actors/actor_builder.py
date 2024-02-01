@@ -333,6 +333,7 @@ class ActorBuilder:
             local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
         actor._mesh = geometric_model.set_mesh()
+        actor._center_of_gravity = geometric_model.find_center_of_gravity()
         actor._moment_of_inertia = geometric_model.find_moment_of_inertia
 
     @staticmethod
@@ -553,7 +554,8 @@ class ActorBuilder:
             actor: SpacecraftActor,
             actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
             actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-            actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0]
+            actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+            actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
 
     ):
         """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
@@ -564,6 +566,8 @@ class ActorBuilder:
             actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
             actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
             actor_pointing_vector_body (list of floats): Actor's pointing vector. Defaults to [0.0, 0.0, 1.0].
+            actor_residual_magnetic_field (list of floats): Actor's residual magnetic dipole moment vector.
+            Defaults to [0.0, 0.0, 0.0].
         """
 
         actor._attitude_model = AttitudeModel(
@@ -571,7 +575,7 @@ class ActorBuilder:
             actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
             actor_initial_angular_velocity=actor_initial_angular_velocity,
             actor_pointing_vector_body=actor_pointing_vector_body,
-
+            actor_residual_magnetic_field=actor_residual_magnetic_field,
 
         )
 
