@@ -133,7 +133,7 @@ def attitude_thermal_model_test():
     assert np.round(sat1.temperature_in_K, 3) == 278.522
 
 
-def test_attitude_and_orbit():
+def attitude_and_orbit_test():
     """This test checks both the orbit calculations, as well as the attitude.
     The input is a simple orbit, and the angular velocity if 2pi/period. This means the initial conditions should be
     the same as the conditions after one orbit"""

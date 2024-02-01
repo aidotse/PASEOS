@@ -1,10 +1,10 @@
 import numpy as np
 import pykep as pk
 
-from .disturbance_calculations import (
-    calculate_aero_torque,
-    calculate_magnetic_torque,
-    calculate_grav_torque,
+from .disturbance_torques_utils import (
+    get_aerodynamic_torque,
+    get_magnetic_torque,
+    get_gravity_gradient_torque,
 )
 from ..utils.reference_frame_transfer import (
     eci_to_rpy,
@@ -13,6 +13,7 @@ from ..utils.reference_frame_transfer import (
     rodrigues_rotation,
     get_rpy_angles,
     rotate_body_vectors,
+    rpy_to_body,
 )
 
 
@@ -102,23 +103,42 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-    def _calculate_disturbance_torque(self):
-        """Compute total torque due to user specified disturbances.
+
+    def calculate_disturbance_torque(self, position, velocity, euler_angles):
+        """Compute total torque due to user-specified disturbances.
+
+        Args:
+            position (np.ndarray): position vector of RPY reference frame wrt ECI frame
+            velocity (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
+            euler_angles (np.ndarray): [roll, pitch, yaw] in radians
 
         Returns:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
+
+        # Transform the earth rotation vector to the body reference frame, assuming the rotation vector is the z-axis
+        # of the earth-centered-inertial (eci) frame
+
+
         T = np.array([0.0, 0.0, 0.0])
 
         if self._disturbances is not None:
             # TODO add solar disturbance
             if "aerodynamic" in self._actor.attitude_disturbances:
-                T += calculate_aero_torque()
+                T += get_aerodynamic_torque()
             if "gravitational" in self._actor.attitude_disturbances:
-                T += calculate_grav_torque()
+                # Extract nadir vectors in different reference systems
+                nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
+                nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
+                # Extract Earth rotation vector in different reference systems
+                earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
+                earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
+                # Accumulate torque due to gravity gradients
+                T += get_gravity_gradient_torque(self._actor.central_body.planet, nadir_vector_in_body, earth_rotation_vector_in_body,
+                                           self._actor.body_moment_of_inertia, np.linalg.norm(position))
             if "magnetic" in self._actor.attitude_disturbances:
                 time = self._actor.local_time
-                T += calculate_magnetic_torque(
+                T += get_magnetic_torque(
                     m_earth=self._actor.central_body.magnetic_dipole_moment(time),
                     m_sat=self._actor_residual_magnetic_field,
                     position=self._actor.get_position(time),
@@ -130,17 +150,15 @@ class AttitudeModel:
     def _calculate_angular_acceleration(self):
         """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)."""
         # TODO in the future control torques could be added
-
-        # moment of Inertia matrix:
-        body_moment_of_inertia = self._actor.body_moment_of_inertia
-
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(body_moment_of_inertia) @ (
-            self._calculate_disturbance_torque()
+        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia) @ (
+            self.calculate_disturbance_torque(position=np.array(self._actor.get_position(self._actor.local_time)),
+                                              velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
+                                              euler_angles=self._actor_attitude_in_rad)
             - np.cross(
                 self._actor_angular_velocity,
-                body_moment_of_inertia @ self._actor_angular_velocity,
+                self._actor.body_moment_of_inertia @ self._actor_angular_velocity,
             )
         )
 

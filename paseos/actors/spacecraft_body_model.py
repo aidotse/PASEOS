@@ -86,9 +86,6 @@ class SpacecraftBodyModel:
                 len(np.asarray(vertices).shape) == 2
                 and np.asarray(vertices).shape[1] == 3
             ), "Vertices shall be [N, 3] shaped."
-            assert np.asarray(faces).shape[0] < len(
-                vertices
-            ), "All the entries in faces are < len(vertices)"
 
         # Create mesh
         logger.trace("Creating the spacecraft body mesh.")
