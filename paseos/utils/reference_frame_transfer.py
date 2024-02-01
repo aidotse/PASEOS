@@ -18,7 +18,7 @@ Note: the order of rotation yaw -> pitch -> roll is used for transforming from "
 import numpy as np
 
 
-def transformation_matrix_eci_rpy(r, v):
+def compute_transformation_matrix_eci_rpy(r, v):
     """
     Creates the transformation matrix to transform a vector in the Earth-Centered Inertial Frame (ECI) to the
     Roll-Pitch-Yaw (RPY) reference frame of the spacecraft (variant to Gaussian reference frame, useful for attitude
@@ -54,7 +54,7 @@ def transformation_matrix_eci_rpy(r, v):
     return T
 
 
-def transformation_matrix_rpy_body(euler_angles_in_rad):
+def compute_transformation_matrix_rpy_body(euler_angles_in_rad):
     """Creates the transformation matrix to transform a vector in the Roll-Pitch-Yaw (RPY) reference frame to the body.
     fixed reference frame of the spacecraft.
 
@@ -70,13 +70,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
     roll, pitch, yaw = euler_angles_in_rad
 
     # individual axis rotations:
-    A = np.array(
-        [
-            [1, 0, 0],
-            [0, np.cos(roll), np.sin(roll)],
-            [0, -np.sin(roll), np.cos(roll)]
-        ]
-    )
+    A = np.array([[1, 0, 0], [0, np.cos(roll), np.sin(roll)], [0, -np.sin(roll), np.cos(roll)]])
 
     B = np.array(
         [
@@ -86,12 +80,7 @@ def transformation_matrix_rpy_body(euler_angles_in_rad):
         ]
     )
 
-    C = np.array(
-        [
-            [np.cos(yaw), np.sin(yaw), 0],
-            [-np.sin(yaw), np.cos(yaw), 0],
-            [0, 0, 1]]
-    )
+    C = np.array([[np.cos(yaw), np.sin(yaw), 0], [-np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]])
 
     # Transformation matrix:
     T = A @ B @ C
@@ -113,7 +102,7 @@ def eci_to_rpy(u, r, v, translation=False):
         vector u w.r.t. RPY frame
     """
 
-    T = transformation_matrix_eci_rpy(r, v)
+    T = compute_transformation_matrix_eci_rpy(r, v)
 
     if translation:
         shift = r
@@ -138,7 +127,7 @@ def rpy_to_eci(u, r, v, translation=False):
         vector u w.r.t. ECI frame
     """
 
-    T = np.linalg.inv(transformation_matrix_eci_rpy(r, v))
+    T = np.linalg.inv(compute_transformation_matrix_eci_rpy(r, v))
     if translation:
         shift = r
     else:
@@ -163,7 +152,7 @@ def rpy_to_body(u, euler_angles_in_rad):
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
         return u
     else:
-        T = transformation_matrix_rpy_body(euler_angles_in_rad)
+        T = compute_transformation_matrix_rpy_body(euler_angles_in_rad)
         return T @ u
 
 
@@ -183,7 +172,7 @@ def body_to_rpy(u, euler_angles_in_rad):
     if all(np.isclose(euler_angles_in_rad, np.zeros(3))):
         return u
     else:
-        T = np.linalg.inv(transformation_matrix_rpy_body(euler_angles_in_rad))
+        T = np.linalg.inv(compute_transformation_matrix_rpy_body(euler_angles_in_rad))
         return T @ u
 
 

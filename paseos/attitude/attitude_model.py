@@ -1,13 +1,12 @@
 import numpy as np
 import pykep as pk
 
-
-from paseos.attitude.disturbance_calculations import (
-    calculate_aero_torque,
-    calculate_magnetic_torque,
-    calculate_grav_torque,
+from .disturbance_torques_utils import (
+    compute_aerodynamic_torque,
+    compute_magnetic_torque,
+    compute_gravity_gradient_torque,
 )
-from paseos.utils.reference_frame_transfer import (
+from ..utils.reference_frame_transfer import (
     eci_to_rpy,
     rpy_to_eci,
     body_to_rpy,
@@ -29,24 +28,30 @@ class AttitudeModel:
     The attitude calculations are based in three reference frames, refer to reference_frame_transfer.py in utils folder.
     """
 
+    # Spacecraft actor.
     _actor = None
-
+    # Actor attitude in rad..
     _actor_attitude_in_rad = None
+    # Actor angular velocity [rad/s].
     _actor_angular_velocity = None
+    # Actor angular acceleation [rad/s^2].
     _actor_angular_acceleration = None
-
+    # Actor pointing vector expressed in the body frame.
     _actor_pointing_vector_body = None
+    # Actor pointing vector expressed in intertial frame.
     _actor_pointing_vector_eci = None
+    # Attitude disturbances experienced by the actor.
+    _disturbances = None
 
     def __init__(
         self,
         local_actor,
         # initial conditions:
-        actor_initial_attitude_in_rad: list[float] = [0., 0., 0.],
-        actor_initial_angular_velocity: list[float] = [0., 0., 0.],
+        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         # pointing vector in body frame: (defaults to body z-axis)
-        actor_pointing_vector_body: list[float] = [0., 0., 1.],
-        actor_residual_magnetic_field: list[float] = [0., 0., 0.],
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
     ):
         """Creates an attitude model to model actor attitude based on
         initial conditions (initial attitude and angular velocity) and
@@ -68,9 +73,9 @@ class AttitudeModel:
         self._actor_angular_velocity = np.array(actor_initial_angular_velocity)
 
         # normalize inputted pointing vector & convert to np.ndarray
-        self._actor_pointing_vector_body = np.array(
-            actor_pointing_vector_body
-        ) / np.linalg.norm(np.array(actor_pointing_vector_body))
+        self._actor_pointing_vector_body = np.array(actor_pointing_vector_body) / np.linalg.norm(
+            np.array(actor_pointing_vector_body)
+        )
 
         # pointing vector expressed in Earth-centered inertial frame
         self._actor_pointing_vector_eci = rpy_to_eci(
@@ -98,39 +103,51 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-
-    def calculate_disturbance_torque(self, position, velocity, euler_angles):
+    def compute_disturbance_torque(self, position, velocity, euler_angles, current_temperature_K):
         """Compute total torque due to user-specified disturbances.
 
         Args:
-            position (np.ndarray): position vector of RPY reference frame wrt ECI frame
-            velocity (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft
-            euler_angles (np.ndarray): [roll, pitch, yaw] in radians
-
+            position (np.ndarray): position vector of RPY reference frame wrt ECI frame.
+            velocity (np.ndarray): velocity of the spacecraft in earth reference frame, centered on spacecraft.
+            euler_angles (np.ndarray): [roll, pitch, yaw] in radians.
+            current_temperature_K (float): current temperature in Kelvin.
         Returns:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
-
         # Transform the earth rotation vector to the body reference frame, assuming the rotation vector is the z-axis
-        # of the earth-centered-inertial (eci) frame
-
-
+        # of the earth-centered-inertial (eci) frame.
         T = np.array([0.0, 0.0, 0.0])
 
-        if self._actor.has_attitude_disturbances:
+        if self._disturbances is not None:
             # TODO add solar disturbance
-            if "aerodynamic" in self._actor.get_disturbances():
-                T += calculate_aero_torque()
-            if "gravitational" in self._actor.get_disturbances():
-                nadir_vector_in_rpy = eci_to_rpy(self.nadir_vector(), position, velocity)
+            if "aerodynamic" in self._actor.attitude_disturbances:
+                T += compute_aerodynamic_torque(
+                    position,
+                    velocity,
+                    self._actor.geometric_model.mesh,
+                    self.actor_attitude_in_rad,
+                    current_temperature_K,
+                )
+            if "gravitational" in self._actor.attitude_disturbances:
+                # Extract nadir vectors in different reference systems
+                nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
                 nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
+                # Extract Earth rotation vector in different reference systems
                 earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
-                earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
-                T += calculate_grav_torque(self._actor.central_body.planet, nadir_vector_in_body,earth_rotation_vector_in_body,
-                                           self._actor._moment_of_inertia(), np.linalg.norm(position))
-            if "magnetic" in self._actor.get_disturbances():
+                earth_rotation_vector_in_body = rpy_to_body(
+                    earth_rotation_vector_in_rpy, euler_angles
+                )
+                # Accumulate torque due to gravity gradients
+                T += compute_gravity_gradient_torque(
+                    self._actor.central_body.planet,
+                    nadir_vector_in_body,
+                    earth_rotation_vector_in_body,
+                    self._actor.body_moment_of_inertia,
+                    np.linalg.norm(position),
+                )
+            if "magnetic" in self._actor.attitude_disturbances:
                 time = self._actor.local_time
-                T += calculate_magnetic_torque(
+                T += compute_magnetic_torque(
                     m_earth=self._actor.central_body.magnetic_dipole_moment(time),
                     m_sat=self._actor_residual_magnetic_field,
                     position=self._actor.get_position(time),
@@ -139,34 +156,40 @@ class AttitudeModel:
                 )
         return T
 
-    def _calculate_angular_acceleration(self):
-        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations)."""
+    def _calculate_angular_acceleration(self, current_temperature_K):
+        """Calculate the spacecraft angular acceleration (external disturbance torques and gyroscopic accelerations).
+        Args:
+            current_temperature_K (float): current temperature in Kelvin.
+        """
+
         # TODO in the future control torques could be added
-
-        # moment of Inertia matrix:
-        I = self._actor._moment_of_inertia()
-
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
-        # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(I) @ (
-
-            self.calculate_disturbance_torque(position=np.array(self._actor.get_position(self._actor.local_time)),
-                                              velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
-                                              euler_angles=self._actor_attitude_in_rad)
-            - np.cross(self._actor_angular_velocity, I @ self._actor_angular_velocity)
+        # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
+        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia) @ (
+            self.compute_disturbance_torque(
+                position=np.array(self._actor.get_position(self._actor.local_time)),
+                velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
+                euler_angles=self._actor_attitude_in_rad,
+                current_temperature_K=current_temperature_K,
+            )
+            - np.cross(
+                self._actor_angular_velocity,
+                self._actor.body_moment_of_inertia @ self._actor_angular_velocity,
+            )
         )
 
-    def _body_rotation(self, dt):
+    def _body_rotation(self, dt, current_temperature_K):
         """Calculates the rotation vector around which the spacecraft body rotates
-        based on angular acceleration and velocity.
+        based on angular acceleration, velocity, and current temperature.
 
         Args:
             dt (float): time to advance.
+            current_temperature_K (float): current temperature in Kelvin.
 
         Returns: rotation vector of spacecraft body expressed in the RPY frame.
         """
         # Calculate angular acceleration
-        self._calculate_angular_acceleration()
+        self._calculate_angular_acceleration(current_temperature_K)
 
         # Add angular velocity
         self._actor_angular_velocity += self._actor_angular_acceleration * dt
@@ -201,9 +224,7 @@ class AttitudeModel:
         )
 
         # assign this scalar rotation angle to the vector perpendicular to rotation plane
-        rpy_frame_rotation_vector_in_eci = (
-            orbital_plane_normal * rpy_frame_rotation_angle_in_eci
-        )
+        rpy_frame_rotation_vector_in_eci = orbital_plane_normal * rpy_frame_rotation_angle_in_eci
 
         # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
@@ -224,11 +245,12 @@ class AttitudeModel:
         p = body_to_rpy(self._actor_pointing_vector_body, self._actor_attitude_in_rad)
         return x, y, z, p
 
-    def update_attitude(self, dt):
+    def update_attitude(self, dt, current_temperature_K):
         """Updates the actor attitude based on initial conditions and disturbance torques over time.
 
         Args:
-            dt (float): How far to advance the attitude computation.
+            dt (float): how far to advance the attitude computation.
+            current_temperature_K (float): current actor temperature in Kelvin.
         """
         # time
         t = self._actor.local_time
@@ -242,9 +264,7 @@ class AttitudeModel:
         )
 
         # velocity
-        velocity = np.array(
-            self._actor.get_position_velocity(self._actor.local_time)[1]
-        )
+        velocity = np.array(self._actor.get_position_velocity(self._actor.local_time)[1])
 
         # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self._body_axes_in_rpy()
@@ -253,7 +273,7 @@ class AttitudeModel:
         # rpy frame rotation, in inertial frame:
         theta_1 = self._frame_rotation(position, next_position, velocity)
         # body rotation due to its physical rotation
-        theta_2 = self._body_rotation(dt)
+        theta_2 = self._body_rotation(dt, current_temperature_K)
 
         # rotate the body vectors in rpy frame with frame rotation
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = rotate_body_vectors(
@@ -277,6 +297,4 @@ class AttitudeModel:
             velocity,
         )
         # update pointing vector
-        self._actor_pointing_vector_eci = rpy_to_eci(
-            pointing_vector_rpy, next_position, velocity
-        )
+        self._actor_pointing_vector_eci = rpy_to_eci(pointing_vector_rpy, next_position, velocity)

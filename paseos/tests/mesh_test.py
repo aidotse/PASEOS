@@ -127,7 +127,10 @@ def test_mesh_eclipse():
 
     # Add a power device
     ActorBuilder.set_power_devices(
-        actor=sat1, battery_level_in_Ws=500, max_battery_level_in_Ws=1000, charging_rate_in_W=10
+        actor=sat1,
+        battery_level_in_Ws=500,
+        max_battery_level_in_Ws=1000,
+        charging_rate_in_W=10,
     )
 
     assert not sat1.is_in_eclipse(epoch)

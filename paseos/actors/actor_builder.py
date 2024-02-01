@@ -13,8 +13,8 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
+from .spacecraft_body_model import SpacecraftBodyModel
 from ..attitude.attitude_model import AttitudeModel
-from paseos.geometric_model.geometric_model import GeometricModel
 
 
 class ActorBuilder:
@@ -308,33 +308,49 @@ class ActorBuilder:
         logger.debug(f"Setting position {position} on actor {actor}")
 
     @staticmethod
-    def set_geometric_model(
+    def set_spacecraft_body_model(
         actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
     ):
         """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
-        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        transformed to the inertial/PASEOS reference frame using the reference frame transformations in the attitude
         model. When used in the attitude model, the geometric model is in the body reference frame.
 
         Args:
             actor (SpacecraftActor): Actor to update.
             mass (float): Mass of the spacecraft in kg.
-            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
-                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
+            vertices (list): List of coordinates [x, y, z] of the vertices of the mesh w.r.t. the body frame [m].
+                If not selected, it will default to a cube that can be scaled.
                 by the scale. Uses Trimesh to create the mesh from this and the list of faces.
             faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
                 defining the three vertices to form a triangular face. For a cuboid each face is split into two
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Body model is only supported for SpacecraftActors."
+
         assert mass > 0, "Mass is > 0"
 
+        # Check if the actor already has mass.
+        if actor.mass:
+            logger.warning("The actor already had a mass. Overriding old mass value.")
+
         actor._mass = mass
-        geometric_model = GeometricModel(
-            local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
+
+        # Check if the actor already had a has_spacecraft_body_model.
+        if actor.has_spacecraft_body_model:
+            logger.warning(
+                "The actor already had a spacecraft body model. Overriding old body bodel."
+            )
+
+        # Create a spacraft body model
+        actor._spacecraft_body_model = SpacecraftBodyModel(
+            actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
-        actor._mesh = geometric_model.set_mesh()
-        actor._center_of_gravity = geometric_model.find_center_of_gravity()
-        actor._moment_of_inertia = geometric_model.find_moment_of_inertia
+
+        # Check if the actor has a moment of inertia
 
     @staticmethod
     def set_power_devices(
@@ -522,20 +538,29 @@ class ActorBuilder:
         )
 
     @staticmethod
-    def set_disturbances(
-            actor: SpacecraftActor,
-            aerodynamic: bool = False,
-            gravitational: bool = False,
-            magnetic: bool = False,
+    def set_attitude_disturbances(
+        actor: SpacecraftActor,
+        aerodynamic: bool = False,
+        gravitational: bool = False,
+        magnetic: bool = False,
     ):
         """Enables the attitude disturbances to be considered in the attitude modelling for an actor.
 
         Args:
             actor (SpacecraftActor): The actor to add to.
-            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False
-            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False
-            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False
+            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False.
+            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False.
+            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False.
         """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude disturbances are only supported for SpacecraftActors."
+
+        assert (
+            actor.has_attitude_model
+        ), "The actor has no attitude model. Impossible to set attitude disturbances."
+
         # Create a list with user specified disturbances which are considered in the attitude modelling.
         disturbance_list = []
 
@@ -545,18 +570,16 @@ class ActorBuilder:
             disturbance_list.append("gravitational")
         if magnetic:
             disturbance_list.append("magnetic")
-
-        # Assign disturbance list to actor.
-        actor._disturbances = disturbance_list
+        # Set attitude models.
+        actor._attitude_model._disturbances = disturbance_list
 
     @staticmethod
     def set_attitude_model(
-            actor: SpacecraftActor,
-            actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
-            actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-            actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-            actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
-
+        actor: SpacecraftActor,
+        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
     ):
         """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
         and angular velocity vector, modeling the evolution of the user specified pointing vector.
@@ -569,14 +592,24 @@ class ActorBuilder:
             actor_residual_magnetic_field (list of floats): Actor's residual magnetic dipole moment vector.
             Defaults to [0.0, 0.0, 0.0].
         """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude model is only supported for SpacecraftActors"
 
+        # Check if actor has already an attitude model.
+        if actor.has_attitude_model:
+            logger.warning(
+                "The actor already had an attitude model. Overriding old attitude model."
+            )
+
+        # Set attitude model.
         actor._attitude_model = AttitudeModel(
             local_actor=actor,
             actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
             actor_initial_angular_velocity=actor_initial_angular_velocity,
             actor_pointing_vector_body=actor_pointing_vector_body,
             actor_residual_magnetic_field=actor_residual_magnetic_field,
-
         )
 
     @staticmethod
@@ -599,7 +632,10 @@ class ActorBuilder:
 
     @staticmethod
     def add_custom_property(
-        actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable
+        actor: BaseActor,
+        property_name: str,
+        initial_value: Any,
+        update_function: Callable,
     ):
         """Adds a custom property to the actor. This e.g. allows tracking any physical
         the user would like to track.
