@@ -103,8 +103,7 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-
-    def calculate_disturbance_torque(self, position, velocity, euler_angles):
+    def get_disturbance_torque(self, position, velocity, euler_angles):
         """Compute total torque due to user-specified disturbances.
 
         Args:
@@ -115,11 +114,8 @@ class AttitudeModel:
         Returns:
             np.array([Tx, Ty, Tz]): total combined torques in Nm expressed in the spacecraft body frame.
         """
-
         # Transform the earth rotation vector to the body reference frame, assuming the rotation vector is the z-axis
-        # of the earth-centered-inertial (eci) frame
-
-
+        # of the earth-centered-inertial (eci) frame.
         T = np.array([0.0, 0.0, 0.0])
 
         if self._disturbances is not None:
@@ -128,14 +124,25 @@ class AttitudeModel:
                 T += get_aerodynamic_torque()
             if "gravitational" in self._actor.attitude_disturbances:
                 # Extract nadir vectors in different reference systems
-                nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
+                nadir_vector_in_rpy = eci_to_rpy(
+                    self._nadir_vector(), position, velocity
+                )
                 nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
                 # Extract Earth rotation vector in different reference systems
-                earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
-                earth_rotation_vector_in_body = rpy_to_body(earth_rotation_vector_in_rpy, euler_angles)
+                earth_rotation_vector_in_rpy = eci_to_rpy(
+                    np.array([0, 0, 1]), position, velocity
+                )
+                earth_rotation_vector_in_body = rpy_to_body(
+                    earth_rotation_vector_in_rpy, euler_angles
+                )
                 # Accumulate torque due to gravity gradients
-                T += get_gravity_gradient_torque(self._actor.central_body.planet, nadir_vector_in_body, earth_rotation_vector_in_body,
-                                           self._actor.body_moment_of_inertia, np.linalg.norm(position))
+                T += get_gravity_gradient_torque(
+                    self._actor.central_body.planet,
+                    nadir_vector_in_body,
+                    earth_rotation_vector_in_body,
+                    self._actor.body_moment_of_inertia,
+                    np.linalg.norm(position),
+                )
             if "magnetic" in self._actor.attitude_disturbances:
                 time = self._actor.local_time
                 T += get_magnetic_torque(
@@ -152,10 +159,16 @@ class AttitudeModel:
         # TODO in the future control torques could be added
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia) @ (
-            self.calculate_disturbance_torque(position=np.array(self._actor.get_position(self._actor.local_time)),
-                                              velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
-                                              euler_angles=self._actor_attitude_in_rad)
+        self._actor_angular_acceleration = np.linalg.inv(
+            self._actor.body_moment_of_inertia
+        ) @ (
+            self.get_disturbance_torque(
+                position=np.array(self._actor.get_position(self._actor.local_time)),
+                velocity=np.array(
+                    self._actor.get_position_velocity(self._actor.local_time)[1]
+                ),
+                euler_angles=self._actor_attitude_in_rad,
+            )
             - np.cross(
                 self._actor_angular_velocity,
                 self._actor.body_moment_of_inertia @ self._actor_angular_velocity,
