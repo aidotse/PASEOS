@@ -1,8 +1,7 @@
-from ..utils.reference_frame_transfer import transformation_matrix_eci_rpy, transformation_matrix_rpy_body, rpy_to_body, eci_to_rpy
+from ..utils.reference_frame_transfer import compute_transformation_matrix_rpy_body, rpy_to_body, eci_to_rpy
 import numpy as np
-import trimesh
 
-def calculate_aero_torque(r,v,mesh, transformation_matrix_rpy_body):
+def calculate_aero_torque(r,v,mesh, actor_attitude_in_rad, current_spacecraft_temperature_K):
     """ Calculates the aerodynamic torque on the satellite.
     The model used is taken from "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces"; Ran. S,
     Jihe W., et al.; 2017. The mass density of the atmosphere is calculated from the best linear fit of the data
@@ -14,29 +13,28 @@ def calculate_aero_torque(r,v,mesh, transformation_matrix_rpy_body):
     temperature of the spacecraft and of the gas is low.
 
     Args:
-        r (np.array): distance from the satellite and the Earth's center of mass [km]
-        v (np.array): velocity of the satellite in ECI reference frame [m/s]
-        mesh (trimesh): mesh of the satellite from the geometric model
-        transformation_matrix_rpy_body (np.array): transformation matrix from Roll-Pitch_Yaw frame to the Spacecraft
-            Body frame. From reference_frame_transfer.py .
-
+        r (np.array): distance from the satellite and the Earth's center of mass [km].
+        v (np.array): velocity of the satellite in ECI reference frame [m/s].
+        mesh (trimesh): mesh of the satellite from the geometric model.
+        actor_attitude_in_rad (np.array): spacecraft actor in rad.
+        current_spacecraft_temperature_K (float): current temperature in Kelvin.
      Returns:
-         T (np.array): torque vector in the spacecraft body frame
+         T (np.array): torque vector in the spacecraft body frame.
     """
-
-    #  Constants for aerodynamic coefficients calculation
-    temperature_spacecraft = 300  # [K]
+    # Constants for aerodynamic coefficients calculation
     temperature_gas = 1000  # [K]
     R = 8.314462  # Universal Gas Constant, [J/(K mol)]
     altitude = np.linalg.norm(r)-6371  # [km]
     density = 10**(-(altitude+1285)/151)  # equation describing the best linear fit for the data, [kg/m^3]
     molecular_speed_ratio_t = np.linalg.norm(v)/np.sqrt(2*R*temperature_gas)  # Used in the Cd and Cl calculation
-    molecular_speed_ratio_r = np.linalg.norm(v)/np.sqrt(2*R*temperature_spacecraft)  # Used in the Cd and Cl calculation
+    molecular_speed_ratio_r = np.linalg.norm(v)/np.sqrt(2*R*current_spacecraft_temperature_K)  # Used in the Cd and Cl calculation
     accommodation_parameter = 0.85
 
     #  Get the normal vectors of all the faces of the mesh in the spacecraft body reference frame, and then they get
     #  translated in the Roll Pitch Yaw frame with a transformation from paseos.utils.reference_frame_transfer.py
     face_normals_sbf = mesh.face_normals[0:12]
+    # Get ntransformation matrix
+    transformation_matrix_rpy_body = compute_transformation_matrix_rpy_body(actor_attitude_in_rad)
     face_normals_rpy = np.dot(transformation_matrix_rpy_body, face_normals_sbf.T).T
 
     #  Get the velocity and transform it in the Roll Pitch Yaw frame. Get the unit vector associated with the latter
