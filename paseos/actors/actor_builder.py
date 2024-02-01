@@ -333,6 +333,7 @@ class ActorBuilder:
             local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
         actor._mesh = geometric_model.set_mesh()
+        actor._center_of_gravity = geometric_model.find_center_of_gravity()
         actor._moment_of_inertia = geometric_model.find_moment_of_inertia
 
     @staticmethod
