@@ -14,6 +14,7 @@ from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
 from .spacecraft_body_model import SpacecraftBodyModel
+from ..attitude.attitude_model import AttitudeModel
 
 
 class ActorBuilder:
@@ -349,6 +350,11 @@ class ActorBuilder:
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Body model is only supported for SpacecraftActors."
+
         assert mass > 0, "Mass is > 0"
 
         # Check if the actor already has mass.
@@ -564,6 +570,76 @@ class ActorBuilder:
             body_emissivity=body_emissivity,
             body_reflectance=body_reflectance,
             power_consumption_to_heat_ratio=power_consumption_to_heat_ratio,
+        )
+
+    @staticmethod
+    def set_attitude_disturbances(
+            actor: SpacecraftActor,
+            aerodynamic: bool = False,
+            gravitational: bool = False,
+            magnetic: bool = False,
+    ):
+        """Enables the attitude disturbances to be considered in the attitude modelling for an actor.
+
+        Args:
+            actor (SpacecraftActor): The actor to add to.
+            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False.
+            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False.
+            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False.
+        """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude disturbances are only supported for SpacecraftActors."
+
+        assert actor.has_attitude_model, "The actor has no attitude model. Impossible to set attitude disturbances."
+
+        if actor.has_attitude_disturbances:
+            logger.warning(
+                "The actor already had attitude disturbance models. Overriding old disturbances models."
+            )
+        # Set attitude models.
+        actor._attitude_model.set_attitude_disturbances(aerodynamic=aerodynamic, gravitational=gravitational, magnetic=magnetic)
+
+    @staticmethod
+    def set_attitude_model(
+            actor: SpacecraftActor,
+            actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+            actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
+            actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+            actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
+
+    ):
+        """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
+        and angular velocity vector, modeling the evolution of the user specified pointing vector.
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
+            actor_pointing_vector_body (list of floats): Actor's pointing vector. Defaults to [0.0, 0.0, 1.0].
+            actor_residual_magnetic_field (list of floats): Actor's residual magnetic dipole moment vector.
+            Defaults to [0.0, 0.0, 0.0].
+        """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude model is only supported for SpacecraftActors"
+
+        # Check if actor has already an attitude model.
+        if actor.has_attitude_model:
+            logger.warning(
+                "The actor already had an attitude model. Overriding old attitude model."
+            )
+
+        # Set attitude model.
+        actor._attitude_model = AttitudeModel(
+            local_actor=actor,
+            actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
+            actor_initial_angular_velocity=actor_initial_angular_velocity,
+            actor_pointing_vector_body=actor_pointing_vector_body,
+            actor_residual_magnetic_field=actor_residual_magnetic_field,
+
         )
 
     @staticmethod
