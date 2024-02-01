@@ -3,7 +3,10 @@ from loguru import logger
 
 
 def mesh_between_points(
-    point_1: np.array, point_2: np.array, mesh_vertices: np.array, mesh_triangles: np.array
+    point_1: np.array,
+    point_2: np.array,
+    mesh_vertices: np.array,
+    mesh_triangles: np.array,
 ) -> bool:
     """Checks whether the mesh is between the two points using ray-triangle
     intersection with Möller-Trumbore algorithm.
@@ -17,7 +20,9 @@ def mesh_between_points(
     Returns:
         bool: True if the mesh is between the two points
     """
-    logger.trace("Computing if mesh lies between points: " + str(point_1) + " " + str(point_2))
+    logger.trace(
+        "Computing if mesh lies between points: " + str(point_1) + " " + str(point_2)
+    )
 
     # Compute line between points
     direction = point_2 - point_1
@@ -28,7 +33,11 @@ def mesh_between_points(
     # Iterate over triangles to find any intersection
     for t in mesh_triangles:
         intersect, intersect_t = _rays_triangle_intersect(
-            point_1, direction, mesh_vertices[t[0]], mesh_vertices[t[1]], mesh_vertices[t[2]]
+            point_1,
+            direction,
+            mesh_vertices[t[0]],
+            mesh_vertices[t[1]],
+            mesh_vertices[t[2]],
         )
         # If / When found break the loop
         if intersect:

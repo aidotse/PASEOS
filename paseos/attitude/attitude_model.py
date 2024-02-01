@@ -26,6 +26,7 @@ class AttitudeModel:
 
     The attitude calculations are based in three reference frames, refer to reference_frame_transfer.py in utils folder.
     """
+
     # Spacecraft actor.
     _actor = None
     # Actor attitude in rad..
@@ -45,11 +46,11 @@ class AttitudeModel:
         self,
         local_actor,
         # initial conditions:
-        actor_initial_attitude_in_rad: list[float] = [0., 0., 0.],
-        actor_initial_angular_velocity: list[float] = [0., 0., 0.],
+        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         # pointing vector in body frame: (defaults to body z-axis)
-        actor_pointing_vector_body: list[float] = [0., 0., 1.],
-        actor_residual_magnetic_field: list[float] = [0., 0., 0.],
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
     ):
         """Creates an attitude model to model actor attitude based on
         initial conditions (initial attitude and angular velocity) and
@@ -131,13 +132,16 @@ class AttitudeModel:
         # TODO in the future control torques could be added
 
         # moment of Inertia matrix:
-        I = self._actor.body_moment_of_inertia
+        body_moment_of_inertia = self._actor.body_moment_of_inertia
 
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
-        # with: a = angular acceleration, I = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(I) @ (
+        # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
+        self._actor_angular_acceleration = np.linalg.inv(body_moment_of_inertia) @ (
             self._calculate_disturbance_torque()
-            - np.cross(self._actor_angular_velocity, I @ self._actor_angular_velocity)
+            - np.cross(
+                self._actor_angular_velocity,
+                body_moment_of_inertia @ self._actor_angular_velocity,
+            )
         )
 
     def _body_rotation(self, dt):

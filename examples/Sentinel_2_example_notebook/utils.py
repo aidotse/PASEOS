@@ -96,8 +96,12 @@ def get_thresholds(
     alpha = np.logical_and(
         np.where(sentinel_img[:, :, 2] >= alpha_thr[2], 1, 0),
         np.logical_and(
-            np.where(sentinel_img[:, :, 2] / sentinel_img[:, :, 1] >= alpha_thr[0], 1, 0),
-            np.where(sentinel_img[:, :, 2] / sentinel_img[:, :, 0] >= alpha_thr[1], 1, 0),
+            np.where(
+                sentinel_img[:, :, 2] / sentinel_img[:, :, 1] >= alpha_thr[0], 1, 0
+            ),
+            np.where(
+                sentinel_img[:, :, 2] / sentinel_img[:, :, 0] >= alpha_thr[1], 1, 0
+            ),
         ),
     )
     beta = np.logical_and(
@@ -155,7 +159,9 @@ def get_alert_matrix_and_thresholds(
         numpy.array: gamma threshold map.
     """
 
-    alpha, beta, S, gamma = get_thresholds(sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr)
+    alpha, beta, S, gamma = get_thresholds(
+        sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
+    )
     alert_matrix = np.logical_or(np.logical_or(np.logical_or(alpha, beta), gamma), S)
     return alert_matrix, alpha, beta, S, gamma
 

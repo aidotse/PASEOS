@@ -89,7 +89,9 @@ class ActivityProcessor:
         logger.debug(f"Time since last update: {elapsed_time}s")
         logger.trace(f"Applying time multiplier of {self._time_multiplier}")
         elapsed_time *= self._time_multiplier
-        self._paseos_instance.advance_time(elapsed_time, self._power_consumption_in_watt)
+        self._paseos_instance.advance_time(
+            elapsed_time, self._power_consumption_in_watt
+        )
 
     async def _run(self):
         """Main processor loop. Will track time, update paseos and check constraints of the activity."""

@@ -16,7 +16,9 @@ class Node:
         # Create PASEOS instance to node
         earth = pk.planet.jpl_lp("earth")
         self.node_id = node_id
-        sat = ActorBuilder.get_actor_scaffold(f"sat{node_id}", SpacecraftActor, pk.epoch(0))
+        sat = ActorBuilder.get_actor_scaffold(
+            f"sat{node_id}", SpacecraftActor, pk.epoch(0)
+        )
         ActorBuilder.set_orbit(sat, pos_and_vel[0], pos_and_vel[1], pk.epoch(0), earth)
         ActorBuilder.set_power_devices(
             actor=sat,
@@ -34,7 +36,8 @@ class Node:
 
         transmit_bits = self.model_size()
         self.transmit_duration = transmit_bits / (
-            1000 * self.paseos.local_actor.communication_devices["link"].bandwidth_in_kbps
+            1000
+            * self.paseos.local_actor.communication_devices["link"].bandwidth_in_kbps
         )
 
         self.current_activity = "train"
@@ -66,7 +69,9 @@ class Node:
         # Return model parameters as a list of NumPy ndarrays
         bytestream = b""  # Empty byte represenation
         for _, val in self.model.state_dict().items():  # go over each layer
-            bytestream += val.cpu().numpy().tobytes()  # convert layer to bytes and concatenate
+            bytestream += (
+                val.cpu().numpy().tobytes()
+            )  # convert layer to bytes and concatenate
         return len(bytestream) * 8
 
     def local_time(self):
@@ -106,7 +111,9 @@ class Node:
         target_actor = target_node.paseos.local_actor
         local_actor = self.paseos.local_actor
 
-        transmit_end = pk.epoch(self.local_time().mjd2000 + self.transmit_duration * pk.SEC2DAY)
+        transmit_end = pk.epoch(
+            self.local_time().mjd2000 + self.transmit_duration * pk.SEC2DAY
+        )
         los_end = local_actor.is_in_line_of_sight(target_actor, transmit_end)
         return los_end
 

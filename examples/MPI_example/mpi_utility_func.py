@@ -48,7 +48,9 @@ def _parse_actor_data(actor_data):
     return actor
 
 
-def exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbose=False):
+def exchange_actors(
+    comm, paseos_instance, local_actor, other_ranks, rank, verbose=False
+):
     """This function exchanges the states of various actors among all MPI ranks.
 
     Args:
@@ -67,7 +69,9 @@ def exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbo
     # Send local actor to other ranks
     for i in other_ranks:
         actor_data = _encode_actor(local_actor)
-        send_requests.append(comm.isend(actor_data, dest=i, tag=int(str(rank) + str(i))))
+        send_requests.append(
+            comm.isend(actor_data, dest=i, tag=int(str(rank) + str(i)))
+        )
 
     # Receive from other ranks
     for i in other_ranks:

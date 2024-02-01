@@ -23,7 +23,9 @@ set_log_level("WARNING")
 logger.debug("Loaded module.")
 
 
-def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None):
+def init_sim(
+    local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None
+):
     """Initializes PASEOS
 
     Args:

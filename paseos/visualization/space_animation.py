@@ -18,7 +18,9 @@ from paseos.visualization.animation import Animation
 class SpaceAnimation(Animation):
     """This class visualizes the central body, local actor and known actors over time."""
 
-    def __init__(self, sim: PASEOS, n_trajectory: int = 32, filename: str = None) -> None:
+    def __init__(
+        self, sim: PASEOS, n_trajectory: int = 32, filename: str = None
+    ) -> None:
         """Initialize the space animation object
 
         Args:
@@ -135,7 +137,13 @@ class SpaceAnimation(Animation):
 
                     self.comm_lines.append(
                         self.ax_3d.plot3D(
-                            x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10
+                            x1x2,
+                            y1y2,
+                            z1z2,
+                            "--",
+                            color="green",
+                            linewidth=0.5,
+                            zorder=10,
                         )
                     )
 
@@ -178,7 +186,9 @@ class SpaceAnimation(Animation):
         for i, a1 in enumerate(current_actors):
             for j, a2 in enumerate(current_actors[i + 1 :]):
                 # Skip LOS between groundstations (leads to crash)
-                if isinstance(a1, GroundstationActor) and isinstance(a2, GroundstationActor):
+                if isinstance(a1, GroundstationActor) and isinstance(
+                    a2, GroundstationActor
+                ):
                     continue
                 elif a1.is_in_line_of_sight(a2, local_time) is True:
                     los_matrix[i, j + i + 1] = 1.0
@@ -271,7 +281,9 @@ class SpaceAnimation(Animation):
                 if isinstance(obj.actor, SpacecraftActor) or isinstance(
                     obj.actor, GroundstationActor
                 ):
-                    trajectory = self.ax_3d.plot3D(data[0, 0], data[0, 1], data[0, 2])[0]
+                    trajectory = self.ax_3d.plot3D(data[0, 0], data[0, 1], data[0, 2])[
+                        0
+                    ]
                     obj.plot.trajectory = trajectory
                     obj.plot.point = self.ax_3d.plot(
                         data[0, 0],
@@ -347,7 +359,9 @@ class SpaceAnimation(Animation):
         # if known_actor does not exist in objects, add the actors and update in plot
         objects_to_add = list(current_actors.difference(objects_in_plot))
 
-        plot_objects_to_remove = [x for x in self.objects if x.actor in objects_to_remove]
+        plot_objects_to_remove = [
+            x for x in self.objects if x.actor in objects_to_remove
+        ]
         for obj in plot_objects_to_remove:
             obj.plot.trajectory.remove()
             obj.plot.point.remove()
@@ -362,7 +376,9 @@ class SpaceAnimation(Animation):
         for known_actor in current_actors:
             for obj in self.objects:
                 if obj.actor == known_actor:
-                    pos = np.array(known_actor.get_position(self._local_actor.local_time))
+                    pos = np.array(
+                        known_actor.get_position(self._local_actor.local_time)
+                    )
                     if "positions" in obj:
                         if obj.positions.shape[0] > self.n_trajectory:
                             obj.positions = np.roll(obj.positions, shift=-1, axis=0)
@@ -415,7 +431,9 @@ class SpaceAnimation(Animation):
         except RuntimeError:
             logger.trace("Animation date label could not be updated.")
 
-        self.time_label.set_text(f"t={sim._state.time - sim._cfg.sim.start_time:<10.2e}")
+        self.time_label.set_text(
+            f"t={sim._state.time - sim._cfg.sim.start_time:<10.2e}"
+        )
 
         logger.debug("Plot updated.")
 
@@ -446,7 +464,9 @@ class SpaceAnimation(Animation):
         """
         return self._animate(sim, dt)
 
-    def animate(self, sim: PASEOS, dt: float, steps: int = 1, save_to_file: str = None) -> None:
+    def animate(
+        self, sim: PASEOS, dt: float, steps: int = 1, save_to_file: str = None
+    ) -> None:
         """Animates paseos for a given number of steps with dt in each step.
 
         Args:

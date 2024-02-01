@@ -47,7 +47,9 @@ async def test_thermal():
         await asyncio.sleep(16.0)
 
     # Register an activity that draws 10 watt per second
-    sim.register_activity("Activity_1", activity_function=func, power_consumption_in_watt=10)
+    sim.register_activity(
+        "Activity_1", activity_function=func, power_consumption_in_watt=10
+    )
 
     # Run the activity
     sim.perform_activity("Activity_1")

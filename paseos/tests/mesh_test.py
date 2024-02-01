@@ -30,7 +30,9 @@ def get_default_setup():
     paseos.set_log_level("INFO")
 
     # Create a planet object from pykep for 67P
-    comet = pk.planet.keplerian(epoch, (a, e, i, W, w, M), pk.MU_SUN, MU, 2000, 2000, "67P")
+    comet = pk.planet.keplerian(
+        epoch, (a, e, i, W, w, M), pk.MU_SUN, MU, 2000, 2000, "67P"
+    )
 
     # Load the 67P mesh with pickle
     with open(mesh_path, "rb") as f:
@@ -127,7 +129,10 @@ def test_mesh_eclipse():
 
     # Add a power device
     ActorBuilder.set_power_devices(
-        actor=sat1, battery_level_in_Ws=500, max_battery_level_in_Ws=1000, charging_rate_in_W=10
+        actor=sat1,
+        battery_level_in_Ws=500,
+        max_battery_level_in_Ws=1000,
+        charging_rate_in_W=10,
     )
 
     assert not sat1.is_in_eclipse(epoch)

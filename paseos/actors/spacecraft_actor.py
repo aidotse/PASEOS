@@ -1,7 +1,6 @@
 import numpy as np
-from loguru import logger
-import numpy as np
 import pykep as pk
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
 from paseos.power import discharge_model
@@ -216,10 +215,11 @@ class SpacecraftActor(BaseActor):
         Returns:
             list[floats]: actor attitude in radians.
         """
-        if type(self._attitude_model._actor_attitude_in_rad) == np.ndarray:
+        if type(self._attitude_model._actor_attitude_in_rad) is np.ndarray:
             return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad)
         else:
             return self._attitude_model._actor_attitude_in_rad
+
     @property
     def attitude_in_deg(self):
         """Returns the current attitude of the actor in degrees.
@@ -227,10 +227,14 @@ class SpacecraftActor(BaseActor):
         Returns:
             list[floats]: actor attitude in degrees.
         """
-        if type(self._attitude_model._actor_attitude_in_rad) == np.ndarray:
-            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad * 180 / np.pi)
+        if type(self._attitude_model._actor_attitude_in_rad) is np.ndarray:
+            return np.ndarray.tolist(
+                self._attitude_model._actor_attitude_in_rad * 180 / np.pi
+            )
         else:
-            return np.ndarray.tolist(np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi)
+            return np.ndarray.tolist(
+                np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi
+            )
 
     @property
     def pointing_vector(self):

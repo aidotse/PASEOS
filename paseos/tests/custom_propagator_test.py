@@ -20,7 +20,9 @@ def test_custom_propagator():
     # Define a custom propagator function that just returns a sinus position
     def my_propagator(epoch: pk.epoch):
         """Custom propagator that returns a sinus position"""
-        time_since_epoch_in_seconds = (epoch.mjd2000 - starting_epoch.mjd2000) * pk.DAY2SEC
+        time_since_epoch_in_seconds = (
+            epoch.mjd2000 - starting_epoch.mjd2000
+        ) * pk.DAY2SEC
 
         r = [np.sin(time_since_epoch_in_seconds), 0.0, 0.0]
         v = [42.0, 42.0, 42.0]

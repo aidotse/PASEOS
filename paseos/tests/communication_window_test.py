@@ -18,8 +18,12 @@ def setup_sentinel_example(t0):
 
     # Define Sentinel 2 orbit
     sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, t0)
-    sentinel2B_line1 = "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
-    sentinel2B_line2 = "2 42063  98.5693  13.0364 0001083 104.3232 255.8080 14.30819357294601"
+    sentinel2B_line1 = (
+        "1 42063U 17013A   22300.18652110  .00000099  00000+0  54271-4 0  9998"
+    )
+    sentinel2B_line2 = (
+        "2 42063  98.5693  13.0364 0001083 104.3232 255.8080 14.30819357294601"
+    )
     s2b = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
 
     # Calculating S2B ephemerides.

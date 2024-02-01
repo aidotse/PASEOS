@@ -192,7 +192,6 @@ class BaseActor(ABC):
         """
         return hasattr(self, "_attitude_model") and self._attitude_model is not None
 
-
     @property
     def mass(self) -> float:
         """Returns actor's mass in kg.

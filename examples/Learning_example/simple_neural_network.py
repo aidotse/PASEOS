@@ -57,7 +57,9 @@ class SimpleNeuralNetwork(torch.nn.Module):
 
         # Instantiate training and test data
         X, y = make_circles(n_samples=10000, noise=0.05, random_state=26)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=26)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.33, random_state=26
+        )
 
         # divide the training set so none of the peers have the same data
         if self.node_id == 1:
@@ -73,8 +75,12 @@ class SimpleNeuralNetwork(torch.nn.Module):
         # Create dataloaders
         train_data = Data(X_train, y_train)
         test_data = Data(X_test, y_test)
-        self.train_dataloader = DataLoader(dataset=train_data, batch_size=64, shuffle=True)
-        self.test_dataloader = DataLoader(dataset=test_data, batch_size=64, shuffle=True)
+        self.train_dataloader = DataLoader(
+            dataset=train_data, batch_size=64, shuffle=True
+        )
+        self.test_dataloader = DataLoader(
+            dataset=test_data, batch_size=64, shuffle=True
+        )
 
     def forward(self, x):
         """Do inference on model

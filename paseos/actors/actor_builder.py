@@ -574,10 +574,10 @@ class ActorBuilder:
 
     @staticmethod
     def set_attitude_disturbances(
-            actor: SpacecraftActor,
-            aerodynamic: bool = False,
-            gravitational: bool = False,
-            magnetic: bool = False,
+        actor: SpacecraftActor,
+        aerodynamic: bool = False,
+        gravitational: bool = False,
+        magnetic: bool = False,
     ):
         """Enables the attitude disturbances to be considered in the attitude modelling for an actor.
 
@@ -592,7 +592,9 @@ class ActorBuilder:
             actor, SpacecraftActor
         ), "Attitude disturbances are only supported for SpacecraftActors."
 
-        assert actor.has_attitude_model, "The actor has no attitude model. Impossible to set attitude disturbances."
+        assert (
+            actor.has_attitude_model
+        ), "The actor has no attitude model. Impossible to set attitude disturbances."
 
         # Create a list with user specified disturbances which are considered in the attitude modelling.
         disturbance_list = []
@@ -606,15 +608,13 @@ class ActorBuilder:
         # Set attitude models.
         actor._attitude_model._disturbances = disturbance_list
 
-
     @staticmethod
     def set_attitude_model(
-            actor: SpacecraftActor,
-            actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
-            actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
-            actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-            actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
-
+        actor: SpacecraftActor,
+        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
     ):
         """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
         and angular velocity vector, modeling the evolution of the user specified pointing vector.
@@ -645,7 +645,6 @@ class ActorBuilder:
             actor_initial_angular_velocity=actor_initial_angular_velocity,
             actor_pointing_vector_body=actor_pointing_vector_body,
             actor_residual_magnetic_field=actor_residual_magnetic_field,
-
         )
 
     @staticmethod
