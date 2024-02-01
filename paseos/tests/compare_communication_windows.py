@@ -22,12 +22,8 @@ def setup_sentinel_example(t0):
 
     # Define Sentinel 2 orbit
     sentinel2B = ActorBuilder.get_actor_scaffold("Sentinel2B", SpacecraftActor, t0)
-    sentinel2B_line1 = (
-        "1 40697U 15028A   23193.19358829  .00000126  00000-0  64636-4 0  9993"
-    )
-    sentinel2B_line2 = (
-        "2 40697  98.5693 267.3615 0001325  90.2705 269.8630 14.30818726420585"
-    )
+    sentinel2B_line1 = "1 40697U 15028A   23193.19358829  .00000126  00000-0  64636-4 0  9993"
+    sentinel2B_line2 = "2 40697  98.5693 267.3615 0001325  90.2705 269.8630 14.30818726420585"
     s2b = pk.planet.tle(sentinel2B_line1, sentinel2B_line2)
 
     # Calculating S2B ephemerides.
@@ -95,9 +91,7 @@ def main():
                 print("n: ", n)
                 n -= 1
                 n_sec_advance = (
-                    start.mjd2000 * pk.DAY2SEC
-                    - sentinel2B.local_time.mjd2000 * pk.DAY2SEC
-                    + length
+                    start.mjd2000 * pk.DAY2SEC - sentinel2B.local_time.mjd2000 * pk.DAY2SEC + length
                 )
         else:
             n_sec_advance = 500
@@ -107,9 +101,7 @@ def main():
 
     print("Lengths: ", lengths)
     print("Starts: ", starts)
-    lengths_expected = np.array(
-        [31032 - 30426, 37026 - 36321, 75297 - 74811, 81396 - 80661]
-    )
+    lengths_expected = np.array([31032 - 30426, 37026 - 36321, 75297 - 74811, 81396 - 80661])
     errors = np.abs(lengths_expected - np.array(lengths))
     errors_percentage = errors / np.array(lengths)
     print("Error percentages: ", errors_percentage)

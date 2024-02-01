@@ -31,9 +31,7 @@ class SpacecraftBodyModel:
         logger.trace("Initializing cuboid geometrical model.")
 
         self._body_mass = actor_mass
-        self._body_mesh = self._create_body_mesh(
-            vertices=vertices, faces=faces, scale=scale
-        )
+        self._body_mesh = self._create_body_mesh(vertices=vertices, faces=faces, scale=scale)
         self._body_moment_of_inertia = self._body_mesh.moment_inertia * self._body_mass
         self._body_center_of_gravity = self._body_mesh.center_mass
 
@@ -83,8 +81,7 @@ class SpacecraftBodyModel:
 
         else:
             assert (
-                len(np.asarray(vertices).shape) == 2
-                and np.asarray(vertices).shape[1] == 3
+                len(np.asarray(vertices).shape) == 2 and np.asarray(vertices).shape[1] == 3
             ), "Vertices shall be [N, 3] shaped."
 
         # Create mesh

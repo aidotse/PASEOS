@@ -74,9 +74,7 @@ def test_gravity_disturbance_pole():
     # Define local actor
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [7000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_spacecraft_body_model(
-        sat1, mass=100, vertices=vertices, faces=faces
-    )
+    ActorBuilder.set_spacecraft_body_model(sat1, mass=100, vertices=vertices, faces=faces)
     orbital_period = 2 * np.pi * np.sqrt((6371000 + 7000000) ** 3 / 3.986004418e14)
     ActorBuilder.set_attitude_model(
         sat1
@@ -136,9 +134,7 @@ def test_magnetic_disturbance():
             # transform B vector to the actor body frame and return
             actor_velocity = np.array(actor.get_position_velocity(actor.local_time)[1])
             actor_attitude = np.array(actor.attitude_in_rad)
-            return rpy_to_body(
-                eci_to_rpy(B, actor_position, actor_velocity), actor_attitude
-            )
+            return rpy_to_body(eci_to_rpy(B, actor_position, actor_velocity), actor_attitude)
 
     # Define central body
     earth = pk.planet.jpl_lp("earth")

@@ -31,9 +31,7 @@ def test_set_TLE():
 
     # Create an actor with a keplerian orbit and check that the position and velocity
     # diverge over time
-    s2a_kep = ActorBuilder.get_actor_scaffold(
-        "s2a_kep", SpacecraftActor, sentinel2a.local_time
-    )
+    s2a_kep = ActorBuilder.get_actor_scaffold("s2a_kep", SpacecraftActor, sentinel2a.local_time)
     ActorBuilder.set_orbit(s2a_kep, position, velocity, sentinel2a.local_time, earth)
 
     # After some orbits the differences should be significant
@@ -109,9 +107,7 @@ def test_set_spacecraft_body_model():
         sat1.body_center_of_gravity == np.array([0, 0, 0])
     )  # check the default mesh is centered
     assert sat1.body_mesh.volume == 1  # check the default volume is correct
-    assert (
-        round(sat1.body_moment_of_inertia[0, 0], 4) == 16.6667
-    )  # for the default mesh
+    assert round(sat1.body_moment_of_inertia[0, 0], 4) == 16.6667  # for the default mesh
     assert (
         sat1.body_moment_of_inertia[0, 1] == 0.0
     )  # Should be zero if the mass distribution is even

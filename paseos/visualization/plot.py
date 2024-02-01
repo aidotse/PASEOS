@@ -29,6 +29,4 @@ def plot(sim: PASEOS, plot_type: PlotType, filename: str = None):
     if plot_type is PlotType.SpacePlot:
         return SpaceAnimation(sim, filename=filename)
     else:
-        raise ValueError(
-            f"PlotType {plot_type} not known. Available are {[e for e in PlotType]}"
-        )
+        raise ValueError(f"PlotType {plot_type} not known. Available are {[e for e in PlotType]}")

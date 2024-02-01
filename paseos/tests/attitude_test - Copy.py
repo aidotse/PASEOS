@@ -50,9 +50,7 @@ def test_attitude_model():
     assert np.all(sat1._attitude_model._actor_pointing_vector_eci == [-1.0, 0.0, 0.0])
     assert np.all(sat1._attitude_model._actor_attitude_in_rad == [0.0, 0.0, 0.0])
     # positive angular velocity in body y direction is negative angular velocity in Earth inertial z direction:
-    assert np.all(
-        sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega]
-    )
+    assert np.all(sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega])
 
     # sat2
     assert np.all(sat2._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
@@ -87,9 +85,7 @@ def test_attitude_model():
     # Pointing vector from sat2 must not be rotated.
     assert np.all(sat2.pointing_vector() == np.array([-1.0, 0.0, 0.0]))
     # Sat2 angular velocity in the body frame must stay zero:
-    assert np.all(
-        sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0])
-    )
+    assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
 
 
 def test_attitude_thermal_model():
@@ -207,9 +203,7 @@ def test_magnetic_disturbance():
             # transform B vector to the actor body frame and return
             actor_velocity = np.array(actor.get_position_velocity(actor.local_time)[1])
             actor_attitude = np.array(actor.attitude_in_rad())
-            return rpy_to_body(
-                eci_to_rpy(B, actor_position, actor_velocity), actor_attitude
-            )
+            return rpy_to_body(eci_to_rpy(B, actor_position, actor_velocity), actor_attitude)
 
     # Define central body
     earth = pk.planet.jpl_lp("earth")

@@ -104,9 +104,7 @@ class PASEOS:
         self._is_advancing_time = True
 
         assert time_to_advance > 0, "Time to advance has to be positive."
-        assert (
-            current_power_consumption_in_W >= 0
-        ), "Power consumption cannot be negative."
+        assert current_power_consumption_in_W >= 0, "Power consumption cannot be negative."
 
         # Check constraint function returns something
         if constraint_function is not None:
@@ -144,14 +142,10 @@ class PASEOS:
             # check for device and / or activity failure
             if self.local_actor.has_radiation_model:
                 if self.local_actor.is_dead:
-                    logger.warning(
-                        f"Tried to advance time on dead actor {self.local_actor}."
-                    )
+                    logger.warning(f"Tried to advance time on dead actor {self.local_actor}.")
                     return max(target_time - self._state.time, 0)
                 if self.local_actor._radiation_model.did_device_restart(dt):
-                    logger.info(
-                        f"Actor {self.local_actor} interrupted during advance_time."
-                    )
+                    logger.info(f"Actor {self.local_actor} interrupted during advance_time.")
                     self.local_actor.set_was_interrupted()
                     return max(target_time - self._state.time, 0)
                 if self.local_actor._radiation_model.did_device_experience_failure(dt):
@@ -179,18 +173,14 @@ class PASEOS:
 
             # Update actor attitude
             if self.local_actor.has_attitude_model:
-                self.local_actor._attitude_model.update_attitude(
-                    dt, current_temperature_K
-                )
+                self.local_actor._attitude_model.update_attitude(dt, current_temperature_K)
 
             # Update user-defined properties in the actor
             for property_name in self.local_actor.custom_properties.keys():
                 update_function = self.local_actor.get_custom_property_update_function(
                     property_name
                 )
-                new_value = update_function(
-                    self.local_actor, dt, current_power_consumption_in_W
-                )
+                new_value = update_function(self.local_actor, dt, current_power_consumption_in_W)
                 self.local_actor.set_custom_property(property_name, new_value)
 
             self._state.time += dt
@@ -218,9 +208,7 @@ class PASEOS:
         logger.debug("Current actors: " + str(self._known_actors.keys()))
         # Check for duplicate actors by name
         if actor.name in self._known_actors.keys():
-            raise ValueError(
-                "Trying to add already existing actor with name: " + actor.name
-            )
+            raise ValueError("Trying to add already existing actor with name: " + actor.name)
         # Else add
         self._known_actors[actor.name] = actor
 

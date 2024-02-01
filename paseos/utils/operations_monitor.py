@@ -70,9 +70,7 @@ class OperationsMonitor:
             known_actors (list): List of names of the known actors.
         """
         logger.trace("Logging iteration")
-        assert local_actor.name == self._actor_name, (
-            "Expected actor's name was" + self._actor_name
-        )
+        assert local_actor.name == self._actor_name, "Expected actor's name was" + self._actor_name
         self._log.timesteps.append(local_actor.local_time.mjd2000 * pk.DAY2SEC)
         self._log.current_activity.append(local_actor.current_activity)
         self._log.position.append(local_actor._previous_position)
@@ -107,9 +105,7 @@ class OperationsMonitor:
         """
         logger.trace("Writing status log file to " + filename)
         with open(filename, "w", newline="") as f:
-            w = csv.DictWriter(
-                f, list(self._log.keys()) + list(self._log.custom_properties.keys())
-            )
+            w = csv.DictWriter(f, list(self._log.keys()) + list(self._log.custom_properties.keys()))
             w.writeheader()
             for i in range(len(self._log.timesteps)):
                 row = {
@@ -131,9 +127,7 @@ class OperationsMonitor:
                         if i < len(self._log.timesteps) - len(value):
                             row[key] = None
                         else:
-                            row[key] = value[
-                                i - (len(self._log.timesteps) - len(value))
-                            ]
+                            row[key] = value[i - (len(self._log.timesteps) - len(value))]
                     else:
                         row[key] = value[i]
 

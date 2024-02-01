@@ -43,9 +43,7 @@ def charge(
     # Apply specified charging model
     if model == "simple":
         actor._battery_level_in_Ws += actor._charging_rate_in_W * charging_time_in_s
-        actor._battery_level_in_Ws = min(
-            actor.battery_level_in_Ws, actor._max_battery_level_in_Ws
-        )
+        actor._battery_level_in_Ws = min(actor.battery_level_in_Ws, actor._max_battery_level_in_Ws)
         return actor
     else:
         raise NotImplementedError("Unknown charging model " + model)

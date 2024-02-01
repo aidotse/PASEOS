@@ -65,9 +65,7 @@ def test_2a():
     r = np.array([6626, 0, 0])  # [km]
     v = np.array([0, 7756, 0])  # [km]
 
-    T = compute_aerodynamic_torque(
-        r, v, mesh, np.array([0, 0, 0]), spacecraft_temperature_K
-    )
+    T = compute_aerodynamic_torque(r, v, mesh, np.array([0, 0, 0]), spacecraft_temperature_K)
 
     assert np.linalg.norm(T) < 10 ** (-8)
 

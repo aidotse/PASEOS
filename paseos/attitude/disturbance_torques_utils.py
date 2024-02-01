@@ -10,9 +10,7 @@ from ..utils.reference_frame_transfer import (
 )
 
 
-def compute_aerodynamic_torque(
-    r, v, mesh, actor_attitude_in_rad, current_spacecraft_temperature_K
-):
+def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacecraft_temperature_K):
     """Calculates the aerodynamic torque on the satellite.
     The model used is taken from "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces"; Ran. S,
     Jihe W., et al.; 2017. The mass density of the atmosphere is calculated from the best linear fit of the data
@@ -51,9 +49,7 @@ def compute_aerodynamic_torque(
     #  translated in the Roll Pitch Yaw frame with a transformation from paseos.utils.reference_frame_transfer.py
     face_normals_sbf = mesh.face_normals[0:12]
     # Get ntransformation matrix
-    transformation_matrix_rpy_body = compute_transformation_matrix_rpy_body(
-        actor_attitude_in_rad
-    )
+    transformation_matrix_rpy_body = compute_transformation_matrix_rpy_body(actor_attitude_in_rad)
     face_normals_rpy = np.dot(transformation_matrix_rpy_body, face_normals_sbf.T).T
 
     #  Get the velocity and transform it in the Roll Pitch Yaw frame. Get the unit vector associated with the latter
@@ -164,12 +160,7 @@ def compute_aerodynamic_torque(
 
         # Drag force on the plate [k]. Direction along the velocity vector.
         force_drag[k] = (
-            -0.5
-            * density
-            * C_d
-            * area_faces_airflow[k]
-            * np.linalg.norm(v) ** 2
-            * unit_v_rpy
+            -0.5 * density * C_d * area_faces_airflow[k] * np.linalg.norm(v) ** 2 * unit_v_rpy
         )
         # Lift force on the plate [k]. Direction along the (v x n) x v direction, lift vector defined to be in that
         # direction. Intermediate step to get v x n.
@@ -177,12 +168,7 @@ def compute_aerodynamic_torque(
         not_norm_lift_vector = np.cross(v_x_n_vector, unit_v_rpy)
         lift_vector = not_norm_lift_vector / np.linalg.norm(not_norm_lift_vector)
         force_lift[k] = (
-            -0.5
-            * density
-            * C_l
-            * area_faces_airflow[k]
-            * np.linalg.norm(v) ** 2
-            * lift_vector
+            -0.5 * density * C_l * area_faces_airflow[k] * np.linalg.norm(v) ** 2 * lift_vector
         )
 
         # Torque calculated as the product between the distance of the centroid from the geometric center of the
@@ -226,13 +212,11 @@ def compute_gravity_gradient_torque(central_body, u_r, u_n, J, r):
 
     tg_term_1 = (3 * mu / (r**3)) * np.cross(u_r, np.dot(J, u_r))
     tg_term_2 = (
-        30
-        * np.dot(u_r, u_n)
-        * (np.cross(u_n, np.dot(J, u_r)) + np.cross(u_r, np.dot(J, u_n)))
+        30 * np.dot(u_r, u_n) * (np.cross(u_n, np.dot(J, u_r)) + np.cross(u_r, np.dot(J, u_n)))
     )
-    tg_term_3 = np.cross(
-        (15 - 105 * np.dot(u_r, u_n) ** 2) * u_r, np.dot(J, u_r)
-    ) + np.cross(6 * u_n, np.dot(J, u_n))
+    tg_term_3 = np.cross((15 - 105 * np.dot(u_r, u_n) ** 2) * u_r, np.dot(J, u_r)) + np.cross(
+        6 * u_n, np.dot(J, u_n)
+    )
     tg = tg_term_1 + mu * J2 * Re**2 / (2 * r**5) * (tg_term_2 + tg_term_3)
     return np.array(tg)
 

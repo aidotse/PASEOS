@@ -6,9 +6,7 @@ from skyfield.units import AU_M
 from skyfield.api import load
 from skyfield.vectorlib import VectorFunction
 
-_SKYFIELD_EARTH_PATH = os.path.join(
-    os.path.dirname(__file__) + "/../resources/", "de421.bsp"
-)
+_SKYFIELD_EARTH_PATH = os.path.join(os.path.dirname(__file__) + "/../resources/", "de421.bsp")
 # Skyfield Earth, in the future we may not always want to load this.
 _SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
@@ -35,9 +33,7 @@ class SkyfieldSkyCoordinate(VectorFunction):
         return self.r, v, self.center, "SkyfieldSkyCoordinate"
 
 
-def _is_in_line_of_sight_spacecraft_to_spacecraft(
-    actor, other_actor, epoch: pk.epoch, plot=False
-):
+def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.epoch, plot=False):
     """Determines whether a position is in line of sight of this actor
 
     Args:
@@ -82,10 +78,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
     ), "0 < Minimum altitude angle < 90"
 
     logger.debug(
-        "Computing line of sight between actors: "
-        + str(ground_station)
-        + " "
-        + str(spacecraft)
+        "Computing line of sight between actors: " + str(ground_station) + " " + str(spacecraft)
     )
 
     # Converting time to skyfield to use its API
@@ -165,9 +158,7 @@ def is_in_line_of_sight(
         assert (
             actor.central_body is not None
         ), f"Please set the central body on actor {actor} for line of sight computations."
-        return _is_in_line_of_sight_spacecraft_to_spacecraft(
-            actor, other_actor, epoch, plot
-        )
+        return _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch, plot)
     elif (
         type(actor).__name__ == "GroundstationActor"
         and type(other_actor).__name__ == "SpacecraftActor"

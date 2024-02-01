@@ -16,9 +16,7 @@ def test_custom_power_consumption_property():
     sim, sat1, earth = get_default_instance()
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_orbit(sat1, [10000000, 0, 0], [0, 8000.0, 0], pk.epoch(0), earth)
-    ActorBuilder.set_power_devices(
-        sat1, 50000, 1000000, 1, paseos.PowerDeviceType.SolarPanel
-    )
+    ActorBuilder.set_power_devices(sat1, 50000, 1000000, 1, paseos.PowerDeviceType.SolarPanel)
 
     # Add a custom property which tracks the total power consumption
     prop_name = "total_power_consumption"

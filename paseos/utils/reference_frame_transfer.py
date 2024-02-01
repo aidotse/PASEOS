@@ -70,9 +70,7 @@ def compute_transformation_matrix_rpy_body(euler_angles_in_rad):
     roll, pitch, yaw = euler_angles_in_rad
 
     # individual axis rotations:
-    A = np.array(
-        [[1, 0, 0], [0, np.cos(roll), np.sin(roll)], [0, -np.sin(roll), np.cos(roll)]]
-    )
+    A = np.array([[1, 0, 0], [0, np.cos(roll), np.sin(roll)], [0, -np.sin(roll), np.cos(roll)]])
 
     B = np.array(
         [
@@ -82,9 +80,7 @@ def compute_transformation_matrix_rpy_body(euler_angles_in_rad):
         ]
     )
 
-    C = np.array(
-        [[np.cos(yaw), np.sin(yaw), 0], [-np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]
-    )
+    C = np.array([[np.cos(yaw), np.sin(yaw), 0], [-np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]])
 
     # Transformation matrix:
     T = A @ B @ C

@@ -121,15 +121,9 @@ class ActorBuilder:
         ), "Central body only supported for SpacecraftActors"
 
         # Fuzzy type check for pykep planet
-        assert "pykep.planet" in str(
-            type(pykep_planet)
-        ), "pykep_planet has to be a pykep planet."
-        assert (
-            mesh is not None or radius is not None
-        ), "Either mesh or radius has to be provided."
-        assert (
-            mesh is None or radius is None
-        ), "Either mesh or radius has to be provided, not both."
+        assert "pykep.planet" in str(type(pykep_planet)), "pykep_planet has to be a pykep planet."
+        assert mesh is not None or radius is not None, "Either mesh or radius has to be provided."
+        assert mesh is None or radius is None, "Either mesh or radius has to be provided, not both."
 
         # Check rotation parameters
         if rotation_declination is not None:
@@ -155,26 +149,16 @@ class ActorBuilder:
             assert (
                 rotation_declination is not None
             ), "Rotation declination has to be set. for rotation."
-            assert (
-                rotation_period is not None
-            ), "Rotation period has to be set for rotation."
-            assert (
-                mesh is not None
-            ), "Radius cannot only be set for mesh-defined bodies."
+            assert rotation_period is not None, "Rotation period has to be set for rotation."
+            assert mesh is not None, "Radius cannot only be set for mesh-defined bodies."
 
         if mesh is not None:
             # Check mesh
             assert isinstance(mesh, tuple), "Mesh has to be a tuple."
             assert len(mesh) == 2, "Mesh has to be a tuple of length 2."
-            assert isinstance(
-                mesh[0], np.ndarray
-            ), "Mesh vertices have to be a numpy array."
-            assert isinstance(
-                mesh[1], np.ndarray
-            ), "Mesh triangles have to be a numpy array."
-            assert (
-                len(mesh[0].shape) == 2
-            ), "Mesh vertices have to be a numpy array of shape (n,3)."
+            assert isinstance(mesh[0], np.ndarray), "Mesh vertices have to be a numpy array."
+            assert isinstance(mesh[1], np.ndarray), "Mesh triangles have to be a numpy array."
+            assert len(mesh[0].shape) == 2, "Mesh vertices have to be a numpy array of shape (n,3)."
             assert (
                 len(mesh[1].shape) == 2
             ), "Mesh triangles have to be a numpy array of shape (n,3)."
@@ -205,9 +189,7 @@ class ActorBuilder:
         logger.debug(f"Added central body {pykep_planet} to actor {actor}")
 
     @staticmethod
-    def set_custom_orbit(
-        actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch
-    ):
+    def set_custom_orbit(actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch):
         """Define the orbit of the actor using a custom propagator function.
         The custom function has to return position and velocity in meters
         and meters per second respectively. The function will be called with the
@@ -220,9 +202,7 @@ class ActorBuilder:
         """
         assert callable(propagator_func), "propagator_func has to be callable."
         assert isinstance(epoch, pk.epoch), "epoch has to be a pykep epoch."
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Orbit only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
         assert actor._orbital_parameters is None, "Actor already has an orbit."
         assert np.isclose(
             actor.local_time.mjd2000, epoch.mjd2000
@@ -268,9 +248,7 @@ class ActorBuilder:
         try:
             actor._orbital_parameters = pk.planet.tle(line1, line2)
             # TLE only works around Earth
-            ActorBuilder.set_central_body(
-                actor, pk.planet.jpl_lp("earth"), radius=6371000
-            )
+            ActorBuilder.set_central_body(actor, pk.planet.jpl_lp("earth"), radius=6371000)
         except RuntimeError:
             logger.error("Error reading TLE \n", line1, "\n", line2)
             raise RuntimeError("Error reading TLE")
@@ -294,9 +272,7 @@ class ActorBuilder:
             epoch (pk.epoch): Time of position / velocity.
             central_body (pk.planet): Central body around which the actor is orbiting as a pykep planet.
         """
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Orbit only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
 
         ActorBuilder.set_central_body(actor, central_body, radius=central_body.radius)
         actor._orbital_parameters = pk.planet.keplerian(
@@ -404,9 +380,7 @@ class ActorBuilder:
         # If solar panel, check if the actor has a central body
         # to check eclipse
         if power_device_type == PowerDeviceType.SolarPanel:
-            assert (
-                actor.has_central_body
-            ), "Solar panels require a central body to check eclipse."
+            assert actor.has_central_body, "Solar panels require a central body to check eclipse."
 
         # Check if the actor already had a power device
         if actor.has_power_model:
@@ -456,9 +430,7 @@ class ActorBuilder:
             actor, SpacecraftActor
         ), "Radiation models are only supported for SpacecraftActors"
 
-        assert (
-            data_corruption_events_per_s >= 0
-        ), "data_corruption_events_per_s cannot be negative."
+        assert data_corruption_events_per_s >= 0, "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
         assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
 
@@ -524,14 +496,11 @@ class ActorBuilder:
         assert actor_mass > 0, "Actor mass has to be positive."
 
         assert (
-            0 <= power_consumption_to_heat_ratio
-            and power_consumption_to_heat_ratio <= 1.0
+            0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0
         ), "Heat ratio has to be 0 to 1."
 
         logger.trace("Checking actor thermal values for sensibility.")
-        assert (
-            0 <= actor_initial_temperature_in_K
-        ), "Actor initial temperature cannot be below 0K."
+        assert 0 <= actor_initial_temperature_in_K, "Actor initial temperature cannot be below 0K."
         assert (
             0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
         ), "Absorptance has to be 0 to 1."
@@ -545,12 +514,8 @@ class ActorBuilder:
 
         logger.trace("Checking body thermal values for sensibility.")
         assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
-        assert (
-            0 <= body_surface_temperature_in_K
-        ), "Body surface temperature cannot be below 0K."
-        assert (
-            0 <= body_emissivity and body_emissivity <= 1.0
-        ), "Body emissivity has to be 0 to 1"
+        assert 0 <= body_surface_temperature_in_K, "Body surface temperature cannot be below 0K."
+        assert 0 <= body_emissivity and body_emissivity <= 1.0, "Body emissivity has to be 0 to 1"
         assert (
             0 <= body_reflectance and body_reflectance <= 1.0
         ), "Body reflectance has to be 0 to 1"
@@ -661,13 +626,9 @@ class ActorBuilder:
                 + device_name
             )
 
-        actor._communication_devices[device_name] = DotMap(
-            bandwidth_in_kbps=bandwidth_in_kbps
-        )
+        actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
-        logger.debug(
-            f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}."
-        )
+        logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
 
     @staticmethod
     def add_custom_property(
@@ -691,18 +652,14 @@ class ActorBuilder:
             update_function (Callable): The function to update the custom property.
         """
         if property_name in actor._custom_properties:
-            raise ValueError(
-                f"Custom property '{property_name}' already exists for actor {actor}."
-            )
+            raise ValueError(f"Custom property '{property_name}' already exists for actor {actor}.")
 
         # Already adding property but will remove if the update function fails
         actor._custom_properties[property_name] = initial_value
 
         # Check if the update function accepts the required parameters
         try:
-            logger.trace(
-                f"Checking update function for actor {actor} with time 0 and power 0."
-            )
+            logger.trace(f"Checking update function for actor {actor} with time 0 and power 0.")
             new_value = update_function(actor, 0, 0)
             logger.debug(
                 f"Update function returned {new_value} for actor {actor} with time 0 and power 0."

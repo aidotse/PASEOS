@@ -73,9 +73,9 @@ class AttitudeModel:
         self._actor_angular_velocity = np.array(actor_initial_angular_velocity)
 
         # normalize inputted pointing vector & convert to np.ndarray
-        self._actor_pointing_vector_body = np.array(
-            actor_pointing_vector_body
-        ) / np.linalg.norm(np.array(actor_pointing_vector_body))
+        self._actor_pointing_vector_body = np.array(actor_pointing_vector_body) / np.linalg.norm(
+            np.array(actor_pointing_vector_body)
+        )
 
         # pointing vector expressed in Earth-centered inertial frame
         self._actor_pointing_vector_eci = rpy_to_eci(
@@ -103,9 +103,7 @@ class AttitudeModel:
         u = np.array(self._actor.get_position(self._actor.local_time))
         return -u / np.linalg.norm(u)
 
-    def compute_disturbance_torque(
-        self, position, velocity, euler_angles, current_temperature_K
-    ):
+    def compute_disturbance_torque(self, position, velocity, euler_angles, current_temperature_K):
         """Compute total torque due to user-specified disturbances.
 
         Args:
@@ -132,14 +130,10 @@ class AttitudeModel:
                 )
             if "gravitational" in self._actor.attitude_disturbances:
                 # Extract nadir vectors in different reference systems
-                nadir_vector_in_rpy = eci_to_rpy(
-                    self._nadir_vector(), position, velocity
-                )
+                nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
                 nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
                 # Extract Earth rotation vector in different reference systems
-                earth_rotation_vector_in_rpy = eci_to_rpy(
-                    np.array([0, 0, 1]), position, velocity
-                )
+                earth_rotation_vector_in_rpy = eci_to_rpy(np.array([0, 0, 1]), position, velocity)
                 earth_rotation_vector_in_body = rpy_to_body(
                     earth_rotation_vector_in_rpy, euler_angles
                 )
@@ -171,14 +165,10 @@ class AttitudeModel:
         # TODO in the future control torques could be added
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(
-            self._actor.body_moment_of_inertia
-        ) @ (
+        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia) @ (
             self.compute_disturbance_torque(
                 position=np.array(self._actor.get_position(self._actor.local_time)),
-                velocity=np.array(
-                    self._actor.get_position_velocity(self._actor.local_time)[1]
-                ),
+                velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
                 euler_angles=self._actor_attitude_in_rad,
                 current_temperature_K=current_temperature_K,
             )
@@ -234,9 +224,7 @@ class AttitudeModel:
         )
 
         # assign this scalar rotation angle to the vector perpendicular to rotation plane
-        rpy_frame_rotation_vector_in_eci = (
-            orbital_plane_normal * rpy_frame_rotation_angle_in_eci
-        )
+        rpy_frame_rotation_vector_in_eci = orbital_plane_normal * rpy_frame_rotation_angle_in_eci
 
         # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
         return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
@@ -276,9 +264,7 @@ class AttitudeModel:
         )
 
         # velocity
-        velocity = np.array(
-            self._actor.get_position_velocity(self._actor.local_time)[1]
-        )
+        velocity = np.array(self._actor.get_position_velocity(self._actor.local_time)[1])
 
         # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self._body_axes_in_rpy()
@@ -311,6 +297,4 @@ class AttitudeModel:
             velocity,
         )
         # update pointing vector
-        self._actor_pointing_vector_eci = rpy_to_eci(
-            pointing_vector_rpy, next_position, velocity
-        )
+        self._actor_pointing_vector_eci = rpy_to_eci(pointing_vector_rpy, next_position, velocity)

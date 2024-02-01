@@ -49,9 +49,7 @@ def test_attitude_model():
     assert np.all(sat1._attitude_model._actor_pointing_vector_eci == [-1.0, 0.0, 0.0])
     assert np.all(sat1._attitude_model._actor_attitude_in_rad == [0.0, 0.0, 0.0])
     # positive angular velocity in body y direction is negative angular velocity in Earth inertial z direction:
-    assert np.all(
-        sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega]
-    )
+    assert np.all(sat1._attitude_model._actor_angular_velocity_eci == [0.0, 0.0, -omega])
 
     # sat2
     assert np.all(sat2._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
@@ -86,9 +84,7 @@ def test_attitude_model():
     # Pointing vector from sat2 must not be rotated.
     assert np.all(sat2.pointing_vector == np.array([-1.0, 0.0, 0.0]))
     # Sat2 angular velocity in the body frame must stay zero:
-    assert np.all(
-        sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0])
-    )
+    assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
 
 
 def attitude_thermal_model_test():

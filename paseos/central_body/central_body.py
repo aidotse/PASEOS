@@ -104,9 +104,7 @@ class CentralBody:
 
         # Compute central body position in solar reference frame
         r_central_body_heliocentric, _ = np.array(self._planet.eph(t))
-        logger.trace(
-            "r_central_body_heliocentric is" + str(r_central_body_heliocentric)
-        )
+        logger.trace("r_central_body_heliocentric is" + str(r_central_body_heliocentric))
 
         # Compute satellite / actor position in solar reference frame
         r_sat_central_body_frame = np.array(actor.get_position(t))
@@ -130,12 +128,7 @@ class CentralBody:
         Returns:
             bool: True if the central body is between the two actors
         """
-        logger.debug(
-            "Computing line of sight between actors: "
-            + str(actor_1)
-            + " "
-            + str(actor_2)
-        )
+        logger.debug("Computing line of sight between actors: " + str(actor_1) + " " + str(actor_2))
         pos_1 = actor_1.get_position_velocity(t)
         pos_2 = actor_2.get_position_velocity(t)
 
@@ -162,12 +155,7 @@ class CentralBody:
         Returns:
             bool: True if the central body is between the two points
         """
-        logger.debug(
-            "Computing line of sight between points: "
-            + str(point_1)
-            + " "
-            + str(point_2)
-        )
+        logger.debug("Computing line of sight between points: " + str(point_1) + " " + str(point_2))
 
         point_1 = np.array(point_1)
         point_2 = np.array(point_2)
@@ -197,12 +185,8 @@ class CentralBody:
                 mesh_triangles=self._mesh[1],
             )
         else:
-            logger.error(
-                "No mesh or encompassing sphere provided. Cannot check visibility."
-            )
-            raise ValueError(
-                "No mesh or encompassing sphere provided. Cannot check visibility."
-            )
+            logger.error("No mesh or encompassing sphere provided. Cannot check visibility.")
+            raise ValueError("No mesh or encompassing sphere provided. Cannot check visibility.")
 
     def _apply_rotation(self, point, epoch: pk.epoch):
         """Applies the inverse rotation of the central body to the given point. This way
@@ -263,15 +247,11 @@ class CentralBody:
 
             # North geomagnetic pole location on Earth surface in cartesian coordinates
             dipole_north_direction = np.array(
-                wgs84.latlon(pole_latitude_in_deg, pole_longitude_in_deg)
-                .at(t_skyfield)
-                .position.m
+                wgs84.latlon(pole_latitude_in_deg, pole_longitude_in_deg).at(t_skyfield).position.m
             )
             # Multiply geomagnetic pole position unit vector with dipole moment strength
             magnetic_dipole_moment = (
-                dipole_north_direction
-                / np.linalg.norm(dipole_north_direction)
-                * strength_in_Am2
+                dipole_north_direction / np.linalg.norm(dipole_north_direction) * strength_in_Am2
             )
         else:
             # TODO add other planets' magnetic fields

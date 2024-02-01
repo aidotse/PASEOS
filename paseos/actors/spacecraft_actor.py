@@ -228,9 +228,7 @@ class SpacecraftActor(BaseActor):
             list[floats]: actor attitude in degrees.
         """
         if type(self._attitude_model._actor_attitude_in_rad) is np.ndarray:
-            return np.ndarray.tolist(
-                self._attitude_model._actor_attitude_in_rad * 180 / np.pi
-            )
+            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad * 180 / np.pi)
         else:
             return np.ndarray.tolist(
                 np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi

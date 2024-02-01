@@ -28,9 +28,7 @@ class OrekitPropagator:
     initStep = 60.0
     positionTolerance = 1.0
 
-    def __init__(
-        self, orbital_elements: list, epoch: AbsoluteDate, satellite_mass: float
-    ) -> None:
+    def __init__(self, orbital_elements: list, epoch: AbsoluteDate, satellite_mass: float) -> None:
         """Initialize the propagator.
 
         Args:

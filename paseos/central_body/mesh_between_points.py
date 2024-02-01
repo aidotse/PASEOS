@@ -20,9 +20,7 @@ def mesh_between_points(
     Returns:
         bool: True if the mesh is between the two points
     """
-    logger.trace(
-        "Computing if mesh lies between points: " + str(point_1) + " " + str(point_2)
-    )
+    logger.trace("Computing if mesh lies between points: " + str(point_1) + " " + str(point_2))
 
     # Compute line between points
     direction = point_2 - point_1
