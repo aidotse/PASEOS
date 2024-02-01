@@ -25,7 +25,6 @@ class SpacecraftActor(BaseActor):
     _thermal_model = None
     _radiation_model = None
     _attitude_model = None
-    _attitude_disturbances = None
 
     # If radiation randomly restarted the device
     _was_interrupted = False
@@ -119,6 +118,15 @@ class SpacecraftActor(BaseActor):
         return self._spacecraft_body_model._body_mesh
 
     @property
+    def attitude_disturbances(self) -> list:
+        """Gives attitude disturbances list.
+
+        Returns:
+            list: attitude disturbances list.
+        """
+        return self._attitude_model._disturbances
+
+    @property
     def body_moment_of_inertia(self) -> np.array:
         """Gives the moment of inertia of the actor, assuming constant density.
 
@@ -201,6 +209,7 @@ class SpacecraftActor(BaseActor):
 
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")
 
+    @property
     def attitude_in_rad(self):
         """Returns the current attitude of the actor in radians.
 
@@ -211,7 +220,7 @@ class SpacecraftActor(BaseActor):
             return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad)
         else:
             return self._attitude_model._actor_attitude_in_rad
-
+    @property
     def attitude_in_deg(self):
         """Returns the current attitude of the actor in degrees.
 
@@ -223,7 +232,7 @@ class SpacecraftActor(BaseActor):
         else:
             return np.ndarray.tolist(np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi)
 
-
+    @property
     def pointing_vector(self):
         """Returns the spacecraft pointing vector in the Earth-centered inertial frame.
 
@@ -232,7 +241,7 @@ class SpacecraftActor(BaseActor):
         """
         return self._attitude_model._actor_pointing_vector_eci
 
-
+    @property
     def angular_velocity(self):
         """Returns the spacecraft angular velocity vector in the Earth-centered inertial frame.
 

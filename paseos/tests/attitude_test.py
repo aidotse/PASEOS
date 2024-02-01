@@ -9,7 +9,7 @@ import paseos
 from paseos import ActorBuilder, SpacecraftActor
 
 
-def attitude_model_test():
+def test_attitude_model():
     """Testing the attitude model with no disturbances and known angular velocity.
     One actor has orbit in Earth inertial x-y plane (equatorial) with initial velocity which rotates the actor with 180°
     in 20 steps advancing time 100 seconds (pi/ (20 * 100)).
@@ -65,7 +65,7 @@ def attitude_model_test():
 
     # Testing the simulation went as intended
     # Pointing vector from sat1 must be rotated from [-1, 0, 0] to [1, 0, 0]:
-    assert np.all(np.isclose(sat1.pointing_vector(), np.array([1.0, 0.0, 0.0])))
+    assert np.all(np.isclose(sat1.pointing_vector, np.array([1.0, 0.0, 0.0])))
     # Sat1 angular velocity in the body frame must stay constant:
     assert np.all(
         np.isclose(
@@ -76,13 +76,13 @@ def attitude_model_test():
     # Sat1 angular velocity in the Earth inertial frame must stay constant:
     assert np.all(
         np.isclose(
-            sat1.angular_velocity(),
+            sat1.angular_velocity,
             np.array([0.0, 0.0, -omega]),
         )
     )
 
     # Pointing vector from sat2 must not be rotated.
-    assert np.all(sat2.pointing_vector() == np.array([-1.0, 0.0, 0.0]))
+    assert np.all(sat2.pointing_vector == np.array([-1.0, 0.0, 0.0]))
     # Sat2 angular velocity in the body frame must stay zero:
     assert np.all(sat2._attitude_model._actor_angular_velocity == np.array([0.0, 0.0, 0.0]))
 
@@ -119,7 +119,7 @@ def attitude_thermal_model_test():
 
     # Run simulation 20 steps
     for i in range(21):
-        vector = sat1.pointing_vector()
+        vector = sat1.pointing_vector
         sim.advance_time(100, 0)
 
     # Testing the simulation went as intended
@@ -150,7 +150,7 @@ def test_attitude_and_orbit():
     # Check Initial values
     assert np.all(sat1._attitude_model._actor_pointing_vector_body == [0.0, 0.0, 1.0])
     assert np.all(sat1._attitude_model._actor_attitude_in_rad == [0.0, 0.0, 0.0])
-    vector = sat1.pointing_vector()
+    vector = sat1.pointing_vector
     assert vector[0] == -1.0
 
     # Initialise simulation
@@ -158,7 +158,7 @@ def test_attitude_and_orbit():
 
     # Run simulation 10 steps
     for i in range(11):
-        vector = sat1.pointing_vector()
+        vector = sat1.pointing_vector
         sim.advance_time(orbit_period / 10, 0)
 
     # Testing the simulation went as intended

@@ -92,25 +92,6 @@ class AttitudeModel:
         # actor residual magnetic field (modeled as dipole)
         self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
 
-    def set_attitude_disturbances(self, aerodynamic: bool = False, gravitational: bool = False, magnetic: bool = False):
-        """Setting attitude diturbances.
-
-        Args:
-            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False.
-            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False.
-            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False.
-        """
-        # Create a list with user specified disturbances which are considered in the attitude modelling.
-        disturbance_list = []
-
-        if aerodynamic:
-            disturbance_list.append("aerodynamic")
-        if gravitational:
-            disturbance_list.append("gravitational")
-        if magnetic:
-            disturbance_list.append("magnetic")
-        self._disturbances = disturbance_list
-
     def _nadir_vector(self):
         """Compute unit vector pointing towards earth, in the inertial frame.
 
@@ -128,13 +109,13 @@ class AttitudeModel:
         """
         T = np.array([0.0, 0.0, 0.0])
 
-        if self._actor.has_attitude_disturbances:
+        if self._disturbances is not None:
             # TODO add solar disturbance
-            if "aerodynamic" in self._actor.get_disturbances():
+            if "aerodynamic" in self._actor.attitude_disturbances:
                 T += calculate_aero_torque()
-            if "gravitational" in self._actor.get_disturbances():
+            if "gravitational" in self._actor.attitude_disturbances:
                 T += calculate_grav_torque()
-            if "magnetic" in self._actor.get_disturbances():
+            if "magnetic" in self._actor.attitude_disturbances:
                 time = self._actor.local_time
                 T += calculate_magnetic_torque(
                     m_earth=self._actor.central_body.magnetic_dipole_moment(time),

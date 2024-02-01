@@ -594,12 +594,18 @@ class ActorBuilder:
 
         assert actor.has_attitude_model, "The actor has no attitude model. Impossible to set attitude disturbances."
 
-        if actor.has_attitude_disturbances:
-            logger.warning(
-                "The actor already had attitude disturbance models. Overriding old disturbances models."
-            )
+        # Create a list with user specified disturbances which are considered in the attitude modelling.
+        disturbance_list = []
+
+        if aerodynamic:
+            disturbance_list.append("aerodynamic")
+        if gravitational:
+            disturbance_list.append("gravitational")
+        if magnetic:
+            disturbance_list.append("magnetic")
         # Set attitude models.
-        actor._attitude_model.set_attitude_disturbances(aerodynamic=aerodynamic, gravitational=gravitational, magnetic=magnetic)
+        actor._attitude_model._disturbances = disturbance_list
+
 
     @staticmethod
     def set_attitude_model(
