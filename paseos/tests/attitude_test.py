@@ -95,8 +95,8 @@ def gravity_disturbance_pole_test():
     assert np.round(sat1._attitude_model._actor_angular_acceleration[0],10) == 0.0
     assert not np.round(sat1._attitude_model._actor_angular_acceleration[1],10) == 0.0
 
-
-def attitude_model_test():
+    
+def test_attitude_model():
     """Testing the attitude model with no disturbances and known angular velocity.
     One actor has orbit in Earth inertial x-y plane (equatorial) with initial velocity which rotates the actor with 180°
     in 20 steps advancing time 100 seconds (pi/ (20 * 100)).
@@ -253,7 +253,7 @@ def attitude_and_orbit_test():
     assert vector[0] == -1.0
 
 
-def magnetic_disturbance_test():
+def test_magnetic_disturbance():
     """Tests the magnetic disturbance torques applied in the attitude model.
     Put two spacecraft actors in a geostationary orbit (disregarding the relative magnetic field rotation of the Earth).
     Both actor's own magnetic dipole moment aligned with the local magnetic flux density vector of the Earth
