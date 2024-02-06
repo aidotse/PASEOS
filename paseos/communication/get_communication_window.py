@@ -43,7 +43,7 @@ def get_communication_window(
     )
     local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
-    assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandiwidth has to be positive."
+    assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandwidth has to be positive."
     assert dt > 0, "dt has to be positive."
     assert data_to_send_in_b > 0, "data_to_send_in_b has to be positive."
 
