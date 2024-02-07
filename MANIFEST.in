@@ -1,0 +1,3 @@
+include paseos/resources/default_cfg.toml
+include paseos/resources/de421.bsp
+include README.md
