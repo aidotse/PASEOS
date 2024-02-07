@@ -14,25 +14,28 @@ class RadioLinkModel(LinkModel):
 
     def __init__(
         self,
-        transmitterActor: BaseActor,
-        transmitterName,
-        receiverActor: BaseActor,
-        receiverName,
+        transmitter_actor: BaseActor,
+        transmitter_device_name: str,
+        receiver_actor: BaseActor,
+        receiver_device_name: str,
         frequency: int,
     ) -> None:
         """Initializes the model.
 
         Args:
-            transmitter (TransmitterModel): The transmitter in this link.
-            receiver (ReceiverModel): The receiver in this link.
+            transmitter_actor (BaseActor): the transmitter in this link.
+            transmitter_device_name (str): the name of the transmitter device.
+            receiver_actor (BaseActor): the receiver in this link.
+            receiver_device_name (str): the name of the receiver device.  
             frequency (int): The frequency of this link, in Hz.
-            required_BER (int): The required bit error rate (BER), 10^-5 by default.
-            modulation_scheme (string): The modulation scheme for this link, currently only BPSK implemented
-            coding_scheme (string): The coding scheme for this link, currently not implemented         
         """
-        transmitter = transmitterActor.get_transmitter(transmitterName)
-        receiver = receiverActor.get_receiver(receiverName)
-        super().__init__(transmitterActor, transmitter, receiverActor, receiver, frequency)
+
+        # Get the actual transmitter and receiver models
+        transmitter = transmitter_actor.get_transmitter(transmitter_device_name)
+        receiver = receiver_actor.get_receiver(receiver_device_name)
+
+        super().__init__(transmitter_actor, transmitter, receiver_actor, receiver, frequency)
+
         assert frequency > 0, "Frequency needs to be higher than 0 Hz."
         assert isinstance(transmitter, RadioTransmitterModel), "A radio transmitter is required for this radio link."
         assert isinstance(receiver, RadioReceiverModel), "A radio receiver is required for this radio link."
@@ -50,7 +53,7 @@ class RadioLinkModel(LinkModel):
         self.receiver.set_gain(self.wavelength)
         self.transmitter.set_gain(self.wavelength)
     
-    def get_path_loss(self, slant_range):
+    def get_path_loss(self, slant_range) -> float:
         """Gets the path loss (free space loss) for a link.
 
         Args:
@@ -63,7 +66,7 @@ class RadioLinkModel(LinkModel):
 
         return 20 * math.log10(4 * math.pi * slant_range  / self.wavelength)
 
-    def get_max_atmospheric_loss(self, min_elevation_angle):
+    def get_max_atmospheric_loss(self, min_elevation_angle) -> float:
         """Gets the maximal atmospheric loss for a link.
 
         Args:
@@ -76,7 +79,7 @@ class RadioLinkModel(LinkModel):
 
         return self.zenith_atmospheric_attenuation / math.sin(min_elevation_angle * math.pi / 180)
     
-    def get_bitrate(self, slant_range, min_elevation_angle):
+    def get_bitrate(self, slant_range, min_elevation_angle) -> float:
         """Gets the bitrate for a link based on current slant range and minimum elevation angle.
 
         Args:

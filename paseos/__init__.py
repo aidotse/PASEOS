@@ -16,6 +16,7 @@ from .power.power_device_type import PowerDeviceType
 from .utils.reference_frame import ReferenceFrame
 from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
+from .communication.link_model import LinkModel
 
 
 set_log_level("WARNING")
@@ -23,13 +24,14 @@ set_log_level("WARNING")
 logger.debug("Loaded module.")
 
 
-def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None):
+def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None, communication_links = None):
     """Initializes PASEOS
 
     Args:
         local_actor (BaseActor): The actor linked to the local device which is required to model anything.
         cfg (DotMap, optional): Configuration file. If None, default configuration will be used. Defaults to None.
         starting_epoch(pk.epoch): Starting epoch of the simulation. Will override cfg and local actor one.
+        communication_links: A list of links from this instance to others.
     Returns:
         PASEOS: Instance of the simulation (only one can exist, singleton)
     """
@@ -51,7 +53,7 @@ def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoc
             + "starting_epoch will be used."
         )
 
-    sim = PASEOS(local_actor=local_actor, cfg=cfg)
+    sim = PASEOS(local_actor=local_actor, cfg=cfg, communication_links=communication_links)
     return sim
 
 

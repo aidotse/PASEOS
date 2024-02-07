@@ -4,7 +4,7 @@ import pykep as pk
 from paseos.actors.base_actor import BaseActor
 from paseos.power import discharge_model
 from paseos.power import charge_model
-
+from dotmap import DotMap
 
 class SpacecraftActor(BaseActor):
     """This class models a spacecraft actor which in addition to pos,

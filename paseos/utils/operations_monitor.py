@@ -62,12 +62,14 @@ class OperationsMonitor:
         self,
         local_actor: BaseActor,
         known_actors: list,
+        communication_links = None
     ):
         """Log the current time step.
 
         Args:
             local_actor (BaseActor): The local actors whose status we are monitoring.
             known_actors (list): List of names of the known actors.
+            communication_links: List of communication links.
         """
         logger.trace("Logging iteration")
         assert local_actor.name == self._actor_name, "Expected actor's name was" + self._actor_name
@@ -89,6 +91,10 @@ class OperationsMonitor:
             self._log.is_in_eclipse.append(False)
         else:
             self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
+        
+        if communication_links != None:
+            for link in communication_links:
+                link.save_state()
 
         # Track all custom properties
         for key, value in local_actor.custom_properties.items():

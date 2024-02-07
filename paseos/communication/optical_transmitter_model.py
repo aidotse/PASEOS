@@ -32,7 +32,7 @@ class OpticalTransmitterModel(TransmitterModel):
 
         logger.debug("Initializing optical  transmitter model.")
         super().__init__(input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_diameter)
-        assert antenna_gain > 0 or antenna_diameter > 0 or FWHM > 0, "Antenna gain or antenna diameter needs to be higher than 0."
+        assert antenna_gain > 0 or antenna_diameter > 0 or FWHM > 0, "Antenna gain or antenna diameter or FWHM needs to be higher than 0."
         assert not (antenna_diameter != 0 and antenna_gain != 0 and FWHM != 0),  "Only set one of antenna gain, antenna diameter, and FWHM not multiple."
 
         self.input_power = input_power

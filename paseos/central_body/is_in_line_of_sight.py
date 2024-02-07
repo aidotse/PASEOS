@@ -5,33 +5,11 @@ import numpy as np
 from skyfield.units import AU_M
 from skyfield.api import load
 from skyfield.vectorlib import VectorFunction
+from ..utils.sky_field_sky_coordinate import SkyfieldSkyCoordinate
 
 _SKYFIELD_EARTH_PATH = os.path.join(os.path.dirname(__file__) + "/../resources/", "de421.bsp")
 # Skyfield Earth, in the future we may not always want to load this.
 _SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
-
-
-class SkyfieldSkyCoordinate(VectorFunction):
-    """Small helper class to compute altitude angle"""
-
-    def __init__(self, r_in_m, earth_pos_in_au):
-        # Value 0 corresponds to the solar system barycenter according to
-        # this: https://rhodesmill.org/skyfield/api-vectors.html#skyfield.vectorlib.VectorFunction.center
-        self.center = 0
-        # Position vector
-        self.r = earth_pos_in_au + r_in_m / AU_M
-
-    @property
-    def target(self):
-        # This is a property to avoid circular references as described
-        # here: https://github.com/skyfielders/python-skyfield/blob/master/skyfield/planetarylib.py#L222
-        return self
-
-    def _at(self, t):
-        # Velocity vector
-        v = [0.0, 0.0, 0.0]
-        return self.r, v, self.center, "SkyfieldSkyCoordinate"
-
 
 def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.epoch, plot=False):
     """Determines whether a position is in line of sight of this actor
@@ -97,7 +75,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
     observation = gs_position.observe(other_actor_pos).apparent()
 
     # Compute angle
-    altitude_angle = observation.altaz()[0].degrees
+    altitude_angle = observation.altaz()[0].degrees    
 
     logger.debug("Computed angle was " + str(altitude_angle))
 

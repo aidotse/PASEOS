@@ -3,7 +3,7 @@ from loguru import logger
 from .optical_receiver_model import OpticalReceiverModel
 from .optical_transmitter_model import OpticalTransmitterModel
 from .link_model import LinkModel
-from .link_type import *
+from .device_type import *
 from ..actors.base_actor import BaseActor
 import math
 
@@ -12,26 +12,26 @@ class OpticalLinkModel(LinkModel):
 
     def __init__(
         self,
-        transmitterActor: BaseActor,
-        transmitterName,
-        receiverActor: BaseActor,
-        receiverName,
+        transmitter_actor: BaseActor,
+        transmitter_device_name: str,
+        receiver_actor: BaseActor,
+        receiver_device_name: str
     ) -> None:
         """Initializes the model.
 
         Args:
-            transmitter (TransmitterModel): The transmitter in this link.
-            receiver (ReceiverModel): The receiver in this link.
-            frequency (int): The frequency of this link, in Hz.
-            required_BER (int): The required bit error rate (BER), 10^-5 by default.
-            modulation_scheme (string): The modulation scheme for this link, currently only BPSK implemented
-            coding_scheme (string): The coding scheme for this link, currently not implemented         
+            transmitter_actor (BaseActor): the transmitter in this link.
+            transmitter_device_name (str): the name of the transmitter device.
+            receiver_actor (BaseActor): the receiver in this link.
+            receiver_device_name (str): the name of the receiver device.       
         """
         self.wavelength = 1550E-9 # in m
-        transmitter = transmitterActor.get_transmitter(transmitterName)
-        receiver = receiverActor.get_receiver(receiverName)
 
-        super().__init__(transmitterActor, transmitter, receiverActor, receiver, 299792458/self.wavelength)
+        # Get the transmitter and receiver models from the actor
+        transmitter = transmitter_actor.get_transmitter(transmitter_device_name)
+        receiver = receiver_actor.get_receiver(receiver_device_name)
+
+        super().__init__(transmitter_actor, transmitter, receiver_actor, receiver, frequency=299792458/self.wavelength)
         
         assert isinstance(transmitter, OpticalTransmitterModel), "An optical transmitter is required for this optical link."
         assert isinstance(receiver, OpticalReceiverModel), "An optical receiver is required for this optical link."

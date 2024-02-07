@@ -5,6 +5,7 @@ import numpy as np
 from dotmap import DotMap
 import pykep as pk
 from skyfield.api import wgs84
+import math
 
 from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
@@ -13,7 +14,7 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
-
+from ..communication.device_type import DeviceType
 
 class ActorBuilder:
     """This class is used to construct actors."""
@@ -45,9 +46,6 @@ class ActorBuilder:
         assert (
             actor_type != BaseActor
         ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
-        assert (
-            actor_type == SpacecraftActor or actor_type == GroundstationActor
-        ), f"Unsupported actor_type {actor_type}, Please use SpacecraftActor or GroundstationActor."
 
         logger.trace(f"Creating an actor blueprint with name {name}")
 
@@ -491,22 +489,49 @@ class ActorBuilder:
         )
 
     @staticmethod
-    def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):
-        """Creates a communication device.
+    def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float = 0, input_power: int = 0, power_efficiency: float = 0, 
+                        antenna_efficiency: float = 0, antenna_diameter: int  = 0, antenna_gain: int  = 0, point_losses: int = 0, 
+                        line_losses: int = 0, polarization_losses: int = 0, noise_temperature: int = 0, FWHM: float = 0,
+                        device_type: DeviceType = None):
+        """Creates a communication device. Can be used by just setting bandwidth_in_kbps, or can be used with link budget modelling.
 
         Args:
             device_name (str): device_name of the communication device.
             bandwidth_in_kbps (float): device bandwidth in kbps.
+            input_power (int): input power of this device.
+            power_efficiency (float): power efficiency of the device, between 0 and 1.
+            antenna_efficiency (float): effiency of the antenna, between 0 and 1.
+            antenna_diameter (int): diameter of the antenna, in m. Either set antenna_gain, or antenna_diameter.
+            antenna_gain (int): gain of the antenna, in dB. Either set antenna_gain, or antenna_diameter.
+            point_losses(int): pointing losses, in dB.
+            line_losses (int): line losses, in dB.
+            polarization_losses (int): polarization_losses, in dB.
+            noise_temperature (int): noise temperature, in K.
+            FWHM (float): full width at half maximum, in rad.
+            device_type (DeviceType): type of the device.
         """
-        if device_name in actor.communication_devices:
-            raise ValueError(
-                "Trying to add already existing communication device with device_name: "
-                + device_name
-            )
 
-        actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
+        if bandwidth_in_kbps > 0:
+            if device_name in actor.communication_devices:
+                raise ValueError(
+                    "Trying to add already existing communication device with device_name: "
+                    + device_name
+                )
+            actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
-        logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
+            logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
+        else:
+            assert not device_type == None, "A device type needs to be set."
+            if device_type == DeviceType.RADIO_TRANSMITTER:
+                actor.set_radio_transmitter(device_name, input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_diameter)
+            elif device_type == DeviceType.RADIO_RECEIVER:
+                actor.set_radio_receiver(device_name, noise_temperature, line_losses, polarization_losses, antenna_diameter, antenna_gain)
+            elif device_type == DeviceType.OPTICAL_TRANSMITTER:
+                actor.set_optical_transmitter(device_name, input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_gain, FWHM)
+            elif device_type == DeviceType.OPTICAL_RECEIVER:
+                actor.set_optical_receiver(device_name, line_losses, antenna_diameter, antenna_gain)
+
+        
 
     @staticmethod
     def add_custom_property(

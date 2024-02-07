@@ -1,8 +1,9 @@
 from loguru import logger
 import pykep as pk
 from skyfield.api import load
-
-from paseos.actors.base_actor import BaseActor
+import math
+from dotmap import DotMap
+from .base_actor import BaseActor
 
 
 class GroundstationActor(BaseActor):
@@ -16,6 +17,8 @@ class GroundstationActor(BaseActor):
 
     # Minimum angle to communicate with this ground station
     _minimum_altitude_angle = None
+
+    # _receiver: DotMap(_dynamic=False)
 
     def __init__(
         self,

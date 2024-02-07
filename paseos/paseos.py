@@ -27,6 +27,9 @@ class PASEOS:
     # The actor of the device this is running on
     _local_actor = None
 
+    # List of communication links
+    _communication_links = None
+
     # Handles registered activities
     _activity_manager = None
 
@@ -41,12 +44,13 @@ class PASEOS:
 
     _time_since_previous_log = sys.float_info.max
 
-    def __init__(self, local_actor: BaseActor, cfg):
+    def __init__(self, local_actor: BaseActor, cfg, communication_links):
         """Initalize PASEOS
 
         Args:
             local_actor (BaseActor): local actor.
             cfg (DotMap): simulation configuration.
+            communication_links ([LinkModel]): list of communication links
         """
         logger.trace("Initializing PASEOS")
         self._cfg = cfg
@@ -54,6 +58,7 @@ class PASEOS:
         self._state.time = self._cfg.sim.start_time
         self._known_actors = {}
         self._local_actor = local_actor
+        self._communication_links = communication_links
         # Update local actor time to simulation start time.
         self.local_actor.set_time(pk.epoch(self._cfg.sim.start_time * pk.SEC2DAY))
 
@@ -78,7 +83,7 @@ class PASEOS:
 
     def log_status(self):
         """Updates the status log."""
-        self._operations_monitor.log(self.local_actor, self.known_actor_names)
+        self._operations_monitor.log(self.local_actor, self.known_actor_names, self._communication_links)
 
     def advance_time(
         self,
@@ -288,6 +293,15 @@ class PASEOS:
             list: List of names of known actors.
         """
         return self._known_actors.keys()
+    
+    @property
+    def communication_links(self):
+        """Returns communication links.
+
+        Returns:
+            list: List of communication links.
+        """
+        return self._communication_links
 
     def empty_known_actors(self):
         """Clears the list of known actors."""

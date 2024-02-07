@@ -36,17 +36,25 @@ class TransmitterModel:
         assert point_losses >= 0, "Pointing losses needs to be 0 or higher."
     
         logger.debug("Initializing general transmitter model.")
-
+        self.input_power = input_power
         self.antenna_efficiency = antenna_efficiency
         self.antenna_gain = antenna_gain
         self.antenna_diameter = antenna_diameter
         self.line_losses = line_losses
         self.point_losses = point_losses
+        self.active = False
 
     def set_EIRP(self):
-        """Sets the Effective Isotropic Radiated Power (EIRP) for a transmitter.
-        """
+        """Sets the Effective Isotropic Radiated Power (EIRP) for a transmitter."""
         self.EIRP = self.output_power - self.line_losses - self.point_losses + self.antenna_gain
     
     def set_gain(self):
         pass
+
+    def set_active(self, state: bool):
+        """Sets the active state of the transmitter.
+
+            Args:
+                state (bool): whether the transmitter is active.
+        """
+        self.active = state
