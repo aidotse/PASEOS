@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 .idea
+pylintrc
 
 my_notebooks
 .vscode
