@@ -1,11 +1,11 @@
 """Test to check the gain_calc function(s)"""
+import numpy as np
 import pytest
+
 from paseos.utils.gain_calc import (
     calc_radio_gain_from_wavelength_diameter,
     calc_gain_from_fwhm,
 )
-
-import numpy as np
 
 
 def test_gain_calculation():

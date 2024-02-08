@@ -1,6 +1,4 @@
 import math
-import os
-from skyfield.api import load
 
 
 def calc_radio_gain_from_wavelength_diameter(

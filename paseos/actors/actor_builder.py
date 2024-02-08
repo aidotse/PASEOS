@@ -1,24 +1,24 @@
 from typing import Callable, Any
 
-from loguru import logger
 import numpy as np
-from dotmap import DotMap
 import pykep as pk
+from dotmap import DotMap
+from loguru import logger
 from skyfield.api import wgs84
 
+from paseos.geometric_model.geometric_model import GeometricModel
 from .base_actor import BaseActor
-from .spacecraft_actor import SpacecraftActor
 from .ground_station_actor import GroundstationActor
+from .spacecraft_actor import SpacecraftActor
 from ..central_body.central_body import CentralBody
-from ..thermal.thermal_model import ThermalModel
+from ..communication.device_type import DeviceType
+from ..communication.optical_receiver_model import OpticalReceiverModel
+from ..communication.optical_transmitter_model import OpticalTransmitterModel
+from ..communication.radio_receiver_model import RadioReceiverModel
+from ..communication.radio_transmitter_model import RadioTransmitterModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
-from ..communication.device_type import DeviceType
-from ..communication.radio_transmitter_model import RadioTransmitterModel
-from ..communication.radio_receiver_model import RadioReceiverModel
-from ..communication.optical_transmitter_model import OpticalTransmitterModel
-from ..communication.optical_receiver_model import OpticalReceiverModel
-from paseos.geometric_model.geometric_model import GeometricModel
+from ..thermal.thermal_model import ThermalModel
 
 
 class ActorBuilder:

@@ -16,8 +16,6 @@ from .power.power_device_type import PowerDeviceType
 from .utils.reference_frame import ReferenceFrame
 from .utils.set_log_level import set_log_level
 from .visualization.plot import plot, PlotType
-from .communication.link_model import LinkModel
-
 
 set_log_level("WARNING")
 

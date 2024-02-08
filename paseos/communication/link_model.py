@@ -1,10 +1,10 @@
-import numpy as np
+import math
+
 from loguru import logger
+
 from .receiver_model import ReceiverModel
 from .transmitter_model import TransmitterModel
-from .device_type import *
 from ..actors.base_actor import BaseActor
-import math
 
 
 class LinkModel:

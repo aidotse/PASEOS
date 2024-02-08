@@ -1,13 +1,11 @@
-import numpy as np
+import math
+
 from loguru import logger
+
+from .link_model import LinkModel
 from .radio_receiver_model import RadioReceiverModel
 from .radio_transmitter_model import RadioTransmitterModel
-from .link_model import LinkModel
-from ..actors.spacecraft_actor import SpacecraftActor
-from ..actors.ground_station_actor import GroundstationActor
 from ..actors.base_actor import BaseActor
-
-import math
 
 
 class RadioLinkModel(LinkModel):

@@ -1,11 +1,11 @@
-import numpy as np
+import math
+
 from loguru import logger
+
+from .link_model import LinkModel
 from .optical_receiver_model import OpticalReceiverModel
 from .optical_transmitter_model import OpticalTransmitterModel
-from .link_model import LinkModel
-from .device_type import *
 from ..actors.base_actor import BaseActor
-import math
 
 
 class OpticalLinkModel(LinkModel):

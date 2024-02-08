@@ -1,12 +1,13 @@
 from abc import ABC
 from typing import Callable, Any
 
-from loguru import logger
-import pykep as pk
 import numpy as np
+import pykep as pk
 from dotmap import DotMap
-from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from loguru import logger
+
 from ..central_body.central_body import CentralBody
+from ..central_body.is_in_line_of_sight import is_in_line_of_sight
 
 
 class BaseActor(ABC):

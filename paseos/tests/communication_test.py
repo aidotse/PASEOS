@@ -1,21 +1,20 @@
 """Tests to check the communication models creation and calculation function(s)"""
+import numpy as np
+import pykep as pk
 import pytest
 
-from paseos.communication.transmitter_model import TransmitterModel
-from paseos.communication.radio_transmitter_model import RadioTransmitterModel
-from paseos.communication.optical_transmitter_model import OpticalTransmitterModel
-from paseos.communication.receiver_model import ReceiverModel
-from paseos.communication.radio_receiver_model import RadioReceiverModel
-from paseos.communication.optical_receiver_model import OpticalReceiverModel
-from paseos.communication.radio_link_model import RadioLinkModel
-from paseos.communication.optical_link_model import OpticalLinkModel
-from paseos.actors.spacecraft_actor import SpacecraftActor
-from paseos.actors.ground_station_actor import GroundstationActor
 from paseos.actors.actor_builder import ActorBuilder
+from paseos.actors.ground_station_actor import GroundstationActor
+from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.communication.device_type import DeviceType
-
-import pykep as pk
-import numpy as np
+from paseos.communication.optical_link_model import OpticalLinkModel
+from paseos.communication.optical_receiver_model import OpticalReceiverModel
+from paseos.communication.optical_transmitter_model import OpticalTransmitterModel
+from paseos.communication.radio_link_model import RadioLinkModel
+from paseos.communication.radio_receiver_model import RadioReceiverModel
+from paseos.communication.radio_transmitter_model import RadioTransmitterModel
+from paseos.communication.receiver_model import ReceiverModel
+from paseos.communication.transmitter_model import TransmitterModel
 
 
 def test_link_creation():

@@ -1,4 +1,5 @@
 from loguru import logger
+
 from .receiver_model import ReceiverModel
 from ..utils.gain_calc import calc_optical_gain_from_wavelength_diameter
 

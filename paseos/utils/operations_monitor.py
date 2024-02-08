@@ -1,9 +1,9 @@
 import csv
 
-from loguru import logger
-from dotmap import DotMap
-import pykep as pk
 import matplotlib.pyplot as plt
+import pykep as pk
+from dotmap import DotMap
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
 

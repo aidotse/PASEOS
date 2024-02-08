@@ -1,7 +1,9 @@
-from loguru import logger
-from ..utils.gain_calc import calc_gain_from_fwhm
-from .transmitter_model import TransmitterModel
 import math
+
+from loguru import logger
+
+from .transmitter_model import TransmitterModel
+from ..utils.gain_calc import calc_gain_from_fwhm
 
 
 class OpticalTransmitterModel(TransmitterModel):

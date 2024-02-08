@@ -1,13 +1,13 @@
-import types
 import asyncio
 import sys
+import types
 
+import pykep as pk
 from dotmap import DotMap
 from loguru import logger
-import pykep as pk
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
+from paseos.actors.base_actor import BaseActor
 from paseos.utils.operations_monitor import OperationsMonitor
 
 

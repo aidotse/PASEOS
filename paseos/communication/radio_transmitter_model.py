@@ -1,7 +1,9 @@
 import math
+
 from loguru import logger
-from ..utils.gain_calc import calc_radio_gain_from_wavelength_diameter
+
 from .transmitter_model import TransmitterModel
+from ..utils.gain_calc import calc_radio_gain_from_wavelength_diameter
 
 
 class RadioTransmitterModel(TransmitterModel):

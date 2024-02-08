@@ -1,10 +1,12 @@
-import pykep as pk
 import os
+
 import numpy as np
+import pykep as pk
 from skyfield.api import load
+
 from .sky_field_sky_coordinate import SkyfieldSkyCoordinate
-from ..actors.spacecraft_actor import SpacecraftActor
 from ..actors.ground_station_actor import GroundstationActor
+from ..actors.spacecraft_actor import SpacecraftActor
 
 _SKYFIELD_EARTH_PATH = os.path.join(
     os.path.dirname(__file__) + "/../resources/", "de421.bsp"
