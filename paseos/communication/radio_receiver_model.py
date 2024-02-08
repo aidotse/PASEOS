@@ -24,7 +24,8 @@ class RadioReceiverModel(ReceiverModel):
             polarization_loss (float): The polarization losses of the receiver, in dB.
             noise_temperature (float): The noise temperature of the receiver, in K.
             antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain needs to be given.
-            antenna_gain (float): The gain of the antenna, either this or the diameter needs to be given so that gain can be determined.
+            antenna_gain (float): The gain of the antenna, either this or
+            the diameter needs to be given so that gain can be determined.
 
         """
 
