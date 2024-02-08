@@ -2,9 +2,7 @@ from loguru import logger
 import pykep as pk
 import os
 import numpy as np
-from skyfield.units import AU_M
 from skyfield.api import load
-from skyfield.vectorlib import VectorFunction
 from ..utils.sky_field_sky_coordinate import SkyfieldSkyCoordinate
 
 _SKYFIELD_EARTH_PATH = os.path.join(

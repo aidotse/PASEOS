@@ -11,17 +11,21 @@ def get_known_actor_comms_status(values):
         conv_values.append(status[idx])
     return conv_values
 
+
 def get_bitrate_status(link):
     """Helper function to get bitrate status history"""
     return link.bitrate_history
+
 
 def get_line_of_sight_status(link):
     """Helper function to get line of sight status history"""
     return link.line_of_sight_history
 
+
 def get_distance_status(link):
     """Helper function to distance status history"""
     return link.distance_history
+
 
 def get_elevation_angle_status(link):
     """Helper function to get elevation angle status history"""

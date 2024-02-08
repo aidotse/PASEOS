@@ -80,18 +80,18 @@ def test_link_creation():
         AssertionError,
         match="An optical transmitter is required for this optical link.",
     ):
-        link = OpticalLinkModel(sat_actor, radio_name, comms_sat, optical_receiver_name)
+        OpticalLinkModel(sat_actor, radio_name, comms_sat, optical_receiver_name)
     with pytest.raises(
         AssertionError, match="An optical receiver is required for this optical link."
     ):
-        link = OpticalLinkModel(
+        OpticalLinkModel(
             sat_actor, optical_transmitter_name, maspalomas_groundstation, receiver_name
         )
 
     with pytest.raises(
         AssertionError, match="A radio transmitter is required for this radio link."
     ):
-        link = RadioLinkModel(
+        RadioLinkModel(
             sat_actor,
             optical_transmitter_name,
             maspalomas_groundstation,
@@ -101,12 +101,12 @@ def test_link_creation():
     with pytest.raises(
         AssertionError, match="A radio receiver is required for this radio link."
     ):
-        link = RadioLinkModel(
+        RadioLinkModel(
             sat_actor, radio_name, comms_sat, optical_receiver_name, 8675e6
         )
 
     with pytest.raises(AssertionError, match="Frequency needs to be higher than 0 Hz."):
-        link = RadioLinkModel(
+        RadioLinkModel(
             sat_actor, radio_name, maspalomas_groundstation, receiver_name, -8675e6
         )
 

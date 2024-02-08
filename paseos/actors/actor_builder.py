@@ -611,7 +611,7 @@ class ActorBuilder:
                 f"Added comm device with bandwidth={bandwidth_in_kbps} kbps to actor {actor}."
             )
         else:
-            assert not device_type is None, "A device type needs to be set."
+            assert device_type is not None, "A device type needs to be set."
             if device_type == DeviceType.RADIO_TRANSMITTER:
                 assert isinstance(
                     actor, SpacecraftActor

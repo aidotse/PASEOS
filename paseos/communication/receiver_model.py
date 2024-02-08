@@ -11,9 +11,10 @@ class ReceiverModel:
 
         Args:
             line_losses (float): The line losses of the receiver, in dB.
-            antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain needs to be given.
-            antenna_gain (float): The gain of the antenna, either this or the diameter needs to be given so that gain
-            can be determined.
+            antenna_diameter (float): The diameter of the antenna, in m.
+            Either this or the gain needs to be given.
+            antenna_gain (float): The gain of the antenna, either this or the diameter
+            needs to be given so that gain can be determined.
 
         """
         assert line_losses >= 0, "Line losses needs to be 0 or higher."

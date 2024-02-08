@@ -89,7 +89,7 @@ class OperationsMonitor:
         else:
             self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
 
-        if communication_links != None:
+        if communication_links is not None:
             for link in communication_links:
                 link.save_state()
 
