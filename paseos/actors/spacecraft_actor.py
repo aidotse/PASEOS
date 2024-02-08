@@ -6,6 +6,7 @@ from paseos.power import discharge_model
 from paseos.power import charge_model
 from dotmap import DotMap
 
+
 class SpacecraftActor(BaseActor):
     """This class models a spacecraft actor which in addition to pos,
     velocity also has additional constraints such as power/battery."""

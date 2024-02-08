@@ -21,12 +21,12 @@ class LinkModel:
     _current_elevation_angle = 0
 
     def __init__(
-            self,
-            transmitter_actor: BaseActor,
-            transmitter_model: TransmitterModel,
-            receiver_actor: BaseActor,
-            receiver_model: ReceiverModel,
-            frequency: float
+        self,
+        transmitter_actor: BaseActor,
+        transmitter_model: TransmitterModel,
+        receiver_actor: BaseActor,
+        receiver_model: ReceiverModel,
+        frequency: float,
     ) -> None:
         """Initializes the model.
 
@@ -37,7 +37,9 @@ class LinkModel:
             receiver_model (ReceiverModel): the receiver device model.
         """
         # assert isinstance(transmitter, TransmitterModel), "A transmitter is required for this link."
-        assert isinstance(receiver_model, ReceiverModel), "A receiver is required for this link."
+        assert isinstance(
+            receiver_model, ReceiverModel
+        ), "A receiver is required for this link."
 
         logger.debug("Initializing link model.")
         self.c = 299792458

@@ -8,14 +8,14 @@ class RadioTransmitterModel(TransmitterModel):
     """This class defines a radio transmitter model."""
 
     def __init__(
-            self,
-            input_power: float,
-            power_efficiency: float,
-            antenna_efficiency: float,
-            line_losses: float,
-            point_losses: float,
-            antenna_gain: float = 0,
-            antenna_diameter: float = 0
+        self,
+        input_power: float,
+        power_efficiency: float,
+        antenna_efficiency: float,
+        line_losses: float,
+        point_losses: float,
+        antenna_gain: float = 0,
+        antenna_diameter: float = 0,
     ) -> None:
         """Initializes the model.
 
@@ -29,12 +29,21 @@ class RadioTransmitterModel(TransmitterModel):
             can be determined.
             antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain needs to be given.
         """
-        super().__init__(input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain,
-                         antenna_diameter)
-        assert antenna_gain > 0 or antenna_diameter > 0, "Antenna gain or antenna diameter needs to be higher than 0."
-        assert not (
-                    antenna_diameter != 0 and antenna_gain != 0), ("Only set one of antenna gain and "
-                                                                   "antenna diameter, not both.")
+        super().__init__(
+            input_power,
+            power_efficiency,
+            antenna_efficiency,
+            line_losses,
+            point_losses,
+            antenna_gain,
+            antenna_diameter,
+        )
+        assert (
+            antenna_gain > 0 or antenna_diameter > 0
+        ), "Antenna gain or antenna diameter needs to be higher than 0."
+        assert not (antenna_diameter != 0 and antenna_gain != 0), (
+            "Only set one of antenna gain and " "antenna diameter, not both."
+        )
 
         self.input_power = input_power
         self.power_efficiency = power_efficiency
@@ -49,7 +58,8 @@ class RadioTransmitterModel(TransmitterModel):
             wavelength (float): The wavelength of the link, in meters
         """
         if self.antenna_gain == 0:
-            self.antenna_gain = calc_radio_gain_from_wavelength_diameter(wavelength, self.antenna_diameter,
-                                                                         self.antenna_efficiency)
+            self.antenna_gain = calc_radio_gain_from_wavelength_diameter(
+                wavelength, self.antenna_diameter, self.antenna_efficiency
+            )
 
         self.set_EIRP()

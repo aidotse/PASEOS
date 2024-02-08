@@ -58,12 +58,7 @@ class OperationsMonitor:
         plt.xlabel("Time [s]")
         plt.ylabel(item.replace("_", " "))
 
-    def log(
-        self,
-        local_actor: BaseActor,
-        known_actors: list,
-        communication_links = None
-    ):
+    def log(self, local_actor: BaseActor, known_actors: list, communication_links=None):
         """Log the current time step.
 
         Args:
@@ -72,7 +67,9 @@ class OperationsMonitor:
             communication_links: List of communication links.
         """
         logger.trace("Logging iteration")
-        assert local_actor.name == self._actor_name, "Expected actor's name was" + self._actor_name
+        assert local_actor.name == self._actor_name, (
+            "Expected actor's name was" + self._actor_name
+        )
         self._log.timesteps.append(local_actor.local_time.mjd2000 * pk.DAY2SEC)
         self._log.current_activity.append(local_actor.current_activity)
         self._log.position.append(local_actor._previous_position)
@@ -91,7 +88,7 @@ class OperationsMonitor:
             self._log.is_in_eclipse.append(False)
         else:
             self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
-        
+
         if communication_links != None:
             for link in communication_links:
                 link.save_state()
@@ -111,7 +108,9 @@ class OperationsMonitor:
         """
         logger.trace("Writing status log file to " + filename)
         with open(filename, "w", newline="") as f:
-            w = csv.DictWriter(f, list(self._log.keys()) + list(self._log.custom_properties.keys()))
+            w = csv.DictWriter(
+                f, list(self._log.keys()) + list(self._log.custom_properties.keys())
+            )
             w.writeheader()
             for i in range(len(self._log.timesteps)):
                 row = {
@@ -133,7 +132,9 @@ class OperationsMonitor:
                         if i < len(self._log.timesteps) - len(value):
                             row[key] = None
                         else:
-                            row[key] = value[i - (len(self._log.timesteps) - len(value))]
+                            row[key] = value[
+                                i - (len(self._log.timesteps) - len(value))
+                            ]
                     else:
                         row[key] = value[i]
 

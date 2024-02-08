@@ -16,8 +16,6 @@ class GroundstationActor(BaseActor):
     # Minimum angle to communicate with this ground station
     _minimum_altitude_angle = None
 
-    # _receiver: DotMap(_dynamic=False)
-
     def __init__(
         self,
         name: str,

@@ -1,6 +1,7 @@
 from skyfield.units import AU_M
 from skyfield.vectorlib import VectorFunction
 
+
 class SkyfieldSkyCoordinate(VectorFunction):
     """Small helper class to compute altitude angle"""
 

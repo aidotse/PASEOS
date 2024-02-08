@@ -12,7 +12,7 @@ class TransmitterModel:
         line_losses: float,
         point_losses: float,
         antenna_gain: float = 0,
-        antenna_diameter: float = 0
+        antenna_diameter: float = 0,
     ) -> None:
         """Initializes the model.
 
@@ -28,10 +28,12 @@ class TransmitterModel:
         """
         assert input_power > 0, "Input power needs to be higher than 0."
         assert 0 < power_efficiency <= 1, "Power efficiency should be between 0 and 1."
-        assert 0 < antenna_efficiency <= 1, "Antenna efficiency should be between 0 and 1."
+        assert (
+            0 < antenna_efficiency <= 1
+        ), "Antenna efficiency should be between 0 and 1."
         assert line_losses >= 0, "Line losses needs to be 0 or higher."
         assert point_losses >= 0, "Pointing losses needs to be 0 or higher."
-    
+
         logger.debug("Initializing general transmitter model.")
         self.input_power = input_power
         self.antenna_efficiency = antenna_efficiency
@@ -43,15 +45,17 @@ class TransmitterModel:
 
     def set_EIRP(self) -> None:
         """Sets the Effective Isotropic Radiated Power (EIRP) for a transmitter."""
-        self.EIRP = self.output_power - self.line_losses - self.point_losses + self.antenna_gain
-    
+        self.EIRP = (
+            self.output_power - self.line_losses - self.point_losses + self.antenna_gain
+        )
+
     def set_gain(self) -> None:
         pass
 
     def set_active(self, state: bool) -> None:
         """Sets the active state of the transmitter.
 
-            Args:
-                state (bool): whether the transmitter is active.
+        Args:
+            state (bool): whether the transmitter is active.
         """
         self.active = state

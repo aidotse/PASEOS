@@ -24,7 +24,12 @@ set_log_level("WARNING")
 logger.debug("Loaded module.")
 
 
-def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None, communication_links = None):
+def init_sim(
+    local_actor: BaseActor,
+    cfg: DotMap = None,
+    starting_epoch: pk.epoch = None,
+    communication_links=None,
+):
     """Initializes PASEOS
 
     Args:
@@ -53,7 +58,9 @@ def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoc
             + "starting_epoch will be used."
         )
 
-    sim = PASEOS(local_actor=local_actor, cfg=cfg, communication_links=communication_links)
+    sim = PASEOS(
+        local_actor=local_actor, cfg=cfg, communication_links=communication_links
+    )
     return sim
 
 
