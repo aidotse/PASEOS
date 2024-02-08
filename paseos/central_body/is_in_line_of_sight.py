@@ -1,8 +1,10 @@
-from loguru import logger
-import pykep as pk
 import os
+
 import numpy as np
+import pykep as pk
+from loguru import logger
 from skyfield.api import load
+
 from ..utils.sky_field_sky_coordinate import SkyfieldSkyCoordinate
 
 _SKYFIELD_EARTH_PATH = os.path.join(
@@ -13,7 +15,7 @@ _SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
 
 def _is_in_line_of_sight_spacecraft_to_spacecraft(
-    actor, other_actor, epoch: pk.epoch, plot=False
+        actor, other_actor, epoch: pk.epoch, plot=False
 ):
     """Determines whether a position is in line of sight of this actor
 
@@ -28,17 +30,17 @@ def _is_in_line_of_sight_spacecraft_to_spacecraft(
     """
     # Check actor has central body
     assert (
-        actor.central_body is not None
+            actor.central_body is not None
     ), f"Please set the central body on actor {actor} for line of sight computations."
     return not actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
 
 
 def _is_in_line_of_sight_ground_station_to_spacecraft(
-    ground_station,
-    spacecraft,
-    epoch: pk.epoch,
-    minimum_altitude_angle: float,
-    plot=False,
+        ground_station,
+        spacecraft,
+        epoch: pk.epoch,
+        minimum_altitude_angle: float,
+        plot=False,
 ):
     """Determines whether a position is in line of sight of this actor
 
@@ -55,7 +57,7 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
         bool: true if in line-of-sight.
     """
     assert (
-        minimum_altitude_angle < 90 and minimum_altitude_angle > 0
+            minimum_altitude_angle < 90 and minimum_altitude_angle > 0
     ), "0 < Minimum altitude angle < 90"
 
     logger.debug(
@@ -110,11 +112,11 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
 
 
 def is_in_line_of_sight(
-    actor,
-    other_actor,
-    epoch: pk.epoch,
-    minimum_altitude_angle: float = None,
-    plot=False,
+        actor,
+        other_actor,
+        epoch: pk.epoch,
+        minimum_altitude_angle: float = None,
+        plot=False,
 ):
     """Determines whether a position is in line of sight of this actor
 
@@ -136,40 +138,42 @@ def is_in_line_of_sight(
     # Delegate call to correct function, ground stations are done with skyfield
     # and only work with Earth as central body for now.
     if (
-        type(actor).__name__ == "SpacecraftActor"
-        and type(other_actor).__name__ == "SpacecraftActor"
+            type(actor).__name__ == "SpacecraftActor"
+            and type(other_actor).__name__ == "SpacecraftActor"
     ):
         assert (
-            actor.central_body is not None
+                actor.central_body is not None
         ), f"Please set the central body on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_spacecraft_to_spacecraft(
             actor, other_actor, epoch, plot
         )
     elif (
-        type(actor).__name__ == "GroundstationActor"
-        and type(other_actor).__name__ == "SpacecraftActor"
+            type(actor).__name__ == "GroundstationActor"
+            and type(other_actor).__name__ == "SpacecraftActor"
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
         assert (
-            other_actor.central_body.planet.name.lower() == "earth"
-        ), f"Ground stations can only be used with Earth for now (not {other_actor.central_body.planet.name})."
+                other_actor.central_body.planet.name.lower() == "earth"
+        ), (f"Ground stations can only be used with Earth for now (not "
+            f"{other_actor.central_body.planet.name}).")
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             actor, other_actor, epoch, minimum_altitude_angle, plot
         )
     elif (
-        type(actor).__name__ == "SpacecraftActor"
-        and type(other_actor).__name__ == "GroundstationActor"
+            type(actor).__name__ == "SpacecraftActor"
+            and type(other_actor).__name__ == "GroundstationActor"
     ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
         assert actor.central_body is not None, (
-            other_actor.central_body.planet.name.lower() == "earth"
+                other_actor.central_body.planet.name.lower() == "earth"
         )
         return _is_in_line_of_sight_ground_station_to_spacecraft(
             other_actor, actor, epoch, minimum_altitude_angle, plot
         )
     else:
         raise NotImplementedError(
-            f"Cannot compute line of sight between {type(actor).__name__} and {type(other_actor).__name__}."
+            f"Cannot compute line of sight between {type(actor).__name__} "
+            f"and {type(other_actor).__name__}."
         )

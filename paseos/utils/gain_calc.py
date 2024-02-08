@@ -2,9 +2,10 @@ import math
 
 
 def calc_radio_gain_from_wavelength_diameter(
-    wavelength: float, antenna_diameter: float, antenna_efficiency: float
+        wavelength: float, antenna_diameter: float, antenna_efficiency: float
 ) -> float:
-    """Calculates antenna gain (directivity) based on wavelength and diameter, valid for parabolic antennas.
+    """Calculates antenna gain (directivity) based on wavelength and diameter, valid for
+    parabolic antennas.
 
     Args:
         wavelength (float): The wavelength of the signal, in meters.
@@ -23,9 +24,10 @@ def calc_radio_gain_from_wavelength_diameter(
 
 
 def calc_optical_gain_from_wavelength_diameter(
-    wavelength: float, antenna_diameter: float, antenna_efficiency: float
+        wavelength: float, antenna_diameter: float, antenna_efficiency: float
 ) -> float:
-    """Calculates antenna gain (directivity) based on wavelength and diameter, valid for parabolic antennas.
+    """Calculates antenna gain (directivity) based on wavelength and diameter, valid for
+    parabolic antennas.
 
     Args:
         wavelength (float): The wavelength of the signal, in meters.
@@ -39,9 +41,9 @@ def calc_optical_gain_from_wavelength_diameter(
     assert antenna_diameter > 0, "Antenna diameter needs to be larger than 0."
     assert 0 < antenna_efficiency <= 1, "Antenna efficiency should be between 0 and 1."
     antenna_radius = antenna_diameter / 2
-    aperture_area = math.pi * antenna_radius**2
+    aperture_area = math.pi * antenna_radius ** 2
     return 10 * math.log10(
-        antenna_efficiency * (4 * math.pi * aperture_area / wavelength**2)
+        antenna_efficiency * (4 * math.pi * aperture_area / wavelength ** 2)
     )
 
 

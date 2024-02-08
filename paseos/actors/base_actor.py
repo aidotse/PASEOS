@@ -203,8 +203,8 @@ class BaseActor(ABC):
             bool: bool indicating presence.
         """
         return (
-            hasattr(self, "_battery_level_in_Ws")
-            and self._battery_level_in_Ws is not None
+                hasattr(self, "_battery_level_in_Ws")
+                and self._battery_level_in_Ws is not None
         )
 
     @property
@@ -245,7 +245,8 @@ class BaseActor(ABC):
 
     @property
     def local_time(self) -> pk.epoch:
-        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in
+        days.
 
         Returns:
             pk.epoch: local time of the actor
@@ -263,8 +264,8 @@ class BaseActor(ABC):
 
     @staticmethod
     def _check_init_value_sensibility(
-        position,
-        velocity,
+            position,
+            velocity,
     ):
         """A function to check user inputs for sensibility
 
@@ -307,8 +308,8 @@ class BaseActor(ABC):
         pass
 
     def get_altitude(
-        self,
-        t0: pk.epoch = None,
+            self,
+            t0: pk.epoch = None,
     ) -> float:
         """Returns altitude above [0,0,0]. Will only compute if not computed for this timestep.
 
@@ -321,8 +322,8 @@ class BaseActor(ABC):
         if t0 is None:
             t0 = self._local_time
         if (
-            t0.mjd2000 == self._time_of_previous_position
-            and self._previous_altitude is not None
+                t0.mjd2000 == self._time_of_previous_position
+                and self._previous_altitude is not None
         ):
             return self._previous_altitude
         else:
@@ -332,7 +333,8 @@ class BaseActor(ABC):
             return self._previous_altitude
 
     def get_position(self, epoch: pk.epoch):
-        """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
+        """Compute the position of this actor at a specific time. Requires orbital parameters or
+        position set.
 
         Args:
             epoch (pk.epoch): Time as pykep epoch
@@ -349,8 +351,8 @@ class BaseActor(ABC):
         )
 
         if (
-            self._orbital_parameters is not None
-            or self._custom_orbit_propagator is not None
+                self._orbital_parameters is not None
+                or self._custom_orbit_propagator is not None
         ) and self._position is not None:
             raise ValueError(
                 "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
@@ -368,11 +370,13 @@ class BaseActor(ABC):
             return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
-            "No suitable way added to determine actor position. Either set an orbit or position with ActorBuilder."
+            "No suitable way added to determine actor position. Either set an orbit or position "
+            "with ActorBuilder."
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
-        """Compute the position / velocity of this actor at a specific time. Requires orbital parameters set.
+        """Compute the position / velocity of this actor at a specific time. Requires orbital
+        parameters set.
 
         Args:
             epoch (pk.epoch): Time as pykep epoch.
@@ -407,11 +411,11 @@ class BaseActor(ABC):
         return pos, vel
 
     def is_in_line_of_sight(
-        self,
-        other_actor: "BaseActor",
-        epoch: pk.epoch,
-        minimum_altitude_angle: float = None,
-        plot=False,
+            self,
+            other_actor: "BaseActor",
+            epoch: pk.epoch,
+            minimum_altitude_angle: float = None,
+            plot=False,
     ):
         """Determines whether a position is in line of sight of this actor
 
@@ -419,7 +423,8 @@ class BaseActor(ABC):
             other_actor (BaseActor): The actor to check line of sight with
             epoch (pk,.epoch): Epoch at which to check the line of sight
             minimum_altitude_angle(float): The altitude angle (in degree) at which the actor has
-            to be in relation to the ground station position to be visible. It has to be between 0 and 90.
+            to be in relation to the ground station position to be visible. It has to be between
+            0 and 90.
             Only relevant if one of the actors is a ground station.
             plot (bool): Whether to plot a diagram illustrating the positions.
 

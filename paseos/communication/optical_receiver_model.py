@@ -8,14 +8,16 @@ class OpticalReceiverModel(ReceiverModel):
     """This class defines an optical receiver model."""
 
     def __init__(
-        self, line_losses: float, antenna_diameter: float = 0, antenna_gain: float = 0
+            self, line_losses: float, antenna_diameter: float = 0, antenna_gain: float = 0
     ) -> None:
         """Initializes the model.
 
         Args:
             line_losses (float): The line losses of the receiver, in dB.
-            antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain needs to be given.
-            antenna_gain (float): The gain of the antenna, either this or the diameter needs to be given so that
+            antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain
+            needs to be given.
+            antenna_gain (float): The gain of the antenna, either this or the diameter needs to
+            be given so that
             gain can be determined.
 
         """

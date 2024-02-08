@@ -1,9 +1,9 @@
-from loguru import logger
 import pykep as pk
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
-from paseos.power import discharge_model
 from paseos.power import charge_model
+from paseos.power import discharge_model
 
 
 class SpacecraftActor(BaseActor):
@@ -29,9 +29,9 @@ class SpacecraftActor(BaseActor):
     _is_dead = False
 
     def __init__(
-        self,
-        name: str,
-        epoch: pk.epoch,
+            self,
+            name: str,
+            epoch: pk.epoch,
     ) -> None:
         """Constructor for a spacecraft actor
 
@@ -47,7 +47,8 @@ class SpacecraftActor(BaseActor):
         self._is_dead = True
 
     def set_was_interrupted(self):
-        """Sets this device to "was_interrupted=True" indicating current activities were interrupted."""
+        """Sets this device to "was_interrupted=True" indicating current activities were
+        interrupted."""
         self._was_interrupted = True
 
     @property
@@ -158,7 +159,7 @@ class SpacecraftActor(BaseActor):
         """
         logger.debug(f"Charging actor {self} for {duration_in_s}s.")
         assert (
-            duration_in_s > 0
+                duration_in_s > 0
         ), "Charging interval has to be positive but t1 was less or equal t0."
 
         self = charge_model.charge(self, duration_in_s)

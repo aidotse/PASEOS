@@ -34,20 +34,23 @@ class OperationsMonitor:
         """Get a logged attributes values.
 
         Args:
-            item (str): Name of item. Available are "timesteps","current_activity","state_of_charge",
+            item (str): Name of item. Available are "timesteps","current_activity",
+            "state_of_charge",
             "is_in_eclipse","known_actors","position","velocity","temperature"
         """
         assert item in (
-            list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+                list(self._log.keys()) + list(self._log.custom_properties.keys())
+        ), (f"Untracked quantity. Available are "
+            f"{self._log.keys() + self._log.custom_properties.keys()}")
         if item in self._log.custom_properties.keys():
             return self._log.custom_properties[item]
         return self._log[item]
 
     def plot(self, item):
         assert item in (
-            list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+                list(self._log.keys()) + list(self._log.custom_properties.keys())
+        ), (f"Untracked quantity. Available "
+            f"are {self._log.keys() + self._log.custom_properties.keys()}")
         if item in self._log.custom_properties.keys():
             values = self._log.custom_properties[item]
         else:
@@ -68,7 +71,7 @@ class OperationsMonitor:
         """
         logger.trace("Logging iteration")
         assert local_actor.name == self._actor_name, (
-            "Expected actor's name was" + self._actor_name
+                "Expected actor's name was" + self._actor_name
         )
         self._log.timesteps.append(local_actor.local_time.mjd2000 * pk.DAY2SEC)
         self._log.current_activity.append(local_actor.current_activity)
@@ -134,7 +137,7 @@ class OperationsMonitor:
                         else:
                             row[key] = value[
                                 i - (len(self._log.timesteps) - len(value))
-                            ]
+                                ]
                     else:
                         row[key] = value[i]
 

@@ -77,19 +77,19 @@ def test_link_creation():
     )
 
     with pytest.raises(
-        AssertionError,
-        match="An optical transmitter is required for this optical link.",
+            AssertionError,
+            match="An optical transmitter is required for this optical link.",
     ):
         OpticalLinkModel(sat_actor, radio_name, comms_sat, optical_receiver_name)
     with pytest.raises(
-        AssertionError, match="An optical receiver is required for this optical link."
+            AssertionError, match="An optical receiver is required for this optical link."
     ):
         OpticalLinkModel(
             sat_actor, optical_transmitter_name, maspalomas_groundstation, receiver_name
         )
 
     with pytest.raises(
-        AssertionError, match="A radio transmitter is required for this radio link."
+            AssertionError, match="A radio transmitter is required for this radio link."
     ):
         RadioLinkModel(
             sat_actor,
@@ -99,7 +99,7 @@ def test_link_creation():
             8675e6,
         )
     with pytest.raises(
-        AssertionError, match="A radio receiver is required for this radio link."
+            AssertionError, match="A radio receiver is required for this radio link."
     ):
         RadioLinkModel(
             sat_actor, radio_name, comms_sat, optical_receiver_name, 8675e6
@@ -147,8 +147,8 @@ def test_receiver_creation():
             device_type=DeviceType.RADIO_RECEIVER,
         )
     with pytest.raises(
-        AssertionError,
-        match="Antenna gain or antenna diameter needs to be higher than 0.",
+            AssertionError,
+            match="Antenna gain or antenna diameter needs to be higher than 0.",
     ):
         ActorBuilder.add_comm_device(
             actor=maspalomas_groundstation,
@@ -159,8 +159,8 @@ def test_receiver_creation():
             device_type=DeviceType.RADIO_RECEIVER,
         )
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain and antenna diameter, not both.",
+            AssertionError,
+            match="Only set one of antenna gain and antenna diameter, not both.",
     ):
         ActorBuilder.add_comm_device(
             actor=maspalomas_groundstation,
@@ -203,7 +203,7 @@ def test_radio_receiver_creation():
     receiver_name = "maspalomas_radio_receiver_1"
 
     with pytest.raises(
-        AssertionError, match="Polarization losses needs to be 0 or higher."
+            AssertionError, match="Polarization losses needs to be 0 or higher."
     ):
         ActorBuilder.add_comm_device(
             actor=maspalomas_groundstation,
@@ -215,7 +215,7 @@ def test_radio_receiver_creation():
             device_type=DeviceType.RADIO_RECEIVER,
         )
     with pytest.raises(
-        AssertionError, match="Noise temperature needs to be higher than 0."
+            AssertionError, match="Noise temperature needs to be higher than 0."
     ):
         ActorBuilder.add_comm_device(
             actor=maspalomas_groundstation,
@@ -282,7 +282,7 @@ def test_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError, match="Power efficiency should be between 0 and 1."
+            AssertionError, match="Power efficiency should be between 0 and 1."
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -297,7 +297,7 @@ def test_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError, match="Power efficiency should be between 0 and 1."
+            AssertionError, match="Power efficiency should be between 0 and 1."
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -312,7 +312,7 @@ def test_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError, match="Antenna efficiency should be between 0 and 1."
+            AssertionError, match="Antenna efficiency should be between 0 and 1."
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -327,7 +327,7 @@ def test_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError, match="Antenna efficiency should be between 0 and 1."
+            AssertionError, match="Antenna efficiency should be between 0 and 1."
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -355,7 +355,7 @@ def test_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError, match="Pointing losses needs to be 0 or higher."
+            AssertionError, match="Pointing losses needs to be 0 or higher."
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -378,8 +378,8 @@ def test_radio_transmitter_creation():
     radio_name = "sat_radio_transmitter_1"
 
     with pytest.raises(
-        AssertionError,
-        match="Antenna gain or antenna diameter needs to be higher than 0.",
+            AssertionError,
+            match="Antenna gain or antenna diameter needs to be higher than 0.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -393,8 +393,8 @@ def test_radio_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain and antenna diameter, not both.",
+            AssertionError,
+            match="Only set one of antenna gain and antenna diameter, not both.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -432,8 +432,8 @@ def test_optical_transmitter_creation():
     )
 
     with pytest.raises(
-        AssertionError,
-        match="Antenna gain or antenna diameter or FWHM needs to be higher than 0.",
+            AssertionError,
+            match="Antenna gain or antenna diameter or FWHM needs to be higher than 0.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -447,8 +447,8 @@ def test_optical_transmitter_creation():
         )
 
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
+            AssertionError,
+            match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -463,8 +463,8 @@ def test_optical_transmitter_creation():
             device_type=DeviceType.OPTICAL_TRANSMITTER,
         )
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
+            AssertionError,
+            match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -479,8 +479,8 @@ def test_optical_transmitter_creation():
             device_type=DeviceType.OPTICAL_TRANSMITTER,
         )
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
+            AssertionError,
+            match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,
@@ -495,8 +495,8 @@ def test_optical_transmitter_creation():
             device_type=DeviceType.OPTICAL_TRANSMITTER,
         )
     with pytest.raises(
-        AssertionError,
-        match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
+            AssertionError,
+            match="Only set one of antenna gain, antenna diameter, and FWHM not multiple.",
     ):
         ActorBuilder.add_comm_device(
             actor=sat_actor,

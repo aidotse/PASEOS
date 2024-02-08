@@ -12,12 +12,12 @@ class RadioLinkModel(LinkModel):
     """This class defines a link model, containing one transmitter and one receiver."""
 
     def __init__(
-        self,
-        transmitter_actor: BaseActor,
-        transmitter_device_name: str,
-        receiver_actor: BaseActor,
-        receiver_device_name: str,
-        frequency: float,
+            self,
+            transmitter_actor: BaseActor,
+            transmitter_device_name: str,
+            receiver_actor: BaseActor,
+            receiver_device_name: str,
+            frequency: float,
     ) -> None:
         """Initializes the model.
 
@@ -107,18 +107,18 @@ class RadioLinkModel(LinkModel):
         self.signal_at_receiver = self.transmitter.EIRP - self.total_channel_loss
 
         self.s_n_power_density = (
-            self.signal_at_receiver
-            + self.receiver.antenna_gain
-            - self.receiver.polarization_loss
-            - self.receiver.line_losses
-            - self.receiver.noise_temperature
-            + boltzmann_constant
+                self.signal_at_receiver
+                + self.receiver.antenna_gain
+                - self.receiver.polarization_loss
+                - self.receiver.line_losses
+                - self.receiver.noise_temperature
+                + boltzmann_constant
         )
         self.s_n_power_density_including_margin = (
-            self.s_n_power_density - self.required_s_n_margin
+                self.s_n_power_density - self.required_s_n_margin
         )
         bitrate = 10 ** (
-            -0.1 * (self.required_s_n_ratio - self.s_n_power_density_including_margin)
+                -0.1 * (self.required_s_n_ratio - self.s_n_power_density_including_margin)
         )
 
         if bitrate < 0:

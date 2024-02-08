@@ -88,10 +88,10 @@ class PASEOS:
         )
 
     def advance_time(
-        self,
-        time_to_advance: float,
-        current_power_consumption_in_W: float,
-        constraint_function: types.FunctionType = None,
+            self,
+            time_to_advance: float,
+            current_power_consumption_in_W: float,
+            constraint_function: types.FunctionType = None,
     ):
         """Advances the simulation by a specified amount of time
 
@@ -107,18 +107,19 @@ class PASEOS:
         """
         assert (
             not self._is_advancing_time
-        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        ), ("advance_time is already running. This function is not thread-safe. Avoid mixing ("
+            "async) activities and calling it.")
         self._is_advancing_time = True
 
         assert time_to_advance > 0, "Time to advance has to be positive."
         assert (
-            current_power_consumption_in_W >= 0
+                current_power_consumption_in_W >= 0
         ), "Power consumption cannot be negative."
 
         # Check constraint function returns something
         if constraint_function is not None:
             assert (
-                constraint_function() is not None
+                    constraint_function() is not None
             ), "Your constraint function failed to return True or False."
 
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
@@ -132,8 +133,8 @@ class PASEOS:
         while self._state.time < target_time:
             # Check constraint function
             if (
-                constraint_function is not None
-                and time_since_constraint_check > self._cfg.sim.activity_timestep
+                    constraint_function is not None
+                    and time_since_constraint_check > self._cfg.sim.activity_timestep
             ):
                 time_since_constraint_check = 0
                 if not constraint_function():
@@ -254,7 +255,8 @@ class PASEOS:
 
     @property
     def local_time(self) -> pk.epoch:
-        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in
+        days.
 
         Returns:
             pk.epoch: local time of the actor
@@ -263,7 +265,8 @@ class PASEOS:
 
     @property
     def monitor(self):
-        """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
+        """Access paseos operations monitor which tracks local actor attributes such as
+        temperature or state of charge.
 
         Returns:
             OperationsMonitor: Monitor object.
@@ -326,7 +329,7 @@ class PASEOS:
             actor_name (str): name of the actor to remove.
         """
         assert (
-            actor_name in self.known_actors
+                actor_name in self.known_actors
         ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
         del self._known_actors[actor_name]
 
@@ -339,12 +342,12 @@ class PASEOS:
         self._activity_manager.remove_activity(name=name)
 
     def register_activity(
-        self,
-        name: str,
-        activity_function: types.CoroutineType,
-        power_consumption_in_watt: float,
-        on_termination_function: types.CoroutineType = None,
-        constraint_function: types.CoroutineType = None,
+            self,
+            name: str,
+            activity_function: types.CoroutineType,
+            power_consumption_in_watt: float,
+            on_termination_function: types.CoroutineType = None,
+            constraint_function: types.CoroutineType = None,
     ):
         """Registers an activity that can then be performed on the local actor.
 
@@ -353,10 +356,12 @@ class PASEOS:
             activity_function (types.CoroutineType): Function to execute during the activity.
             Needs to be async. Can accept a list of arguments to be specified later.
             power_consumption_in_watt (float): Power consumption of the activity in W (per second).
-            on_termination_function (types.CoroutineType): Function to execute when the activities stops
+            on_termination_function (types.CoroutineType): Function to execute when the
+            activities stops
             (either due to completion or constraint not being satisfied anymore). Needs to be async.
             Can accept a list of arguments to be specified later.
-            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are
+            still valid.
             Should return True if constraints are valid, False if they aren't. Needs to be async.
             Can accept a list of arguments to be specified later.
         """
@@ -391,13 +396,14 @@ class PASEOS:
         )
 
     def perform_activity(
-        self,
-        name: str,
-        activity_func_args: list = None,
-        termination_func_args: list = None,
-        constraint_func_args: list = None,
+            self,
+            name: str,
+            activity_func_args: list = None,
+            termination_func_args: list = None,
+            constraint_func_args: list = None,
     ):
-        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
+        """Perform the specified activity. Will advance the simulation if automatic clock is not
+        disabled.
 
         Args:
             name (str): Name of the activity

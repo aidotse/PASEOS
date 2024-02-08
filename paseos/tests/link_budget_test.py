@@ -13,15 +13,15 @@ def test_gain_calculation():
         calc_radio_gain_from_wavelength_diameter(-5, 0, 0.5)
 
     with pytest.raises(
-        AssertionError, match="Antenna diameter needs to be larger than 0."
+            AssertionError, match="Antenna diameter needs to be larger than 0."
     ):
         calc_radio_gain_from_wavelength_diameter(10, -2, 0.5)
     with pytest.raises(
-        AssertionError, match="Antenna efficiency should be between 0 and 1."
+            AssertionError, match="Antenna efficiency should be between 0 and 1."
     ):
         calc_radio_gain_from_wavelength_diameter(10, 2, -0.5)
     with pytest.raises(
-        AssertionError, match="Antenna efficiency should be between 0 and 1."
+            AssertionError, match="Antenna efficiency should be between 0 and 1."
     ):
         calc_radio_gain_from_wavelength_diameter(10, 2, 1.5)
 

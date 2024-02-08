@@ -16,7 +16,7 @@ _SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
 
 def calc_dist_and_alt_angle_spacecraft_ground(
-    spacecraft_actor, ground_station_actor, epoch: pk.epoch
+        spacecraft_actor, ground_station_actor, epoch: pk.epoch
 ) -> (float, float):
     """Calculates distance and elevation angle based on spacecraft and ground station positions.
 
@@ -53,7 +53,7 @@ def calc_dist_and_alt_angle_spacecraft_ground(
 
 
 def calc_dist_and_alt_angle_spacecraft_spacecraft(
-    local_actor, known_actor, epoch: pk.epoch
+        local_actor, known_actor, epoch: pk.epoch
 ) -> (float, float):
     """Calculates distance and elevation angle between two spacecraft.
 
@@ -92,13 +92,13 @@ def calc_dist_and_alt_angle(local_actor, known_actor, epoch: pk.epoch):
     """
 
     if isinstance(local_actor, SpacecraftActor) and isinstance(
-        known_actor, GroundstationActor
+            known_actor, GroundstationActor
     ):
         return calc_dist_and_alt_angle_spacecraft_ground(
             local_actor, known_actor, epoch
         )
     elif isinstance(local_actor, SpacecraftActor) and isinstance(
-        known_actor, SpacecraftActor
+            known_actor, SpacecraftActor
     ):
         return calc_dist_and_alt_angle_spacecraft_spacecraft(
             local_actor, known_actor, epoch

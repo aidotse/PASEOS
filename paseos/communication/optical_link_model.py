@@ -12,11 +12,11 @@ class OpticalLinkModel(LinkModel):
     """This class defines an optical link model, containing one transmitter and one receiver."""
 
     def __init__(
-        self,
-        transmitter_actor: BaseActor,
-        transmitter_device_name: str,
-        receiver_actor: BaseActor,
-        receiver_device_name: str,
+            self,
+            transmitter_actor: BaseActor,
+            transmitter_device_name: str,
+            receiver_actor: BaseActor,
+            receiver_device_name: str,
     ) -> None:
         """Initializes the model.
 
@@ -87,18 +87,18 @@ class OpticalLinkModel(LinkModel):
         self.signal_at_receiver = self.transmitter.EIRP - self.total_channel_loss
 
         self.received_signal_power_with_gain = (
-            self.signal_at_receiver
-            + self.receiver.antenna_gain
-            - self.receiver.line_losses
+                self.signal_at_receiver
+                + self.receiver.antenna_gain
+                - self.receiver.line_losses
         )
         self.received_signal_power_with_margin = (
-            self.received_signal_power_with_gain - self.required_s_n_margin
+                self.received_signal_power_with_gain - self.required_s_n_margin
         )  # dBm
         self.received_signal_power_with_margin = (
-            10 ** (self.received_signal_power_with_margin / 10) * 1e-3
+                10 ** (self.received_signal_power_with_margin / 10) * 1e-3
         )  # nW
         bitrate = (
-            self.received_signal_power_with_margin / 250 * 1550e-9 / 6.626e-34 / self.c
+                self.received_signal_power_with_margin / 250 * 1550e-9 / 6.626e-34 / self.c
         )
 
         if bitrate < 0:

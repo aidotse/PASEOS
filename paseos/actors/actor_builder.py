@@ -49,7 +49,7 @@ class ActorBuilder:
             Created actor
         """
         assert (
-            actor_type != BaseActor
+                actor_type != BaseActor
         ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
 
         logger.trace(f"Creating an actor blueprint with name {name}")
@@ -58,11 +58,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_ground_station_location(
-        actor: GroundstationActor,
-        latitude: float,
-        longitude: float,
-        elevation: float = 0,
-        minimum_altitude_angle: float = 30,
+            actor: GroundstationActor,
+            latitude: float,
+            longitude: float,
+            elevation: float = 0,
+            minimum_altitude_angle: float = 30,
     ):
         """Define the position of a ground station actor.
 
@@ -79,7 +79,7 @@ class ActorBuilder:
         assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
         assert (
-            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
+                minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
         ), "0 <= minimum_altitude_angle <= 90."
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
@@ -90,18 +90,19 @@ class ActorBuilder:
 
     @staticmethod
     def set_central_body(
-        actor: SpacecraftActor,
-        pykep_planet: pk.planet,
-        mesh: tuple = None,
-        radius: float = None,
-        rotation_declination: float = None,
-        rotation_right_ascension: float = None,
-        rotation_period: float = None,
+            actor: SpacecraftActor,
+            pykep_planet: pk.planet,
+            mesh: tuple = None,
+            radius: float = None,
+            rotation_declination: float = None,
+            rotation_right_ascension: float = None,
+            rotation_period: float = None,
     ):
         """Define the central body of the actor. This is the body the actor is orbiting around.
 
         If a mesh is provided, it will be used to compute visibility and eclipse checks.
-        Otherwise, a sphere with the provided radius will be used. One of the two has to be provided.
+        Otherwise, a sphere with the provided radius will be used. One of the two has to be
+        provided.
 
         Note the specification here will not affect the actor orbit.
         For that, use set_orbit, set_TLE or set_custom_orbit.
@@ -114,8 +115,10 @@ class ActorBuilder:
             rotation_declination (float): Declination of the rotation axis in degrees in the
             central body's inertial frame. Rotation at current actor local time is presumed to be 0.
             rotation_right_ascension (float): Right ascension of the rotation axis in degrees in
-            the central body's inertial frame. Rotation at current actor local time is presumed to be 0.
-            rotation_period (float): Rotation period in seconds. Rotation at current actor local time is presumed to be 0.
+            the central body's inertial frame. Rotation at current actor local time is presumed
+            to be 0.
+            rotation_period (float): Rotation period in seconds. Rotation at current actor local
+            time is presumed to be 0.
         """
         assert isinstance(
             actor, SpacecraftActor
@@ -126,41 +129,41 @@ class ActorBuilder:
             type(pykep_planet)
         ), "pykep_planet has to be a pykep planet."
         assert (
-            mesh is not None or radius is not None
+                mesh is not None or radius is not None
         ), "Either mesh or radius has to be provided."
         assert (
-            mesh is None or radius is None
+                mesh is None or radius is None
         ), "Either mesh or radius has to be provided, not both."
 
         # Check rotation parameters
         if rotation_declination is not None:
             assert (
-                rotation_declination >= -90 and rotation_declination <= 90
+                    rotation_declination >= -90 and rotation_declination <= 90
             ), "Rotation declination has to be -90 <= dec <= 90"
         if rotation_right_ascension is not None:
             assert (
-                rotation_right_ascension >= -180 and rotation_right_ascension <= 180
+                    rotation_right_ascension >= -180 and rotation_right_ascension <= 180
             ), "Rotation right ascension has to be -180 <= ra <= 180"
         if rotation_period is not None:
             assert rotation_period > 0, "Rotation period has to be > 0"
 
         # Check if rotation parameters are set
         if (
-            rotation_period is not None
-            or rotation_right_ascension is not None
-            or rotation_declination is not None
+                rotation_period is not None
+                or rotation_right_ascension is not None
+                or rotation_declination is not None
         ):
             assert (
-                rotation_right_ascension is not None
+                    rotation_right_ascension is not None
             ), "Rotation right ascension has to be set for rotation."
             assert (
-                rotation_declination is not None
+                    rotation_declination is not None
             ), "Rotation declination has to be set. for rotation."
             assert (
-                rotation_period is not None
+                    rotation_period is not None
             ), "Rotation period has to be set for rotation."
             assert (
-                mesh is not None
+                    mesh is not None
             ), "Radius cannot only be set for mesh-defined bodies."
 
         if mesh is not None:
@@ -174,10 +177,10 @@ class ActorBuilder:
                 mesh[1], np.ndarray
             ), "Mesh triangles have to be a numpy array."
             assert (
-                len(mesh[0].shape) == 2
+                    len(mesh[0].shape) == 2
             ), "Mesh vertices have to be a numpy array of shape (n,3)."
             assert (
-                len(mesh[1].shape) == 2
+                    len(mesh[1].shape) == 2
             ), "Mesh triangles have to be a numpy array of shape (n,3)."
 
         # Check if pykep planet is either orbiting the sun or is the sunitself
@@ -189,7 +192,8 @@ class ActorBuilder:
         # Check if the actor already had a central body
         if actor.has_central_body:
             logger.warning(
-                "The actor already had a central body. Only one central body is supported. Overriding old body."
+                "The actor already had a central body. Only one central body is supported. "
+                "Overriding old body."
             )
 
         # Set central body
@@ -207,7 +211,7 @@ class ActorBuilder:
 
     @staticmethod
     def set_custom_orbit(
-        actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch
+            actor: SpacecraftActor, propagator_func: Callable, epoch: pk.epoch
     ):
         """Define the orbit of the actor using a custom propagator function.
         The custom function has to return position and velocity in meters
@@ -249,14 +253,15 @@ class ActorBuilder:
 
     @staticmethod
     def set_TLE(
-        actor: SpacecraftActor,
-        line1: str,
-        line2: str,
+            actor: SpacecraftActor,
+            line1: str,
+            line2: str,
     ):
         """Define the orbit of the actor using a TLE. For more information on TLEs see
         https://en.wikipedia.org/wiki/Two-line_element_set .
 
-        TLEs can be obtained from https://www.space-track.org/ or https://celestrak.com/NORAD/elements/
+        TLEs can be obtained from https://www.space-track.org/ or
+        https://celestrak.com/NORAD/elements/
 
         Args:
             actor (SpacecraftActor): Actor to update.
@@ -280,11 +285,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_orbit(
-        actor: SpacecraftActor,
-        position,
-        velocity,
-        epoch: pk.epoch,
-        central_body: pk.planet,
+            actor: SpacecraftActor,
+            position,
+            velocity,
+            epoch: pk.epoch,
+            central_body: pk.planet,
     ):
         """Define the orbit of the actor
 
@@ -293,7 +298,8 @@ class ActorBuilder:
             position (list of floats): [x,y,z].
             velocity (list of floats): [vx,vy,vz].
             epoch (pk.epoch): Time of position / velocity.
-            central_body (pk.planet): Central body around which the actor is orbiting as a pykep planet.
+            central_body (pk.planet): Central body around which the actor is orbiting as a pykep
+            planet.
         """
         assert isinstance(
             actor, SpacecraftActor
@@ -315,7 +321,8 @@ class ActorBuilder:
 
     @staticmethod
     def set_position(actor: BaseActor, position: list):
-        """Sets the actors position. Use this if you do *not* want the actor to have a keplerian orbit around a central body.
+        """Sets the actors position. Use this if you do *not* want the actor to have a keplerian
+        orbit around a central body.
 
         Args:
             actor (BaseActor): Actor set the position on.
@@ -334,20 +341,26 @@ class ActorBuilder:
 
     @staticmethod
     def set_geometric_model(
-        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
+            actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
     ):
-        """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
-        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        """Define geometry of the spacecraft actor. This is done in the spacecraft body reference
+        frame, and can be
+        transformed to the inertial/PASEOS reference frame using the reference frane
+        transformations in the attitude
         model. When used in the attitude model, the geometric model is in the body reference frame.
 
         Args:
             actor (SpacecraftActor): Actor to update.
             mass (float): Mass of the spacecraft in kg.
-            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
-                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from
+            origin of body frame.
+                Coordinates of the corners of the object. If not selected, it will default to a
+                cube that can be scaled.
                 by the scale. Uses Trimesh to create the mesh from this and the list of faces.
-            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
-                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of
+            the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is
+                split into two
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
@@ -366,11 +379,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_power_devices(
-        actor: SpacecraftActor,
-        battery_level_in_Ws: float,
-        max_battery_level_in_Ws: float,
-        charging_rate_in_W: float,
-        power_device_type: PowerDeviceType = PowerDeviceType.SolarPanel,
+            actor: SpacecraftActor,
+            battery_level_in_Ws: float,
+            max_battery_level_in_Ws: float,
+            charging_rate_in_W: float,
+            power_device_type: PowerDeviceType = PowerDeviceType.SolarPanel,
     ):
         """Add a power device (battery + some charging mechanism (e.g. solar power)) to the actor.
         This will allow constraints related to power consumption.
@@ -399,7 +412,8 @@ class ActorBuilder:
         # Check if the actor already had a power device
         if actor.has_power_model:
             logger.warning(
-                "The actor already had a power device. Currently only one device is supported. Overriding old device."
+                "The actor already had a power device. Currently only one device is supported. "
+                "Overriding old device."
             )
 
         logger.trace("Checking battery values for sensibility.")
@@ -407,8 +421,8 @@ class ActorBuilder:
         assert max_battery_level_in_Ws > 0, "Battery level must be positive"
         assert charging_rate_in_W > 0, "Battery level must be positive"
         assert (
-            power_device_type == PowerDeviceType.SolarPanel
-            or power_device_type == PowerDeviceType.RTG
+                power_device_type == PowerDeviceType.SolarPanel
+                or power_device_type == PowerDeviceType.RTG
         ), "Only SolarPanel and RTG devices supported."
 
         actor._power_device_type = power_device_type
@@ -423,10 +437,10 @@ class ActorBuilder:
 
     @staticmethod
     def set_radiation_model(
-        actor: SpacecraftActor,
-        data_corruption_events_per_s: float,
-        restart_events_per_s: float,
-        failure_events_per_s: float,
+            actor: SpacecraftActor,
+            data_corruption_events_per_s: float,
+            restart_events_per_s: float,
+            failure_events_per_s: float,
     ):
         """Enables the radiation model allowing data corruption, activities being
         interrupted by restarts and potentially critical device failures. Set any of the
@@ -434,10 +448,12 @@ class ActorBuilder:
 
         Args:
             actor (SpacecraftActor):  The actor to add to.
-            data_corruption_events_per_s (float): Single bit of data being corrupted, events per second,
+            data_corruption_events_per_s (float): Single bit of data being corrupted, events per
+            second,
             i.e. a Single Event Upset (SEU).
             restart_events_per_s (float): Device restart being triggered, events per second.
-            failure_events_per_s (float): Complete device failure, events per second, i.e. a Single Event Latch-Up (SEL).
+            failure_events_per_s (float): Complete device failure, events per second,
+            i.e. a Single Event Latch-Up (SEL).
         """
         # check for spacecraft actor
         assert isinstance(
@@ -445,7 +461,7 @@ class ActorBuilder:
         ), "Radiation models are only supported for SpacecraftActors"
 
         assert (
-            data_corruption_events_per_s >= 0
+                data_corruption_events_per_s >= 0
         ), "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
         assert failure_events_per_s >= 0, "failure_events_per_s cannot be negative."
@@ -459,27 +475,28 @@ class ActorBuilder:
 
     @staticmethod
     def set_thermal_model(
-        actor: SpacecraftActor,
-        actor_mass: float,
-        actor_initial_temperature_in_K: float,
-        actor_sun_absorptance: float,
-        actor_infrared_absorptance: float,
-        actor_sun_facing_area: float,
-        actor_central_body_facing_area: float,
-        actor_emissive_area: float,
-        actor_thermal_capacity: float,
-        body_solar_irradiance: float = 1360,
-        body_surface_temperature_in_K: float = 288,
-        body_emissivity: float = 0.6,
-        body_reflectance: float = 0.3,
-        power_consumption_to_heat_ratio: float = 0.5,
+            actor: SpacecraftActor,
+            actor_mass: float,
+            actor_initial_temperature_in_K: float,
+            actor_sun_absorptance: float,
+            actor_infrared_absorptance: float,
+            actor_sun_facing_area: float,
+            actor_central_body_facing_area: float,
+            actor_emissive_area: float,
+            actor_thermal_capacity: float,
+            body_solar_irradiance: float = 1360,
+            body_surface_temperature_in_K: float = 288,
+            body_emissivity: float = 0.6,
+            body_reflectance: float = 0.3,
+            power_consumption_to_heat_ratio: float = 0.5,
     ):
         """Add a thermal model to the actor to model temperature based on
         heat flux from sun, central body albedo, central body IR, actor IR
         emission and due to actor activities.
         For the moment, it is a slightly simplified version
         of the single node model from "Spacecraft Thermal Control" by Prof. Isidoro Martínez
-        available at http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling%20and%20Testing.pdf
+        available at http://imartinez.etsiae.upm.es/~isidoro/tc3/Spacecraft%20Thermal%20Modelling
+        %20and%20Testing.pdf
 
         Args:
             actor (SpacecraftActor): Actor to model.
@@ -492,9 +509,11 @@ class ActorBuilder:
             actor_emissive_area (float): Actor area emitting (radiating) heat.
             actor_thermal_capacity (float): Actor's thermal capacity in J / (kg * K).
             body_solar_irradiance (float, optional): Irradiance from the sun in W. Defaults to 1360.
-            body_surface_temperature_in_K (float, optional): Central body surface temperature. Defaults to 288.
+            body_surface_temperature_in_K (float, optional): Central body surface temperature.
+            Defaults to 288.
             body_emissivity (float, optional): Centrla body emissivity [0,1] in IR. Defaults to 0.6.
-            body_reflectance (float, optional): Central body reflectance of sun light. Defaults to 0.3.
+            body_reflectance (float, optional): Central body reflectance of sun light. Defaults
+            to 0.3.
             power_consumption_to_heat_ratio (float, optional): Conversion ratio for activities.
             0 leads to know heat-up due to activity. Defaults to 0.5.
         """
@@ -506,25 +525,26 @@ class ActorBuilder:
         # Check if the actor already had a thermal model
         if actor.has_thermal_model:
             logger.warning(
-                "The actor already had a thermal model. Currently only one model is supported. Overriding old model."
+                "The actor already had a thermal model. Currently only one model is supported. "
+                "Overriding old model."
             )
 
         assert actor_mass > 0, "Actor mass has to be positive."
 
         assert (
-            0 <= power_consumption_to_heat_ratio
-            and power_consumption_to_heat_ratio <= 1.0
+                0 <= power_consumption_to_heat_ratio
+                and power_consumption_to_heat_ratio <= 1.0
         ), "Heat ratio has to be 0 to 1."
 
         logger.trace("Checking actor thermal values for sensibility.")
         assert (
-            0 <= actor_initial_temperature_in_K
+                0 <= actor_initial_temperature_in_K
         ), "Actor initial temperature cannot be below 0K."
         assert (
-            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
+                0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
         ), "Absorptance has to be 0 to 1."
         assert (
-            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
+                0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
         ), "Absorptance has to be 0 to 1."
         assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
         assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
@@ -534,13 +554,13 @@ class ActorBuilder:
         logger.trace("Checking body thermal values for sensibility.")
         assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
         assert (
-            0 <= body_surface_temperature_in_K
+                0 <= body_surface_temperature_in_K
         ), "Body surface temperature cannot be below 0K."
         assert (
-            0 <= body_emissivity and body_emissivity <= 1.0
+                0 <= body_emissivity and body_emissivity <= 1.0
         ), "Body emissivity has to be 0 to 1"
         assert (
-            0 <= body_reflectance and body_reflectance <= 1.0
+                0 <= body_reflectance and body_reflectance <= 1.0
         ), "Body reflectance has to be 0 to 1"
 
         actor._mass = actor_mass
@@ -562,20 +582,20 @@ class ActorBuilder:
 
     @staticmethod
     def add_comm_device(
-        actor: BaseActor,
-        device_name: str,
-        bandwidth_in_kbps: float = 0,
-        input_power: float = 0,
-        power_efficiency: float = 0,
-        antenna_efficiency: float = 0,
-        antenna_diameter: float = 0,
-        antenna_gain: float = 0,
-        point_losses: float = 0,
-        line_losses: float = 0,
-        polarization_losses: float = 0,
-        noise_temperature: float = 0,
-        fwhm: float = 0,
-        device_type: DeviceType = None,
+            actor: BaseActor,
+            device_name: str,
+            bandwidth_in_kbps: float = 0,
+            input_power: float = 0,
+            power_efficiency: float = 0,
+            antenna_efficiency: float = 0,
+            antenna_diameter: float = 0,
+            antenna_gain: float = 0,
+            point_losses: float = 0,
+            line_losses: float = 0,
+            polarization_losses: float = 0,
+            noise_temperature: float = 0,
+            fwhm: float = 0,
+            device_type: DeviceType = None,
     ):
         """Creates a communication device. Can be used by just setting bandwidth_in_kbps,
         or can be used with link budget modelling.
@@ -587,8 +607,10 @@ class ActorBuilder:
             input_power (float): input power of this device.
             power_efficiency (float): power efficiency of the device, between 0 and 1.
             antenna_efficiency (float): efficiency of the antenna, between 0 and 1.
-            antenna_diameter (float): diameter of the antenna, in m. Either set antenna_gain, or antenna_diameter.
-            antenna_gain (float): gain of the antenna, in dB. Either set antenna_gain, or antenna_diameter.
+            antenna_diameter (float): diameter of the antenna, in m. Either set antenna_gain,
+            or antenna_diameter.
+            antenna_gain (float): gain of the antenna, in dB. Either set antenna_gain,
+            or antenna_diameter.
             point_losses(float): pointing losses, in dB.
             line_losses (float): line losses, in dB.
             polarization_losses (float): polarization_losses, in dB.
@@ -664,10 +686,10 @@ class ActorBuilder:
 
     @staticmethod
     def add_custom_property(
-        actor: BaseActor,
-        property_name: str,
-        initial_value: Any,
-        update_function: Callable,
+            actor: BaseActor,
+            property_name: str,
+            initial_value: Any,
+            update_function: Callable,
     ):
         """Adds a custom property to the actor. This e.g. allows tracking any physical
         the user would like to track.
@@ -705,7 +727,8 @@ class ActorBuilder:
             # remove property if this failed
             del actor._custom_properties[property_name]
             raise TypeError(
-                "Update function must accept three parameters: actor, time_to_advance, current_power_consumption_in_W."
+                "Update function must accept three parameters: actor, time_to_advance, "
+                "current_power_consumption_in_W."
             )
 
         # Check that the update function returns a value of the same type as the initial value
@@ -713,15 +736,18 @@ class ActorBuilder:
             # remove property if this failed
             del actor._custom_properties[property_name]
             raise TypeError(
-                f"Update function must return a value of type {type(initial_value)} matching initial vaue."
+                f"Update function must return a value of type {type(initial_value)} matching "
+                f"initial vaue."
             )
 
-        # Check that the initial value is the same as the value returned by the update function with time 0
+        # Check that the initial value is the same as the value returned by the update function
+        # with time 0
         if new_value != initial_value:
             # remove property if this failed
             del actor._custom_properties[property_name]
             raise ValueError(
-                "Update function must return the existing value when called with unchanged time (dt = 0)."
+                "Update function must return the existing value when called with unchanged time ("
+                "dt = 0)."
             )
 
         actor._custom_properties_update_function[property_name] = update_function

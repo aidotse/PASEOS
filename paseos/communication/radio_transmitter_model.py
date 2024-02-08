@@ -10,26 +10,29 @@ class RadioTransmitterModel(TransmitterModel):
     """This class defines a radio transmitter model."""
 
     def __init__(
-        self,
-        input_power: float,
-        power_efficiency: float,
-        antenna_efficiency: float,
-        line_losses: float,
-        point_losses: float,
-        antenna_gain: float = 0,
-        antenna_diameter: float = 0,
+            self,
+            input_power: float,
+            power_efficiency: float,
+            antenna_efficiency: float,
+            line_losses: float,
+            point_losses: float,
+            antenna_gain: float = 0,
+            antenna_diameter: float = 0,
     ) -> None:
         """Initializes the model.
 
         Args:
             input_power (float): Input power into the signal amplifier, in W.
-            power_efficiency (float): The power efficiency of the signal amplifier, determines the output power.
+            power_efficiency (float): The power efficiency of the signal amplifier, determines
+            the output power.
             antenna_efficiency (float): The efficiency of the antenna.
             line_losses (float): The line losses of the transmitter, in dB.
             point_losses (float): The pointing losses of the transmitter, in dB.
-            antenna_gain (float): The gain of the antenna, either this or the diameter needs to be given so that gain
+            antenna_gain (float): The gain of the antenna, either this or the diameter needs to
+            be given so that gain
             can be determined.
-            antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain needs to be given.
+            antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain
+            needs to be given.
         """
         super().__init__(
             input_power,
@@ -41,7 +44,7 @@ class RadioTransmitterModel(TransmitterModel):
             antenna_diameter,
         )
         assert (
-            antenna_gain > 0 or antenna_diameter > 0
+                antenna_gain > 0 or antenna_diameter > 0
         ), "Antenna gain or antenna diameter needs to be higher than 0."
         assert not (antenna_diameter != 0 and antenna_gain != 0), (
             "Only set one of antenna gain and " "antenna diameter, not both."
