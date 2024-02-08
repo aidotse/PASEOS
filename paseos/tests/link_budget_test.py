@@ -1,6 +1,6 @@
-"""Test to check the link_budget_calc function(s)"""
+"""Test to check the gain_calc function(s)"""
 import pytest
-from paseos.utils.link_budget_calc import calc_radio_gain_from_wavelength_diameter,  calc_gain_from_fwhm
+from paseos.utils.gain_calc import calc_radio_gain_from_wavelength_diameter, calc_gain_from_fwhm
 
 import numpy as np
 
@@ -21,6 +21,7 @@ def test_gain_calculation():
 
     gain_optical = calc_gain_from_fwhm(1E-3)
     assert np.isclose(gain_optical, 70.45, rtol=0.01, atol=1)
+
 
 if __name__ == "__main__":
     test_gain_calculation()

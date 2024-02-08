@@ -15,6 +15,10 @@ from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
 from ..communication.device_type import DeviceType
+from ..communication.radio_transmitter_model import RadioTransmitterModel
+from ..communication.radio_receiver_model import RadioReceiverModel
+from ..communication.optical_transmitter_model import OpticalTransmitterModel
+from ..communication.optical_receiver_model import OpticalReceiverModel
 from paseos.geometric_model.geometric_model import GeometricModel
 
 
@@ -46,7 +50,7 @@ class ActorBuilder:
             Created actor
         """
         assert (
-            actor_type != BaseActor
+                actor_type != BaseActor
         ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
 
         logger.trace(f"Creating an actor blueprint with name {name}")
@@ -55,11 +59,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_ground_station_location(
-        actor: GroundstationActor,
-        latitude: float,
-        longitude: float,
-        elevation: float = 0,
-        minimum_altitude_angle: float = 30,
+            actor: GroundstationActor,
+            latitude: float,
+            longitude: float,
+            elevation: float = 0,
+            minimum_altitude_angle: float = 30,
     ):
         """Define the position of a ground station actor.
 
@@ -76,7 +80,7 @@ class ActorBuilder:
         assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
         assert (
-            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
+                minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
         ), "0 <= minimum_altitude_angle <= 90."
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
@@ -87,13 +91,13 @@ class ActorBuilder:
 
     @staticmethod
     def set_central_body(
-        actor: SpacecraftActor,
-        pykep_planet: pk.planet,
-        mesh: tuple = None,
-        radius: float = None,
-        rotation_declination: float = None,
-        rotation_right_ascension: float = None,
-        rotation_period: float = None,
+            actor: SpacecraftActor,
+            pykep_planet: pk.planet,
+            mesh: tuple = None,
+            radius: float = None,
+            rotation_declination: float = None,
+            rotation_right_ascension: float = None,
+            rotation_period: float = None,
     ):
         """Define the central body of the actor. This is the body the actor is orbiting around.
 
@@ -126,26 +130,26 @@ class ActorBuilder:
         # Check rotation parameters
         if rotation_declination is not None:
             assert (
-                rotation_declination >= -90 and rotation_declination <= 90
+                    rotation_declination >= -90 and rotation_declination <= 90
             ), "Rotation declination has to be -90 <= dec <= 90"
         if rotation_right_ascension is not None:
             assert (
-                rotation_right_ascension >= -180 and rotation_right_ascension <= 180
+                    rotation_right_ascension >= -180 and rotation_right_ascension <= 180
             ), "Rotation right ascension has to be -180 <= ra <= 180"
         if rotation_period is not None:
             assert rotation_period > 0, "Rotation period has to be > 0"
 
         # Check if rotation parameters are set
         if (
-            rotation_period is not None
-            or rotation_right_ascension is not None
-            or rotation_declination is not None
+                rotation_period is not None
+                or rotation_right_ascension is not None
+                or rotation_declination is not None
         ):
             assert (
-                rotation_right_ascension is not None
+                    rotation_right_ascension is not None
             ), "Rotation right ascension has to be set for rotation."
             assert (
-                rotation_declination is not None
+                    rotation_declination is not None
             ), "Rotation declination has to be set. for rotation."
             assert rotation_period is not None, "Rotation period has to be set for rotation."
             assert mesh is not None, "Radius cannot only be set for mesh-defined bodies."
@@ -158,7 +162,7 @@ class ActorBuilder:
             assert isinstance(mesh[1], np.ndarray), "Mesh triangles have to be a numpy array."
             assert len(mesh[0].shape) == 2, "Mesh vertices have to be a numpy array of shape (n,3)."
             assert (
-                len(mesh[1].shape) == 2
+                    len(mesh[1].shape) == 2
             ), "Mesh triangles have to be a numpy array of shape (n,3)."
 
         # Check if pykep planet is either orbiting the sun or is the sunitself
@@ -226,9 +230,9 @@ class ActorBuilder:
 
     @staticmethod
     def set_TLE(
-        actor: SpacecraftActor,
-        line1: str,
-        line2: str,
+            actor: SpacecraftActor,
+            line1: str,
+            line2: str,
     ):
         """Define the orbit of the actor using a TLE. For more information on TLEs see
         https://en.wikipedia.org/wiki/Two-line_element_set .
@@ -255,11 +259,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_orbit(
-        actor: SpacecraftActor,
-        position,
-        velocity,
-        epoch: pk.epoch,
-        central_body: pk.planet,
+            actor: SpacecraftActor,
+            position,
+            velocity,
+            epoch: pk.epoch,
+            central_body: pk.planet,
     ):
         """Define the orbit of the actor
 
@@ -307,7 +311,7 @@ class ActorBuilder:
 
     @staticmethod
     def set_geometric_model(
-        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
+            actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
     ):
         """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
         transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
@@ -335,11 +339,11 @@ class ActorBuilder:
 
     @staticmethod
     def set_power_devices(
-        actor: SpacecraftActor,
-        battery_level_in_Ws: float,
-        max_battery_level_in_Ws: float,
-        charging_rate_in_W: float,
-        power_device_type: PowerDeviceType = PowerDeviceType.SolarPanel,
+            actor: SpacecraftActor,
+            battery_level_in_Ws: float,
+            max_battery_level_in_Ws: float,
+            charging_rate_in_W: float,
+            power_device_type: PowerDeviceType = PowerDeviceType.SolarPanel,
     ):
         """Add a power device (battery + some charging mechanism (e.g. solar power)) to the actor.
         This will allow constraints related to power consumption.
@@ -374,8 +378,8 @@ class ActorBuilder:
         assert max_battery_level_in_Ws > 0, "Battery level must be positive"
         assert charging_rate_in_W > 0, "Battery level must be positive"
         assert (
-            power_device_type == PowerDeviceType.SolarPanel
-            or power_device_type == PowerDeviceType.RTG
+                power_device_type == PowerDeviceType.SolarPanel
+                or power_device_type == PowerDeviceType.RTG
         ), "Only SolarPanel and RTG devices supported."
 
         actor._power_device_type = power_device_type
@@ -390,10 +394,10 @@ class ActorBuilder:
 
     @staticmethod
     def set_radiation_model(
-        actor: SpacecraftActor,
-        data_corruption_events_per_s: float,
-        restart_events_per_s: float,
-        failure_events_per_s: float,
+            actor: SpacecraftActor,
+            data_corruption_events_per_s: float,
+            restart_events_per_s: float,
+            failure_events_per_s: float,
     ):
         """Enables the radiation model allowing data corruption, activities being
         interrupted by restarts and potentially critical device failures. Set any of the
@@ -424,20 +428,20 @@ class ActorBuilder:
 
     @staticmethod
     def set_thermal_model(
-        actor: SpacecraftActor,
-        actor_mass: float,
-        actor_initial_temperature_in_K: float,
-        actor_sun_absorptance: float,
-        actor_infrared_absorptance: float,
-        actor_sun_facing_area: float,
-        actor_central_body_facing_area: float,
-        actor_emissive_area: float,
-        actor_thermal_capacity: float,
-        body_solar_irradiance: float = 1360,
-        body_surface_temperature_in_K: float = 288,
-        body_emissivity: float = 0.6,
-        body_reflectance: float = 0.3,
-        power_consumption_to_heat_ratio: float = 0.5,
+            actor: SpacecraftActor,
+            actor_mass: float,
+            actor_initial_temperature_in_K: float,
+            actor_sun_absorptance: float,
+            actor_infrared_absorptance: float,
+            actor_sun_facing_area: float,
+            actor_central_body_facing_area: float,
+            actor_emissive_area: float,
+            actor_thermal_capacity: float,
+            body_solar_irradiance: float = 1360,
+            body_surface_temperature_in_K: float = 288,
+            body_emissivity: float = 0.6,
+            body_reflectance: float = 0.3,
+            power_consumption_to_heat_ratio: float = 0.5,
     ):
         """Add a thermal model to the actor to model temperature based on
         heat flux from sun, central body albedo, central body IR, actor IR
@@ -477,16 +481,16 @@ class ActorBuilder:
         assert actor_mass > 0, "Actor mass has to be positive."
 
         assert (
-            0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0
+                0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0
         ), "Heat ratio has to be 0 to 1."
 
         logger.trace("Checking actor thermal values for sensibility.")
         assert 0 <= actor_initial_temperature_in_K, "Actor initial temperature cannot be below 0K."
         assert (
-            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
+                0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
         ), "Absorptance has to be 0 to 1."
         assert (
-            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
+                0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
         ), "Absorptance has to be 0 to 1."
         assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
         assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
@@ -498,7 +502,7 @@ class ActorBuilder:
         assert 0 <= body_surface_temperature_in_K, "Body surface temperature cannot be below 0K."
         assert 0 <= body_emissivity and body_emissivity <= 1.0, "Body emissivity has to be 0 to 1"
         assert (
-            0 <= body_reflectance and body_reflectance <= 1.0
+                0 <= body_reflectance and body_reflectance <= 1.0
         ), "Body reflectance has to be 0 to 1"
 
         actor._mass = actor_mass
@@ -519,25 +523,29 @@ class ActorBuilder:
         )
 
     @staticmethod
-    def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float = 0, input_power: int = 0, power_efficiency: float = 0, 
-                        antenna_efficiency: float = 0, antenna_diameter: int  = 0, antenna_gain: int  = 0, point_losses: int = 0, 
-                        line_losses: int = 0, polarization_losses: int = 0, noise_temperature: int = 0, FWHM: float = 0,
+    def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float = 0, input_power: int = 0,
+                        power_efficiency: float = 0,
+                        antenna_efficiency: float = 0, antenna_diameter: float = 0, antenna_gain: float = 0,
+                        point_losses: int = 0,
+                        line_losses: int = 0, polarization_losses: int = 0, noise_temperature: int = 0, fwhm: float = 0,
                         device_type: DeviceType = None):
-        """Creates a communication device. Can be used by just setting bandwidth_in_kbps, or can be used with link budget modelling.
+        """Creates a communication device. Can be used by just setting bandwidth_in_kbps,
+        or can be used with link budget modelling.
 
         Args:
+            actor (BaseActor): act that that communication device will be added to.
             device_name (str): device_name of the communication device.
             bandwidth_in_kbps (float): device bandwidth in kbps.
-            input_power (int): input power of this device.
+            input_power (float): input power of this device.
             power_efficiency (float): power efficiency of the device, between 0 and 1.
-            antenna_efficiency (float): effiency of the antenna, between 0 and 1.
-            antenna_diameter (int): diameter of the antenna, in m. Either set antenna_gain, or antenna_diameter.
-            antenna_gain (int): gain of the antenna, in dB. Either set antenna_gain, or antenna_diameter.
-            point_losses(int): pointing losses, in dB.
-            line_losses (int): line losses, in dB.
-            polarization_losses (int): polarization_losses, in dB.
+            antenna_efficiency (float): efficiency of the antenna, between 0 and 1.
+            antenna_diameter (float): diameter of the antenna, in m. Either set antenna_gain, or antenna_diameter.
+            antenna_gain (float): gain of the antenna, in dB. Either set antenna_gain, or antenna_diameter.
+            point_losses(float): pointing losses, in dB.
+            line_losses (float): line losses, in dB.
+            polarization_losses (float): polarization_losses, in dB.
             noise_temperature (int): noise temperature, in K.
-            FWHM (float): full width at half maximum, in rad.
+            fwhm (float): full width at half maximum, in rad.
             device_type (DeviceType): type of the device.
         """
 
@@ -549,23 +557,33 @@ class ActorBuilder:
                 )
             actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
-            logger.debug(f"Added comm device with bandwith={bandwidth_in_kbps} kbps to actor {actor}.")
+            logger.debug(f"Added comm device with bandwidth={bandwidth_in_kbps} kbps to actor {actor}.")
         else:
-            assert not device_type == None, "A device type needs to be set."
+            assert not device_type is None, "A device type needs to be set."
             if device_type == DeviceType.RADIO_TRANSMITTER:
-                actor.set_radio_transmitter(device_name, input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_diameter)
+                assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain a radio transmitter."
+                radio_transmitter = RadioTransmitterModel(input_power, power_efficiency, antenna_efficiency,
+                                                          line_losses, point_losses, antenna_gain, antenna_diameter)
+                actor.add_transmitter(device_name, radio_transmitter)
             elif device_type == DeviceType.RADIO_RECEIVER:
-                actor.set_radio_receiver(device_name, noise_temperature, line_losses, polarization_losses, antenna_diameter, antenna_gain)
+                assert isinstance(actor, GroundstationActor), "Only a ground station can contain a radio receiver."
+                radio_receiver = RadioReceiverModel(line_losses, polarization_losses, noise_temperature,
+                                                    antenna_diameter, antenna_gain)
+                actor.add_receiver(device_name, radio_receiver)
             elif device_type == DeviceType.OPTICAL_TRANSMITTER:
-                actor.set_optical_transmitter(device_name, input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_gain, FWHM)
+                assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain an optical transmitter."
+                optical_transmitter = OpticalTransmitterModel(input_power, power_efficiency, antenna_efficiency,
+                                                              line_losses, point_losses, antenna_gain, antenna_diameter,
+                                                              fwhm)
+                actor.add_transmitter(device_name, optical_transmitter)
             elif device_type == DeviceType.OPTICAL_RECEIVER:
-                actor.set_optical_receiver(device_name, line_losses, antenna_diameter, antenna_gain)
-
-        
+                assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain an optical receiver."
+                optical_receiver = OpticalReceiverModel(line_losses, antenna_diameter, antenna_gain)
+                actor.add_receiver(device_name, optical_receiver)
 
     @staticmethod
     def add_custom_property(
-        actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable
+            actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable
     ):
         """Adds a custom property to the actor. This e.g. allows tracking any physical
         the user would like to track.

@@ -1,6 +1,6 @@
-import numpy as np
+import math
 from loguru import logger
-from ..utils.link_budget_calc  import *
+from ..utils.gain_calc import calc_radio_gain_from_wavelength_diameter
 from .transmitter_model import TransmitterModel
 
 class RadioTransmitterModel(TransmitterModel):
@@ -11,15 +11,14 @@ class RadioTransmitterModel(TransmitterModel):
         input_power: int,
         power_efficiency: float,
         antenna_efficiency: float,
-        line_losses: int,
-        point_losses: int,
-        antenna_gain: int = 0,
-        antenna_diameter: int = 0
+        line_losses: float,
+        point_losses: float,
+        antenna_gain: float = 0,
+        antenna_diameter: float = 0
     ) -> None:
         """Initializes the model.
 
         Args:
-            transmission_type (string): Transmission type, radio or optical. Currently radio and optical is implemented
             input_power (int): Input power into the signal amplifier, in W.
             power_efficiency (float): The power efficiency of the signal amplifier, determines the output power.
             antenna_efficiency (float): The efficiency of the antenna.

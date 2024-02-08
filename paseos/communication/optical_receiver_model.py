@@ -1,7 +1,4 @@
-import numpy as np
 from loguru import logger
-import math
-from ..utils.link_budget_calc import *
 from .receiver_model import ReceiverModel
 
 class OpticalReceiverModel(ReceiverModel):

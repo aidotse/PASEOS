@@ -1,8 +1,6 @@
 from loguru import logger
 import pykep as pk
 from skyfield.api import load
-import math
-from dotmap import DotMap
 from .base_actor import BaseActor
 
 

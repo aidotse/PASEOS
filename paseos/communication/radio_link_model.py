@@ -9,16 +9,17 @@ from ..actors.base_actor import BaseActor
 
 import math
 
+
 class RadioLinkModel(LinkModel):
     """This class defines a link model, containing one transmitter and one receiver."""
 
     def __init__(
-        self,
-        transmitter_actor: BaseActor,
-        transmitter_device_name: str,
-        receiver_actor: BaseActor,
-        receiver_device_name: str,
-        frequency: int,
+            self,
+            transmitter_actor: BaseActor,
+            transmitter_device_name: str,
+            receiver_actor: BaseActor,
+            receiver_device_name: str,
+            frequency: float,
     ) -> None:
         """Initializes the model.
 
@@ -27,7 +28,7 @@ class RadioLinkModel(LinkModel):
             transmitter_device_name (str): the name of the transmitter device.
             receiver_actor (BaseActor): the receiver in this link.
             receiver_device_name (str): the name of the receiver device.  
-            frequency (int): The frequency of this link, in Hz.
+            frequency (float): The frequency of this link, in Hz.
         """
 
         # Get the actual transmitter and receiver models
@@ -44,15 +45,15 @@ class RadioLinkModel(LinkModel):
         self.transmitter = transmitter
         self.receiver = receiver
         self.required_BER = 10E-5
-        self.frequency = frequency # in Hz
+        self.frequency = frequency  # in Hz
         self.modulation_scheme = "BPSK"
-        self.zenith_atmospheric_attenuation = 0.5 # in dB
-        self.required_s_n_ratio = 9.6 # in dB
-        self.required_s_n_margin = 3 # in dB
+        self.zenith_atmospheric_attenuation = 0.5  # in dB
+        self.required_s_n_ratio = 9.6  # in dB
+        self.required_s_n_margin = 3  # in dB
 
         self.receiver.set_gain(self.wavelength)
         self.transmitter.set_gain(self.wavelength)
-    
+
     def get_path_loss(self, slant_range) -> float:
         """Gets the path loss (free space loss) for a link.
 
@@ -64,7 +65,7 @@ class RadioLinkModel(LinkModel):
         """
         assert slant_range > 0, "Slant range needs to be higher than 0 meters"
 
-        return 20 * math.log10(4 * math.pi * slant_range  / self.wavelength)
+        return 20 * math.log10(4 * math.pi * slant_range / self.wavelength)
 
     def get_max_atmospheric_loss(self, min_elevation_angle) -> float:
         """Gets the maximal atmospheric loss for a link.
@@ -78,7 +79,7 @@ class RadioLinkModel(LinkModel):
         assert min_elevation_angle > 0, "Slant range needs to be higher than 0 meters"
 
         return self.zenith_atmospheric_attenuation / math.sin(min_elevation_angle * math.pi / 180)
-    
+
     def get_bitrate(self, slant_range, min_elevation_angle) -> float:
         """Gets the bitrate for a link based on current slant range and minimum elevation angle.
 
@@ -103,5 +104,5 @@ class RadioLinkModel(LinkModel):
 
         if bitrate < 0:
             bitrate = 0
-     
+
         return bitrate

@@ -1,8 +1,8 @@
-import numpy as np
 from loguru import logger
-import math
-from ..utils.link_budget_calc import *
+from ..utils.gain_calc import calc_radio_gain_from_wavelength_diameter
 from .receiver_model import ReceiverModel
+import math
+
 
 class RadioReceiverModel(ReceiverModel):
     """This class defines a radio receiver model."""

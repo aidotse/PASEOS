@@ -5,17 +5,6 @@ from loguru import logger
 import pykep as pk
 import numpy as np
 from dotmap import DotMap
-
-from ..communication.optical_transmitter_model import OpticalTransmitterModel
-from ..communication.optical_receiver_model import OpticalReceiverModel
-from ..communication.radio_receiver_model import RadioReceiverModel
-from ..communication.radio_transmitter_model import RadioTransmitterModel
-# from ..actors.ground_station_actor import GroundstationActor
-# from ..actors.spacecraft_actor import SpacecraftActor
-# from ..communication.transmitter_model import TransmitterModel
-# from ..communication.receiver_model import ReceiverModel
-
-
 from ..central_body.is_in_line_of_sight import is_in_line_of_sight
 from ..central_body.central_body import CentralBody
 
@@ -143,6 +132,12 @@ class BaseActor(ABC):
         for key in self._receivers:
             result.append(key)
         return result
+    
+    def add_transmitter(self, device_name, model):
+        self._transmitters[device_name] = DotMap(model=model)
+    
+    def add_receiver(self, device_name, model):
+        self._receivers[device_name] = DotMap(model=model)
 
     @property
     def custom_properties(self):
@@ -425,68 +420,3 @@ class BaseActor(ABC):
             self._previous_eclipse_status = self._central_body.blocks_sun(self, t)
             self._time_of_last_eclipse_status = t.mjd2000
         return self._previous_eclipse_status
-
-    def set_radio_transmitter(self,
-        transmitter_name, 
-        input_power: int,
-        power_efficiency: float,
-        antenna_efficiency: float,
-        line_losses: int,
-        point_losses: int,
-        antenna_gain: int = 0,
-        antenna_diameter: int = 0):
-
-        # return None
-        # assert isinstance(self, SpacecraftActor), "Only a spacecraft can contain a radio transmitter."
-
-        radio_transmitter = RadioTransmitterModel(input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_diameter)
-        self._transmitters[transmitter_name] = DotMap(model=radio_transmitter)
-    
-    def set_radio_receiver(self, receiver_name, noise_temperature, line_losses, polarization_loss, antenna_diameter = 0, antenna_gain = 0):
-        """Sets relevant parameters to calculate link budget
-
-        Args:
-            
-            noise_temperature (int): Noise temperature in K
-            line losses (int): Line losses in dB
-            polarization loss (int): Polarization loss in dB
-            antenna_diameter (int): Antenna diameter in dB, only one of antenna diameter or antenna gain needs to be set.
-            antenna_gain (int): Antenna gain in dBi, only one of antenna diameter or antenna gain needs to be set.
-        """
-        
-        # return None
-    
-        # assert isinstance(self, GroundstationActor), "Only a ground station can contain a radio receiver."
-        radio_receiver = RadioReceiverModel(line_losses, polarization_loss, noise_temperature, antenna_diameter, antenna_gain)
-        self._receivers[receiver_name] = DotMap(model=radio_receiver)
-
-    def set_optical_transmitter(self,
-        transmitter_name, 
-        input_power: int,
-        power_efficiency: float,
-        antenna_efficiency: float,
-        line_losses: int,
-        point_losses: int,
-        antenna_gain: int = 0,
-        antenna_diameter: int = 0,
-        FWHM: int = 0):
-
-        # return None
-        assert isinstance(self, SpacecraftActor), "Only a ground station can contain an optical transmitter."
-
-        optical_transmitter = OpticalTransmitterModel(input_power, power_efficiency, antenna_efficiency, line_losses, point_losses, antenna_gain, antenna_diameter, FWHM)
-        
-        self._transmitters[transmitter_name] = DotMap(model=optical_transmitter)
-
-    def set_optical_receiver(self,
-        receiver_name, 
-        line_losses: int,
-        antenna_diameter: int = 0, 
-        antenna_gain: int = 0):
-
-        # return None
-        assert isinstance(self, SpacecraftActor), "Only a spacecraft can contain an optical receiver."
-        
-        optical_receiver = OpticalReceiverModel(line_losses, antenna_diameter, antenna_gain)
-
-        self._receivers[receiver_name] = DotMap(model=optical_receiver)

@@ -25,7 +25,7 @@ class LinkModel:
         transmitter_model: TransmitterModel,
         receiver_actor: BaseActor,
         receiver_model: ReceiverModel,
-        frequency: int
+        frequency: float
     ) -> None:
         """Initializes the model.
 
