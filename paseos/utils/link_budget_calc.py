@@ -1,10 +1,7 @@
-import math
 import pykep as pk
 import os
 import numpy as np
-from skyfield.units import AU_M
 from skyfield.api import load
-from skyfield.vectorlib import VectorFunction
 from .sky_field_sky_coordinate import SkyfieldSkyCoordinate
 from ..actors.spacecraft_actor import SpacecraftActor
 from ..actors.ground_station_actor import GroundstationActor
@@ -14,11 +11,8 @@ _SKYFIELD_EARTH_PATH = os.path.join(os.path.dirname(__file__) + "/../resources/"
 _SKYFIELD_EARTH = load(_SKYFIELD_EARTH_PATH)["earth"]
 
 
-
-
-
 def calc_dist_and_alt_angle_spacecraft_ground(spacecraft_actor, ground_station_actor, epoch: pk.epoch) -> (
-float, float):
+        float, float):
     """Calculates distance and elevation angle based on spacecraft and ground station positions.
 
         Args:
@@ -68,7 +62,7 @@ def calc_dist_and_alt_angle_spacecraft_spacecraft(local_actor, known_actor, epoc
 
     distance = np.sqrt(
         (local_actor_pos[0] - other_actor_pos[0]) ** 2 + (local_actor_pos[1] - other_actor_pos[1]) ** 2 + (
-                    local_actor_pos[2] - other_actor_pos[2]) ** 2)
+                local_actor_pos[2] - other_actor_pos[2]) ** 2)
     altitude_angle = 0
 
     return distance, altitude_angle
@@ -86,10 +80,9 @@ def calc_dist_and_alt_angle(local_actor, known_actor, epoch: pk.epoch):
             distance, elevation (float, float): the distance in m and the elevation angle in degrees.
     """
 
-    # return None
-    if (isinstance(local_actor, SpacecraftActor) and isinstance(known_actor, GroundstationActor)):
+    if isinstance(local_actor, SpacecraftActor) and isinstance(known_actor, GroundstationActor):
         return calc_dist_and_alt_angle_spacecraft_ground(local_actor, known_actor, epoch)
-    elif (isinstance(local_actor, SpacecraftActor) and isinstance(known_actor, SpacecraftActor)):
+    elif isinstance(local_actor, SpacecraftActor) and isinstance(known_actor, SpacecraftActor):
         return calc_dist_and_alt_angle_spacecraft_spacecraft(local_actor, known_actor, epoch)
     else:
         print("No suitable types for distance calculations.")

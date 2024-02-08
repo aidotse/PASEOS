@@ -54,11 +54,11 @@ class RadioLinkModel(LinkModel):
         self.receiver.set_gain(self.wavelength)
         self.transmitter.set_gain(self.wavelength)
 
-    def get_path_loss(self, slant_range) -> float:
+    def get_path_loss(self, slant_range: float) -> float:
         """Gets the path loss (free space loss) for a link.
 
         Args:
-            slant_range (int): The slant range of the link, in meters
+            slant_range (float): The slant range of the link, in meters
 
         Returns:
             The path loss (free space loss) in dB
@@ -67,7 +67,7 @@ class RadioLinkModel(LinkModel):
 
         return 20 * math.log10(4 * math.pi * slant_range / self.wavelength)
 
-    def get_max_atmospheric_loss(self, min_elevation_angle) -> float:
+    def get_max_atmospheric_loss(self, min_elevation_angle: float) -> float:
         """Gets the maximal atmospheric loss for a link.
 
         Args:
@@ -80,11 +80,11 @@ class RadioLinkModel(LinkModel):
 
         return self.zenith_atmospheric_attenuation / math.sin(min_elevation_angle * math.pi / 180)
 
-    def get_bitrate(self, slant_range, min_elevation_angle) -> float:
+    def get_bitrate(self, slant_range: float, min_elevation_angle: float) -> float:
         """Gets the bitrate for a link based on current slant range and minimum elevation angle.
 
         Args:
-            slant_range (int): The slant range of the link, in meters
+            slant_range (float): The slant range of the link, in meters
             min_elevation_angle (float): The minimum elevation angle for this receiver, in degrees
 
         Returns:

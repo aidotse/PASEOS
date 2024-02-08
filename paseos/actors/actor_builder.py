@@ -5,7 +5,6 @@ import numpy as np
 from dotmap import DotMap
 import pykep as pk
 from skyfield.api import wgs84
-import math
 
 from .base_actor import BaseActor
 from .spacecraft_actor import SpacecraftActor
