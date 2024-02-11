@@ -1,11 +1,21 @@
 import socket
-import binascii
 from PIL import Image
 import io
 import numpy as np
 from communication_protocol import check_CRC, send_with_CRC, receive_with_CRC
 
+
 def create_connection(ip_client, port, buffer_size):
+    """Connect to a client requesting connection.
+
+    Args:
+        ip_client (str): client Internet Protocol (IP) address.
+        port (int): communication port.
+        buffer_size (int): communication buffer size.
+
+    Returns:
+        socket: communication socket.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(f"Binding connection at address: {ip_client} and port: {port}...")
         s.bind((ip_client, port))
@@ -21,6 +31,16 @@ def create_connection(ip_client, port, buffer_size):
 
 
 def sync_with_spacecraft(conn, local_time, buffer_size):
+    """Synchornize time with the target spacecraft. Local time is sent. spacecraft time is received.
+
+    Args:
+        conn (socket): communication socket.
+        local_time (pykep epoch): local time.
+        buffer_size (int): communication buffer size.
+
+    Returns:
+        str: spacecraft time in string format.
+    """
 
     # Receive spacecraft time with CRC
     spacecraft_time = receive_with_CRC(conn, buffer_size)
@@ -30,15 +50,26 @@ def sync_with_spacecraft(conn, local_time, buffer_size):
 
     return spacecraft_time
 
+
 def receive_image(conn, buffer_size):
+    """Receive image from a transmitting spacecraft.
+
+    Args:
+        conn (socket): communication socket.
+        buffer_size (int): communication buffer size.
+
+    Returns:
+        numpy array: received image.
+        str: received image name.
+    """
 
     # Receive metadata with CRC check
     image_metadata = receive_with_CRC(conn, buffer_size)
 
-    image_size = int(image_metadata.split('\n')[0])
+    image_size = int(image_metadata.split("\n")[0])
 
     # Get image name
-    image_name = image_metadata.split('\n')[1]
+    image_name = image_metadata.split("\n")[1]
 
     print(f"Receiving image:\n\bImage name: {image_name}.\n\bImage size: {image_size}.")
 
@@ -50,8 +81,7 @@ def receive_image(conn, buffer_size):
     # Received
     received = 0
 
-    while(received < image_size):
-
+    while received < image_size:
         # Calculate bytes to receive
         bytes_to_receive = min(buffer_size, image_size - received)
         # Receive data
@@ -70,9 +100,7 @@ def receive_image(conn, buffer_size):
         else:
             conn.sendall(b"NACK")
 
-
-
     image = Image.open(io.BytesIO(data))
     print("Image received successfully.")
 
-    return  np.array(image), image_name
+    return np.array(image), image_name
