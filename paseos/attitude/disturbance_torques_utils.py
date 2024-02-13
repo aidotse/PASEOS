@@ -1,7 +1,5 @@
-"""this file contains functions that return attitude disturbance torque vectors expressed in the actor body frame"""
+"""this file contains functions that return attitude disturbance torque vectors expressed in the actor body frame."""
 
-# OUTPUT NUMPY ARRAYS
-# OUTPUT IN BODY FRAME
 import numpy as np
 from ..utils.reference_frame_transfer import (
     rpy_to_body,
@@ -10,7 +8,7 @@ from ..utils.reference_frame_transfer import (
 )
 
 
-def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacecraft_temperature_K):
+def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, current_spacecraft_temperature_K, central_body_radius_m):
     """Calculates the aerodynamic torque on the satellite.
     The model used is taken from "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces"; Ran. S,
     Jihe W., et al.; 2017. The mass density of the atmosphere is calculated from the best linear fit of the data
@@ -22,25 +20,26 @@ def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacec
     temperature of the spacecraft and of the gas is low.
 
     Args:
-        r (np.array): distance from the satellite and the Earth's center of mass [km].
-        v (np.array): velocity of the satellite in ECI reference frame [m/s].
+        position (np.array): distance from the satellite and the Earth's center of mass [m].
+        velocity (np.array): velocity of the satellite in ECI reference frame [m/s].
         mesh (trimesh): mesh of the satellite from the geometric model.
         actor_attitude_in_rad (np.array): spacecraft actor in rad.
         current_spacecraft_temperature_K (float): current temperature in Kelvin.
+        central_body_radius_m (float): central body radius [m].
      Returns:
          T (np.array): torque vector in the spacecraft body frame.
     """
     # Constants for aerodynamic coefficients calculation
     temperature_gas = 1000  # [K]
     R = 8.314462  # Universal Gas Constant, [J/(K mol)]
-    altitude = np.linalg.norm(r) - 6371  # [km]
+    altitude = np.linalg.norm(position) - central_body_radius_m  # [km]
     density = 10 ** (
-        -(altitude + 1285) / 151
+        -(altitude + 1285e3) / 151e3
     )  # equation describing the best linear fit for the data, [kg/m^3]
-    molecular_speed_ratio_t = np.linalg.norm(v) / np.sqrt(
+    molecular_speed_ratio_t = np.linalg.norm(velocity) / np.sqrt(
         2 * R * temperature_gas
     )  # Used in the Cd and Cl calculation
-    molecular_speed_ratio_r = np.linalg.norm(v) / np.sqrt(
+    molecular_speed_ratio_r = np.linalg.norm(velocity) / np.sqrt(
         2 * R * current_spacecraft_temperature_K
     )  # Used in the Cd and Cl calculation
     accommodation_parameter = 0.85
@@ -53,7 +52,7 @@ def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacec
     face_normals_rpy = np.dot(transformation_matrix_rpy_body, face_normals_sbf.T).T
 
     #  Get the velocity and transform it in the Roll Pitch Yaw frame. Get the unit vector associated with the latter
-    v_rpy = eci_to_rpy(v, r, v)
+    v_rpy = eci_to_rpy(velocity, position, velocity)
     unit_v_rpy = v_rpy / np.linalg.norm(v_rpy)
 
     #  Loop to get the normals, the areas, the angle of attack and the centroids of the faces with airflow, confronting them
@@ -160,7 +159,7 @@ def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacec
 
         # Drag force on the plate [k]. Direction along the velocity vector.
         force_drag[k] = (
-            -0.5 * density * C_d * area_faces_airflow[k] * np.linalg.norm(v) ** 2 * unit_v_rpy
+            -0.5 * density * C_d * area_faces_airflow[k] * np.linalg.norm(velocity) ** 2 * unit_v_rpy
         )
         # Lift force on the plate [k]. Direction along the (v x n) x v direction, lift vector defined to be in that
         # direction. Intermediate step to get v x n.
@@ -168,7 +167,7 @@ def compute_aerodynamic_torque(r, v, mesh, actor_attitude_in_rad, current_spacec
         not_norm_lift_vector = np.cross(v_x_n_vector, unit_v_rpy)
         lift_vector = not_norm_lift_vector / np.linalg.norm(not_norm_lift_vector)
         force_lift[k] = (
-            -0.5 * density * C_l * area_faces_airflow[k] * np.linalg.norm(v) ** 2 * lift_vector
+            -0.5 * density * C_l * area_faces_airflow[k] * np.linalg.norm(velocity) ** 2 * lift_vector
         )
 
         # Torque calculated as the product between the distance of the centroid from the geometric center of the

@@ -9,8 +9,8 @@ class SpacecraftBodyModel:
     """
 
     _body_mesh = None
-    _body_center_of_gravity = None
-    _body_moment_of_inertia = None
+    _body_center_of_gravity_body = None
+    _body_moment_of_inertia_body = None
 
     def __init__(self, actor_mass, vertices=None, faces=None, scale=1) -> None:
         """Describes the geometry of the spacecraft and outputs relevant parameters related to the spacecraft body.
@@ -32,8 +32,8 @@ class SpacecraftBodyModel:
 
         self._body_mass = actor_mass
         self._body_mesh = self._create_body_mesh(vertices=vertices, faces=faces, scale=scale)
-        self._body_moment_of_inertia = self._body_mesh.moment_inertia * self._body_mass
-        self._body_center_of_gravity = self._body_mesh.center_mass
+        self._body_moment_of_inertia_body = self._body_mesh.moment_inertia * self._body_mass
+        self._body_center_of_gravity_body = self._body_mesh.center_mass
 
     def _create_body_mesh(self, vertices=None, faces=None, scale=1):
         """Creates the mesh of the satellite. If no vertices input is given, it defaults to a cuboid scaled by the
@@ -99,24 +99,4 @@ class SpacecraftBodyModel:
         """
         return self._body_mesh
 
-    @property
-    def body_moment_of_inertia(self) -> np.array:
-        """Gives the moment of inertia of the actor, assuming constant density.
 
-        Returns:
-            np.array: Mass moments of inertia for the actor
-
-        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
-                                                    [Iyx Iyy Iyx]
-                                                    [Izx Izy Izz]]
-        """
-        return self._body_moment_of_inertia
-
-    @property
-    def body_center_of_gravity(self) -> np.array:
-        """Gives the volumetric center of mass of the actor.
-
-        Returns:
-            np.array: Coordinates of the center of gravity of the mesh.
-        """
-        return self._body_center_of_gravity

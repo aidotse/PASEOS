@@ -190,7 +190,7 @@ def test_magnetic_disturbance():
 
     # Now, align the body magnetic dipole with the local Earth magnetic flux density vector
     # Earth magnetic flux density vector at start position is approximately:
-    B0 = np.array([-3.18159529e-09, 1.02244882e-07, -3.72362170e-08])
+    B0 = np.array([3.18159529e-09, -1.02244882e-07, 3.72362170e-08])
 
     B_direction = B0 / np.linalg.norm(B0)
 

@@ -1,5 +1,6 @@
 import numpy as np
 import pykep as pk
+from ..actors.spacecraft_actor import SpacecraftActor
 
 from .disturbance_torques_utils import (
     compute_aerodynamic_torque,
@@ -16,6 +17,15 @@ from ..utils.reference_frame_transfer import (
     rpy_to_body,
 )
 
+from enum import Enum
+
+class TorqueDisturbanceModel(Enum):
+    """Describes the different torque disturbance models supported.
+    1 - SpacePlot
+    """
+    Aerodynamic = 1
+    Gravitational = 2
+    Magnetic = 3
 
 class AttitudeModel:
     """This model describes the attitude (Roll, Pitch and Yaw) evolution of a spacecraft actor.
@@ -51,7 +61,7 @@ class AttitudeModel:
         actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         # pointing vector in body frame: (defaults to body z-axis)
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
+        actor_residual_magnetic_field_body: list[float] = [0.0, 0.0, 0.0],
     ):
         """Creates an attitude model to model actor attitude based on
         initial conditions (initial attitude and angular velocity) and
@@ -64,9 +74,28 @@ class AttitudeModel:
             actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
                 Defaults to [0., 0., 0.].
             actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
-            actor_residual_magnetic_field (list of floats): Actor's own magnetic field modeled as dipole moment vector.
+            actor_residual_magnetic_field_body (list of floats): Actor's own magnetic field modeled as dipole moment vector.
                 Defaults to [0., 0., 0.].
         """
+        assert (isinstance(local_actor, SpacecraftActor)
+            ), "local_actor must be a ""SpacecraftActor""."
+
+        assert (
+                np.asarray(actor_initial_attitude_in_rad).shape[0] == 3 and actor_initial_attitude_in_rad.ndim == 1
+            ), "actor_initial_attitude_in_rad shall be [3] shaped."
+
+        assert (
+                np.asarray(actor_initial_angular_velocity).shape[0] == 3 and actor_initial_angular_velocity.ndim == 1
+            ), "actor_initial_angular_velocity shall be [3] shaped."
+
+        assert (
+                np.asarray(actor_pointing_vector_body).shape[0] == 3 and actor_pointing_vector_body.ndim == 1
+            ), "actor_pointing_vector_body shall be [3] shaped."
+
+        assert (
+                np.asarray(actor_residual_magnetic_field_body).shape[0] == 3 and actor_residual_magnetic_field_body.ndim == 1
+            ), "actor_residual_magnetic_field_body shall be [3] shaped."
+
         self._actor = local_actor
         # convert to np.ndarray
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
@@ -92,7 +121,7 @@ class AttitudeModel:
         )
 
         # actor residual magnetic field (modeled as dipole)
-        self._actor_residual_magnetic_field = np.array(actor_residual_magnetic_field)
+        self._actor_residual_magnetic_field_body = np.array(actor_residual_magnetic_field_body)
 
     def _nadir_vector(self):
         """Compute unit vector pointing towards earth, in the inertial frame.
@@ -120,7 +149,7 @@ class AttitudeModel:
 
         if self._disturbances is not None:
             # TODO add solar disturbance
-            if "aerodynamic" in self._actor.attitude_disturbances:
+            if TorqueDisturbanceModel.Aerodynamic in self._actor.attitude_disturbances:
                 T += compute_aerodynamic_torque(
                     position,
                     velocity,
@@ -128,7 +157,7 @@ class AttitudeModel:
                     self.actor_attitude_in_rad,
                     current_temperature_K,
                 )
-            if "gravitational" in self._actor.attitude_disturbances:
+            if TorqueDisturbanceModel.Gravitational in self._actor.attitude_disturbances:
                 # Extract nadir vectors in different reference systems
                 nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
                 nadir_vector_in_body = rpy_to_body(nadir_vector_in_rpy, euler_angles)
@@ -142,14 +171,14 @@ class AttitudeModel:
                     self._actor.central_body.planet,
                     nadir_vector_in_body,
                     earth_rotation_vector_in_body,
-                    self._actor.body_moment_of_inertia,
+                    self._actor.body_moment_of_inertia_body,
                     np.linalg.norm(position),
                 )
-            if "magnetic" in self._actor.attitude_disturbances:
+            if TorqueDisturbanceModel.Magnetic in self._actor.attitude_disturbances:
                 time = self._actor.local_time
                 T += compute_magnetic_torque(
                     m_earth=self._actor.central_body.magnetic_dipole_moment(time),
-                    m_sat=self._actor_residual_magnetic_field,
+                    m_sat=self._actor_residual_magnetic_field_body,
                     position=self._actor.get_position(time),
                     velocity=self._actor.get_position_velocity(time)[1],
                     attitude=self._actor_attitude_in_rad,
@@ -165,7 +194,7 @@ class AttitudeModel:
         # TODO in the future control torques could be added
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia) @ (
+        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia_body) @ (
             self.compute_disturbance_torque(
                 position=np.array(self._actor.get_position(self._actor.local_time)),
                 velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
@@ -174,7 +203,7 @@ class AttitudeModel:
             )
             - np.cross(
                 self._actor_angular_velocity,
-                self._actor.body_moment_of_inertia @ self._actor_angular_velocity,
+                self._actor.body_moment_of_inertia_body @ self._actor_angular_velocity,
             )
         )
 
@@ -255,16 +284,13 @@ class AttitudeModel:
         # time
         t = self._actor.local_time
 
-        # position
-        position = np.array(self._actor.get_position(t))
-
         # next position
         next_position = np.array(
             self._actor.get_position(pk.epoch(t.mjd2000 + dt * pk.SEC2DAY, "mjd2000"))
         )
 
-        # velocity
-        velocity = np.array(self._actor.get_position_velocity(self._actor.local_time)[1])
+        # position, velocity
+        position, velocity = np.array(self._actor.get_position_velocity(self._actor.local_time)[1])
 
         # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self._body_axes_in_rpy()

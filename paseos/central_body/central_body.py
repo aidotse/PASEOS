@@ -250,7 +250,7 @@ class CentralBody:
                 wgs84.latlon(pole_latitude_in_deg, pole_longitude_in_deg).at(t_skyfield).position.m
             )
             # Multiply geomagnetic pole position unit vector with dipole moment strength
-            magnetic_dipole_moment = (
+            magnetic_dipole_moment = -(
                 dipole_north_direction / np.linalg.norm(dipole_north_direction) * strength_in_Am2
             )
         else:

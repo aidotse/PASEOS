@@ -14,7 +14,7 @@ from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
 from .spacecraft_body_model import SpacecraftBodyModel
-from ..attitude.attitude_model import AttitudeModel
+from ..attitude.attitude_model import AttitudeModel, TorqueDisturbanceModel
 
 
 class ActorBuilder:
@@ -565,11 +565,11 @@ class ActorBuilder:
         disturbance_list = []
 
         if aerodynamic:
-            disturbance_list.append("aerodynamic")
+            disturbance_list.append(TorqueDisturbanceModel.Aerodynamic)
         if gravitational:
-            disturbance_list.append("gravitational")
+            disturbance_list.append(TorqueDisturbanceModel.Gravitational)
         if magnetic:
-            disturbance_list.append("magnetic")
+            disturbance_list.append(TorqueDisturbanceModel.Magnetic)
         # Set attitude models.
         actor._attitude_model._disturbances = disturbance_list
 
@@ -579,7 +579,7 @@ class ActorBuilder:
         actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
         actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
-        actor_residual_magnetic_field: list[float] = [0.0, 0.0, 0.0],
+        actor_residual_magnetic_field_body: list[float] = [0.0, 0.0, 0.0],
     ):
         """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
         and angular velocity vector, modeling the evolution of the user specified pointing vector.
@@ -588,9 +588,8 @@ class ActorBuilder:
             actor (SpacecraftActor): Actor to model.
             actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
             actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
-            actor_pointing_vector_body (list of floats): Actor's pointing vector. Defaults to [0.0, 0.0, 1.0].
-            actor_residual_magnetic_field (list of floats): Actor's residual magnetic dipole moment vector.
-            Defaults to [0.0, 0.0, 0.0].
+            actor_pointing_vector_body (list of floats): Actor's pointing vector with respect to the body frame. Defaults to [0.0, 0.0, 1.0].
+            actor_residual_magnetic_field_body (list of floats): Actor's residual magnetic dipole moment vector in the body frame. Only needed if magnetic torque disturbances are modelled. Please, refer to [Tai L. Chow (2006) p. 148 - 149]. Defaults to [0.0, 0.0, 0.0].
         """
         # check for spacecraft actor
         assert isinstance(
@@ -609,7 +608,7 @@ class ActorBuilder:
             actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
             actor_initial_angular_velocity=actor_initial_angular_velocity,
             actor_pointing_vector_body=actor_pointing_vector_body,
-            actor_residual_magnetic_field=actor_residual_magnetic_field,
+            actor_residual_magnetic_field_body=actor_residual_magnetic_field_body,
         )
 
     @staticmethod

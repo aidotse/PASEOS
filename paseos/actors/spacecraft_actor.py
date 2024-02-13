@@ -126,28 +126,6 @@ class SpacecraftActor(BaseActor):
         return self._attitude_model._disturbances
 
     @property
-    def body_moment_of_inertia(self) -> np.array:
-        """Gives the moment of inertia of the actor, assuming constant density.
-
-        Returns:
-            np.array: Mass moments of inertia for the actor
-
-        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
-                                                    [Iyx Iyy Iyx]
-                                                    [Izx Izy Izz]]
-        """
-        return self._spacecraft_body_model._body_moment_of_inertia
-
-    @property
-    def body_center_of_gravity(self) -> np.array:
-        """Gives the volumetric center of mass of the actor.
-
-        Returns:
-            np.array: Coordinates of the center of gravity of the mesh.
-        """
-        return self._spacecraft_body_model._body_center_of_gravity
-
-    @property
     def temperature_in_K(self) -> float:
         """Returns the current temperature of the actor in K.
 
@@ -251,3 +229,25 @@ class SpacecraftActor(BaseActor):
             np.ndarray (owega_x, omega_y, omega_z).
         """
         return self._attitude_model._actor_angular_velocity_eci
+
+    @property
+    def body_moment_of_inertia_body(self) -> np.array:
+        """Gives the moment of inertia of the actor, assuming constant density, with respect to the body frame.
+
+        Returns:
+            np.array: Mass moments of inertia for the actor
+
+        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
+                                                    [Iyx Iyy Iyx]
+                                                    [Izx Izy Izz]]
+        """
+        return self._spacecraft_body_model._body_moment_of_inertia_body
+
+    @property
+    def body_center_of_gravity_body(self) -> np.array:
+        """Gives the volumetric center of mass of the actor with respect to the body frame.
+
+        Returns:
+            np.array: Coordinates of the center of gravity of the mesh.
+        """
+        return self._spacecraft_body_model._body_center_of_gravity_body
