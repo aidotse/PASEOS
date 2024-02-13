@@ -152,13 +152,8 @@ class AttitudeModel:
                 raise NotImplementedError("Models for torque disturbances are implemented only for Earth as a central body.")
 
             if TorqueDisturbanceModel.Aerodynamic in self._actor.attitude_disturbances:
-                T += compute_aerodynamic_torque(
-                    position,
-                    velocity,
-                    self._actor.geometric_model.mesh,
-                    self.actor_attitude_in_rad,
-                    current_temperature_K,
-                )
+                raise ValueError("Aerodynamic torque disturbance model is not implemented.")
+
             if TorqueDisturbanceModel.Gravitational in self._actor.attitude_disturbances:
                 # Extract nadir vectors in different reference systems
                 nadir_vector_in_rpy = eci_to_rpy(self._nadir_vector(), position, velocity)
