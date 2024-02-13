@@ -148,7 +148,9 @@ class AttitudeModel:
         T = np.array([0.0, 0.0, 0.0])
 
         if self._disturbances is not None:
-            # TODO add solar disturbance
+            if self._actor.central_body != pk.earth:
+                raise NotImplementedError("Models for torque disturbances are implemented only for Earth as a central body.")
+
             if TorqueDisturbanceModel.Aerodynamic in self._actor.attitude_disturbances:
                 T += compute_aerodynamic_torque(
                     position,

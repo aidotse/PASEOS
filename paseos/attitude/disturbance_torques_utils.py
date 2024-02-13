@@ -80,17 +80,19 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
     for i in range(12):
         if np.dot(face_normals_rpy[i], v_rpy) > 0:
             normals_faces_with_airflow[j] = face_normals_rpy[i]
+            # get the area of the plate [i] which is receiving airflow
             area_faces_airflow[j] = area_all_faces_mesh[
                 i
-            ]  # get the area of the plate [i] which is receiving airflow
+            ]
             alpha[j] = np.arccos(np.dot(normals_faces_with_airflow[j], unit_v_rpy))
             face_vertices = mesh.vertices[mesh.faces[i]]
             face_vertices_rpy = np.dot(
                 np.linalg.inv(transformation_matrix_rpy_body), face_vertices.T
             ).T
+            # get the centroids of the face[i] with airflow
             centroids_faces_airflow[j] = np.mean(
                 face_vertices_rpy, axis=0
-            )  # get the centroids of the face[i] with airflow
+            )
             j += 1
 
     #  Get the aerodynamic coefficient Cd and Cl for every plate and calculate the corresponding drag and lift forces
@@ -181,7 +183,8 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
     torque_aero = np.array(torque_aero)
     T_rpy = torque_aero.sum(axis=0)
     T = transformation_matrix_rpy_body @ T_rpy
-    T[np.isnan(T)] = 0  # substitutes 0 to any NaN value
+    # substitutes 0 to any NaN value
+    T[np.isnan(T)] = 0
 
     return np.array(T)
 
