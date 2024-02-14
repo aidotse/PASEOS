@@ -31,6 +31,9 @@ class SpacecraftActor(BaseActor):
     # If radiation permanently killed this device
     _is_dead = False
 
+    # Default temperature [K]
+    _default_temperature_in_K = 300
+
     def __init__(
         self,
         name: str,
@@ -52,6 +55,48 @@ class SpacecraftActor(BaseActor):
     def set_was_interrupted(self):
         """Sets this device to "was_interrupted=True" indicating current activities were interrupted."""
         self._was_interrupted = True
+
+    def set_body_attitude(self, attitude_in_rad):
+        """Sets the spacecraft attitude in [yaw, pitch, roll] angles.
+
+        Args:
+            actor_attitude_in_rad (numpy array): actor's attitude in [yaw, pitch, roll] angles [rad].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(attitude_in_rad, np.array)
+            and attitude_in_rad.shape[1] == 3
+            and attitude_in_rad.ndim == 1
+        ), "attitude_in_rad shall be a numpy array [3] shaped."
+        self._attitude_model._actor_attitude_in_rad = attitude_in_rad
+
+    def set_body_pointing_vector(self, pointing_vector_body):
+        """Sets the spacecraft angular velocity in body frame.
+
+        Args:
+            pointing_vector_body (numpy array): actor's pointing vector in body frame [m].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(pointing_vector_body, np.array)
+            and pointing_vector_body.shape[1] == 3
+            and pointing_vector_body.ndim == 1
+        ), "pointing_vector_body shall be a numpy array [3] shaped."
+        self._attitude_model._actor_pointing_vector_body = pointing_vector_body
+
+    def set_body_angular_velocity(self, angular_velocity_body):
+        """Sets the spacecraft angular velocity in body frame.
+
+        Args:
+            angular_velocity_body (numpy array): actor's angular velocity in body frame [rad/s].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(angular_velocity_body, np.array)
+            and angular_velocity_body.shape[1] == 3
+            and angular_velocity_body.ndim == 1
+        ), "angular_velocity_body shall be a numpy array [3] shaped."
+        self._attitude_model._actor_angular_velocity = angular_velocity_body
 
     @property
     def was_interrupted(self) -> bool:
@@ -133,6 +178,15 @@ class SpacecraftActor(BaseActor):
             float: Actor temperature in Kelvin.
         """
         return self._thermal_model.temperature_in_K
+
+    @property
+    def default_temperature_in_K(self) -> float:
+        """Returns the default temperature of the actor in K.
+
+        Returns:
+            float: Actor default temperature in Kelvin.
+        """
+        return self._default_temperature_in_K
 
     @property
     def temperature_in_C(self) -> float:

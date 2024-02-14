@@ -8,7 +8,17 @@ from ..utils.reference_frame_transfer import (
 )
 
 
-def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, current_spacecraft_temperature_K, central_body_radius_m):
+def compute_aerodynamic_torque(
+    position,
+    velocity,
+    mesh,
+    actor_attitude_in_rad,
+    current_spacecraft_temperature_K,
+    central_body_radius_m,
+    gas_temperature_K,
+    R_gas,
+    accommodation_coefficient,
+):
     """Calculates the aerodynamic torque on the satellite.
     The model used is taken from "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces"; Ran. S,
     Jihe W., et al.; 2017. The mass density of the atmosphere is calculated from the best linear fit of the data
@@ -26,23 +36,23 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
         actor_attitude_in_rad (np.array): spacecraft actor in rad.
         current_spacecraft_temperature_K (float): current temperature in Kelvin.
         central_body_radius_m (float): central body radius [m].
+        gas_temperature_K (float): gas temperature [K].
+        R_gas (float):  Universal Gas Constant [J/(K mol)].
+        accommodation_coefficient (float): accommodation coefficient.
      Returns:
          T (np.array): torque vector in the spacecraft body frame.
     """
-    # Constants for aerodynamic coefficients calculation
-    temperature_gas = 1000  # [K]
-    R = 8.314462  # Universal Gas Constant, [J/(K mol)]
+
     altitude = np.linalg.norm(position) - central_body_radius_m  # [km]
     density = 10 ** (
         -(altitude + 1285e3) / 151e3
     )  # equation describing the best linear fit for the data, [kg/m^3]
     molecular_speed_ratio_t = np.linalg.norm(velocity) / np.sqrt(
-        2 * R * temperature_gas
+        2 * R_gas * gas_temperature_K
     )  # Used in the Cd and Cl calculation
     molecular_speed_ratio_r = np.linalg.norm(velocity) / np.sqrt(
-        2 * R * current_spacecraft_temperature_K
+        2 * R_gas * current_spacecraft_temperature_K
     )  # Used in the Cd and Cl calculation
-    accommodation_parameter = 0.85
 
     #  Get the normal vectors of all the faces of the mesh in the spacecraft body reference frame, and then they get
     #  translated in the Roll Pitch Yaw frame with a transformation from paseos.utils.reference_frame_transfer.py
@@ -77,22 +87,18 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
     area_faces_airflow = [0, 0, 0, 0, 0, 0]
     centroids_faces_airflow = [0, 0, 0, 0, 0, 0]
 
-    for i in range(12):
+    for i in range(len(mesh.area_faces)):
         if np.dot(face_normals_rpy[i], v_rpy) > 0:
             normals_faces_with_airflow[j] = face_normals_rpy[i]
             # get the area of the plate [i] which is receiving airflow
-            area_faces_airflow[j] = area_all_faces_mesh[
-                i
-            ]
+            area_faces_airflow[j] = area_all_faces_mesh[i]
             alpha[j] = np.arccos(np.dot(normals_faces_with_airflow[j], unit_v_rpy))
             face_vertices = mesh.vertices[mesh.faces[i]]
             face_vertices_rpy = np.dot(
                 np.linalg.inv(transformation_matrix_rpy_body), face_vertices.T
             ).T
             # get the centroids of the face[i] with airflow
-            centroids_faces_airflow[j] = np.mean(
-                face_vertices_rpy, axis=0
-            )
+            centroids_faces_airflow[j] = np.mean(face_vertices_rpy, axis=0)
             j += 1
 
     #  Get the aerodynamic coefficient Cd and Cl for every plate and calculate the corresponding drag and lift forces
@@ -107,61 +113,83 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
 
     for k in range(j):
         alpha_scalar = alpha[k]
-        C_d = (
-            1
-            / molecular_speed_ratio_t**2
+
+        # C_d first term
+        C_d_term_1 = (
+            molecular_speed_ratio_t
+            / np.sqrt(np.pi)
             * (
-                molecular_speed_ratio_t
-                / np.sqrt(np.pi)
-                * (
-                    4 * np.sin(alpha_scalar) ** 2
-                    + 2 * accommodation_parameter * np.cos(2 * alpha_scalar)
-                )
-                * np.exp(-((molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2))
-                + np.sin(alpha_scalar)
-                * (
-                    1
-                    + 2 * molecular_speed_ratio_t**2
-                    + (1 - accommodation_parameter)
-                    * (1 - 2 * molecular_speed_ratio_t**2 * np.cos(2 * alpha_scalar))
-                )
-                * np.math.erf(molecular_speed_ratio_t * np.sin(alpha_scalar))
-                + accommodation_parameter
-                * np.sqrt(np.pi)
-                * molecular_speed_ratio_t**2
-                / molecular_speed_ratio_r
-                * np.sin(alpha_scalar) ** 2
+                4 * np.sin(alpha_scalar) ** 2
+                + 2 * accommodation_coefficient * np.cos(2 * alpha_scalar)
             )
+            * np.exp(-((molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2))
         )
 
-        C_l = (
-            np.cos(alpha[k])
-            / molecular_speed_ratio_t**2
+        # C_d second term
+        C_d_term_2 = (
+            np.sin(alpha_scalar)
             * (
-                2
-                / np.sqrt(np.pi)
-                * (2 - 2 * accommodation_parameter)
-                * molecular_speed_ratio_t
-                * np.sin(alpha_scalar)
-                * np.exp(-((molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2))
-                + (
-                    2
-                    * (2 - 2 * accommodation_parameter)
-                    * (molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2
-                    + (2 - accommodation_parameter)
-                )
-                * np.math.erf(molecular_speed_ratio_t * np.sin(alpha_scalar))
-                + accommodation_parameter
-                * np.sqrt(np.pi)
-                * molecular_speed_ratio_t**2
-                / molecular_speed_ratio_r
-                * np.sin(alpha_scalar)
+                1
+                + 2 * molecular_speed_ratio_t**2
+                + (1 - accommodation_coefficient)
+                * (1 - 2 * molecular_speed_ratio_t**2 * np.cos(2 * alpha_scalar))
             )
+            * np.math.erf(molecular_speed_ratio_t * np.sin(alpha_scalar))
+        )
+
+        # C_d third term
+        C_d_term_3 = (
+            accommodation_coefficient
+            * np.sqrt(np.pi)
+            * molecular_speed_ratio_t**2
+            / molecular_speed_ratio_r
+            * np.sin(alpha_scalar) ** 2
+        )
+
+        # C_d (computed according to Eq 2a of "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces";
+        # Ran. S, Jihe W., et al.; 2017. )
+        C_d = 1 / molecular_speed_ratio_t**2 * (C_d_term_1 + C_d_term_2 + C_d_term_3)
+        # C_l first term
+        C_l_term_1 = (
+            2
+            / np.sqrt(np.pi)
+            * (2 - 2 * accommodation_coefficient)
+            * molecular_speed_ratio_t
+            * np.sin(alpha_scalar)
+            * np.exp(-((molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2))
+        )
+
+        # C_l second term
+        C_l_term_2 = (
+            2
+            * (2 - 2 * accommodation_coefficient)
+            * (molecular_speed_ratio_t * np.sin(alpha_scalar)) ** 2
+            + (2 - accommodation_coefficient)
+        ) * np.math.erf(molecular_speed_ratio_t * np.sin(alpha_scalar))
+
+        # C_l third term
+        C_l_term_3 = (
+            accommodation_coefficient
+            * np.sqrt(np.pi)
+            * molecular_speed_ratio_t**2
+            / molecular_speed_ratio_r
+            * np.sin(alpha_scalar)
+        )
+
+        # C_l (computed according to Eq 2b of "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces";
+        # Ran. S, Jihe W., et al.; 2017. )
+        C_l = (
+            np.cos(alpha[k]) / molecular_speed_ratio_t**2 * (C_l_term_1 + C_l_term_2 + C_l_term_3)
         )
 
         # Drag force on the plate [k]. Direction along the velocity vector.
         force_drag[k] = (
-            -0.5 * density * C_d * area_faces_airflow[k] * np.linalg.norm(velocity) ** 2 * unit_v_rpy
+            -0.5
+            * density
+            * C_d
+            * area_faces_airflow[k]
+            * np.linalg.norm(velocity) ** 2
+            * unit_v_rpy
         )
         # Lift force on the plate [k]. Direction along the (v x n) x v direction, lift vector defined to be in that
         # direction. Intermediate step to get v x n.
@@ -169,7 +197,12 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
         not_norm_lift_vector = np.cross(v_x_n_vector, unit_v_rpy)
         lift_vector = not_norm_lift_vector / np.linalg.norm(not_norm_lift_vector)
         force_lift[k] = (
-            -0.5 * density * C_l * area_faces_airflow[k] * np.linalg.norm(velocity) ** 2 * lift_vector
+            -0.5
+            * density
+            * C_l
+            * area_faces_airflow[k]
+            * np.linalg.norm(velocity) ** 2
+            * lift_vector
         )
 
         # Torque calculated as the product between the distance of the centroid from the geometric center of the
@@ -189,36 +222,55 @@ def compute_aerodynamic_torque(position, velocity, mesh, actor_attitude_in_rad, 
     return np.array(T)
 
 
-def compute_gravity_gradient_torque(central_body, u_r, u_n, J, r):
+def compute_gravity_gradient_torque(
+    central_body, satellite_to_earth_unit_vector_body, roatation_axis_unit_vector_body, J, r, J2
+):
     """
     Equation for gravity gradient torque with up to J2 effect from:
     https://doi.org/10.1016/j.asr.2018.06.025, chapter 3.3
     This function currently only works for Earth centered orbits.
 
     Args:
-        u_r (np.array): Unit vector pointing from Satellite center of gravity to Earth's center of gravity.
-        u_n (np.array): Unit vector along the Earth's rotation axis, in the spacecraft body frame.
+        satellite_to_earth_unit_vector_body (np.array): Unit vector pointing from Satellite center
+            of gravity to Earth's center of gravity.
+        roatation_axis_unit_vector_body (np.array): Unit vector along the Earth's rotation axis, in the spacecraft body frame.
         J (np.array): The satellites moment of inertia, in the form of [[Ixx Ixy Ixz]
                                                                         [Iyx Iyy Iyx]
                                                                         [Izx Izy Izz]].
         r (float): The distance from the center of the Earth to the satellite.
-
+        J2 (float): Earth'sJ2 coefficient [https://ocw.tudelft.nl/wp-content/uploads/AE2104-Orbital-Mechanics-Slides_8.pdf].
     Returns:
         np.array: total gravitational torques in Nm expressed in the spacecraft body frame.
     """
     # Constants
     mu = central_body.mu_self  # Earth's gravitational parameter, [m^3/s^2].
-    # Earth's J2 coefficient [https://ocw.tudelft.nl/wp-content/uploads/AE2104-Orbital-Mechanics-Slides_8.pdf].
-    J2 = 1.0826267e-3
+
     Re = central_body.radius  # Earth's radius, [m]
 
-    tg_term_1 = (3 * mu / (r**3)) * np.cross(u_r, np.dot(J, u_r))
+    tg_term_1 = (3 * mu / (r**3)) * np.cross(
+        satellite_to_earth_unit_vector_body, np.dot(J, satellite_to_earth_unit_vector_body)
+    )
     tg_term_2 = (
-        30 * np.dot(u_r, u_n) * (np.cross(u_n, np.dot(J, u_r)) + np.cross(u_r, np.dot(J, u_n)))
+        30
+        * np.dot(satellite_to_earth_unit_vector_body, roatation_axis_unit_vector_body)
+        * (
+            np.cross(
+                roatation_axis_unit_vector_body, np.dot(J, satellite_to_earth_unit_vector_body)
+            )
+            + np.cross(
+                satellite_to_earth_unit_vector_body, np.dot(J, roatation_axis_unit_vector_body)
+            )
+        )
     )
-    tg_term_3 = np.cross((15 - 105 * np.dot(u_r, u_n) ** 2) * u_r, np.dot(J, u_r)) + np.cross(
-        6 * u_n, np.dot(J, u_n)
-    )
+    tg_term_3 = np.cross(
+        (
+            15
+            - 105
+            * np.dot(satellite_to_earth_unit_vector_body, roatation_axis_unit_vector_body) ** 2
+        )
+        * satellite_to_earth_unit_vector_body,
+        np.dot(J, satellite_to_earth_unit_vector_body),
+    ) + np.cross(6 * roatation_axis_unit_vector_body, np.dot(J, roatation_axis_unit_vector_body))
     tg = tg_term_1 + mu * J2 * Re**2 / (2 * r**5) * (tg_term_2 + tg_term_3)
     return np.array(tg)
 

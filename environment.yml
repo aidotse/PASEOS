@@ -9,7 +9,7 @@ dependencies:
   - myst-parser # for markdown math in docs
   - pykep>=2.6 # core non-optional dependency
   - pyquaternion>=0.9.9 # core non-optional dependency
-  - pytest<8.0.0 # for tests
+  - pytest<8.0.0 # for tests. v8.0.0 is not supporting asyncio. To be checked later.
   - pytest-asyncio # for tests involving activities
   - python>=3.8 # core non-optional dependency
   - scikit-spatial>=6.5.0 # core non-optional dependency

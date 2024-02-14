@@ -331,6 +331,7 @@ class ActorBuilder:
             actor, SpacecraftActor
         ), "Body model is only supported for SpacecraftActors."
 
+        logger.trace("Checking mass values for sensibility.")
         assert mass > 0, "Mass is > 0"
 
         # Check if the actor already has mass.
@@ -349,8 +350,8 @@ class ActorBuilder:
         actor._spacecraft_body_model = SpacecraftBodyModel(
             actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
-
-        # Check if the actor has a moment of inertia
+        # Logging
+        logger.debug(f"Added spacecraft body model to actor {actor}.")
 
     @staticmethod
     def set_power_devices(
@@ -564,14 +565,27 @@ class ActorBuilder:
         # Create a list with user specified disturbances which are considered in the attitude modelling.
         disturbance_list = []
 
+        # Disturbance list name
+        disturbance_list_name = ""
+
         if aerodynamic:
             disturbance_list.append(TorqueDisturbanceModel.Aerodynamic)
+            disturbance_list_name += "Aerodynamic, "
         if gravitational:
             disturbance_list.append(TorqueDisturbanceModel.Gravitational)
+            disturbance_list_name += "Gravitational, "
         if magnetic:
             disturbance_list.append(TorqueDisturbanceModel.Magnetic)
-        # Set attitude models.
-        actor._attitude_model._disturbances = disturbance_list
+            disturbance_list_name += "Magnetic, "
+
+        if len(disturbance_list) > 0:
+            # Set attitude models.
+            actor._attitude_model._disturbances = disturbance_list
+            logger.debug(
+                f"Added {disturbance_list_name[:-2]} attitude torque disturbance models to actor {actor}."
+            )
+        else:
+            logger.warning("No disturbance model was specified.")
 
     @staticmethod
     def set_attitude_model(
@@ -580,16 +594,25 @@ class ActorBuilder:
         actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
         actor_residual_magnetic_field_body: list[float] = [0.0, 0.0, 0.0],
+        accommodation_coefficient: float = 0.85,
     ):
         """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
         and angular velocity vector, modeling the evolution of the user specified pointing vector.
 
         Args:
             actor (SpacecraftActor): Actor to model.
-            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude. Defaults to [0.0, 0.0, 0.0].
-            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity. Defaults to [0.0, 0.0, 0.0].
-            actor_pointing_vector_body (list of floats): Actor's pointing vector with respect to the body frame. Defaults to [0.0, 0.0, 1.0].
-            actor_residual_magnetic_field_body (list of floats): Actor's residual magnetic dipole moment vector in the body frame. Only needed if magnetic torque disturbances are modelled. Please, refer to [Tai L. Chow (2006) p. 148 - 149]. Defaults to [0.0, 0.0, 0.0].
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude.
+                Defaults to [0.0, 0.0, 0.0].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity.
+                Defaults to [0.0, 0.0, 0.0].
+            actor_pointing_vector_body (list of floats): Actor's pointing vector with respect to the body frame.
+                Defaults to [0.0, 0.0, 1.0].
+            actor_residual_magnetic_field_body (list of floats): Actor's residual magnetic dipole moment vector
+                in the body frame. Only needed if magnetic torque disturbances are modelled.
+                Please, refer to [Tai L. Chow (2006) p. 148 - 149]. Defaults to [0.0, 0.0, 0.0].
+            accommodation_coefficient (float): Accommodation coefficient used for Aerodynamic torque disturbance calculation.
+                Defaults to 0.85.
+
         """
         # check for spacecraft actor
         assert isinstance(
@@ -602,6 +625,29 @@ class ActorBuilder:
                 "The actor already had an attitude model. Overriding old attitude model."
             )
 
+        assert (
+            np.asarray(actor_initial_attitude_in_rad).shape[0] == 3
+            and actor_initial_attitude_in_rad.ndim == 1
+        ), "actor_initial_attitude_in_rad shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_initial_angular_velocity).shape[0] == 3
+            and actor_initial_angular_velocity.ndim == 1
+        ), "actor_initial_angular_velocity shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_pointing_vector_body).shape[0] == 3
+            and actor_pointing_vector_body.ndim == 1
+        ), "actor_pointing_vector_body shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_residual_magnetic_field_body).shape[0] == 3
+            and actor_residual_magnetic_field_body.ndim == 1
+        ), "actor_residual_magnetic_field_body shall be [3] shaped."
+
+        logger.trace("Checking accommodation coefficient for sensibility.")
+        assert accommodation_coefficient > 0, "Accommodation coefficient shall be positive."
+
         # Set attitude model.
         actor._attitude_model = AttitudeModel(
             local_actor=actor,
@@ -609,7 +655,9 @@ class ActorBuilder:
             actor_initial_angular_velocity=actor_initial_angular_velocity,
             actor_pointing_vector_body=actor_pointing_vector_body,
             actor_residual_magnetic_field_body=actor_residual_magnetic_field_body,
+            accommodation_coefficient=accommodation_coefficient,
         )
+        logger.debug(f"Added attitude model to actor {actor}.")
 
     @staticmethod
     def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):

@@ -255,7 +255,7 @@ class CentralBody:
             )
         else:
             # TODO add other planets' magnetic fields
-            logger.warning("Magnetic dipole moment only modeled for Earth")
+            raise NotImplementedError("Magnetic dipole moment only modeled for Earth.")
             # For now: assume alignment with rotation axis
             magnetic_dipole_moment = np.array([0, 0, 1]) * strength_in_Am2
 

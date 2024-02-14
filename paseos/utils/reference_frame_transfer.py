@@ -275,3 +275,32 @@ def rotate_body_vectors(x, y, z, p, angle):
     p = rodrigues_rotation(p, angle)
 
     return x, y, z, p
+
+
+def frame_rotation(position, next_position, velocity):
+    """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
+    This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
+
+    Args:
+        position (np.ndarray): actor position vector.
+        next_position (np.ndarray): actor position vector in the next timestep.
+        velocity (np.ndarray): actor velocity vector.
+
+    Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame.
+    """
+    # orbital plane normal unit vector: (p x v)/||p x v||
+    orbital_plane_normal = np.cross(position, velocity) / np.linalg.norm(
+        np.cross(position, velocity)
+    )
+
+    # rotation angle: arccos((p . p_previous) / (||p|| ||p_previous||))
+    rpy_frame_rotation_angle_in_eci = np.arccos(
+        np.linalg.multi_dot([position, next_position])
+        / (np.linalg.norm(position) * np.linalg.norm(next_position))
+    )
+
+    # assign this scalar rotation angle to the vector perpendicular to rotation plane
+    rpy_frame_rotation_vector_in_eci = orbital_plane_normal * rpy_frame_rotation_angle_in_eci
+
+    # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
+    return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)

@@ -1,6 +1,7 @@
 from loguru import logger
 import numpy as np
 import trimesh
+import itertools
 
 
 class SpacecraftBodyModel:
@@ -34,6 +35,45 @@ class SpacecraftBodyModel:
         self._body_mesh = self._create_body_mesh(vertices=vertices, faces=faces, scale=scale)
         self._body_moment_of_inertia_body = self._body_mesh.moment_inertia * self._body_mass
         self._body_center_of_gravity_body = self._body_mesh.center_mass
+
+    @staticmethod
+    def _is_cuboid(vertices):
+        """Check if the mesh corresponds to a cuboid.
+
+        Args:
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+        Returns:
+            bool: True, if the mesh corresponds to a cuboid.
+        """
+        # Convert to numpy
+        vertices = np.array(vertices)
+        # If the len is not 8, then it is not a cuboid.
+        if len(vertices) != 8:
+            return False
+
+        # Vertices distances
+        distances = []
+        # Getting distance of vertices
+        for v1, v2 in itertools.combinations(vertices, 2):
+            distances.append(np.linalg.norm(v1 - v2))
+
+        # Unique distances
+        unique_distances = set(distances)
+        # If the unique distances are not 2 nor 3, then it is not a cuboid.
+        if len(unique_distances) not in [2, 3]:
+            return False
+
+        # Count the occurrences of each distance
+        distance_counts = [distances.count(d) for d in unique_distances]
+
+        # For a cuboid, there should be 12 edges of one length, 12 edges of root 2 of that length,
+        # and 4 edges of root 3 of that length.
+        # For a cube, there should be 12 edges of one length, and 4 edges of root 3 of that length.
+        distance_counts.sort()
+        if distance_counts not in [[12, 4], [4, 12, 12]]:
+            return False
+
+        return True
 
     def _create_body_mesh(self, vertices=None, faces=None, scale=1):
         """Creates the mesh of the satellite. If no vertices input is given, it defaults to a cuboid scaled by the
@@ -83,6 +123,8 @@ class SpacecraftBodyModel:
             assert (
                 len(np.asarray(vertices).shape) == 2 and np.asarray(vertices).shape[1] == 3
             ), "Vertices shall be [N, 3] shaped."
+            if not (SpacecraftBodyModel._is_cuboid(vertices=vertices)):
+                raise NotImplementedError("Only cuboid meshes are currently supported.")
 
         # Create mesh
         logger.trace("Creating the spacecraft body mesh.")
@@ -98,5 +140,3 @@ class SpacecraftBodyModel:
             np.array: Mesh of the satellite.
         """
         return self._body_mesh
-
-

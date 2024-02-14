@@ -159,13 +159,15 @@ class PASEOS:
 
             # Update actor temperature
             if self.local_actor.has_thermal_model:
-                # Get current temperature to update attitude model if needed.
+                # Get current temperature to update attitude model, if needed.
+                current_temperature_K = self.local_actor.temperature_in_K
+
                 self.local_actor._thermal_model.update_temperature(
                     dt, current_power_consumption_in_W
                 )
             else:
-                # Setting default temperature to update attitude model if needed.
-                current_temperature_K = 300
+                # Setting current temperature to default temperatue to update the attitude model, if needed.
+                current_temperature_K = self.local_actor.default_temperature_in_K
 
             # Update state of charge
             if self.local_actor.has_power_model:
