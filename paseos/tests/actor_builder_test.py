@@ -104,10 +104,10 @@ def test_set_spacecraft_body_model():
 
     assert sat1.mass == 100
     assert all(
-        sat1.body_center_of_gravity == np.array([0, 0, 0])
+        sat1.body_center_of_gravity_body == np.array([0, 0, 0])
     )  # check the default mesh is centered
     assert sat1.body_mesh.volume == 1  # check the default volume is correct
-    assert round(sat1.body_moment_of_inertia[0, 0], 4) == 16.6667  # for the default mesh
+    assert round(sat1.body_moment_of_inertia_body[0, 0], 4) == 16.6667  # for the default mesh
     assert (
-        sat1.body_moment_of_inertia[0, 1] == 0.0
+        sat1.body_moment_of_inertia_body[0, 1] == 0.0
     )  # Should be zero if the mass distribution is even

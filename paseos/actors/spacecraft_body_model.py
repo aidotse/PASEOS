@@ -37,41 +37,59 @@ class SpacecraftBodyModel:
         self._body_center_of_gravity_body = self._body_mesh.center_mass
 
     @staticmethod
-    def _is_cuboid(vertices):
+    def _is_cuboid(vertices, faces):
         """Check if the mesh corresponds to a cuboid.
 
         Args:
             vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+                triangles. Uses Trimesh to create the mesh from this and the list of vertices.
         Returns:
             bool: True, if the mesh corresponds to a cuboid.
         """
         # Convert to numpy
         vertices = np.array(vertices)
-        # If the len is not 8, then it is not a cuboid.
-        if len(vertices) != 8:
+        # Checking expected number of vertices and faces
+        if len(vertices) != 8 or len(faces) != 12:
             return False
 
-        # Vertices distances
-        distances = []
-        # Getting distance of vertices
-        for v1, v2 in itertools.combinations(vertices, 2):
-            distances.append(np.linalg.norm(v1 - v2))
+        # Minimum norm vectors in faces
+        min_vectors_in_faces = []
 
-        # Unique distances
-        unique_distances = set(distances)
-        # If the unique distances are not 2 nor 3, then it is not a cuboid.
-        if len(unique_distances) not in [2, 3]:
-            return False
+        # Taking the two vectors for each face having the smallest norm.
+        for face in faces:
+            v1 = vertices[face[0]] - vertices[face[1]]
+            v2 = vertices[face[0]] - vertices[face[2]]
+            v3 = vertices[face[1]] - vertices[face[2]]
+            n1 = np.linalg.norm(v1)
+            n2 = np.linalg.norm(v2)
+            n3 = np.linalg.norm(v3)
 
-        # Count the occurrences of each distance
-        distance_counts = [distances.count(d) for d in unique_distances]
+            # norm sorted
+            norm_sorted = sorted([n1, n2, n3])
 
-        # For a cuboid, there should be 12 edges of one length, 12 edges of root 2 of that length,
-        # and 4 edges of root 3 of that length.
-        # For a cube, there should be 12 edges of one length, and 4 edges of root 3 of that length.
-        distance_counts.sort()
-        if distance_counts not in [[12, 4], [4, 12, 12]]:
-            return False
+            # mininum norm vectors
+            min_norm_vectors = []
+            if n1 in norm_sorted[:2]:
+                min_norm_vectors.append(v1)
+
+            if n2 in norm_sorted[:2]:
+                min_norm_vectors.append(v2)
+
+            if n3 in norm_sorted[:2]:
+                min_norm_vectors.append(v3)
+
+            min_vectors_in_faces.append(min_norm_vectors)
+
+
+        # The vectors in min_vectors_in_faces shall be orthogonal.
+
+        # Angles between vectors
+        for min_norm_vector_in_face in min_vectors_in_faces:
+            if np.dot(min_norm_vector_in_face[0], min_norm_vector_in_face[1]):
+                return False
+
 
         return True
 
@@ -123,7 +141,7 @@ class SpacecraftBodyModel:
             assert (
                 len(np.asarray(vertices).shape) == 2 and np.asarray(vertices).shape[1] == 3
             ), "Vertices shall be [N, 3] shaped."
-            if not (SpacecraftBodyModel._is_cuboid(vertices=vertices)):
+            if not (SpacecraftBodyModel._is_cuboid(vertices=vertices, faces=faces)):
                 raise NotImplementedError("Only cuboid meshes are currently supported.")
 
         # Create mesh

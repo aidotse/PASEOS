@@ -155,7 +155,7 @@ class AttitudeModel:
         T = np.array([0.0, 0.0, 0.0])
 
         if self._disturbances is not None:
-            if self._actor.central_body != pk.earth:
+            if self._actor.central_body.planet.name != "earth":
                 raise NotImplementedError(
                     "Models for torque disturbances are implemented only for Earth as a central body."
                 )
@@ -284,7 +284,7 @@ class AttitudeModel:
         )
 
         # position, velocity
-        position, velocity = np.array(self._actor.get_position_velocity(self._actor.local_time)[1])
+        position, velocity = np.array(self._actor.get_position_velocity(self._actor.local_time))
 
         # Initial body vectors expressed in rpy frame: (x, y, z, custom pointing vector)
         xb_rpy, yb_rpy, zb_rpy, pointing_vector_rpy = self._body_axes_in_rpy()

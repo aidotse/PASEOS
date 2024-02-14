@@ -627,22 +627,22 @@ class ActorBuilder:
 
         assert (
             np.asarray(actor_initial_attitude_in_rad).shape[0] == 3
-            and actor_initial_attitude_in_rad.ndim == 1
+            and np.asarray(actor_initial_attitude_in_rad).ndim == 1
         ), "actor_initial_attitude_in_rad shall be [3] shaped."
 
         assert (
             np.asarray(actor_initial_angular_velocity).shape[0] == 3
-            and actor_initial_angular_velocity.ndim == 1
+            and np.asarray(actor_initial_angular_velocity).ndim == 1
         ), "actor_initial_angular_velocity shall be [3] shaped."
 
         assert (
             np.asarray(actor_pointing_vector_body).shape[0] == 3
-            and actor_pointing_vector_body.ndim == 1
+            and np.asarray(actor_pointing_vector_body).ndim == 1
         ), "actor_pointing_vector_body shall be [3] shaped."
 
         assert (
             np.asarray(actor_residual_magnetic_field_body).shape[0] == 3
-            and actor_residual_magnetic_field_body.ndim == 1
+            and np.asarray(actor_residual_magnetic_field_body).ndim == 1
         ), "actor_residual_magnetic_field_body shall be [3] shaped."
 
         logger.trace("Checking accommodation coefficient for sensibility.")

@@ -205,7 +205,7 @@ def test_magnetic_disturbance():
         actor_initial_angular_velocity=[0.0, 0.0, 0.0],
         actor_pointing_vector_body=initial_pointing_vector_body,
         actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
-        actor_residual_magnetic_field=actor_dipole,  # magnetic
+        actor_residual_magnetic_field_body=actor_dipole,  # magnetic
     )
 
     ActorBuilder.set_attitude_model(
@@ -213,7 +213,7 @@ def test_magnetic_disturbance():
         actor_initial_angular_velocity=[0.0, 0.0, 0.0],
         actor_pointing_vector_body=initial_pointing_vector_body,
         actor_initial_attitude_in_rad=[0.0, 0.0, 0.0],
-        actor_residual_magnetic_field=[0.0, 0.0, 0.0],  # non-magnetic
+        actor_residual_magnetic_field_body=[0.0, 0.0, 0.0],  # non-magnetic
     )
 
     # Disturbances:
