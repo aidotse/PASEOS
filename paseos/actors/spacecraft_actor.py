@@ -57,10 +57,10 @@ class SpacecraftActor(BaseActor):
         self._was_interrupted = True
 
     def set_body_attitude(self, attitude_in_rad):
-        """Sets the spacecraft attitude in [yaw, pitch, roll] angles.
+        """Sets the spacecraft attitude in [roll, pitch, yaw] angles.
 
         Args:
-            actor_attitude_in_rad (numpy array): actor's attitude in [yaw, pitch, roll] angles [rad].
+            actor_attitude_in_rad (numpy array): actor's attitude in [roll, pitch, yaw] angles [rad].
         """
         assert self.has_attitude_model, "The actor has no attitude model."
         assert (
