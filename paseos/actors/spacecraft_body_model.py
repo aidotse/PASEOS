@@ -1,7 +1,6 @@
 from loguru import logger
 import numpy as np
 import trimesh
-import itertools
 
 
 class SpacecraftBodyModel:
@@ -82,14 +81,12 @@ class SpacecraftBodyModel:
 
             min_vectors_in_faces.append(min_norm_vectors)
 
-
         # The vectors in min_vectors_in_faces shall be orthogonal.
 
         # Angles between vectors
         for min_norm_vector_in_face in min_vectors_in_faces:
             if np.dot(min_norm_vector_in_face[0], min_norm_vector_in_face[1]):
                 return False
-
 
         return True
 
