@@ -1,9 +1,9 @@
 import numpy as np
 import pykep as pk
 from ..actors.spacecraft_actor import SpacecraftActor
+from loguru import logger
 
 from .disturbance_torques_utils import (
-    compute_aerodynamic_torque,
     compute_magnetic_torque,
     compute_gravity_gradient_torque,
 )
@@ -15,17 +15,21 @@ from ..utils.reference_frame_transfer import (
     get_rpy_angles,
     rotate_body_vectors,
     rpy_to_body,
+    frame_rotation,
 )
 
 from enum import Enum
+
 
 class TorqueDisturbanceModel(Enum):
     """Describes the different torque disturbance models supported.
     1 - SpacePlot
     """
+
     Aerodynamic = 1
     Gravitational = 2
     Magnetic = 3
+
 
 class AttitudeModel:
     """This model describes the attitude (Roll, Pitch and Yaw) evolution of a spacecraft actor.
@@ -40,11 +44,11 @@ class AttitudeModel:
 
     # Spacecraft actor.
     _actor = None
-    # Actor attitude in rad..
+    # Actor attitude in rad.
     _actor_attitude_in_rad = None
-    # Actor angular velocity [rad/s].
+    # Actor angular velocity expressed in body frame [rad/s].
     _actor_angular_velocity = None
-    # Actor angular acceleation [rad/s^2].
+    # Actor angular acceleation expressed in body frame [rad/s^2].
     _actor_angular_acceleration = None
     # Actor pointing vector expressed in the body frame.
     _actor_pointing_vector_body = None
@@ -52,6 +56,14 @@ class AttitudeModel:
     _actor_pointing_vector_eci = None
     # Attitude disturbances experienced by the actor.
     _disturbances = None
+    # Accommodation parameter for Aerodynamic torque disturbance calculations.
+    # Please refer to: "Roto-Translational Spacecraft Formation Control Using Aerodynamic Forces";
+    # Ran. S, Jihe W., et al.; 2017.
+    _accommodation_coefficient = None
+    # Earth J2 coefficient.
+    _J2_coefficient = 1.0826267e-3  # Dimensionless constant.
+    # Universal gas constant
+    _R_gas = 8.314462  # [J/(K mol)]
 
     def __init__(
         self,
@@ -62,6 +74,7 @@ class AttitudeModel:
         # pointing vector in body frame: (defaults to body z-axis)
         actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
         actor_residual_magnetic_field_body: list[float] = [0.0, 0.0, 0.0],
+        accommodation_coefficient: float = 0.85,
     ):
         """Creates an attitude model to model actor attitude based on
         initial conditions (initial attitude and angular velocity) and
@@ -69,33 +82,22 @@ class AttitudeModel:
 
         Args:
             actor (SpacecraftActor): Actor to model.
-            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude ([roll, pitch, yaw]) angles.
+            actor_initial_attitude_in_rad (list of floats, optional): Actor's initial attitude ([roll, pitch, yaw]) angles.
                 Defaults to [0., 0., 0.].
-            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity vector.
-                Defaults to [0., 0., 0.].
-            actor_pointing_vector_body (list of floats): User defined vector in the Actor body. Defaults to [0., 0., 1]
-            actor_residual_magnetic_field_body (list of floats): Actor's own magnetic field modeled as dipole moment vector.
-                Defaults to [0., 0., 0.].
+            actor_initial_angular_velocity (list of floats, optional) in the body frame: Actor's initial angular velocity
+                vector. Defaults to [0., 0., 0.].
+            actor_pointing_vector_body (list of floats, optional): User defined vector in the Actor body.
+                Defaults to [0., 0., 1].
+            actor_residual_magnetic_field_body (list of floats, optional): Actor's own magnetic field modeled
+                as dipole moment vector. Defaults to [0., 0., 0.].
+            accommodation_coefficient (float): Accommodation coefficient used for Aerodynamic torque disturbance calculation.
+                Defaults to 0.85.
         """
-        assert (isinstance(local_actor, SpacecraftActor)
-            ), "local_actor must be a ""SpacecraftActor""."
+        assert isinstance(local_actor, SpacecraftActor), (
+            "local_actor must be a " "SpacecraftActor" "."
+        )
 
-        assert (
-                np.asarray(actor_initial_attitude_in_rad).shape[0] == 3 and actor_initial_attitude_in_rad.ndim == 1
-            ), "actor_initial_attitude_in_rad shall be [3] shaped."
-
-        assert (
-                np.asarray(actor_initial_angular_velocity).shape[0] == 3 and actor_initial_angular_velocity.ndim == 1
-            ), "actor_initial_angular_velocity shall be [3] shaped."
-
-        assert (
-                np.asarray(actor_pointing_vector_body).shape[0] == 3 and actor_pointing_vector_body.ndim == 1
-            ), "actor_pointing_vector_body shall be [3] shaped."
-
-        assert (
-                np.asarray(actor_residual_magnetic_field_body).shape[0] == 3 and actor_residual_magnetic_field_body.ndim == 1
-            ), "actor_residual_magnetic_field_body shall be [3] shaped."
-
+        logger.trace("Initializing thermal model.")
         self._actor = local_actor
         # convert to np.ndarray
         self._actor_attitude_in_rad = np.array(actor_initial_attitude_in_rad)
@@ -123,6 +125,9 @@ class AttitudeModel:
         # actor residual magnetic field (modeled as dipole)
         self._actor_residual_magnetic_field_body = np.array(actor_residual_magnetic_field_body)
 
+        # Accommodation coefficient
+        self._accommodation_coefficient = accommodation_coefficient
+
     def _nadir_vector(self):
         """Compute unit vector pointing towards earth, in the inertial frame.
 
@@ -130,7 +135,9 @@ class AttitudeModel:
             np array ([x, y, z]): unit nadir vector in ECIF (Earth-centered inertial frame)
         """
         u = np.array(self._actor.get_position(self._actor.local_time))
-        return -u / np.linalg.norm(u)
+        nadir_vector = -u / np.linalg.norm(u)
+        logger.trace(f"Nadir vector: {nadir_vector}")
+        return nadir_vector
 
     def compute_disturbance_torque(self, position, velocity, euler_angles, current_temperature_K):
         """Compute total torque due to user-specified disturbances.
@@ -149,9 +156,15 @@ class AttitudeModel:
 
         if self._disturbances is not None:
             if self._actor.central_body != pk.earth:
-                raise NotImplementedError("Models for torque disturbances are implemented only for Earth as a central body.")
+                raise NotImplementedError(
+                    "Models for torque disturbances are implemented only for Earth as a central body."
+                )
+
+            # TODO Add solar disturbances. Refer to issue: https://github.com/aidotse/PASEOS/issues/206
 
             if TorqueDisturbanceModel.Aerodynamic in self._actor.attitude_disturbances:
+                # TODO improve integration and testing of aerodynamic model.
+                # Refer to issue: https://github.com/aidotse/PASEOS/issues/207
                 raise ValueError("Aerodynamic torque disturbance model is not implemented.")
 
             if TorqueDisturbanceModel.Gravitational in self._actor.attitude_disturbances:
@@ -163,23 +176,34 @@ class AttitudeModel:
                 earth_rotation_vector_in_body = rpy_to_body(
                     earth_rotation_vector_in_rpy, euler_angles
                 )
-                # Accumulate torque due to gravity gradients
-                T += compute_gravity_gradient_torque(
+                # Computing gravitational torque
+                gravitational_torque = compute_gravity_gradient_torque(
                     self._actor.central_body.planet,
                     nadir_vector_in_body,
                     earth_rotation_vector_in_body,
                     self._actor.body_moment_of_inertia_body,
                     np.linalg.norm(position),
+                    self._J2_coefficient,
                 )
+                logger.debug(f"Gravitational torque: f{gravitational_torque}")
+                # Accumulate torque due to gravity gradients
+                T += gravitational_torque
+
             if TorqueDisturbanceModel.Magnetic in self._actor.attitude_disturbances:
                 time = self._actor.local_time
-                T += compute_magnetic_torque(
+                # Computing magnetic torque
+                magnetic_torque = compute_magnetic_torque(
                     m_earth=self._actor.central_body.magnetic_dipole_moment(time),
                     m_sat=self._actor_residual_magnetic_field_body,
                     position=self._actor.get_position(time),
                     velocity=self._actor.get_position_velocity(time)[1],
                     attitude=self._actor_attitude_in_rad,
                 )
+                logger.debug(f"Magnetic torque: f{magnetic_torque}")
+                # Accumulating magnetic torque
+                T += magnetic_torque
+
+            logger.trace(f"Disturbance torque: f{T}")
         return T
 
     def _calculate_angular_acceleration(self, current_temperature_K):
@@ -191,7 +215,9 @@ class AttitudeModel:
         # TODO in the future control torques could be added
         # Euler's equation for rigid body rotation: a = I^(-1) (T - w x (Iw))
         # with: a = angular acceleration, body_moment_of_inertia = inertia matrix, T = torque vector, w = angular velocity
-        self._actor_angular_acceleration = np.linalg.inv(self._actor.body_moment_of_inertia_body) @ (
+        self._actor_angular_acceleration = np.linalg.inv(
+            self._actor.body_moment_of_inertia_body
+        ) @ (
             self.compute_disturbance_torque(
                 position=np.array(self._actor.get_position(self._actor.local_time)),
                 velocity=np.array(self._actor.get_position_velocity(self._actor.local_time)[1]),
@@ -225,35 +251,6 @@ class AttitudeModel:
 
         # Return rotation vector in RPY frame
         return body_to_rpy(body_rotation, self._actor_attitude_in_rad)
-
-    @staticmethod
-    def _frame_rotation(position, next_position, velocity):
-        """Calculate the rotation vector of the RPY frame rotation within the inertial frame.
-        This rotation component makes the actor body attitude stay constant w.r.t. inertial frame.
-
-        Args:
-            position (np.ndarray): actor position vector.
-            next_position (np.ndarray): actor position vector in the next timestep.
-            velocity (np.ndarray): actor velocity vector.
-
-        Returns: rotation vector of RPY frame w.r.t. ECI frame expressed in the ECI frame.
-        """
-        # orbital plane normal unit vector: (p x v)/||p x v||
-        orbital_plane_normal = np.cross(position, velocity) / np.linalg.norm(
-            np.cross(position, velocity)
-        )
-
-        # rotation angle: arccos((p . p_previous) / (||p|| ||p_previous||))
-        rpy_frame_rotation_angle_in_eci = np.arccos(
-            np.linalg.multi_dot([position, next_position])
-            / (np.linalg.norm(position) * np.linalg.norm(next_position))
-        )
-
-        # assign this scalar rotation angle to the vector perpendicular to rotation plane
-        rpy_frame_rotation_vector_in_eci = orbital_plane_normal * rpy_frame_rotation_angle_in_eci
-
-        # this rotation needs to be compensated in the rotation of the body frame, so its attitude stays fixed
-        return -eci_to_rpy(rpy_frame_rotation_vector_in_eci, position, velocity)
 
     def _body_axes_in_rpy(self):
         """Transforms vectors expressed in the spacecraft body frame to the roll pitch yaw frame.
@@ -294,7 +291,7 @@ class AttitudeModel:
 
         # attitude change due to two rotations
         # rpy frame rotation, in inertial frame:
-        theta_1 = self._frame_rotation(position, next_position, velocity)
+        theta_1 = frame_rotation(position, next_position, velocity)
         # body rotation due to its physical rotation
         theta_2 = self._body_rotation(dt, current_temperature_K)
 
@@ -321,3 +318,9 @@ class AttitudeModel:
         )
         # update pointing vector
         self._actor_pointing_vector_eci = rpy_to_eci(pointing_vector_rpy, next_position, velocity)
+
+        logger.trace(f"Actor's new attitude (Yaw, Pitch, Roll) is f{self._actor_attitude_in_rad}")
+        logger.trace(
+            f"Actor's new angular velocity (ECI) vector is f{self._actor_angular_velocity_eci}"
+        )
+        logger.trace(f"Actor's new pointing vector (ECI) is f{self._actor_pointing_vector_eci}")
