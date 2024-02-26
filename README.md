@@ -424,13 +424,16 @@ ActorBuilder.add_comm_link(comms_sat, radio_link_name, maspalomas_groundstation,
 ```
 
 The link and bitrate can then be evaluated during the simulation to determine the bitrate:
+
 ```py
-from paseos.utils.link_budget_calc import calc_dist_and_alt_angle
-while t <= simulation_time: 
+from paseos.communication.link_budget_calc import calc_dist_and_alt_angle
+
+while t <= simulation_time:
     for instance in paseos_instances:
         local_t = instance.local_actor.local_time
         for link in instance.local_actor.communication_links:
-            distance, elevation_angle = calc_dist_and_alt_angle(instance.local_actor, link.receiver_actor, local_t)
+            distance, elevation_angle = calc_dist_and_alt_angle(instance.local_actor,
+                                                                link.receiver_actor, local_t)
             if instance.local_actor.is_in_line_of_sight(link.receiver_actor, epoch=local_t):
                 bitrate = link.get_bitrate(distance, elevation_angle)
 ```
