@@ -3,7 +3,12 @@ import pandas as pd
 
 
 def get_known_actor_comms_status(values):
-    """Helper function to track comms status"""
+    """Helper function to track comms status
+    Args:
+        values (list): a list with known actors histories.
+    Returns:
+        A list with status values.
+    """
     conv_values = []
     for val in values:
         status = ["No signal", "Ground only", "CommSat only", "Ground + Sat"]
@@ -13,31 +18,67 @@ def get_known_actor_comms_status(values):
 
 
 def get_bitrate_status(link):
-    """Helper function to get bitrate status history"""
+    """Helper function to get bitrate status history
+    Args:
+        link (LinkModel): the link that contains the bitrate history.
+    Returns:
+            The bitrate history, a list with bitrates in bps.
+    """
     return link.bitrate_history
 
 
 def get_line_of_sight_status(link):
-    """Helper function to get line of sight status history"""
+    """Helper function to get line of sight status history
+    Args:
+        link (LinkModel): the link that contains the line of sight history.
+    Returns:
+            The line of sight history, a list with booleans.
+    """
     return link.line_of_sight_history
 
 
 def get_distance_status(link):
-    """Helper function to distance status history"""
+    """Helper function to distance status history
+    Args:
+        link (LinkModel): the link that contains the distance history.
+    Returns:
+            The distance history, a list with distances in metres.
+    """
     return link.distance_history
 
 
 def get_elevation_angle_status(link):
-    """Helper function to get elevation angle status history"""
+    """Helper function to get elevation angle status history
+    Args:
+        link (LinkModel): the link that contains the elevation angle history.
+    Returns:
+            The elevation angle history, a list with angles in degrees.
+    """
     return link.elevation_angle_history
 
 
 def get_closest_entry(df, t, id):
+    """Helper function to the closest entry in the dataframe of a particular time.
+    Args:
+        df (DataFrame): the dataframe.
+        t (df.Time): the timestamp that is being searched for.
+        id (int): the id of the satellite in the dataframe.
+    Returns:
+            The elevation angle history, a list with angles in degrees.
+    """
     df_id = df[df.ID == id]
     return df_id.iloc[(df_id["Time"] - t).abs().argsort().iloc[:1]]
 
 
 def get_analysis_df(df, timestep=60, orbital_period=1):
+    """Helper function to get elevation angle status history
+    Args:
+        df (Dataframe): the dataframe to analyze
+        timestep (int): the timestep to construct the analysis
+        orbital_period (int): the orbital period
+    Returns:
+            The dataframe constructed with the analysis outputs.
+    """
     t = np.round(np.linspace(0, df.Time.max(), int(df.Time.max() // timestep)))
     sats = df.ID.unique()
     df["known_actors"] = pd.Categorical(df.known_actors)
