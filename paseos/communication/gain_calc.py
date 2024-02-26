@@ -10,10 +10,10 @@ def calc_radio_gain_from_wavelength_diameter_db(
     Args:
         wavelength (float): The wavelength of the signal, in meters.
         antenna_diameter (int): The diameter of the antenna, in meters.
-        antenna_efficiency (float): The antenna efficiency
+        antenna_efficiency (float): The antenna efficiency.
 
     Returns:
-        The antenna gain (directivity) in dB
+        The antenna gain (directivity) in dB.
     """
     assert wavelength > 0, "Wavelength needs to be larger than 0."
     assert antenna_diameter > 0, "Antenna diameter needs to be larger than 0."
@@ -30,10 +30,10 @@ def calc_optical_gain_from_wavelength_diameter_db(
     Args:
         wavelength (float): The wavelength of the signal, in meters.
         antenna_diameter (float): The diameter of the antenna, in meters.
-        antenna_efficiency (float): The antenna efficiency
+        antenna_efficiency (float): The antenna efficiency.
 
     Returns:
-        The antenna gain (directivity) in dB
+        The antenna gain (directivity) in dB.
     """
     assert wavelength > 0, "Wavelength needs to be larger than 0."
     assert antenna_diameter > 0, "Antenna diameter needs to be larger than 0."
@@ -50,7 +50,7 @@ def calc_gain_from_fwhm_db(fwhm: float) -> float:
         fwhm (float): the full width at half maximum, in rad.
 
     Returns:
-        The gain in dB
+        The gain in dB.
     """
     assert fwhm > 0, "FWHM needs to be larger than 0."
 

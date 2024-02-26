@@ -67,10 +67,10 @@ class BaseActor(ABC):
     _previous_altitude = None
 
     def __init__(self, name: str, epoch: pk.epoch) -> None:
-        """Constructor for a base actor
+        """Constructor for a base actor.
 
         Args:
-            name (str): Name of this actor
+            name (str): Name of this actor.
             epoch (pykep.epoch): Current local time of the actor.
         """
         logger.trace("Instantiating Actor.")
@@ -120,7 +120,7 @@ class BaseActor(ABC):
         """Get the receiver model with the specified name.
 
         Args:
-            name (str): the name of the receiver
+            name (str): the name of the receiver.
 
         Returns:
             Receiver: the receiver with the specified name.
@@ -140,7 +140,7 @@ class BaseActor(ABC):
 
         Args:
             device_name (str): The name of the transmitter.
-            model (TransmitterModel): The transmitter model
+            model (TransmitterModel): The transmitter model.
         """
         if device_name in self._transmitters.keys():
             raise ValueError(
@@ -153,7 +153,7 @@ class BaseActor(ABC):
 
         Args:
             device_name (str): The name of the receiver.
-            model (ReceiverModel): The receiver model
+            model (ReceiverModel): The receiver model.
         """
         if device_name in self._receivers.keys():
             raise ValueError(f"Receiver with name '{device_name}' already exists for actor {self}.")
@@ -164,7 +164,7 @@ class BaseActor(ABC):
 
         Args:
             link_name (str): The name of the link.
-            model (LinkModel): The link model
+            model (LinkModel): The link model.
         """
         if link_name in self._communication_links.keys():
             raise ValueError(f"Link with name '{link_name}' already exists for actor {self}.")
@@ -174,7 +174,7 @@ class BaseActor(ABC):
         """Get the link model with the specified name.
 
         Args:
-            link_name (str): the name of the link
+            link_name (str): the name of the link.
 
         Returns:
             Receiver: the link with the specified name.

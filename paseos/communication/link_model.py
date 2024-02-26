@@ -84,10 +84,10 @@ class LinkModel:
         """Gets the path loss (free space loss) for a link.
 
         Args:
-            slant_range (float): The slant range of the link, in meters
+            slant_range (float): The slant range of the link, in meters.
 
         Returns:
-            The path loss (free space loss) in dB
+            The path loss (free space loss) in dB.
         """
         assert slant_range > 0, "Slant range needs to be higher than 0 meters"
 
@@ -97,11 +97,11 @@ class LinkModel:
         """Gets the bitrate for a link based on current slant range and minimum elevation angle.
 
         Args:
-            slant_range (float): The slant range of the link, in meters
-            min_elevation_angle (float): The minimum elevation angle for this receiver, in degrees
+            slant_range (float): The slant range of the link, in meters.
+            min_elevation_angle (float): The minimum elevation angle for this receiver, in degrees.
 
         Returns:
-            The bitrate in bps
+            The bitrate in bps.
         """
         assert slant_range > 0, "Slant range needs to be higher than 0 meters"
         assert (
@@ -174,7 +174,7 @@ class LinkModel:
         """Sets the bitrate of this link for a certain epoch.
 
         Args:
-            bitrate (float): The bitrate of this link, in bps
+            bitrate (float): The bitrate of this link, in bps.
         """
         self._current_bitrate = bitrate
 
@@ -183,7 +183,7 @@ class LinkModel:
         if there is a line of sight, the transmitter and receiver are set to active.
 
         Args:
-            state (bool): The current line of sight state
+            state (bool): The current line of sight state.
         """
         self._current_line_of_sight = state
         if state:
@@ -197,7 +197,7 @@ class LinkModel:
         """Sets the distance of this link for a certain epoch.
 
         Args:
-            distance (float): The slant range of the link, in meters
+            distance (float): The slant range of the link, in meters.
         """
         self._current_distance = distance
 
@@ -205,7 +205,7 @@ class LinkModel:
         """Sets the elevation angle of this link for a certain epoch.
 
         Args:
-            angle (float): The elevation angle, in degrees
+            angle (float): The elevation angle, in degrees.
         """
         self._current_elevation_angle = angle
 

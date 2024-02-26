@@ -558,6 +558,7 @@ class ActorBuilder:
             transmitter_name (str): the name of the transmitter device.
             receiver_actor (BaseActor): the receiving actor.
             receiver_name (str): the name of the receiver device.
+            link_name (str): the name of the link.
             frequency (float, optional): the frequency of the radio link. Cannot be used for
             optical where wavelength of 1550 is required.
         """
