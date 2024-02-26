@@ -1,18 +1,25 @@
+import math
 from loguru import logger
+
+from .device_type import DeviceType
+from .gain_calc import (calc_radio_gain_from_wavelength_diameter_db, calc_optical_gain_from_wavelength_diameter_db,
+                        calc_gain_from_fwhm_db)
 
 
 class TransmitterModel:
     """This class defines a simple transmitter model."""
 
     def __init__(
-            self,
-            input_power: float,
-            power_efficiency: float,
-            antenna_efficiency: float,
-            line_losses: float,
-            point_losses: float,
-            antenna_gain: float = 0,
-            antenna_diameter: float = 0,
+        self,
+        input_power: float,
+        power_efficiency: float,
+        antenna_efficiency: float,
+        line_losses: float,
+        point_losses: float,
+        device_type: DeviceType,
+        antenna_gain: float = None,
+        antenna_diameter: float = None,
+        fwhm: float = None,
     ) -> None:
         """Initializes the model.
 
@@ -29,36 +36,63 @@ class TransmitterModel:
             antenna_diameter (float): The diameter of the antenna, in m. Either this or the gain
             needs to be given.
         """
-        assert input_power > 0, "Input power needs to be higher than 0."
-        assert 0 < power_efficiency <= 1, "Power efficiency should be between 0 and 1."
-        assert (
-                0 < antenna_efficiency <= 1
-        ), "Antenna efficiency should be between 0 and 1."
-        assert line_losses >= 0, "Line losses needs to be 0 or higher."
-        assert point_losses >= 0, "Pointing losses needs to be 0 or higher."
 
         logger.debug("Initializing general transmitter model.")
+
+        assert (
+            device_type is DeviceType.RADIO_TRANSMITTER or device_type is DeviceType.OPTICAL_TRANSMITTER
+        ), "Device type must be RADIO_TRANSMITTER or OPTICAL_TRANSMITTER"
+
+        self.device_type = device_type
         self.input_power = input_power
         self.antenna_efficiency = antenna_efficiency
-        self.antenna_gain = antenna_gain
+        self.antenna_gain_db = antenna_gain
         self.antenna_diameter = antenna_diameter
-        self.line_losses = line_losses
-        self.point_losses = point_losses
+        self.line_losses_db = line_losses
+        self.pointing_losses_db = point_losses
         self.active = False
+        self.power_efficiency = power_efficiency
+        self.full_width_half_maximum = fwhm
+        self.effective_isotropic_radiated_power_db = 0
 
-    def set_EIRP(self) -> None:
+        if device_type == DeviceType.RADIO_TRANSMITTER:
+            self.output_power_db = 10 * math.log10(input_power * power_efficiency)  # dBW
+        elif device_type == DeviceType.OPTICAL_TRANSMITTER:
+            self.output_power_db = 10 * math.log10(input_power * power_efficiency * 1000)  # dBm
+
+    def set_effective_isotropic_radiated_power_db(self) -> None:
         """Sets the Effective Isotropic Radiated Power (EIRP) for a transmitter."""
-        self.EIRP = (
-                self.output_power - self.line_losses - self.point_losses + self.antenna_gain
+        self.effective_isotropic_radiated_power_db = (
+            self.output_power_db - self.line_losses_db - self.pointing_losses_db + self.antenna_gain_db
         )
 
-    def set_gain(self) -> None:
-        pass
+    def set_gain(self, wavelength: float) -> None:
+        """Sets the gain of the transmitter.
 
-    def set_active(self, state: bool) -> None:
+        Args:
+            wavelength (float): the wavelength of the transmitter, in m.
+        """
+
+        # If no constant gain value was passed and set in the constructor, it needs to be calculated
+        if self.antenna_gain_db is None:
+            if self.device_type == DeviceType.RADIO_TRANSMITTER:
+                self.antenna_gain_db = calc_radio_gain_from_wavelength_diameter_db(
+                    wavelength, self.antenna_diameter, self.antenna_efficiency
+                )
+            elif self.device_type == DeviceType.OPTICAL_TRANSMITTER:
+                if self.antenna_diameter is not None:
+                    self.antenna_gain_db = calc_optical_gain_from_wavelength_diameter_db(
+                        wavelength, self.antenna_diameter, self.antenna_efficiency
+                    )
+                else:
+                    self.antenna_gain_db = calc_gain_from_fwhm_db(self.full_width_half_maximum)
+
+        self.set_effective_isotropic_radiated_power_db()
+
+    def set_active_state(self, is_active: bool) -> None:
         """Sets the active state of the transmitter.
 
         Args:
-            state (bool): whether the transmitter is active.
+            is_active (bool): whether the transmitter is active.
         """
-        self.active = state
+        self.active = is_active
