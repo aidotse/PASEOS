@@ -38,9 +38,7 @@ def setup_sentinel_example(t0):
         name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=t0
     )
 
-    ActorBuilder.set_ground_station_location(
-        maspalomas_groundstation, 27.7629, -15.6338, 205.1, minimum_altitude_angle=5
-    )
+    ActorBuilder.set_ground_station_location(maspalomas_groundstation, 27.7629, -15.6338, 205.1, minimum_altitude_angle=5)
 
     # Add communication link
     ActorBuilder.add_comm_device(sentinel2B, device_name="link1", bandwidth_in_kbps=1)
@@ -101,9 +99,7 @@ def test_communication_link_sat_to_ground():
         t0=t0,
         data_to_send_in_b=1000000,
     )
-    window_in_s = (
-        communication_window_end_time.mjd2000 - communication_window_start_time.mjd2000
-    ) * pk.DAY2SEC
+    window_in_s = (communication_window_end_time.mjd2000 - communication_window_start_time.mjd2000) * pk.DAY2SEC
     expected_window_in_s = 739.0000000305008
     assert np.isclose(expected_window_in_s, window_in_s)
 
@@ -148,9 +144,7 @@ def test_communication_link_sat_to_sat():
         data_to_send_in_b=10000,
     )
 
-    assert (communication_window_end_time.mjd2000 * pk.DAY2SEC >= 10) and (
-        transmitted_data_in_b == 10000
-    )
+    assert (communication_window_end_time.mjd2000 * pk.DAY2SEC >= 10) and (transmitted_data_in_b == 10000)
 
     # Check again after communication_window_end_time
     (

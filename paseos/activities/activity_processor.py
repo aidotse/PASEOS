@@ -31,9 +31,7 @@ class ActivityProcessor:
         """
         logger.trace("Initalized ActivityProcessor.")
         assert update_interval > 0, "Update update_interval has to be positive."
-        assert (
-            power_consumption_in_watt >= 0
-        ), "Power consumption has to be positive but was specified as " + str(
+        assert power_consumption_in_watt >= 0, "Power consumption has to be positive but was specified as " + str(
             power_consumption_in_watt
         )
 
@@ -64,10 +62,7 @@ class ActivityProcessor:
             # Calculate elapsed time since last update
             elapsed_time = timer() - self.start_time
             # Perform final update if not interrupted before (otherwise already upto date)
-            if (
-                not self._paseos_instance.local_actor.was_interrupted
-                and not self._paseos_instance.local_actor.is_dead
-            ):
+            if not self._paseos_instance.local_actor.was_interrupted and not self._paseos_instance.local_actor.is_dead:
                 await self._update(elapsed_time)
             # Reset interrupt (to prepare for potential next interrupt)
             self._paseos_instance.local_actor._was_interrupted = False
@@ -113,10 +108,7 @@ class ActivityProcessor:
             # otherwise stop it and then the processor
 
             # Radiation interruption leads to stop
-            if (
-                self._paseos_instance.local_actor.was_interrupted
-                or self._paseos_instance.local_actor.is_dead
-            ):
+            if self._paseos_instance.local_actor.was_interrupted or self._paseos_instance.local_actor.is_dead:
                 await self.stop()
                 await self._activity_runner.stop()
 

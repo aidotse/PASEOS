@@ -99,9 +99,7 @@ class ThermalModel:
         logger.trace("Initializing thermal model constants.")
 
         # EQ 15 in source
-        self._C_solar_input = (
-            self._actor_sun_absorptance * self._actor_sun_facing_area * self._body_solar_irradiance
-        )
+        self._C_solar_input = self._actor_sun_absorptance * self._actor_sun_facing_area * self._body_solar_irradiance
         logger.trace(f"self._C_solar_input={self._C_solar_input}")
 
         # EQ 17
@@ -124,9 +122,7 @@ class ThermalModel:
         logger.trace(f"self._C_body_emission={self._C_body_emission}")
 
         # EQ 20
-        self._C_actor_emission = (
-            self._actor_infrared_absorptance * self._actor_emissive_area * self._boltzmann_constant
-        )
+        self._C_actor_emission = self._actor_infrared_absorptance * self._actor_emissive_area * self._boltzmann_constant
         logger.trace(f"self._C_actor_emission={self._C_actor_emission}")
 
     def _compute_body_view_from_actor(self) -> None:
@@ -188,9 +184,7 @@ class ThermalModel:
             dt (float): How far to advance the temperature computation.
             current_power_consumption (float, optional): Activity power consumption. Defaults to 0.
         """
-        logger.debug(
-            f"Updating temperature after {dt} seconds with {current_power_consumption}W being consumed."
-        )
+        logger.debug(f"Updating temperature after {dt} seconds with {current_power_consumption}W being consumed.")
         total_change_in_W = (
             self._compute_solar_input()
             + self._compute_albedo_input()

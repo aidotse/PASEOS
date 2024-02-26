@@ -78,9 +78,7 @@ class ActivityRunner:
             try:
                 await self._termination_func(self._termination_args)
             except Exception as e:
-                logger.error(
-                    f"An exception occurred running the terminating the activity {self.name}."
-                )
+                logger.error(f"An exception occurred running the terminating the activity {self.name}.")
                 logger.error(str(e))
         self.is_started = False
         # Stop task and await it stopped:
@@ -106,20 +104,14 @@ class ActivityRunner:
                         + " The constraint function failed to return True or False."
                     )
             except Exception as e:
-                logger.error(
-                    f"An exception occurred running the checking the activity {self.name} constraint."
-                )
+                logger.error(f"An exception occurred running the checking the activity {self.name} constraint.")
                 logger.error(str(e))
                 return False
             if not is_satisfied:
-                logger.debug(
-                    f"Constraint of activity {self.name} is no longer satisfied, cancelling."
-                )
+                logger.debug(f"Constraint of activity {self.name} is no longer satisfied, cancelling.")
                 if not self._was_stopped:
                     await self.stop()
             return False
         else:
-            logger.warning(
-                f"Checking activity {self.name} constraints even though activity has no constraints."
-            )
+            logger.warning(f"Checking activity {self.name} constraints even though activity has no constraints.")
         return True

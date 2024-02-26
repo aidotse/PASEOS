@@ -6,12 +6,12 @@ from ..actors.base_actor import BaseActor
 
 
 def find_next_window(
-        local_actor: BaseActor,
-        local_actor_communication_link_name: str,
-        target_actor: BaseActor,
-        search_window_in_s: float,
-        t0: pk.epoch,
-        search_step_size: float = 10,
+    local_actor: BaseActor,
+    local_actor_communication_link_name: str,
+    target_actor: BaseActor,
+    search_window_in_s: float,
+    t0: pk.epoch,
+    search_step_size: float = 10,
 ):
     """Returns the start time of the next window in the given timespan (if any).
 
@@ -29,12 +29,9 @@ def find_next_window(
     logger.debug(f"Find next comms window between {local_actor} and {target_actor}")
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
-            "Trying to use a not-existing communication link with the name: "
-            + local_actor.communication_devices
+        "Trying to use a not-existing communication link with the name: " + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor.communication_devices[
-        local_actor_communication_link_name
-    ]
+    local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
     assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandwidth has to be positive."
     assert search_step_size > 0, "dt has to be positive."

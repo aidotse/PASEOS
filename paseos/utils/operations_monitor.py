@@ -38,19 +38,17 @@ class OperationsMonitor:
             "state_of_charge",
             "is_in_eclipse","known_actors","position","velocity","temperature"
         """
-        assert item in (
-                list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), (f"Untracked quantity. Available are "
-            f"{self._log.keys() + self._log.custom_properties.keys()}")
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f"Untracked quantity. Available are " f"{self._log.keys() + self._log.custom_properties.keys()}"
+        )
         if item in self._log.custom_properties.keys():
             return self._log.custom_properties[item]
         return self._log[item]
 
     def plot(self, item):
-        assert item in (
-                list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), (f"Untracked quantity. Available "
-            f"are {self._log.keys() + self._log.custom_properties.keys()}")
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f"Untracked quantity. Available " f"are {self._log.keys() + self._log.custom_properties.keys()}"
+        )
         if item in self._log.custom_properties.keys():
             values = self._log.custom_properties[item]
         else:
@@ -70,9 +68,7 @@ class OperationsMonitor:
             communication_links: List of communication links.
         """
         logger.trace("Logging iteration")
-        assert local_actor.name == self._actor_name, (
-                "Expected actor's name was" + self._actor_name
-        )
+        assert local_actor.name == self._actor_name, "Expected actor's name was" + self._actor_name
         self._log.timesteps.append(local_actor.local_time.mjd2000 * pk.DAY2SEC)
         self._log.current_activity.append(local_actor.current_activity)
         self._log.position.append(local_actor._previous_position)
@@ -92,8 +88,8 @@ class OperationsMonitor:
         else:
             self._log.is_in_eclipse.append(local_actor._previous_eclipse_status)
 
-        if communication_links is not None:
-            for link in communication_links:
+        if local_actor.communication_links is not None:
+            for link in local_actor.communication_links:
                 link.save_state()
 
         # Track all custom properties
@@ -111,9 +107,7 @@ class OperationsMonitor:
         """
         logger.trace("Writing status log file to " + filename)
         with open(filename, "w", newline="") as f:
-            w = csv.DictWriter(
-                f, list(self._log.keys()) + list(self._log.custom_properties.keys())
-            )
+            w = csv.DictWriter(f, list(self._log.keys()) + list(self._log.custom_properties.keys()))
             w.writeheader()
             for i in range(len(self._log.timesteps)):
                 row = {
@@ -135,9 +129,7 @@ class OperationsMonitor:
                         if i < len(self._log.timesteps) - len(value):
                             row[key] = None
                         else:
-                            row[key] = value[
-                                i - (len(self._log.timesteps) - len(value))
-                                ]
+                            row[key] = value[i - (len(self._log.timesteps) - len(value))]
                     else:
                         row[key] = value[i]
 

@@ -35,9 +35,7 @@ def _parse_actor_data(actor_data):
     Returns:
         actor: Created actor
     """
-    actor = ActorBuilder.get_actor_scaffold(
-        name=actor_data[0], actor_type=SpacecraftActor, epoch=actor_data[1]
-    )
+    actor = ActorBuilder.get_actor_scaffold(name=actor_data[0], actor_type=SpacecraftActor, epoch=actor_data[1])
     ActorBuilder.set_orbit(
         actor=actor,
         position=actor_data[2],
@@ -84,6 +82,4 @@ def exchange_actors(comm, paseos_instance, local_actor, other_ranks, rank, verbo
         send_request.wait()
 
     if verbose:
-        print(
-            f"Rank {rank} completed actor exchange. Knows {paseos_instance.known_actor_names} now."
-        )
+        print(f"Rank {rank} completed actor exchange. Knows {paseos_instance.known_actor_names} now.")

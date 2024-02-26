@@ -72,10 +72,7 @@ class ActivityManager:
 
         if name in self._activities.keys():
             raise ValueError(
-                "Trying to add already existing activity with name: "
-                + name
-                + ". Already have "
-                + str(self._activities[name])
+                "Trying to add already existing activity with name: " + name + ". Already have " + str(self._activities[name])
             )
 
         self._activities[name] = DotMap(
@@ -104,15 +101,11 @@ class ActivityManager:
             constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
         # Check if activity exists and if it already had consumption specified
-        assert (
-            name in self._activities.keys()
-        ), f"Activity not found. Declared activities are {self._activities.keys()}"
+        assert name in self._activities.keys(), f"Activity not found. Declared activities are {self._activities.keys()}"
         activity = self._activities[name]
         logger.debug(f"Performing activity {activity}")
 
-        assert (
-            activity.power_consumption_in_watt >= 0
-        ), "Power consumption has to be positive but was specified as " + str(
+        assert activity.power_consumption_in_watt >= 0, "Power consumption has to be positive but was specified as " + str(
             activity.power_consumption_in_watt
         )
 

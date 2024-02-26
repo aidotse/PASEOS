@@ -9,13 +9,13 @@ from ..actors.base_actor import BaseActor
 
 
 def get_communication_window(
-        local_actor: BaseActor,
-        local_actor_communication_link_name: str,
-        target_actor: BaseActor,
-        dt: float = 10.0,
-        t0: pk.epoch = None,
-        data_to_send_in_b: int = sys.maxsize,
-        window_timeout_value_in_s=7200,
+    local_actor: BaseActor,
+    local_actor_communication_link_name: str,
+    target_actor: BaseActor,
+    dt: float = 10.0,
+    t0: pk.epoch = None,
+    data_to_send_in_b: int = sys.maxsize,
+    window_timeout_value_in_s=7200,
 ):
     """Returning the communication window and the amount of data that can be transmitted from the
     local to the target actor.
@@ -41,12 +41,9 @@ def get_communication_window(
         t0 = local_actor.local_time
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
-            "Trying to use a not-existing communication link with the name: "
-            + local_actor.communication_devices
+        "Trying to use a not-existing communication link with the name: " + local_actor.communication_devices
     )
-    local_actor_comm_link = local_actor.communication_devices[
-        local_actor_communication_link_name
-    ]
+    local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
     assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandwidth has to be positive."
     assert dt > 0, "dt has to be positive."
@@ -56,16 +53,11 @@ def get_communication_window(
     transmitted_data_in_b = 0
     current_epoch = t0
     window_length_in_s = 0
-    while (
-            local_actor.is_in_line_of_sight(target_actor, current_epoch)
-            and window_length_in_s < window_timeout_value_in_s
-    ):
+    while local_actor.is_in_line_of_sight(target_actor, current_epoch) and window_length_in_s < window_timeout_value_in_s:
         window_length_in_s += dt
         current_epoch = pk.epoch(t0.mjd2000 + window_length_in_s * pk.SEC2DAY)
         # (This is the quantum of information that you can transmit)
-        transmitted_data_in_b += int(
-            local_actor_comm_link.bandwidth_in_kbps * dt * 1000
-        )
+        transmitted_data_in_b += int(local_actor_comm_link.bandwidth_in_kbps * dt * 1000)
 
     if window_length_in_s >= window_timeout_value_in_s:
         logger.debug("Timeout reached for the estimation of the communication window.")

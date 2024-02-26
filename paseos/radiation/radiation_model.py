@@ -52,9 +52,7 @@ class RadiationModel:
         Returns:
             bool: Whether event happened at least ones
         """
-        poisson_prob = RadiationModel._compute_poisson_nonzero_event_probability(
-            events_per_s, interval_in_s
-        )
+        poisson_prob = RadiationModel._compute_poisson_nonzero_event_probability(events_per_s, interval_in_s)
         logger.trace(f"poisson_prob={poisson_prob}")
         sample = np.random.rand()
         logger.trace(f"sample ={sample }")

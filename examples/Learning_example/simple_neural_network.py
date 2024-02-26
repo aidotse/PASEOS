@@ -65,9 +65,7 @@ class SimpleNeuralNetwork(torch.nn.Module):
         elif self.node_id == 2:
             train_mask = X_train[:, 0] > -0
 
-        X_train = np.ma.compress_rows(
-            np.ma.masked_array(X_train, mask=np.transpose(np.tile(train_mask, (2, 1))))
-        )
+        X_train = np.ma.compress_rows(np.ma.masked_array(X_train, mask=np.transpose(np.tile(train_mask, (2, 1)))))
         y_train = np.ma.masked_array(y_train, mask=train_mask).compressed()
 
         # Create dataloaders
