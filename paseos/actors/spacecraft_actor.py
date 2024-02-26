@@ -158,7 +158,9 @@ class SpacecraftActor(BaseActor):
             duration_in_s (float): How long the activity is performed in seconds
         """
         logger.debug(f"Charging actor {self} for {duration_in_s}s.")
-        assert duration_in_s > 0, "Charging interval has to be positive but t1 was less or equal t0."
+        assert (
+            duration_in_s > 0
+        ), "Charging interval has to be positive but t1 was less or equal t0."
 
         self = charge_model.charge(self, duration_in_s)
 

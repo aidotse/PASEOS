@@ -39,7 +39,8 @@ class OperationsMonitor:
             "is_in_eclipse","known_actors","position","velocity","temperature"
         """
         assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
-            f"Untracked quantity. Available are " f"{self._log.keys() + self._log.custom_properties.keys()}"
+            f"Untracked quantity. Available are "
+            f"{self._log.keys() + self._log.custom_properties.keys()}"
         )
         if item in self._log.custom_properties.keys():
             return self._log.custom_properties[item]
@@ -47,7 +48,8 @@ class OperationsMonitor:
 
     def plot(self, item):
         assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
-            f"Untracked quantity. Available " f"are {self._log.keys() + self._log.custom_properties.keys()}"
+            f"Untracked quantity. Available "
+            f"are {self._log.keys() + self._log.custom_properties.keys()}"
         )
         if item in self._log.custom_properties.keys():
             values = self._log.custom_properties[item]

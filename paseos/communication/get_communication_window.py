@@ -41,7 +41,8 @@ def get_communication_window(
         t0 = local_actor.local_time
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
-        "Trying to use a not-existing communication link with the name: " + local_actor.communication_devices
+        "Trying to use a not-existing communication link with the name: "
+        + local_actor.communication_devices
     )
     local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
@@ -53,7 +54,10 @@ def get_communication_window(
     transmitted_data_in_b = 0
     current_epoch = t0
     window_length_in_s = 0
-    while local_actor.is_in_line_of_sight(target_actor, current_epoch) and window_length_in_s < window_timeout_value_in_s:
+    while (
+        local_actor.is_in_line_of_sight(target_actor, current_epoch)
+        and window_length_in_s < window_timeout_value_in_s
+    ):
         window_length_in_s += dt
         current_epoch = pk.epoch(t0.mjd2000 + window_length_in_s * pk.SEC2DAY)
         # (This is the quantum of information that you can transmit)

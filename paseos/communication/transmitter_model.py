@@ -2,8 +2,11 @@ import math
 from loguru import logger
 
 from .device_type import DeviceType
-from .gain_calc import (calc_radio_gain_from_wavelength_diameter_db, calc_optical_gain_from_wavelength_diameter_db,
-                        calc_gain_from_fwhm_db)
+from .gain_calc import (
+    calc_radio_gain_from_wavelength_diameter_db,
+    calc_optical_gain_from_wavelength_diameter_db,
+    calc_gain_from_fwhm_db,
+)
 
 
 class TransmitterModel:
@@ -40,7 +43,8 @@ class TransmitterModel:
         logger.debug("Initializing general transmitter model.")
 
         assert (
-            device_type is DeviceType.RADIO_TRANSMITTER or device_type is DeviceType.OPTICAL_TRANSMITTER
+            device_type is DeviceType.RADIO_TRANSMITTER
+            or device_type is DeviceType.OPTICAL_TRANSMITTER
         ), "Device type must be RADIO_TRANSMITTER or OPTICAL_TRANSMITTER"
 
         self.device_type = device_type
@@ -63,7 +67,10 @@ class TransmitterModel:
     def set_effective_isotropic_radiated_power_db(self) -> None:
         """Sets the Effective Isotropic Radiated Power (EIRP) for a transmitter."""
         self.effective_isotropic_radiated_power_db = (
-            self.output_power_db - self.line_losses_db - self.pointing_losses_db + self.antenna_gain_db
+            self.output_power_db
+            - self.line_losses_db
+            - self.pointing_losses_db
+            + self.antenna_gain_db
         )
 
     def set_gain(self, wavelength: float) -> None:

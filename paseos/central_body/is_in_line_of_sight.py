@@ -19,7 +19,9 @@ def _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch: pk.
         bool: true if in line-of-sight.
     """
     # Check actor has central body
-    assert actor.central_body is not None, f"Please set the central body on actor {actor} for line of sight computations."
+    assert (
+        actor.central_body is not None
+    ), f"Please set the central body on actor {actor} for line of sight computations."
     return not actor.central_body.is_between_actors(actor, other_actor, epoch, plot)
 
 
@@ -44,9 +46,13 @@ def _is_in_line_of_sight_ground_station_to_spacecraft(
     Returns:
         bool: true if in line-of-sight.
     """
-    assert minimum_altitude_angle < 90 and minimum_altitude_angle > 0, "0 < Minimum altitude angle < 90"
+    assert (
+        minimum_altitude_angle < 90 and minimum_altitude_angle > 0
+    ), "0 < Minimum altitude angle < 90"
 
-    logger.debug("Computing line of sight between actors: " + str(ground_station) + " " + str(spacecraft))
+    logger.debug(
+        "Computing line of sight between actors: " + str(ground_station) + " " + str(spacecraft)
+    )
 
     # Converting time to skyfield to use its API
     t_skyfield = ground_station._skyfield_timescale.tt_jd(epoch.jd)
@@ -118,22 +124,41 @@ def is_in_line_of_sight(
     # Can't import types given circular import then, thus check with names
     # Delegate call to correct function, ground stations are done with skyfield
     # and only work with Earth as central body for now.
-    if type(actor).__name__ == "SpacecraftActor" and type(other_actor).__name__ == "SpacecraftActor":
-        assert actor.central_body is not None, f"Please set the central body on actor {actor} for line of sight computations."
+    if (
+        type(actor).__name__ == "SpacecraftActor"
+        and type(other_actor).__name__ == "SpacecraftActor"
+    ):
+        assert (
+            actor.central_body is not None
+        ), f"Please set the central body on actor {actor} for line of sight computations."
         return _is_in_line_of_sight_spacecraft_to_spacecraft(actor, other_actor, epoch, plot)
-    elif type(actor).__name__ == "GroundstationActor" and type(other_actor).__name__ == "SpacecraftActor":
+    elif (
+        type(actor).__name__ == "GroundstationActor"
+        and type(other_actor).__name__ == "SpacecraftActor"
+    ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = actor._minimum_altitude_angle
         assert other_actor.central_body.planet.name.lower() == "earth", (
-            f"Ground stations can only be used with Earth for now (not " f"{other_actor.central_body.planet.name})."
+            f"Ground stations can only be used with Earth for now (not "
+            f"{other_actor.central_body.planet.name})."
         )
-        return _is_in_line_of_sight_ground_station_to_spacecraft(actor, other_actor, epoch, minimum_altitude_angle, plot)
-    elif type(actor).__name__ == "SpacecraftActor" and type(other_actor).__name__ == "GroundstationActor":
+        return _is_in_line_of_sight_ground_station_to_spacecraft(
+            actor, other_actor, epoch, minimum_altitude_angle, plot
+        )
+    elif (
+        type(actor).__name__ == "SpacecraftActor"
+        and type(other_actor).__name__ == "GroundstationActor"
+    ):
         if minimum_altitude_angle is None:
             minimum_altitude_angle = other_actor._minimum_altitude_angle
-        assert actor.central_body is not None, other_actor.central_body.planet.name.lower() == "earth"
-        return _is_in_line_of_sight_ground_station_to_spacecraft(other_actor, actor, epoch, minimum_altitude_angle, plot)
+        assert actor.central_body is not None, (
+            other_actor.central_body.planet.name.lower() == "earth"
+        )
+        return _is_in_line_of_sight_ground_station_to_spacecraft(
+            other_actor, actor, epoch, minimum_altitude_angle, plot
+        )
     else:
         raise NotImplementedError(
-            f"Cannot compute line of sight between {type(actor).__name__} " f"and {type(other_actor).__name__}."
+            f"Cannot compute line of sight between {type(actor).__name__} "
+            f"and {type(other_actor).__name__}."
         )

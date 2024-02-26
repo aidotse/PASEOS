@@ -2,7 +2,9 @@ import numpy as np
 from loguru import logger
 
 
-def mesh_between_points(point_1: np.array, point_2: np.array, mesh_vertices: np.array, mesh_triangles: np.array) -> bool:
+def mesh_between_points(
+    point_1: np.array, point_2: np.array, mesh_vertices: np.array, mesh_triangles: np.array
+) -> bool:
     """Checks whether the mesh is between the two points using ray-triangle
     intersection with Möller-Trumbore algorithm.
 

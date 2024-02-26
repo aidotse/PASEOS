@@ -29,7 +29,9 @@ def test_link_creation():
         device_type=DeviceType.RADIO_RECEIVER,
     )
 
-    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
     radio_name = "sat_radio_transmitter_1"
     optical_transmitter_name = "sat_optical_transmitter_1"
 
@@ -57,7 +59,9 @@ def test_link_creation():
         device_type=DeviceType.RADIO_TRANSMITTER,
     )
 
-    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Comms", actor_type=SpacecraftActor, epoch=t0)
+    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Comms", actor_type=SpacecraftActor, epoch=t0
+    )
     optical_receiver_name = "optical_receiver_1"
     ActorBuilder.add_comm_device(
         actor=comms_sat,
@@ -68,10 +72,19 @@ def test_link_creation():
     )
 
     with pytest.raises(AssertionError, match="Frequency needs to be higher than 0 Hz."):
-        ActorBuilder.add_comm_link(sat_actor, radio_name, maspalomas_groundstation, receiver_name, "link_1", frequency=-8675e6)
+        ActorBuilder.add_comm_link(
+            sat_actor,
+            radio_name,
+            maspalomas_groundstation,
+            receiver_name,
+            "link_1",
+            frequency=-8675e6,
+        )
 
     link_name = "link_1"
-    ActorBuilder.add_comm_link(sat_actor, radio_name, maspalomas_groundstation, receiver_name, link_name, frequency=8675e6)
+    ActorBuilder.add_comm_link(
+        sat_actor, radio_name, maspalomas_groundstation, receiver_name, link_name, frequency=8675e6
+    )
 
     link = sat_actor.get_comm_link(link_name)
 
@@ -196,7 +209,9 @@ def test_radio_receiver_creation():
 
 def test_optical_receiver_creation():
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
-    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
     optical_receiver_name = "optical_receiver_1"
     ActorBuilder.add_comm_device(
         actor=comms_sat,
@@ -212,7 +227,9 @@ def test_optical_receiver_creation():
 
 def test_transmitter_creation():
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
-    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
     radio_name = "sat_radio_transmitter_1"
 
     with pytest.raises(AssertionError, match="Input power needs to be higher than 0."):
@@ -309,7 +326,9 @@ def test_transmitter_creation():
 
 def test_radio_transmitter_creation():
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
-    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
     radio_name = "sat_radio_transmitter_1"
 
     with pytest.raises(
@@ -361,7 +380,9 @@ def test_radio_transmitter_creation():
 
 def test_optical_transmitter_creation():
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
-    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
 
     with pytest.raises(
         AssertionError,
@@ -479,7 +500,9 @@ def test_bitrate_calculation():
         device_type=DeviceType.RADIO_RECEIVER,
     )
 
-    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Sat", actor_type=SpacecraftActor, epoch=t0)
+    sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Sat", actor_type=SpacecraftActor, epoch=t0
+    )
     radio_name = "sat_radio_transmitter_1"
 
     ActorBuilder.add_comm_device(
@@ -512,7 +535,9 @@ def test_bitrate_calculation():
         device_type=DeviceType.OPTICAL_TRANSMITTER,
     )
 
-    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(name="Comms", actor_type=SpacecraftActor, epoch=t0)
+    comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(
+        name="Comms", actor_type=SpacecraftActor, epoch=t0
+    )
     optical_receiver_name = "optical_receiver_1"
 
     # Optical receiver input based on
@@ -525,14 +550,18 @@ def test_bitrate_calculation():
         device_type=DeviceType.OPTICAL_RECEIVER,
     )
 
-    ActorBuilder.add_comm_link(sat_actor, radio_name, maspalomas_groundstation, receiver_name, "link_1", frequency=2.2e9)
+    ActorBuilder.add_comm_link(
+        sat_actor, radio_name, maspalomas_groundstation, receiver_name, "link_1", frequency=2.2e9
+    )
 
     # Based on hand calculations
     link_model = sat_actor.get_comm_link("link_1")
     radio_bitrate = link_model.get_bitrate(2831e3, 0)
     assert np.isclose(radio_bitrate, 114e6, 0.01, 1000)
 
-    ActorBuilder.add_comm_link(sat_actor, optical_transmitter_name, comms_sat, optical_receiver_name, "optical_link_1")
+    ActorBuilder.add_comm_link(
+        sat_actor, optical_transmitter_name, comms_sat, optical_receiver_name, "optical_link_1"
+    )
 
     # Based on hand calculations
     optical_link_model = sat_actor.get_comm_link("optical_link_1")

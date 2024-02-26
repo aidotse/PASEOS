@@ -60,13 +60,17 @@ class OrekitPropagator:
         )
 
         # Set up the numerical propagator tolerance
-        tolerances = NumericalPropagator.tolerances(self.positionTolerance, initialOrbit, initialOrbit.getType())
+        tolerances = NumericalPropagator.tolerances(
+            self.positionTolerance, initialOrbit, initialOrbit.getType()
+        )
 
         # Set up the numerical integrator
         integrator = DormandPrince853Integrator(
             self.minStep,
             self.maxstep,
-            JArray_double.cast_(tolerances[0]),  # Double array of doubles needs to be casted in Python
+            JArray_double.cast_(
+                tolerances[0]
+            ),  # Double array of doubles needs to be casted in Python
             JArray_double.cast_(tolerances[1]),
         )
         integrator.setInitialStepSize(self.initStep)
@@ -83,7 +87,9 @@ class OrekitPropagator:
         # Add the force models
         gravityProvider = GravityFieldFactory.getNormalizedProvider(10, 10)
         self.propagator_num.addForceModel(
-            HolmesFeatherstoneAttractionModel(FramesFactory.getITRF(IERSConventions.IERS_2010, True), gravityProvider)
+            HolmesFeatherstoneAttractionModel(
+                FramesFactory.getITRF(IERSConventions.IERS_2010, True), gravityProvider
+            )
         )
 
     def eph(self, time_since_epoch_in_seconds: float):
@@ -95,6 +101,8 @@ class OrekitPropagator:
         Returns:
             orekit SpacecraftState: The position and velocity of the satellite.
         """
-        state = self.propagator_num.propagate(self.initialDate, self.initialDate.shiftedBy(time_since_epoch_in_seconds))
+        state = self.propagator_num.propagate(
+            self.initialDate, self.initialDate.shiftedBy(time_since_epoch_in_seconds)
+        )
 
         return state

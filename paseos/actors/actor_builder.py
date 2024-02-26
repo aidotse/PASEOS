@@ -27,7 +27,9 @@ class ActorBuilder:
         if not hasattr(cls, "instance"):
             cls.instance = super(ActorBuilder, cls).__new__(cls)
         else:
-            logger.debug("Tried to create another instance of ActorBuilder. Keeping original one...")
+            logger.debug(
+                "Tried to create another instance of ActorBuilder. Keeping original one..."
+            )
         return cls.instance
 
     def __init__(self):
@@ -45,7 +47,9 @@ class ActorBuilder:
         Returns:
             Created actor
         """
-        assert actor_type != BaseActor, "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
+        assert (
+            actor_type != BaseActor
+        ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
 
         logger.trace(f"Creating an actor blueprint with name {name}")
 
@@ -113,7 +117,9 @@ class ActorBuilder:
             rotation_period (float): Rotation period in seconds. Rotation at current actor local
             time is presumed to be 0.
         """
-        assert isinstance(actor, SpacecraftActor), "Central body only supported for SpacecraftActors"
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Central body only supported for SpacecraftActors"
 
         # Fuzzy type check for pykep planet
         assert "pykep.planet" in str(type(pykep_planet)), "pykep_planet has to be a pykep planet."
@@ -133,9 +139,17 @@ class ActorBuilder:
             assert rotation_period > 0, "Rotation period has to be > 0"
 
         # Check if rotation parameters are set
-        if rotation_period is not None or rotation_right_ascension is not None or rotation_declination is not None:
-            assert rotation_right_ascension is not None, "Rotation right ascension has to be set for rotation."
-            assert rotation_declination is not None, "Rotation declination has to be set. for rotation."
+        if (
+            rotation_period is not None
+            or rotation_right_ascension is not None
+            or rotation_declination is not None
+        ):
+            assert (
+                rotation_right_ascension is not None
+            ), "Rotation right ascension has to be set for rotation."
+            assert (
+                rotation_declination is not None
+            ), "Rotation declination has to be set. for rotation."
             assert rotation_period is not None, "Rotation period has to be set for rotation."
             assert mesh is not None, "Radius cannot only be set for mesh-defined bodies."
 
@@ -146,7 +160,9 @@ class ActorBuilder:
             assert isinstance(mesh[0], np.ndarray), "Mesh vertices have to be a numpy array."
             assert isinstance(mesh[1], np.ndarray), "Mesh triangles have to be a numpy array."
             assert len(mesh[0].shape) == 2, "Mesh vertices have to be a numpy array of shape (n,3)."
-            assert len(mesh[1].shape) == 2, "Mesh triangles have to be a numpy array of shape (n,3)."
+            assert (
+                len(mesh[1].shape) == 2
+            ), "Mesh triangles have to be a numpy array of shape (n,3)."
 
         # Check if pykep planet is either orbiting the sun or is the sunitself
         # by comparing mu values
@@ -156,7 +172,10 @@ class ActorBuilder:
 
         # Check if the actor already had a central body
         if actor.has_central_body:
-            logger.warning("The actor already had a central body. Only one central body is supported. " "Overriding old body.")
+            logger.warning(
+                "The actor already had a central body. Only one central body is supported. "
+                "Overriding old body."
+            )
 
         # Set central body
         actor._central_body = CentralBody(
@@ -187,16 +206,22 @@ class ActorBuilder:
         assert isinstance(epoch, pk.epoch), "epoch has to be a pykep epoch."
         assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
         assert actor._orbital_parameters is None, "Actor already has an orbit."
-        assert np.isclose(actor.local_time.mjd2000, epoch.mjd2000), "The initial epoch has to match actor's local time."
+        assert np.isclose(
+            actor.local_time.mjd2000, epoch.mjd2000
+        ), "The initial epoch has to match actor's local time."
         actor._custom_orbit_propagator = propagator_func
 
         # Try evaluating position and velocity to check if the function works
         try:
             position, velocity = actor.get_position_velocity(epoch)
             assert len(position) == 3, "Position has to be list of 3 floats."
-            assert all([isinstance(val, float) for val in position]), "Position has to be list of 3 floats."
+            assert all(
+                [isinstance(val, float) for val in position]
+            ), "Position has to be list of 3 floats."
             assert len(velocity) == 3, "Velocity has to be list of 3 floats."
-            assert all([isinstance(val, float) for val in velocity]), "Velocity has to be list of 3 floats."
+            assert all(
+                [isinstance(val, float) for val in velocity]
+            ), "Velocity has to be list of 3 floats."
         except Exception as e:
             logger.error(f"Error evaluating custom orbit propagator function: {e}")
             raise RuntimeError("Error evaluating custom orbit propagator function.")
@@ -276,15 +301,21 @@ class ActorBuilder:
             actor (BaseActor): Actor set the position on.
             position (list): [x,y,z] position for SpacecraftActor.
         """
-        assert not isinstance(actor, GroundstationActor), "Position changing not supported for GroundstationActors"
+        assert not isinstance(
+            actor, GroundstationActor
+        ), "Position changing not supported for GroundstationActors"
 
         assert len(position) == 3, "Position has to be list of 3 floats."
-        assert all([isinstance(val, float) for val in position]), "Position has to be list of 3 floats."
+        assert all(
+            [isinstance(val, float) for val in position]
+        ), "Position has to be list of 3 floats."
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
 
     @staticmethod
-    def set_geometric_model(actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1):
+    def set_geometric_model(
+        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
+    ):
         """Define geometry of the spacecraft actor. This is done in the spacecraft body reference
         frame, and can be
         transformed to the inertial/PASEOS reference frame using the reference frane
@@ -340,7 +371,9 @@ class ActorBuilder:
         """
 
         # check for spacecraft actor
-        assert isinstance(actor, SpacecraftActor), "Power devices are only supported for SpacecraftActors"
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Power devices are only supported for SpacecraftActors"
 
         # If solar panel, check if the actor has a central body
         # to check eclipse
@@ -350,7 +383,8 @@ class ActorBuilder:
         # Check if the actor already had a power device
         if actor.has_power_model:
             logger.warning(
-                "The actor already had a power device. Currently only one device is supported. " "Overriding old device."
+                "The actor already had a power device. Currently only one device is supported. "
+                "Overriding old device."
             )
 
         logger.trace("Checking battery values for sensibility.")
@@ -358,7 +392,8 @@ class ActorBuilder:
         assert max_battery_level_in_Ws > 0, "Battery level must be positive"
         assert charging_rate_in_W > 0, "Battery level must be positive"
         assert (
-            power_device_type == PowerDeviceType.SolarPanel or power_device_type == PowerDeviceType.RTG
+            power_device_type == PowerDeviceType.SolarPanel
+            or power_device_type == PowerDeviceType.RTG
         ), "Only SolarPanel and RTG devices supported."
 
         actor._power_device_type = power_device_type
@@ -392,7 +427,9 @@ class ActorBuilder:
             i.e. a Single Event Latch-Up (SEL).
         """
         # check for spacecraft actor
-        assert isinstance(actor, SpacecraftActor), "Radiation models are only supported for SpacecraftActors"
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Radiation models are only supported for SpacecraftActors"
 
         assert data_corruption_events_per_s >= 0, "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
@@ -450,22 +487,31 @@ class ActorBuilder:
             0 leads to know heat-up due to activity. Defaults to 0.5.
         """
         # check for spacecraft actor
-        assert isinstance(actor, SpacecraftActor), "Thermal models are only supported for SpacecraftActors"
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Thermal models are only supported for SpacecraftActors"
 
         # Check if the actor already had a thermal model
         if actor.has_thermal_model:
             logger.warning(
-                "The actor already had a thermal model. Currently only one model is supported. " "Overriding old model."
+                "The actor already had a thermal model. Currently only one model is supported. "
+                "Overriding old model."
             )
 
         assert actor_mass > 0, "Actor mass has to be positive."
 
-        assert 0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0, "Heat ratio has to be 0 to 1."
+        assert (
+            0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0
+        ), "Heat ratio has to be 0 to 1."
 
         logger.trace("Checking actor thermal values for sensibility.")
         assert 0 <= actor_initial_temperature_in_K, "Actor initial temperature cannot be below 0K."
-        assert 0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0, "Absorptance has to be 0 to 1."
-        assert 0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0, "Absorptance has to be 0 to 1."
+        assert (
+            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
+        ), "Absorptance has to be 0 to 1."
+        assert (
+            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
+        ), "Absorptance has to be 0 to 1."
         assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
         assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
         assert 0 < actor_emissive_area, "Actor emissive area has to be > 0."
@@ -475,7 +521,9 @@ class ActorBuilder:
         assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
         assert 0 <= body_surface_temperature_in_K, "Body surface temperature cannot be below 0K."
         assert 0 <= body_emissivity and body_emissivity <= 1.0, "Body emissivity has to be 0 to 1"
-        assert 0 <= body_reflectance and body_reflectance <= 1.0, "Body reflectance has to be 0 to 1"
+        assert (
+            0 <= body_reflectance and body_reflectance <= 1.0
+        ), "Body reflectance has to be 0 to 1"
 
         actor._mass = actor_mass
         actor._thermal_model = ThermalModel(
@@ -594,7 +642,9 @@ class ActorBuilder:
             ), "Only set one of antenna gain, antenna diameter and fwhm not multiple."
 
         if device_type == DeviceType.RADIO_TRANSMITTER:
-            assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain a radio transmitter."
+            assert isinstance(
+                actor, SpacecraftActor
+            ), "Only a spacecraft can contain a radio transmitter."
             radio_transmitter = TransmitterModel(
                 input_power=input_power,
                 power_efficiency=power_efficiency,
@@ -607,7 +657,9 @@ class ActorBuilder:
             )
             actor.add_transmitter(device_name, radio_transmitter)
         elif device_type == DeviceType.RADIO_RECEIVER:
-            assert isinstance(actor, GroundstationActor), "Only a ground station can contain a radio receiver."
+            assert isinstance(
+                actor, GroundstationActor
+            ), "Only a ground station can contain a radio receiver."
             radio_receiver = ReceiverModel(
                 line_losses=line_losses,
                 polarization_losses=polarization_losses,
@@ -618,7 +670,9 @@ class ActorBuilder:
             )
             actor.add_receiver(device_name, radio_receiver)
         elif device_type == DeviceType.OPTICAL_TRANSMITTER:
-            assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain an optical transmitter."
+            assert isinstance(
+                actor, SpacecraftActor
+            ), "Only a spacecraft can contain an optical transmitter."
             optical_transmitter = TransmitterModel(
                 input_power=input_power,
                 power_efficiency=power_efficiency,
@@ -632,17 +686,27 @@ class ActorBuilder:
             )
             actor.add_transmitter(device_name, optical_transmitter)
         elif device_type == DeviceType.OPTICAL_RECEIVER:
-            assert isinstance(actor, SpacecraftActor), "Only a spacecraft can contain an optical receiver."
+            assert isinstance(
+                actor, SpacecraftActor
+            ), "Only a spacecraft can contain an optical receiver."
             optical_receiver = ReceiverModel(
-                line_losses=line_losses, antenna_diameter=antenna_diameter, antenna_gain=antenna_gain, device_type=device_type
+                line_losses=line_losses,
+                antenna_diameter=antenna_diameter,
+                antenna_gain=antenna_gain,
+                device_type=device_type,
             )
             actor.add_receiver(device_name, optical_receiver)
         else:
             if device_name in actor.communication_devices:
-                raise ValueError("Trying to add already existing communication device with device_name: " + device_name)
+                raise ValueError(
+                    "Trying to add already existing communication device with device_name: "
+                    + device_name
+                )
             actor._communication_devices[device_name] = DotMap(bandwidth_in_kbps=bandwidth_in_kbps)
 
-            logger.debug(f"Added comm device with bandwidth={bandwidth_in_kbps} kbps to actor {actor}.")
+            logger.debug(
+                f"Added comm device with bandwidth={bandwidth_in_kbps} kbps to actor {actor}."
+            )
 
     @staticmethod
     def add_custom_property(
@@ -675,27 +739,36 @@ class ActorBuilder:
         try:
             logger.trace(f"Checking update function for actor {actor} with time 0 and power 0.")
             new_value = update_function(actor, 0, 0)
-            logger.debug(f"Update function returned {new_value} for actor {actor} with time 0 and power 0.")
+            logger.debug(
+                f"Update function returned {new_value} for actor {actor} with time 0 and power 0."
+            )
         except TypeError as e:
             logger.error(e)
             # remove property if this failed
             del actor._custom_properties[property_name]
             raise TypeError(
-                "Update function must accept three parameters: actor, time_to_advance, " "current_power_consumption_in_W."
+                "Update function must accept three parameters: actor, time_to_advance, "
+                "current_power_consumption_in_W."
             )
 
         # Check that the update function returns a value of the same type as the initial value
         if type(new_value) is not type(initial_value):
             # remove property if this failed
             del actor._custom_properties[property_name]
-            raise TypeError(f"Update function must return a value of type {type(initial_value)} matching " f"initial vaue.")
+            raise TypeError(
+                f"Update function must return a value of type {type(initial_value)} matching "
+                f"initial vaue."
+            )
 
         # Check that the initial value is the same as the value returned by the update function
         # with time 0
         if new_value != initial_value:
             # remove property if this failed
             del actor._custom_properties[property_name]
-            raise ValueError("Update function must return the existing value when called with unchanged time (" "dt = 0).")
+            raise ValueError(
+                "Update function must return the existing value when called with unchanged time ("
+                "dt = 0)."
+            )
 
         actor._custom_properties_update_function[property_name] = update_function
 

@@ -7,7 +7,9 @@ from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.resources.constants import SKYFIELD_EARTH
 
 
-def calc_dist_and_alt_angle_spacecraft_ground(spacecraft_actor, ground_station_actor, epoch: pk.epoch) -> (float, float):
+def calc_dist_and_alt_angle_spacecraft_ground(
+    spacecraft_actor, ground_station_actor, epoch: pk.epoch
+) -> (float, float):
     """Calculates distance and elevation angle based on spacecraft and ground station positions.
 
     Args:
@@ -40,7 +42,9 @@ def calc_dist_and_alt_angle_spacecraft_ground(spacecraft_actor, ground_station_a
     return distance, altitude_angle
 
 
-def calc_dist_and_alt_angle_spacecraft_spacecraft(local_actor, known_actor, epoch: pk.epoch) -> (float, float):
+def calc_dist_and_alt_angle_spacecraft_spacecraft(
+    local_actor, known_actor, epoch: pk.epoch
+) -> (float, float):
     """Calculates distance and elevation angle between two spacecraft.
 
     Args:

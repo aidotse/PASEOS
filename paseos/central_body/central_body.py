@@ -59,9 +59,15 @@ class CentralBody:
         self._mesh = mesh
         if encompassing_sphere_radius is not None:
             self._encompassing_sphere = Sphere([0, 0, 0], encompassing_sphere_radius)
-        if rotation_declination is not None and rotation_right_ascension is not None and rotation_period is not None:
+        if (
+            rotation_declination is not None
+            and rotation_right_ascension is not None
+            and rotation_period is not None
+        ):
             if mesh is None or encompassing_sphere_radius is not None:
-                logger.warning("You provided rotation parameters but no mesh. This will result in a non-rotating body.")
+                logger.warning(
+                    "You provided rotation parameters but no mesh. This will result in a non-rotating body."
+                )
 
             # Convert to rad
             rotation_declination = radians(rotation_declination)
@@ -104,7 +110,9 @@ class CentralBody:
         r_sat_heliocentric = r_central_body_heliocentric + r_sat_central_body_frame
         logger.trace("r_sat_heliocentric is" + str(r_sat_heliocentric))
 
-        return self.is_between_points([0, 0, 0], r_sat_heliocentric, t, ReferenceFrame.Heliocentric, plot)
+        return self.is_between_points(
+            [0, 0, 0], r_sat_heliocentric, t, ReferenceFrame.Heliocentric, plot
+        )
 
     def is_between_actors(self, actor_1, actor_2, t: pk.epoch, plot=False) -> bool:
         """Checks whether the central body is between the two actors.

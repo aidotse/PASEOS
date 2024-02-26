@@ -44,7 +44,9 @@ def acquire_data(file_name):
         lats = np.array(xs)
         coords_dict = {"lat": lats, "lon": lons}
 
-    sentinel_img = sentinel_img.transpose(1, 2, 0) / 10000 + 1e-13  # Diving for the default quantification value
+    sentinel_img = (
+        sentinel_img.transpose(1, 2, 0) / 10000 + 1e-13
+    )  # Diving for the default quantification value
 
     return sentinel_img, coords_dict
 
@@ -226,7 +228,9 @@ def s2pix_detector(
         list: [list of bounding boxes objects, list of bounding boxes coordinates]
     """
 
-    alert_matrix, _, _, _, _ = get_alert_matrix_and_thresholds(sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr)
+    alert_matrix, _, _, _, _ = get_alert_matrix_and_thresholds(
+        sentinel_img, alpha_thr, beta_thr, S_thr, gamma_thr
+    )
     filtered_alert_matrix = cluster_9px(alert_matrix)
     filtered_alert_matrix[filtered_alert_matrix < 9] = 0
     filtered_alert_matrix[filtered_alert_matrix == 9] = 1

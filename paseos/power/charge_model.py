@@ -20,7 +20,14 @@ def charge(
     Returns:
         SpacecraftActor: Modified actor after charging.
     """
-    logger.trace("Charging actor" + str(actor) + " for " + str(charging_time_in_s) + " seconds using model " + model)
+    logger.trace(
+        "Charging actor"
+        + str(actor)
+        + " for "
+        + str(charging_time_in_s)
+        + " seconds using model "
+        + model
+    )
     assert charging_time_in_s > 0, "Charging time has to be positive."
 
     # Compute end of charging time

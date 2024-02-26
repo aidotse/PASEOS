@@ -143,7 +143,9 @@ class BaseActor(ABC):
             model (TransmitterModel): The transmitter model
         """
         if device_name in self._transmitters.keys():
-            raise ValueError(f"Transmitter with name '{device_name}' already exists for actor {self}.")
+            raise ValueError(
+                f"Transmitter with name '{device_name}' already exists for actor {self}."
+            )
         self._transmitters[device_name] = DotMap(model=model)
 
     def add_receiver(self, device_name: str, model: ReceiverModel):
@@ -374,10 +376,16 @@ class BaseActor(ABC):
         Returns:
             np.array: [x,y,z] in meters
         """
-        logger.trace("Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000).")
+        logger.trace(
+            "Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000)."
+        )
 
-        if (self._orbital_parameters is not None or self._custom_orbit_propagator is not None) and self._position is not None:
-            raise ValueError("Ambiguous position definition. Either set an orbit OR position with ActorBuilder.")
+        if (
+            self._orbital_parameters is not None or self._custom_orbit_propagator is not None
+        ) and self._position is not None:
+            raise ValueError(
+                "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
+            )
 
         # If the actor has no orbit, return position
         if self._orbital_parameters is None and self._custom_orbit_propagator is None:
@@ -391,7 +399,8 @@ class BaseActor(ABC):
             return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
-            "No suitable way added to determine actor position. Either set an orbit or position " "with ActorBuilder."
+            "No suitable way added to determine actor position. Either set an orbit or position "
+            "with ActorBuilder."
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
@@ -406,9 +415,17 @@ class BaseActor(ABC):
         """
 
         if self._orbital_parameters is None and self._custom_orbit_propagator is None:
-            raise NotImplementedError("No suitable way added to determine actor velocity. Set an orbit with ActorBuilder.")
+            raise NotImplementedError(
+                "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
+            )
 
-        logger.trace("Computing " + self.name + " position / velocity at time " + str(epoch.mjd2000) + " (mjd2000).")
+        logger.trace(
+            "Computing "
+            + self.name
+            + " position / velocity at time "
+            + str(epoch.mjd2000)
+            + " (mjd2000)."
+        )
 
         # Use either custom propagator or pykep to compute position / velocity
         if self._custom_orbit_propagator is not None:

@@ -13,7 +13,9 @@ def test_custom_propagator():
 
     # Create a spacecraft actor
     starting_epoch = pk.epoch(42)
-    my_sat = ActorBuilder.get_actor_scaffold(name="my_sat", actor_type=SpacecraftActor, epoch=starting_epoch)
+    my_sat = ActorBuilder.get_actor_scaffold(
+        name="my_sat", actor_type=SpacecraftActor, epoch=starting_epoch
+    )
 
     # Define a custom propagator function that just returns a sinus position
     def my_propagator(epoch: pk.epoch):

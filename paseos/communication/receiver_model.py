@@ -1,7 +1,10 @@
 import math
 from loguru import logger
 
-from .gain_calc import calc_optical_gain_from_wavelength_diameter_db, calc_radio_gain_from_wavelength_diameter_db
+from .gain_calc import (
+    calc_optical_gain_from_wavelength_diameter_db,
+    calc_radio_gain_from_wavelength_diameter_db,
+)
 from .device_type import DeviceType
 
 
@@ -53,9 +56,13 @@ class ReceiverModel:
         # If no constant gain value was passed and set in the constructor, it needs to be calculated
         if self.antenna_gain_db is None:
             if self.device_type == DeviceType.OPTICAL_RECEIVER:
-                self.antenna_gain_db = calc_optical_gain_from_wavelength_diameter_db(wavelength, self.antenna_diameter, 1)
+                self.antenna_gain_db = calc_optical_gain_from_wavelength_diameter_db(
+                    wavelength, self.antenna_diameter, 1
+                )
             elif self.device_type == DeviceType.RADIO_RECEIVER:
-                self.antenna_gain_db = calc_radio_gain_from_wavelength_diameter_db(wavelength, self.antenna_diameter, 1)
+                self.antenna_gain_db = calc_radio_gain_from_wavelength_diameter_db(
+                    wavelength, self.antenna_diameter, 1
+                )
 
     def set_active_state(self, is_active: bool) -> None:
         """Sets the active state of the transmitter.

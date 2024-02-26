@@ -122,7 +122,9 @@ class SpaceAnimation(Animation):
                     self.objects[j].actor, GroundstationActor
                 ):
                     continue
-                elif self.objects[i].actor.is_in_line_of_sight(self.objects[j].actor, self.objects[i].actor.local_time):
+                elif self.objects[i].actor.is_in_line_of_sight(
+                    self.objects[j].actor, self.objects[i].actor.local_time
+                ):
                     pos_i, pos_j = self.objects[i].positions, self.objects[j].positions
                     if isinstance(pos_i[0], np.ndarray):
                         pos_i = pos_i[-1]
@@ -131,7 +133,11 @@ class SpaceAnimation(Animation):
                     y1y2 = [pos_i[1], pos_j[1]]
                     z1z2 = [pos_i[2], pos_j[2]]
 
-                    self.comm_lines.append(self.ax_3d.plot3D(x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10))
+                    self.comm_lines.append(
+                        self.ax_3d.plot3D(
+                            x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10
+                        )
+                    )
 
     def _plot_central_body(self) -> None:
         """Plot the central object"""
@@ -204,7 +210,9 @@ class SpaceAnimation(Animation):
             #     info = actor.communication_devices[name]
             #     info_str += f"\nCommDevice1: {info.bandwidth_in_kbps} kbps"
         else:
-            raise NotImplementedError("SpacePlot is currently not implemented for actor type" + type(actor))
+            raise NotImplementedError(
+                "SpacePlot is currently not implemented for actor type" + type(actor)
+            )
 
         cur_act = actor._current_activity
         if cur_act is not None:
@@ -242,7 +250,9 @@ class SpaceAnimation(Animation):
 
             if "plot" in obj.keys():
                 # spacecraft and ground stations behave differently and are plotted separately
-                if isinstance(obj.actor, SpacecraftActor) or isinstance(obj.actor, GroundstationActor):
+                if isinstance(obj.actor, SpacecraftActor) or isinstance(
+                    obj.actor, GroundstationActor
+                ):
                     logger.trace("Updating SpacecraftActor.")
 
                     # update trajectory
@@ -258,7 +268,9 @@ class SpaceAnimation(Animation):
                     obj.plot.text.set_position_3d(data[-1, :] + self._textbox_offset)
                     obj.plot.text.set_text(actor_info)
             else:
-                if isinstance(obj.actor, SpacecraftActor) or isinstance(obj.actor, GroundstationActor):
+                if isinstance(obj.actor, SpacecraftActor) or isinstance(
+                    obj.actor, GroundstationActor
+                ):
                     trajectory = self.ax_3d.plot3D(data[0, 0], data[0, 1], data[0, 2])[0]
                     obj.plot.trajectory = trajectory
                     obj.plot.point = self.ax_3d.plot(

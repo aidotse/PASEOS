@@ -58,7 +58,9 @@ nSats = 1  # the number of satellites per orbital plane
 t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")  # the starting date of our simulation
 
 # Compute the orbit of each rank
-planet_list, sats_pos_and_v, _ = get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=False)
+planet_list, sats_pos_and_v, _ = get_constellation(
+    altitude, inclination, nSats, nPlanes, t0, verbose=False
+)
 print(f"Rank {rank} set up its orbit with altitude={altitude}m and inclination={inclination}deg")
 
 ############ PASEOS INIT #############
@@ -67,7 +69,9 @@ earth = pk.planet.jpl_lp("earth")  # define our central body
 pos, v = sats_pos_and_v[0]  # get our position and velocity
 
 # Create the local actor, name will be the rank
-local_actor = ActorBuilder.get_actor_scaffold(name="Sat_" + str(rank), actor_type=SpacecraftActor, epoch=t0)
+local_actor = ActorBuilder.get_actor_scaffold(
+    name="Sat_" + str(rank), actor_type=SpacecraftActor, epoch=t0
+)
 ActorBuilder.set_orbit(actor=local_actor, position=pos, velocity=v, epoch=t0, central_body=earth)
 
 paseos_instance = paseos.init_sim(local_actor=local_actor)
@@ -127,7 +131,9 @@ while t <= simulation_time:
     # Advance the simulation state of this rank
     # Note how we pass the "constraint_func" to tell paseos
     # to track windows
-    paseos_instance.advance_time(timestep, current_power_consumption_in_W=0, constraint_function=constraint_func)
+    paseos_instance.advance_time(
+        timestep, current_power_consumption_in_W=0, constraint_function=constraint_func
+    )
     t += timestep
 
     sys.stdout.flush()  # update prints to better see parallelism

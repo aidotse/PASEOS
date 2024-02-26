@@ -5,8 +5,16 @@ from loguru import logger
 from .receiver_model import ReceiverModel
 from .transmitter_model import TransmitterModel
 from ..actors.base_actor import BaseActor
-from ..resources.constants import (C, WAVELENGTH_OPTICAL, REQUIRED_S_N_MARGIN_OPTICAL_DB, PHOTONS_PER_BIT, PLANCK_CONSTANT,
-                                   BOLTZMANN_DB, REQUIRED_S_N_MARGIN_RADIO_DB, REQUIRED_S_N_RATIO_RADIO_DB)
+from ..resources.constants import (
+    C,
+    WAVELENGTH_OPTICAL,
+    REQUIRED_S_N_MARGIN_OPTICAL_DB,
+    PHOTONS_PER_BIT,
+    PLANCK_CONSTANT,
+    BOLTZMANN_DB,
+    REQUIRED_S_N_MARGIN_RADIO_DB,
+    REQUIRED_S_N_RATIO_RADIO_DB,
+)
 from .device_type import DeviceType
 
 
@@ -96,7 +104,9 @@ class LinkModel:
             The bitrate in bps
         """
         assert slant_range > 0, "Slant range needs to be higher than 0 meters"
-        assert 90 >= min_elevation_angle >= 0, "Elevation angle needs to be between 0 and 90 degrees"
+        assert (
+            90 >= min_elevation_angle >= 0
+        ), "Elevation angle needs to be between 0 and 90 degrees"
         bitrate = 0
 
         self.total_channel_loss_db = self.get_path_loss_db(slant_range)
@@ -106,24 +116,38 @@ class LinkModel:
             # Link budget calculation in optical LEO satellite downlinks with on/off‐keying and
             # large signal divergence: A simplified methodology. International Journal of Satellite
             # Communications and Networking.
-            self.signal_at_receiver_db = self.transmitter.effective_isotropic_radiated_power_db - self.total_channel_loss_db
+            self.signal_at_receiver_db = (
+                self.transmitter.effective_isotropic_radiated_power_db - self.total_channel_loss_db
+            )
 
             self.received_signal_power_with_gain_db = (
-                self.signal_at_receiver_db + self.receiver.antenna_gain_db - self.receiver.line_losses_db
+                self.signal_at_receiver_db
+                + self.receiver.antenna_gain_db
+                - self.receiver.line_losses_db
             )
 
             self.received_signal_power_with_margin_db = (
                 self.received_signal_power_with_gain_db - REQUIRED_S_N_MARGIN_OPTICAL_DB
             )  # dBm
 
-            self.received_signal_power_with_margin_nw = 10 ** (self.received_signal_power_with_margin_db / 10) * 1e-3  # nW
+            self.received_signal_power_with_margin_nw = (
+                10 ** (self.received_signal_power_with_margin_db / 10) * 1e-3
+            )  # nW
 
-            bitrate = self.received_signal_power_with_margin_nw / PHOTONS_PER_BIT * WAVELENGTH_OPTICAL / PLANCK_CONSTANT / C
+            bitrate = (
+                self.received_signal_power_with_margin_nw
+                / PHOTONS_PER_BIT
+                * WAVELENGTH_OPTICAL
+                / PLANCK_CONSTANT
+                / C
+            )
         elif self.transmitter.device_type == DeviceType.RADIO_TRANSMITTER:
             # Based on Kirkpatrick, D. (1999). Space mission analysis and design (Vol. 8).
             # J. R. Wertz, W. J. Larson, & D. Klungle (Eds.). Torrance: Microcosm.
 
-            self.signal_at_receiver_db = self.transmitter.effective_isotropic_radiated_power_db - self.total_channel_loss_db
+            self.signal_at_receiver_db = (
+                self.transmitter.effective_isotropic_radiated_power_db - self.total_channel_loss_db
+            )
 
             self.s_n_power_density_db = (
                 self.signal_at_receiver_db
@@ -133,9 +157,13 @@ class LinkModel:
                 - self.receiver.noise_temperature_db
                 - BOLTZMANN_DB
             )
-            self.s_n_power_density_including_margin_db = self.s_n_power_density_db - REQUIRED_S_N_MARGIN_RADIO_DB
+            self.s_n_power_density_including_margin_db = (
+                self.s_n_power_density_db - REQUIRED_S_N_MARGIN_RADIO_DB
+            )
 
-            bitrate = 10 ** (-0.1 * (REQUIRED_S_N_RATIO_RADIO_DB - self.s_n_power_density_including_margin_db))
+            bitrate = 10 ** (
+                -0.1 * (REQUIRED_S_N_RATIO_RADIO_DB - self.s_n_power_density_including_margin_db)
+            )
 
         if bitrate < 0:
             bitrate = 0

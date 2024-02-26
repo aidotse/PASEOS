@@ -29,7 +29,8 @@ def find_next_window(
     logger.debug(f"Find next comms window between {local_actor} and {target_actor}")
 
     assert local_actor_communication_link_name in local_actor.communication_devices, (
-        "Trying to use a not-existing communication link with the name: " + local_actor.communication_devices
+        "Trying to use a not-existing communication link with the name: "
+        + local_actor.communication_devices
     )
     local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
