@@ -13,6 +13,9 @@ from paseos.communication.link_budget_calc import calc_dist_and_alt_angle
 
 
 def test_link_creation():
+    """
+    Tests whether the creation of a link is successful and raises the correct exceptions in case of invalid parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
         name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=t0
@@ -92,6 +95,9 @@ def test_link_creation():
 
 
 def test_receiver_creation():
+    """
+    Tests whether the creation of a receiver is successful and raises the correct exceptions in case of invalid parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
         name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=t0
@@ -158,6 +164,10 @@ def test_receiver_creation():
 
 
 def test_radio_receiver_creation():
+    """
+    Tests whether the creation of a radio receiver is successful and raises the correct exceptions in case of invalid
+    parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
         name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=t0
@@ -208,6 +218,10 @@ def test_radio_receiver_creation():
 
 
 def test_optical_receiver_creation():
+    """
+    Tests whether the creation of an optical receiver is successful and raises the correct exceptions in case of invalid
+    parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     comms_sat: SpacecraftActor = ActorBuilder.get_actor_scaffold(
         name="Sat", actor_type=SpacecraftActor, epoch=t0
@@ -226,6 +240,10 @@ def test_optical_receiver_creation():
 
 
 def test_transmitter_creation():
+    """
+    Tests whether the creation of a transmitter is successful and raises the correct exceptions in case of invalid
+    parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
         name="Sat", actor_type=SpacecraftActor, epoch=t0
@@ -325,6 +343,10 @@ def test_transmitter_creation():
 
 
 def test_radio_transmitter_creation():
+    """
+    Tests whether the creation of a radio transmitter is successful and raises the correct exceptions in case of invalid
+    parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
         name="Sat", actor_type=SpacecraftActor, epoch=t0
@@ -379,6 +401,10 @@ def test_radio_transmitter_creation():
 
 
 def test_optical_transmitter_creation():
+    """
+    Tests whether the creation of an optical transmitter is successful and raises the correct exceptions in case of invalid
+    parameters.
+    """
     t0 = pk.epoch_from_string("2023-Jan-04 20:00:00")
     sat_actor: SpacecraftActor = ActorBuilder.get_actor_scaffold(
         name="Sat", actor_type=SpacecraftActor, epoch=t0
@@ -481,6 +507,9 @@ def test_optical_transmitter_creation():
 
 
 def test_bitrate_calculation():
+    """
+    Tests whether the bitrate is calculated correctly for radio and optical links.
+    """
     # Radio input based on Kirkpatrick, D. (1999). Space mission analysis and design (Vol. 8).
     # J. R. Wertz, W. J. Larson, & D. Klungle (Eds.). Torrance: Microcosm.
 
@@ -570,6 +599,9 @@ def test_bitrate_calculation():
 
 
 def test_communication_link_sat_to_sat():
+    """
+    Tests whether the distance calculations between satellites is correct.
+    """
     earth = pk.planet.jpl_lp("earth")
     sat1 = ActorBuilder.get_actor_scaffold("sat1", SpacecraftActor, pk.epoch(0))
     sat2 = ActorBuilder.get_actor_scaffold("sat2", SpacecraftActor, pk.epoch(0))
