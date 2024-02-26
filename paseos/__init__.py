@@ -22,12 +22,7 @@ set_log_level("WARNING")
 logger.debug("Loaded module.")
 
 
-def init_sim(
-        local_actor: BaseActor,
-        cfg: DotMap = None,
-        starting_epoch: pk.epoch = None,
-        communication_links=None,
-):
+def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoch = None):
     """Initializes PASEOS
 
     Args:
@@ -37,7 +32,6 @@ def init_sim(
         Defaults to None.
         starting_epoch(pk.epoch): Starting epoch of the simulation. Will override cfg and local
         actor one.
-        communication_links: A list of links from this instance to others.
     Returns:
         PASEOS: Instance of the simulation (only one can exist, singleton)
     """
@@ -56,13 +50,10 @@ def init_sim(
     if local_actor.local_time.mjd2000 * pk.DAY2SEC != cfg.sim.start_time:
         logger.warning(
             "You provided a different starting epoch for PASEOS than the local time of the local "
-            "actor."
-            + "starting_epoch will be used."
+            "actor." + "starting_epoch will be used."
         )
 
-    sim = PASEOS(
-        local_actor=local_actor, cfg=cfg, communication_links=communication_links
-    )
+    sim = PASEOS(local_actor=local_actor, cfg=cfg)
     return sim
 
 

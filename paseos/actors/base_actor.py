@@ -8,6 +8,8 @@ from loguru import logger
 
 from ..central_body.central_body import CentralBody
 from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from ..communication.receiver_model import ReceiverModel
+from ..communication.transmitter_model import TransmitterModel
 
 
 class BaseActor(ABC):
@@ -34,12 +36,16 @@ class BaseActor(ABC):
     # Central body this actor is orbiting
     _central_body = None
 
-    # Transmitters
+    # Transmitters for the communication solution where link budget modelling is used
     _transmitters: DotMap(_dynamic=False)
 
-    # Receivers
+    # Receivers for the communication solution where link budget modelling is used
     _receivers: DotMap(_dynamic=False)
 
+    # List of communication links for the communication solution where link budget modelling is used
+    _communication_links: DotMap(_dynamic=False)
+
+    # Communication devices for the simple communication solution where a constant bitrate is set
     _communication_devices: DotMap(_dynamic=False)
 
     # Tracks user-defined custom properties
@@ -76,6 +82,7 @@ class BaseActor(ABC):
 
         self._receivers = DotMap(_dynamic=False)
         self._transmitters = DotMap(_dynamic=False)
+        self._communication_links = DotMap(_dynamic=False)
 
     def get_custom_property(self, property_name: str) -> Any:
         """Returns the value of the specified custom property.
@@ -87,9 +94,7 @@ class BaseActor(ABC):
             Any: The value of the custom property.
         """
         if property_name not in self._custom_properties:
-            raise ValueError(
-                f"Custom property '{property_name}' does not exist for actor {self}."
-            )
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         return self._custom_properties[property_name]
 
@@ -109,10 +114,7 @@ class BaseActor(ABC):
         Returns:
             [str]: Get a list with the names of the all the transmitters.
         """
-        result = []
-        for key in self._transmitters:
-            result.append(key)
-        return result
+        return list(self._transmitters.keys())
 
     def get_receiver(self, name: str):
         """Get the receiver model with the specified name.
@@ -131,16 +133,51 @@ class BaseActor(ABC):
         Returns:
             [str]: Get a list with the names of the all the receivers.
         """
-        result = []
-        for key in self._receivers:
-            result.append(key)
-        return result
+        return list(self._receivers.keys())
 
-    def add_transmitter(self, device_name, model):
+    def add_transmitter(self, device_name, model: TransmitterModel):
+        """Adds a transmitter to the actor.
+
+        Args:
+            device_name (str): The name of the transmitter.
+            model (TransmitterModel): The transmitter model
+        """
+        if device_name in self._transmitters.keys():
+            raise ValueError(f"Transmitter with name '{device_name}' already exists for actor {self}.")
         self._transmitters[device_name] = DotMap(model=model)
 
-    def add_receiver(self, device_name, model):
+    def add_receiver(self, device_name: str, model: ReceiverModel):
+        """Adds a receiver to the actor.
+
+        Args:
+            device_name (str): The name of the receiver.
+            model (ReceiverModel): The receiver model
+        """
+        if device_name in self._receivers.keys():
+            raise ValueError(f"Receiver with name '{device_name}' already exists for actor {self}.")
         self._receivers[device_name] = DotMap(model=model)
+
+    def add_comm_link(self, link_name: str, model):
+        """Adds a communication link to the actor.
+
+        Args:
+            link_name (str): The name of the link.
+            model (LinkModel): The link model
+        """
+        if link_name in self._communication_links.keys():
+            raise ValueError(f"Link with name '{link_name}' already exists for actor {self}.")
+        self._communication_links[link_name] = DotMap(model=model)
+
+    def get_comm_link(self, link_name: str):
+        """Get the link model with the specified name.
+
+        Args:
+            link_name (str): the name of the link
+
+        Returns:
+            Receiver: the link with the specified name.
+        """
+        return self._communication_links[link_name].model
 
     @property
     def custom_properties(self):
@@ -160,15 +197,11 @@ class BaseActor(ABC):
             value (Any): The value to set for the custom property.
         """
         if property_name not in self._custom_properties:
-            raise ValueError(
-                f"Custom property '{property_name}' does not exist for actor {self}."
-            )
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         self._custom_properties[property_name] = value
 
-        logger.debug(
-            f"Set custom property '{property_name}' to {value} for actor {self}."
-        )
+        logger.debug(f"Set custom property '{property_name}' to {value} for actor {self}.")
 
     def get_custom_property_update_function(self, property_name: str) -> Callable:
         """Returns the update function for the specified custom property.
@@ -180,9 +213,7 @@ class BaseActor(ABC):
             Callable: The update function for the custom property.
         """
         if property_name not in self._custom_properties_update_function:
-            raise ValueError(
-                f"Custom property '{property_name}' does not exist for actor {self}."
-            )
+            raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         return self._custom_properties_update_function[property_name]
 
@@ -202,10 +233,7 @@ class BaseActor(ABC):
         Returns:
             bool: bool indicating presence.
         """
-        return (
-                hasattr(self, "_battery_level_in_Ws")
-                and self._battery_level_in_Ws is not None
-        )
+        return hasattr(self, "_battery_level_in_Ws") and self._battery_level_in_Ws is not None
 
     @property
     def has_radiation_model(self) -> bool:
@@ -264,8 +292,8 @@ class BaseActor(ABC):
 
     @staticmethod
     def _check_init_value_sensibility(
-            position,
-            velocity,
+        position,
+        velocity,
     ):
         """A function to check user inputs for sensibility
 
@@ -276,6 +304,15 @@ class BaseActor(ABC):
         logger.trace("Checking constructor values for sensibility.")
         assert len(position) == 3, "Position has to have 3 elements (x,y,z)"
         assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
+
+    @property
+    def communication_links(self):
+        """Returns communication links.
+
+        Returns:
+            list: List of communication links.
+        """
+        return [link.model for link in self._communication_links.values()]
 
     def __str__(self):
         return self.name
@@ -308,8 +345,8 @@ class BaseActor(ABC):
         pass
 
     def get_altitude(
-            self,
-            t0: pk.epoch = None,
+        self,
+        t0: pk.epoch = None,
     ) -> float:
         """Returns altitude above [0,0,0]. Will only compute if not computed for this timestep.
 
@@ -321,15 +358,10 @@ class BaseActor(ABC):
         """
         if t0 is None:
             t0 = self._local_time
-        if (
-                t0.mjd2000 == self._time_of_previous_position
-                and self._previous_altitude is not None
-        ):
+        if t0.mjd2000 == self._time_of_previous_position and self._previous_altitude is not None:
             return self._previous_altitude
         else:
-            self._previous_altitude = np.sqrt(
-                np.sum(np.power(self.get_position(t0), 2))
-            )
+            self._previous_altitude = np.sqrt(np.sum(np.power(self.get_position(t0), 2)))
             return self._previous_altitude
 
     def get_position(self, epoch: pk.epoch):
@@ -342,21 +374,10 @@ class BaseActor(ABC):
         Returns:
             np.array: [x,y,z] in meters
         """
-        logger.trace(
-            "Computing "
-            + self.name
-            + " position at time "
-            + str(epoch.mjd2000)
-            + " (mjd2000)."
-        )
+        logger.trace("Computing " + self.name + " position at time " + str(epoch.mjd2000) + " (mjd2000).")
 
-        if (
-                self._orbital_parameters is not None
-                or self._custom_orbit_propagator is not None
-        ) and self._position is not None:
-            raise ValueError(
-                "Ambiguous position definition. Either set an orbit OR position with ActorBuilder."
-            )
+        if (self._orbital_parameters is not None or self._custom_orbit_propagator is not None) and self._position is not None:
+            raise ValueError("Ambiguous position definition. Either set an orbit OR position with ActorBuilder.")
 
         # If the actor has no orbit, return position
         if self._orbital_parameters is None and self._custom_orbit_propagator is None:
@@ -370,8 +391,7 @@ class BaseActor(ABC):
             return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
-            "No suitable way added to determine actor position. Either set an orbit or position "
-            "with ActorBuilder."
+            "No suitable way added to determine actor position. Either set an orbit or position " "with ActorBuilder."
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
@@ -386,17 +406,9 @@ class BaseActor(ABC):
         """
 
         if self._orbital_parameters is None and self._custom_orbit_propagator is None:
-            raise NotImplementedError(
-                "No suitable way added to determine actor velocity. Set an orbit with ActorBuilder."
-            )
+            raise NotImplementedError("No suitable way added to determine actor velocity. Set an orbit with ActorBuilder.")
 
-        logger.trace(
-            "Computing "
-            + self.name
-            + " position / velocity at time "
-            + str(epoch.mjd2000)
-            + " (mjd2000)."
-        )
+        logger.trace("Computing " + self.name + " position / velocity at time " + str(epoch.mjd2000) + " (mjd2000).")
 
         # Use either custom propagator or pykep to compute position / velocity
         if self._custom_orbit_propagator is not None:
@@ -411,11 +423,11 @@ class BaseActor(ABC):
         return pos, vel
 
     def is_in_line_of_sight(
-            self,
-            other_actor: "BaseActor",
-            epoch: pk.epoch,
-            minimum_altitude_angle: float = None,
-            plot=False,
+        self,
+        other_actor: "BaseActor",
+        epoch: pk.epoch,
+        minimum_altitude_angle: float = None,
+        plot=False,
     ):
         """Determines whether a position is in line of sight of this actor
 
@@ -431,9 +443,7 @@ class BaseActor(ABC):
         Returns:
             bool: true if in line-of-sight.
         """
-        return is_in_line_of_sight(
-            self, other_actor, epoch, minimum_altitude_angle, plot
-        )
+        return is_in_line_of_sight(self, other_actor, epoch, minimum_altitude_angle, plot)
 
     def is_in_eclipse(self, t: pk.epoch = None):
         """Checks if the actors is in eclipse at the specified time.
