@@ -658,9 +658,6 @@ class ActorBuilder:
             )
             actor.add_transmitter(device_name, radio_transmitter)
         elif device_type == DeviceType.RADIO_RECEIVER:
-            assert isinstance(
-                actor, GroundstationActor
-            ), "Only a ground station can contain a radio receiver."
             radio_receiver = ReceiverModel(
                 line_losses=line_losses,
                 polarization_losses=polarization_losses,
