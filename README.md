@@ -1197,7 +1197,7 @@ Distributed under the GPL-3.0 License.
 
 Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 
-- Pablo Gómez - pablo.gomez at esa.int, pablo.gomez at ai.se
+- Pablo Gómez - pablo.gomez at esa.int
 - Gabriele Meoni - gabriele.meoni at esa.int, g.meoni at tudelft.nl
 - Johan Östman - johan.ostman at ai.se
 - Vinutha Magal Shreenath - vinutha at ai.se
