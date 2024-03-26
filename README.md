@@ -328,6 +328,10 @@ print(sat_actor.get_altitude(t0))
 
 #### How to add a communication device
 
+PASEOS supports two types of communication modelling.
+1. A simplified model where a constant bitrate is set between two actors. See the first example below on how to add such a communication device.
+2. A link budget based model where the bitrate is adjusted based on distance between actors and the transmitter, receiver and link characteristics. This other examples in this section will further explore this model.
+
 The following code snippet shows how to add a communication device to a [SpacecraftActors] (#spacecraftactor). A communication device is needed to model the communication between [SpacecraftActors] (#spacecraftactor) or a [SpacecraftActor](#spacecraftactor) and [GroundstationActor](#ground-stationactor). Currently, given the maximum transmission data rate of a communication device, PASEOS calculates the maximum data that can be transmitted by multiplying the transmission data rate by the length of the communication window. The latter is calculated by taking the period for which two actors are in line-of-sight into account.
 
 ```py
@@ -343,6 +347,95 @@ ActorBuilder.add_comm_device(actor=sat_actor,
                              device_name="my_communication_device",
                              # Bandwidth in kbps.
                              bandwidth_in_kbps=100000)
+```
+
+Link budget communication modelling is possible between satellites or between a satellite and ground stations. The example below explores an optical connection between sat_actor and comms_sat and a radio connection between comms_sat and maspalomas_groundstation.
+
+The first step is to add an optical transmitter to a spacecraft:
+
+```py
+    import pykep as pk
+    from paseos import SpacecraftActor, ActorBuilder
+    from paseos.communication.device_type import DeviceType
+    sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
+                                       actor_type=SpacecraftActor,
+                                       epoch=pk.epoch(0))
+    
+    ActorBuilder.set_orbit(
+    actor=sat_actor,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+    )
+    optical_transmitter_name = "sat_optical_transmitter_1"
+    ActorBuilder.add_comm_device(actor=sat_actor,
+                                 device_name=optical_transmitter_name, input_power=1, 
+                                 power_efficiency=1, antenna_efficiency=1, line_losses=1, 
+                                 point_losses=3, fwhm=1E-3, device_type=DeviceType.OPTICAL_TRANSMITTER)
+```
+The full width at half maximum (fwhm) is used to determine the transmitter gain. This can alternatively be determined by setting antenna_gain, or by setting antenna_diameter.
+
+The second step is to add an optical receiver and a radio transmitter to the comms satellite.
+
+```py
+import pykep as pk
+from paseos import SpacecraftActor, ActorBuilder
+from paseos.communication.device_type import DeviceType
+comms_sat:SpacecraftActor = ActorBuilder.get_actor_scaffold(name="comms_1",actor_type=SpacecraftActor, epoch=pk.epoch(0))
+ActorBuilder.set_orbit(
+    actor=comms_sat,
+    position=[10000000, 0, 0],
+    velocity=[0, 8000.0, 0],
+    epoch=pk.epoch(0),
+    central_body=pk.planet.jpl_lp("earth"),  # use Earth from pykep
+    )
+
+optical_receiver_name = "optical_receiver_1"
+ActorBuilder.add_comm_device(actor=comms_sat,device_name=optical_receiver_name, line_losses=4.1, antenna_gain=114.2, device_type=DeviceType.OPTICAL_RECEIVER)
+
+radio_name = "sat_radio_transmitter_1"
+ActorBuilder.add_comm_device(actor=comms_sat,device_name=radio_name, input_power=2, power_efficiency=0.5,
+                                antenna_efficiency=0.5, line_losses=1, point_losses=5, antenna_diameter=0.3, device_type=DeviceType.RADIO_TRANSMITTER)
+```
+Next, add a radio receiver the ground station.
+
+```py
+from paseos import SpacecraftActor, ActorBuilder, GroundstationActor
+maspalomas_groundstation = ActorBuilder.get_actor_scaffold(
+        name="maspalomas_groundstation", actor_type=GroundstationActor, epoch=pk.epoch(0)
+    )
+ActorBuilder.set_ground_station_location(maspalomas_groundstation,latitude=27.7629, longitude=-15.6338, elevation=205.1, minimum_altitude_angle=5)
+receiver_name = "maspalomas_radio_receiver_1"
+ActorBuilder.add_comm_device(actor=maspalomas_groundstation, device_name=receiver_name, noise_temperature=135, 
+                             line_losses=1, polarization_losses=3, antenna_gain=62.6, device_type=DeviceType.RADIO_RECEIVER)
+```
+
+The final step is to add links to the transmitting actors.
+
+```py
+from paseos import SpacecraftActor, ActorBuilder
+optical_link_name = "optical_link_1"
+ActorBuilder.add_comm_link(sat_actor, optical_transmitter_name, comms_sat, optical_receiver_name, optical_link_name)
+
+frequency = 8475E6 #Hz
+radio_link_name = "radio_link_1"
+ActorBuilder.add_comm_link(comms_sat, radio_link_name, maspalomas_groundstation, receiver_name, radio_link_name, frequency=frequency)
+```
+
+The link and bitrate can then be evaluated during the simulation to determine the bitrate:
+
+```py
+from paseos.communication.link_budget_calc import calc_dist_and_alt_angle
+
+while t <= simulation_time:
+    for instance in paseos_instances:
+        local_t = instance.local_actor.local_time
+        for link in instance.local_actor.communication_links:
+            distance, elevation_angle = calc_dist_and_alt_angle(instance.local_actor,
+                                                                link.receiver_actor, local_t)
+            if instance.local_actor.is_in_line_of_sight(link.receiver_actor, epoch=local_t):
+                bitrate = link.get_bitrate(distance, elevation_angle)
 ```
 
 #### How to add a power device

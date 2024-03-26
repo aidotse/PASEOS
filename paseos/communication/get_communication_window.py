@@ -17,16 +17,19 @@ def get_communication_window(
     data_to_send_in_b: int = sys.maxsize,
     window_timeout_value_in_s=7200,
 ):
-    """Returning the communication window and the amount of data that can be transmitted from the local to the target actor.
+    """Returning the communication window and the amount of data that can be transmitted from the
+    local to the target actor.
 
     Args:
         local_actor (BaseActor): Local actor.
-        local_actor_communication_link_name (str):  Name of the local_actor's communication link to use.
+        local_actor_communication_link_name (str):  Name of the local_actor's communication link
+        to use.
         target_actor (BaseActor): other actor.
         dt (float): Simulation timestep [s]. Defaults to 10.
         t0 (pk.epoch): Current simulation time. Defaults to local time.
         data_to_send_in_b (int): Amount of data to transmit [b]. Defaults to maxint.
-        window_timeout_value_in_s (float, optional): Timeout for estimating the communication window. Defaults to 7200.0.
+        window_timeout_value_in_s (float, optional): Timeout for estimating the communication
+        window. Defaults to 7200.0.
     Returns:
         pk.epoch: Communication window start time.
         pk.epoch: Communication window end time.
@@ -43,7 +46,7 @@ def get_communication_window(
     )
     local_actor_comm_link = local_actor.communication_devices[local_actor_communication_link_name]
 
-    assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandiwidth has to be positive."
+    assert local_actor_comm_link.bandwidth_in_kbps > 0, "Bandwidth has to be positive."
     assert dt > 0, "dt has to be positive."
     assert data_to_send_in_b > 0, "data_to_send_in_b has to be positive."
 

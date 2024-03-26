@@ -1,13 +1,15 @@
 from abc import ABC
 from typing import Callable, Any
 
-from loguru import logger
-import pykep as pk
 import numpy as np
+import pykep as pk
 from dotmap import DotMap
+from loguru import logger
 
-from ..central_body.is_in_line_of_sight import is_in_line_of_sight
 from ..central_body.central_body import CentralBody
+from ..central_body.is_in_line_of_sight import is_in_line_of_sight
+from ..communication.receiver_model import ReceiverModel
+from ..communication.transmitter_model import TransmitterModel
 
 
 class BaseActor(ABC):
@@ -34,8 +36,17 @@ class BaseActor(ABC):
     # Central body this actor is orbiting
     _central_body = None
 
-    # Communication links dictionary
-    _communication_devices = DotMap(_dynamic=False)
+    # Transmitters for the communication solution where link budget modelling is used
+    _transmitters: DotMap(_dynamic=False)
+
+    # Receivers for the communication solution where link budget modelling is used
+    _receivers: DotMap(_dynamic=False)
+
+    # List of communication links for the communication solution where link budget modelling is used
+    _communication_links: DotMap(_dynamic=False)
+
+    # Communication devices for the simple communication solution where a constant bitrate is set
+    _communication_devices: DotMap(_dynamic=False)
 
     # Tracks user-defined custom properties
     _custom_properties = DotMap(_dynamic=False)
@@ -56,10 +67,10 @@ class BaseActor(ABC):
     _previous_altitude = None
 
     def __init__(self, name: str, epoch: pk.epoch) -> None:
-        """Constructor for a base actor
+        """Constructor for a base actor.
 
         Args:
-            name (str): Name of this actor
+            name (str): Name of this actor.
             epoch (pykep.epoch): Current local time of the actor.
         """
         logger.trace("Instantiating Actor.")
@@ -68,6 +79,10 @@ class BaseActor(ABC):
         self._local_time = epoch
 
         self._communication_devices = DotMap(_dynamic=False)
+
+        self._receivers = DotMap(_dynamic=False)
+        self._transmitters = DotMap(_dynamic=False)
+        self._communication_links = DotMap(_dynamic=False)
 
     def get_custom_property(self, property_name: str) -> Any:
         """Returns the value of the specified custom property.
@@ -82,6 +97,89 @@ class BaseActor(ABC):
             raise ValueError(f"Custom property '{property_name}' does not exist for actor {self}.")
 
         return self._custom_properties[property_name]
+
+    def get_transmitter(self, name: str):
+        """Get the transmitter model with the specified name.
+
+        Args:
+            name (str): the name of the transmitter.
+        Returns:
+            Transmitter: the transmitter with the specified name.
+        """
+        return self._transmitters[name].model
+
+    def get_all_transmitters(self) -> [str]:
+        """Get a list with the names of the all the transmitters.
+
+        Returns:
+            [str]: Get a list with the names of the all the transmitters.
+        """
+        return list(self._transmitters.keys())
+
+    def get_receiver(self, name: str):
+        """Get the receiver model with the specified name.
+
+        Args:
+            name (str): the name of the receiver.
+
+        Returns:
+            Receiver: the receiver with the specified name.
+        """
+        return self._receivers[name].model
+
+    def get_all_receivers(self) -> [str]:
+        """Get a list with the names of the all the receivers.
+
+        Returns:
+            [str]: Get a list with the names of the all the receivers.
+        """
+        return list(self._receivers.keys())
+
+    def add_transmitter(self, device_name, model: TransmitterModel):
+        """Adds a transmitter to the actor.
+
+        Args:
+            device_name (str): The name of the transmitter.
+            model (TransmitterModel): The transmitter model.
+        """
+        if device_name in self._transmitters.keys():
+            raise ValueError(
+                f"Transmitter with name '{device_name}' already exists for actor {self}."
+            )
+        self._transmitters[device_name] = DotMap(model=model)
+
+    def add_receiver(self, device_name: str, model: ReceiverModel):
+        """Adds a receiver to the actor.
+
+        Args:
+            device_name (str): The name of the receiver.
+            model (ReceiverModel): The receiver model.
+        """
+        if device_name in self._receivers.keys():
+            raise ValueError(f"Receiver with name '{device_name}' already exists for actor {self}.")
+        self._receivers[device_name] = DotMap(model=model)
+
+    def add_comm_link(self, link_name: str, model):
+        """Adds a communication link to the actor.
+
+        Args:
+            link_name (str): The name of the link.
+            model (LinkModel): The link model.
+        """
+        if link_name in self._communication_links.keys():
+            raise ValueError(f"Link with name '{link_name}' already exists for actor {self}.")
+        self._communication_links[link_name] = DotMap(model=model)
+
+    def get_comm_link(self, link_name: str):
+        """Get the link model with the specified name.
+
+        Args:
+            link_name (str): the name of the link.
+
+        Returns:
+            Receiver: the link with the specified name.
+        """
+        return self._communication_links[link_name].model
 
     @property
     def custom_properties(self):
@@ -177,7 +275,8 @@ class BaseActor(ABC):
 
     @property
     def local_time(self) -> pk.epoch:
-        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in
+        days.
 
         Returns:
             pk.epoch: local time of the actor
@@ -207,6 +306,15 @@ class BaseActor(ABC):
         logger.trace("Checking constructor values for sensibility.")
         assert len(position) == 3, "Position has to have 3 elements (x,y,z)"
         assert len(velocity) == 3, "Velocity has to have 3 elements (vx,vy,vz)"
+
+    @property
+    def communication_links(self):
+        """Returns communication links.
+
+        Returns:
+            list: List of communication links.
+        """
+        return [link.model for link in self._communication_links.values()]
 
     def __str__(self):
         return self.name
@@ -259,7 +367,8 @@ class BaseActor(ABC):
             return self._previous_altitude
 
     def get_position(self, epoch: pk.epoch):
-        """Compute the position of this actor at a specific time. Requires orbital parameters or position set.
+        """Compute the position of this actor at a specific time. Requires orbital parameters or
+        position set.
 
         Args:
             epoch (pk.epoch): Time as pykep epoch
@@ -290,11 +399,13 @@ class BaseActor(ABC):
             return self._orbital_parameters.eph(epoch)[0]
 
         raise NotImplementedError(
-            "No suitable way added to determine actor position. Either set an orbit or position with ActorBuilder."
+            "No suitable way added to determine actor position. Either set an orbit or position "
+            "with ActorBuilder."
         )
 
     def get_position_velocity(self, epoch: pk.epoch):
-        """Compute the position / velocity of this actor at a specific time. Requires orbital parameters set.
+        """Compute the position / velocity of this actor at a specific time. Requires orbital
+        parameters set.
 
         Args:
             epoch (pk.epoch): Time as pykep epoch.
@@ -341,7 +452,8 @@ class BaseActor(ABC):
             other_actor (BaseActor): The actor to check line of sight with
             epoch (pk,.epoch): Epoch at which to check the line of sight
             minimum_altitude_angle(float): The altitude angle (in degree) at which the actor has
-            to be in relation to the ground station position to be visible. It has to be between 0 and 90.
+            to be in relation to the ground station position to be visible. It has to be between
+            0 and 90.
             Only relevant if one of the actors is a ground station.
             plot (bool): Whether to plot a diagram illustrating the positions.
 

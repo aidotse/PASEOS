@@ -2,7 +2,7 @@ from loguru import logger
 import pykep as pk
 from skyfield.api import load
 
-from paseos.actors.base_actor import BaseActor
+from .base_actor import BaseActor
 
 
 class GroundstationActor(BaseActor):

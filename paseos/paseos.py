@@ -1,13 +1,13 @@
-import types
 import asyncio
 import sys
+import types
 
+import pykep as pk
 from dotmap import DotMap
 from loguru import logger
-import pykep as pk
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
+from paseos.actors.base_actor import BaseActor
 from paseos.utils.operations_monitor import OperationsMonitor
 
 
@@ -47,6 +47,7 @@ class PASEOS:
         Args:
             local_actor (BaseActor): local actor.
             cfg (DotMap): simulation configuration.
+            communication_links ([LinkModel]): list of communication links
         """
         logger.trace("Initializing PASEOS")
         self._cfg = cfg
@@ -98,9 +99,10 @@ class PASEOS:
             float: Time remaining to advance (or 0 if done)
 
         """
-        assert (
-            not self._is_advancing_time
-        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        assert not self._is_advancing_time, (
+            "advance_time is already running. This function is not thread-safe. Avoid mixing ("
+            "async) activities and calling it."
+        )
         self._is_advancing_time = True
 
         assert time_to_advance > 0, "Time to advance has to be positive."
@@ -237,7 +239,8 @@ class PASEOS:
 
     @property
     def local_time(self) -> pk.epoch:
-        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in days.
+        """Returns local time of the actor as pykep epoch. Use e.g. epoch.mjd2000 to get time in
+        days.
 
         Returns:
             pk.epoch: local time of the actor
@@ -246,7 +249,8 @@ class PASEOS:
 
     @property
     def monitor(self):
-        """Access paseos operations monitor which tracks local actor attributes such as temperature or state of charge.
+        """Access paseos operations monitor which tracks local actor attributes such as
+        temperature or state of charge.
 
         Returns:
             OperationsMonitor: Monitor object.
@@ -327,10 +331,12 @@ class PASEOS:
             activity_function (types.CoroutineType): Function to execute during the activity.
             Needs to be async. Can accept a list of arguments to be specified later.
             power_consumption_in_watt (float): Power consumption of the activity in W (per second).
-            on_termination_function (types.CoroutineType): Function to execute when the activities stops
+            on_termination_function (types.CoroutineType): Function to execute when the
+            activities stops
             (either due to completion or constraint not being satisfied anymore). Needs to be async.
             Can accept a list of arguments to be specified later.
-            constraint_function (types.CoroutineType): Function to evaluate if constraints are still valid.
+            constraint_function (types.CoroutineType): Function to evaluate if constraints are
+            still valid.
             Should return True if constraints are valid, False if they aren't. Needs to be async.
             Can accept a list of arguments to be specified later.
         """
@@ -371,7 +377,8 @@ class PASEOS:
         termination_func_args: list = None,
         constraint_func_args: list = None,
     ):
-        """Perform the specified activity. Will advance the simulation if automatic clock is not disabled.
+        """Perform the specified activity. Will advance the simulation if automatic clock is not
+        disabled.
 
         Args:
             name (str): Name of the activity

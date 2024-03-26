@@ -1,9 +1,9 @@
-from loguru import logger
 import pykep as pk
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
-from paseos.power import discharge_model
 from paseos.power import charge_model
+from paseos.power import discharge_model
 
 
 class SpacecraftActor(BaseActor):
@@ -47,7 +47,8 @@ class SpacecraftActor(BaseActor):
         self._is_dead = True
 
     def set_was_interrupted(self):
-        """Sets this device to "was_interrupted=True" indicating current activities were interrupted."""
+        """Sets this device to "was_interrupted=True" indicating current activities were
+        interrupted."""
         self._was_interrupted = True
 
     @property
