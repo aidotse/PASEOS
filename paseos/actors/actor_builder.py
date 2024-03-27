@@ -13,7 +13,8 @@ from ..central_body.central_body import CentralBody
 from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
-from paseos.geometric_model.geometric_model import GeometricModel
+from .spacecraft_body_model import SpacecraftBodyModel
+from ..attitude.attitude_model import AttitudeModel, TorqueDisturbanceModel
 
 
 class ActorBuilder:
@@ -307,32 +308,50 @@ class ActorBuilder:
         logger.debug(f"Setting position {position} on actor {actor}")
 
     @staticmethod
-    def set_geometric_model(
+    def set_spacecraft_body_model(
         actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
     ):
         """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
-        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        transformed to the inertial/PASEOS reference frame using the reference frame transformations in the attitude
         model. When used in the attitude model, the geometric model is in the body reference frame.
 
         Args:
             actor (SpacecraftActor): Actor to update.
             mass (float): Mass of the spacecraft in kg.
-            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
-                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
+            vertices (list): List of coordinates [x, y, z] of the vertices of the mesh w.r.t. the body frame [m].
+                If not selected, it will default to a cube that can be scaled.
                 by the scale. Uses Trimesh to create the mesh from this and the list of faces.
             faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
                 defining the three vertices to form a triangular face. For a cuboid each face is split into two
                 triangles. Uses Trimesh to create the mesh from this and the list of vertices.
             scale (float): Parameter to scale the cuboid by, defaults to 1.
         """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Body model is only supported for SpacecraftActors."
+
+        logger.trace("Checking mass values for sensibility.")
         assert mass > 0, "Mass is > 0"
 
+        # Check if the actor already has mass.
+        if actor.mass:
+            logger.warning("The actor already had a mass. Overriding old mass value.")
+
         actor._mass = mass
-        geometric_model = GeometricModel(
-            local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
+
+        # Check if the actor already had a has_spacecraft_body_model.
+        if actor.has_spacecraft_body_model:
+            logger.warning(
+                "The actor already had a spacecraft body model. Overriding old body bodel."
+            )
+
+        # Create a spacraft body model
+        actor._spacecraft_body_model = SpacecraftBodyModel(
+            actor_mass=mass, vertices=vertices, faces=faces, scale=scale
         )
-        actor._mesh = geometric_model.set_mesh()
-        actor._moment_of_inertia = geometric_model.find_moment_of_inertia
+        # Logging
+        logger.debug(f"Added spacecraft body model to actor {actor}.")
 
     @staticmethod
     def set_power_devices(
@@ -520,6 +539,127 @@ class ActorBuilder:
         )
 
     @staticmethod
+    def set_attitude_disturbances(
+        actor: SpacecraftActor,
+        aerodynamic: bool = False,
+        gravitational: bool = False,
+        magnetic: bool = False,
+    ):
+        """Enables the attitude disturbances to be considered in the attitude modelling for an actor.
+
+        Args:
+            actor (SpacecraftActor): The actor to add to.
+            aerodynamic (bool): Whether to consider aerodynamic disturbances in the attitude model. Defaults to False.
+            gravitational (bool): Whether to consider gravity disturbances in the attitude model. Defaults to False.
+            magnetic (bool): Whether to consider magnetic disturbances in the attitude model. Defaults to False.
+        """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude disturbances are only supported for SpacecraftActors."
+
+        assert (
+            actor.has_attitude_model
+        ), "The actor has no attitude model. Impossible to set attitude disturbances."
+
+        # Create a list with user specified disturbances which are considered in the attitude modelling.
+        disturbance_list = []
+
+        # Disturbance list name
+        disturbance_list_name = ""
+
+        if aerodynamic:
+            disturbance_list.append(TorqueDisturbanceModel.Aerodynamic)
+            disturbance_list_name += "Aerodynamic, "
+        if gravitational:
+            disturbance_list.append(TorqueDisturbanceModel.Gravitational)
+            disturbance_list_name += "Gravitational, "
+        if magnetic:
+            disturbance_list.append(TorqueDisturbanceModel.Magnetic)
+            disturbance_list_name += "Magnetic, "
+
+        if len(disturbance_list) > 0:
+            # Set attitude models.
+            actor._attitude_model._disturbances = disturbance_list
+            logger.debug(
+                f"Added {disturbance_list_name[:-2]} attitude torque disturbance models to actor {actor}."
+            )
+        else:
+            logger.warning("No disturbance model was specified.")
+
+    @staticmethod
+    def set_attitude_model(
+        actor: SpacecraftActor,
+        actor_initial_attitude_in_rad: list[float] = [0.0, 0.0, 0.0],
+        actor_initial_angular_velocity: list[float] = [0.0, 0.0, 0.0],
+        actor_pointing_vector_body: list[float] = [0.0, 0.0, 1.0],
+        actor_residual_magnetic_field_body: list[float] = [0.0, 0.0, 0.0],
+        accommodation_coefficient: float = 0.85,
+    ):
+        """Add an attitude model to the actor based on initial conditions: attitude (roll, pitch & yaw angles)
+        and angular velocity vector, modeling the evolution of the user specified pointing vector.
+
+        Args:
+            actor (SpacecraftActor): Actor to model.
+            actor_initial_attitude_in_rad (list of floats): Actor's initial attitude.
+                Defaults to [0.0, 0.0, 0.0].
+            actor_initial_angular_velocity (list of floats): Actor's initial angular velocity.
+                Defaults to [0.0, 0.0, 0.0].
+            actor_pointing_vector_body (list of floats): Actor's pointing vector with respect to the body frame.
+                Defaults to [0.0, 0.0, 1.0].
+            actor_residual_magnetic_field_body (list of floats): Actor's residual magnetic dipole moment vector
+                in the body frame. Only needed if magnetic torque disturbances are modelled.
+                Please, refer to [Tai L. Chow (2006) p. 148 - 149]. Defaults to [0.0, 0.0, 0.0].
+            accommodation_coefficient (float): Accommodation coefficient used for Aerodynamic torque disturbance calculation.
+                Defaults to 0.85.
+
+        """
+        # check for spacecraft actor
+        assert isinstance(
+            actor, SpacecraftActor
+        ), "Attitude model is only supported for SpacecraftActors"
+
+        # Check if actor has already an attitude model.
+        if actor.has_attitude_model:
+            logger.warning(
+                "The actor already had an attitude model. Overriding old attitude model."
+            )
+
+        assert (
+            np.asarray(actor_initial_attitude_in_rad).shape[0] == 3
+            and np.asarray(actor_initial_attitude_in_rad).ndim == 1
+        ), "actor_initial_attitude_in_rad shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_initial_angular_velocity).shape[0] == 3
+            and np.asarray(actor_initial_angular_velocity).ndim == 1
+        ), "actor_initial_angular_velocity shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_pointing_vector_body).shape[0] == 3
+            and np.asarray(actor_pointing_vector_body).ndim == 1
+        ), "actor_pointing_vector_body shall be [3] shaped."
+
+        assert (
+            np.asarray(actor_residual_magnetic_field_body).shape[0] == 3
+            and np.asarray(actor_residual_magnetic_field_body).ndim == 1
+        ), "actor_residual_magnetic_field_body shall be [3] shaped."
+
+        logger.trace("Checking accommodation coefficient for sensibility.")
+        assert accommodation_coefficient > 0, "Accommodation coefficient shall be positive."
+
+        # Set attitude model.
+        actor._attitude_model = AttitudeModel(
+            local_actor=actor,
+            actor_initial_attitude_in_rad=actor_initial_attitude_in_rad,
+            actor_initial_angular_velocity=actor_initial_angular_velocity,
+            actor_pointing_vector_body=actor_pointing_vector_body,
+            actor_residual_magnetic_field_body=actor_residual_magnetic_field_body,
+            accommodation_coefficient=accommodation_coefficient,
+        )
+        logger.debug(f"Added attitude model to actor {actor}.")
+
+    @staticmethod
     def add_comm_device(actor: BaseActor, device_name: str, bandwidth_in_kbps: float):
         """Creates a communication device.
 
@@ -539,7 +679,10 @@ class ActorBuilder:
 
     @staticmethod
     def add_custom_property(
-        actor: BaseActor, property_name: str, initial_value: Any, update_function: Callable
+        actor: BaseActor,
+        property_name: str,
+        initial_value: Any,
+        update_function: Callable,
     ):
         """Adds a custom property to the actor. This e.g. allows tracking any physical
         the user would like to track.

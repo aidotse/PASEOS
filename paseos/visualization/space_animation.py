@@ -135,7 +135,13 @@ class SpaceAnimation(Animation):
 
                     self.comm_lines.append(
                         self.ax_3d.plot3D(
-                            x1x2, y1y2, z1z2, "--", color="green", linewidth=0.5, zorder=10
+                            x1x2,
+                            y1y2,
+                            z1z2,
+                            "--",
+                            color="green",
+                            linewidth=0.5,
+                            zorder=10,
                         )
                     )
 

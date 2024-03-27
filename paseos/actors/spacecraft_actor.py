@@ -1,5 +1,6 @@
-from loguru import logger
+import numpy as np
 import pykep as pk
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
 from paseos.power import discharge_model
@@ -19,14 +20,19 @@ class SpacecraftActor(BaseActor):
     # Actor's mass in kg
     _mass = None
 
+    _spacecraft_body_model = None
     _thermal_model = None
     _radiation_model = None
+    _attitude_model = None
 
     # If radiation randomly restarted the device
     _was_interrupted = False
 
     # If radiation permanently killed this device
     _is_dead = False
+
+    # Default temperature [K]
+    _default_temperature_in_K = 300
 
     def __init__(
         self,
@@ -49,6 +55,48 @@ class SpacecraftActor(BaseActor):
     def set_was_interrupted(self):
         """Sets this device to "was_interrupted=True" indicating current activities were interrupted."""
         self._was_interrupted = True
+
+    def set_body_attitude(self, attitude_in_rad):
+        """Sets the spacecraft attitude in [roll, pitch, yaw] angles.
+
+        Args:
+            actor_attitude_in_rad (numpy array): actor's attitude in [roll, pitch, yaw] angles [rad].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(attitude_in_rad, np.array)
+            and attitude_in_rad.shape[1] == 3
+            and attitude_in_rad.ndim == 1
+        ), "attitude_in_rad shall be a numpy array [3] shaped."
+        self._attitude_model._actor_attitude_in_rad = attitude_in_rad
+
+    def set_body_pointing_vector(self, pointing_vector_body):
+        """Sets the spacecraft angular velocity in body frame.
+
+        Args:
+            pointing_vector_body (numpy array): actor's pointing vector in body frame [m].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(pointing_vector_body, np.array)
+            and pointing_vector_body.shape[1] == 3
+            and pointing_vector_body.ndim == 1
+        ), "pointing_vector_body shall be a numpy array [3] shaped."
+        self._attitude_model._actor_pointing_vector_body = pointing_vector_body
+
+    def set_body_angular_velocity(self, angular_velocity_body):
+        """Sets the spacecraft angular velocity in body frame.
+
+        Args:
+            angular_velocity_body (numpy array): actor's angular velocity in body frame [rad/s].
+        """
+        assert self.has_attitude_model, "The actor has no attitude model."
+        assert (
+            isinstance(angular_velocity_body, np.array)
+            and angular_velocity_body.shape[1] == 3
+            and angular_velocity_body.ndim == 1
+        ), "angular_velocity_body shall be a numpy array [3] shaped."
+        self._attitude_model._actor_angular_velocity = angular_velocity_body
 
     @property
     def was_interrupted(self) -> bool:
@@ -105,6 +153,24 @@ class SpacecraftActor(BaseActor):
         return self._mass
 
     @property
+    def body_mesh(self) -> np.array:
+        """Gives the mesh of the satellite.
+
+        Returns:
+            np.array: Mesh of the satellite.
+        """
+        return self._spacecraft_body_model._body_mesh
+
+    @property
+    def attitude_disturbances(self) -> list:
+        """Gives attitude disturbances list.
+
+        Returns:
+            list: attitude disturbances list.
+        """
+        return self._attitude_model._disturbances
+
+    @property
     def temperature_in_K(self) -> float:
         """Returns the current temperature of the actor in K.
 
@@ -112,6 +178,15 @@ class SpacecraftActor(BaseActor):
             float: Actor temperature in Kelvin.
         """
         return self._thermal_model.temperature_in_K
+
+    @property
+    def default_temperature_in_K(self) -> float:
+        """Returns the default temperature of the actor in K.
+
+        Returns:
+            float: Actor default temperature in Kelvin.
+        """
+        return self._default_temperature_in_K
 
     @property
     def temperature_in_C(self) -> float:
@@ -164,3 +239,69 @@ class SpacecraftActor(BaseActor):
         self = charge_model.charge(self, duration_in_s)
 
         logger.debug(f"New battery level is {self.battery_level_in_Ws}")
+
+    @property
+    def attitude_in_rad(self):
+        """Returns the current attitude of the actor in radians.
+
+        Returns:
+            list[floats]: actor attitude in radians.
+        """
+        if type(self._attitude_model._actor_attitude_in_rad) is np.ndarray:
+            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad)
+        else:
+            return self._attitude_model._actor_attitude_in_rad
+
+    @property
+    def attitude_in_deg(self):
+        """Returns the current attitude of the actor in degrees.
+
+        Returns:
+            list[floats]: actor attitude in degrees.
+        """
+        if type(self._attitude_model._actor_attitude_in_rad) is np.ndarray:
+            return np.ndarray.tolist(self._attitude_model._actor_attitude_in_rad * 180 / np.pi)
+        else:
+            return np.ndarray.tolist(
+                np.array(self._attitude_model._actor_attitude_in_rad) * 180 / np.pi
+            )
+
+    @property
+    def pointing_vector(self):
+        """Returns the spacecraft pointing vector in the Earth-centered inertial frame.
+
+        Returns:
+            np.ndarray (x, y, z).
+        """
+        return self._attitude_model._actor_pointing_vector_eci
+
+    @property
+    def angular_velocity(self):
+        """Returns the spacecraft angular velocity vector in the Earth-centered inertial frame.
+
+        Returns:
+            np.ndarray (owega_x, omega_y, omega_z).
+        """
+        return self._attitude_model._actor_angular_velocity_eci
+
+    @property
+    def body_moment_of_inertia_body(self) -> np.array:
+        """Gives the moment of inertia of the actor, assuming constant density, with respect to the body frame.
+
+        Returns:
+            np.array: Mass moments of inertia for the actor
+
+        I is the moment of inertia, in the form of [[Ixx Ixy Ixz]
+                                                    [Iyx Iyy Iyx]
+                                                    [Izx Izy Izz]]
+        """
+        return self._spacecraft_body_model._body_moment_of_inertia_body
+
+    @property
+    def body_center_of_gravity_body(self) -> np.array:
+        """Gives the volumetric center of mass of the actor with respect to the body frame.
+
+        Returns:
+            np.array: Coordinates of the center of gravity of the mesh.
+        """
+        return self._spacecraft_body_model._body_center_of_gravity_body

@@ -5,6 +5,8 @@ from math import radians, pi
 from loguru import logger
 from pyquaternion import Quaternion
 from skspatial.objects import Sphere
+from skyfield.api import wgs84, load
+
 import pykep as pk
 import numpy as np
 
@@ -210,3 +212,51 @@ class CentralBody:
         # Rotate point
         q = Quaternion(axis=self._rotation_axis, angle=angle)
         return q.rotate(point)
+
+    def magnetic_dipole_moment(
+        self,
+        epoch: pk.epoch,
+        strength_in_Am2=7.79e22,
+        pole_latitude_in_deg=79.6,
+        pole_longitude_in_deg=-71.6,
+    ):
+        """Returns the time-dependent magnetic dipole moment vector of central body.
+        Default values are for Earth. Earth dipole moment vector determined from the northern geomagnetic pole position
+        using skyfield api, and actor epoch. To model the simplified Earth magnetic field as a magnetic dipole with an
+        offset from the Earth rotational axis, at a specific point in time.
+
+        Earth geomagnetic pole position and dipole moment strength values from the year 2000:
+        Latitude: 79.6° N
+        Longitude: 71.6° W
+        Dipole moment: 7.79 x 10²² Am²
+        https://wdc.kugi.kyoto-u.ac.jp/poles/polesexp.html
+
+        (The same method used as ground station actor position determination)
+
+        Args:
+            epoch (pk.epoch): Epoch at which to get the dipole
+            strength_in_Am2 (float): dipole strength in Am². Defaults to 7.79e22
+            pole_latitude_in_deg (float): latitude of the Northern geomagnetic pole in degrees. Defaults to 79.6
+            pole_longitude_in_deg (float): longitude of the Northern geomagnetic pole in degrees. Defaults to -71.6
+
+        Returns: Time-dependent dipole moment vector in inertial frame (np.ndarray): [mx, my, mz]
+        """
+        if self.planet.name == "earth":
+            # Converting time to skyfield to use its API
+            t_skyfield = load.timescale().tt_jd(epoch.jd)
+
+            # North geomagnetic pole location on Earth surface in cartesian coordinates
+            dipole_north_direction = np.array(
+                wgs84.latlon(pole_latitude_in_deg, pole_longitude_in_deg).at(t_skyfield).position.m
+            )
+            # Multiply geomagnetic pole position unit vector with dipole moment strength
+            magnetic_dipole_moment = -(
+                dipole_north_direction / np.linalg.norm(dipole_north_direction) * strength_in_Am2
+            )
+        else:
+            # TODO add other planets' magnetic fields
+            raise NotImplementedError("Magnetic dipole moment only modeled for Earth.")
+            # For now: assume alignment with rotation axis
+            magnetic_dipole_moment = np.array([0, 0, 1]) * strength_in_Am2
+
+        return magnetic_dipole_moment
