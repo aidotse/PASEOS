@@ -4,7 +4,6 @@ import asyncio
 import pytest
 import pykep as pk
 
-from test_utils import wait_for_activity
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
@@ -43,10 +42,10 @@ async def test_monitor():
 
     # Run the activity
     sim.perform_activity("Activity_1")
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     sim.perform_activity("Activity_2")
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Try out item function
     sim.monitor["state_of_charge"]

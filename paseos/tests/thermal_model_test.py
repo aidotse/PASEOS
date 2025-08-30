@@ -1,7 +1,6 @@
 """Simple test of the thermal model to see if temperatures evolve as expected"""
 import pykep as pk
 
-from test_utils import wait_for_activity
 import paseos
 from paseos import SpacecraftActor, ActorBuilder, load_default_cfg
 import asyncio
@@ -51,7 +50,7 @@ async def test_thermal():
 
     # Run the activity
     sim.perform_activity("Activity_1")
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
     assert sat1.temperature_in_K > 285
     assert sat1.temperature_in_K < 300
     sim.save_status_log_csv("thermal_test.csv")
