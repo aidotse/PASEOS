@@ -271,6 +271,8 @@ ActorBuilder.set_orbit(actor=sat_actor,
                        epoch=pk.epoch(0), central_body=earth)
 ```
 
+N.B. `set_orbit` creates an analytical [two-body](https://en.wikipedia.org/wiki/Two-body_problem) orbit. Perturbations such as Earth oblateness (J2) and atmospheric drag are not modelled, so propagated positions deviate from real satellite trajectories as the propagation horizon grows — for a satellite in low Earth orbit, typically hundreds of kilometers within a few hours and thousands of kilometers within a few days relative to the corresponding SGP4/TLE trajectory. If your orbit data comes from a TLE, prefer `set_TLE` below.
+
 ##### SGP4 / Two-line element (TLE) 
 
 For using SGP4 / [Two-line element (TLE)](https://en.wikipedia.org/wiki/Two-line_element_set) you need to specify the TLE of the [SpacecraftActor](#spacecraftactor). In this case, we will use the TLE of the [Sentinel-2A](https://en.wikipedia.org/wiki/Sentinel-2) satellite from [celestrak](https://celestrak.com/).
