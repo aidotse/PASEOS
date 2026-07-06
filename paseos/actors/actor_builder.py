@@ -236,6 +236,10 @@ class ActorBuilder:
 
         TLEs can be obtained from https://www.space-track.org/ or https://celestrak.com/NORAD/elements/
 
+        The actor will be propagated with SGP4, i.e. consistently with the model
+        that generated the TLE. Prefer this over set_orbit when your orbit data
+        comes from a TLE (see the note in set_orbit).
+
         Args:
             actor (SpacecraftActor): Actor to update.
             line1 (str): First line of the TLE.
@@ -262,7 +266,16 @@ class ActorBuilder:
         epoch: pk.epoch,
         central_body: pk.planet,
     ):
-        """Define the orbit of the actor
+        """Define the orbit of the actor as an analytical Keplerian two-body orbit.
+
+        Note that perturbations such as Earth oblateness (J2) and atmospheric drag
+        are not modelled by this orbit, so propagated positions increasingly deviate
+        from real satellite trajectories as the propagation horizon grows. For a
+        satellite in low Earth orbit, the deviation from the corresponding SGP4/TLE
+        trajectory typically reaches hundreds of kilometers within a few hours and
+        thousands of kilometers within a few days. If your position / velocity come
+        from a TLE, use set_TLE instead to propagate with SGP4. For higher-fidelity
+        propagators, use set_custom_orbit.
 
         Args:
             actor (BaseActor): The actor to define on
