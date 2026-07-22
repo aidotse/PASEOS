@@ -98,7 +98,16 @@ class CentralBody:
         Returns:
             bool: True if the central body blocks the sun
         """
-        logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
+        # Lazy + safe formatting: this runs every timestep, and
+        # str(pk.epoch) can raise RuntimeError (boost bad_lexical_cast)
+        # on some pykep builds at exact minute boundaries, e.g.
+        # str(pk.epoch(60.0 / 86400.0)). Format only when a DEBUG
+        # handler is active, and never let logging crash the sim.
+        logger.opt(lazy=True).debug(
+            "Checking whether {} is in eclipse at {}.",
+            lambda: actor,
+            lambda: _safe_epoch_str(t),
+        )
 
         # Compute central body position in solar reference frame
         r_central_body_heliocentric, _ = np.array(self._planet.eph(t))
@@ -210,3 +219,15 @@ class CentralBody:
         # Rotate point
         q = Quaternion(axis=self._rotation_axis, angle=angle)
         return q.rotate(point)
+
+def _safe_epoch_str(t) -> str:
+    """String representation of a pykep epoch that cannot raise.
+
+    Some pykep builds raise RuntimeError (boost bad_lexical_cast) in
+    str(epoch) for values at exact minute boundaries; fall back to the
+    raw mjd2000 value in that case.
+    """
+    try:
+        return str(t)
+    except RuntimeError:
+        return f"epoch(mjd2000={t.mjd2000!r})"
