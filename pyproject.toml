@@ -73,3 +73,10 @@ minversion = "7.0"
 testpaths = ["paseos/tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
+
+[tool.uv]
+# pykep 2.6 declares a dependency on the deprecated `sklearn` shim package,
+# which errors on build. pykep only soft-checks sklearn (a try/except that
+# records availability) and PASEOS never uses it, so drop the requirement via
+# an always-false platform marker instead of installing the broken shim.
+override-dependencies = ["sklearn ; sys_platform == 'no-sklearn'"]
