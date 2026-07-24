@@ -1,10 +1,12 @@
 import asyncio
+
+import numpy as np
 import pykep as pk
 import torch
-import numpy as np
+from simple_neural_network import SimpleNeuralNetwork
+
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-from simple_neural_network import SimpleNeuralNetwork
 
 
 class Node:

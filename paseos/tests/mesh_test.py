@@ -1,11 +1,12 @@
 """Test using a mesh for the central body."""
 
-import numpy as np
 import pickle
+
+import numpy as np
 import pykep as pk
 
-from paseos import ActorBuilder, SpacecraftActor
 import paseos
+from paseos import ActorBuilder, SpacecraftActor
 
 mesh_path = "paseos/tests/test_data/67P_low_poly.pk"
 

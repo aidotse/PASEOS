@@ -1,22 +1,21 @@
-from loguru import logger
-from dotmap import DotMap
 import pykep as pk
+from dotmap import DotMap
+from loguru import logger
 
-from .utils.load_default_cfg import load_default_cfg
-from .utils.check_cfg import check_cfg
-from .paseos import PASEOS
-from .actors.base_actor import BaseActor
 from .actors.actor_builder import ActorBuilder
+from .actors.base_actor import BaseActor
 from .actors.ground_station_actor import GroundstationActor
 from .actors.spacecraft_actor import SpacecraftActor
 from .central_body.central_body import CentralBody
-from .communication.get_communication_window import get_communication_window
 from .communication.find_next_window import find_next_window
+from .communication.get_communication_window import get_communication_window
+from .paseos import PASEOS
 from .power.power_device_type import PowerDeviceType
+from .utils.check_cfg import check_cfg
+from .utils.load_default_cfg import load_default_cfg
 from .utils.reference_frame import ReferenceFrame
 from .utils.set_log_level import set_log_level
-from .visualization.plot import plot, PlotType
-
+from .visualization.plot import PlotType, plot
 
 set_log_level("WARNING")
 

@@ -1,11 +1,13 @@
 """Simple test of the thermal model to see if temperatures evolve as expected"""
-import pykep as pk
 
-from test_utils import wait_for_activity
-import paseos
-from paseos import SpacecraftActor, ActorBuilder, load_default_cfg
 import asyncio
+
+import pykep as pk
 import pytest
+from test_utils import wait_for_activity
+
+import paseos
+from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
 
 # tell pytest to create an event loop and execute the tests using the event loop

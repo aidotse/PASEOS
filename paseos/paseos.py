@@ -1,13 +1,13 @@
-import types
 import asyncio
 import sys
+import types
 
+import pykep as pk
 from dotmap import DotMap
 from loguru import logger
-import pykep as pk
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
+from paseos.actors.base_actor import BaseActor
 from paseos.utils.operations_monitor import OperationsMonitor
 
 
@@ -98,9 +98,9 @@ class PASEOS:
             float: Time remaining to advance (or 0 if done)
 
         """
-        assert (
-            not self._is_advancing_time
-        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        assert not self._is_advancing_time, (
+            "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        )
         self._is_advancing_time = True
 
         assert time_to_advance > 0, "Time to advance has to be positive."
@@ -108,9 +108,9 @@ class PASEOS:
 
         # Check constraint function returns something
         if constraint_function is not None:
-            assert (
-                constraint_function() is not None
-            ), "Your constraint function failed to return True or False."
+            assert constraint_function() is not None, (
+                "Your constraint function failed to return True or False."
+            )
 
         logger.debug("Advancing time by " + str(time_to_advance) + " s.")
         target_time = self._state.time + time_to_advance
@@ -299,9 +299,9 @@ class PASEOS:
         Args:
             actor_name (str): name of the actor to remove.
         """
-        assert (
-            actor_name in self.known_actors
-        ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        assert actor_name in self.known_actors, (
+            f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        )
         del self._known_actors[actor_name]
 
     def remove_activity(self, name: str):

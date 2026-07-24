@@ -1,13 +1,15 @@
 """Tests to see if we can create satellites with different devices."""
+
+import sys
+
 import numpy as np
 import pykep as pk
-import sys
 
 sys.path.append("../..")
 
-from paseos import ActorBuilder, SpacecraftActor
-
 from test_utils import get_default_instance
+
+from paseos import ActorBuilder, SpacecraftActor
 
 
 def test_set_TLE():

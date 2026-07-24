@@ -57,7 +57,7 @@ class RadiationModel:
         )
         logger.trace(f"poisson_prob={poisson_prob}")
         sample = np.random.rand()
-        logger.trace(f"sample ={sample }")
+        logger.trace(f"sample ={sample}")
         return sample < poisson_prob
 
     def model_data_corruption(self, data_shape: list, exposure_period_in_s: float):

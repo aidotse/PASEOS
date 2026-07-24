@@ -1,6 +1,6 @@
 import asyncio
-from contextlib import suppress
 import types
+from contextlib import suppress
 
 from loguru import logger
 

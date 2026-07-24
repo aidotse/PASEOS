@@ -55,6 +55,9 @@ namespaces = true
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+# Notebooks were never formatted by the previous black setup (jupyter: false);
+# keep them out of ruff to avoid churning the example/tutorial notebooks.
+extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

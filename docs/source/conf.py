@@ -38,7 +38,7 @@ release = "v0.2.0"
 extensions = [
     "sphinx.ext.autodoc",  # for autodocs
     "sphinx.ext.napoleon",  # for numpy style documentation
-    "myst_parser"  # for markdown support
+    "myst_parser",  # for markdown support
     # "sphinx.ext.viewcode",
     # "sphinx.ext.imgmath",
 ]

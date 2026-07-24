@@ -9,20 +9,6 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  lint_flake8:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Lint with flake8
-        run: |
-          pip install flake8
-          flake8 . --count --show-source --statistics --max-line-length=127 --ignore=E402,W503,E203
-
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -35,11 +21,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Search for severe code errors with flake8
+      - name: Search for severe code errors with ruff
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          pip install flake8
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=127
+          pip install ruff
+          ruff check . --select=E9,F63,F7,F82 --output-format=full
       - name: provision-with-micromamba
         uses: mamba-org/provision-with-micromamba@main
         with:
