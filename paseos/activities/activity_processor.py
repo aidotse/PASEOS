@@ -83,7 +83,11 @@ class ActivityProcessor:
         Args:
             elapsed_time (float): Elapsed time in seconds.
         """
-        assert elapsed_time > 0, "Elapsed time cannot be negative."
+        assert elapsed_time >= 0, "Elapsed time cannot be negative."
+        # A zero interval can occur when updates are scheduled back-to-back; skip it
+        # rather than asserting, which would crash the background processor task.
+        if elapsed_time == 0:
+            return
         logger.debug("Running ActivityProcessor update.")
         logger.debug(f"Time since last update: {elapsed_time}s")
         logger.trace(f"Applying time multiplier of {self._time_multiplier}")
