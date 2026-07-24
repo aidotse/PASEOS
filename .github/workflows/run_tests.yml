@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # uv's standalone Python bundles tkinter, so headless matplotlib would pick an
+    # interactive backend and the visualization test's plt.show() would block.
+    env:
+      MPLBACKEND: Agg
     permissions:
       pull-requests: write
       contents: read
