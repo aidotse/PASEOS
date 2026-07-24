@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paseos"
+version = "0.2.0"
+description = "A package which simulates the space environment for operating multiple spacecraft."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [{ name = "Φ-lab@Sweden", email = "pablo.gomez@esa.int" }]
+keywords = ["spacecraft", "simulation", "space", "satellite", "constellation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+dependencies = [
+    "dotmap>=1.3.30",
+    "loguru>=0.6.0",
+    "matplotlib>=3.6.0",
+    "numpy==1.23.5",
+    "pykep>=2.6",
+    "pyquaternion>=0.9.9",
+    "scikit-spatial>=6.5.0",
+    "skyfield>=1.45",
+    "toml>=0.10.2",
+    "tqdm>=4.64.1",
+    "trimesh>=4.0.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "pytest-cov", "ruff"]
+
+[project.urls]
+Homepage = "https://github.com/aidotse/PASEOS"
+Source = "https://github.com/aidotse/PASEOS/"
+Documentation = "https://paseos.readthedocs.io/en/latest/"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+# PASEOS subpackages are implicit namespace packages (no __init__.py), so
+# namespace discovery is required to include them all.
+include = ["paseos*"]
+exclude = ["paseos.tests*"]
+namespaces = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E402", "E203", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["paseos"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["paseos/tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
