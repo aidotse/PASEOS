@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio", "pytest-cov", "ruff"]
+dev = ["pytest", "pytest-asyncio", "pytest-cov", "pytest-timeout", "ruff"]
 
 [project.urls]
 Homepage = "https://github.com/aidotse/PASEOS"

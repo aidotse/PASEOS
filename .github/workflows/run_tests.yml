@@ -16,6 +16,7 @@ jobs:
     # interactive backend and the visualization test's plt.show() would block.
     env:
       MPLBACKEND: Agg
+      PYTHONUNBUFFERED: "1"
     permissions:
       pull-requests: write
       contents: read
@@ -42,7 +43,7 @@ jobs:
         run: |
           set -e
           set -o pipefail
-          uv run --no-sync pytest --junitxml=pytest.xml --cov-report=xml:coverage.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
+          uv run --no-sync pytest -v --timeout=180 --junitxml=pytest.xml --cov-report=xml:coverage.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         if: github.event_name == 'pull_request'
