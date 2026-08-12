@@ -4,7 +4,7 @@ import asyncio
 import numpy as np
 import pytest
 
-from test_utils import get_default_instance, wait_for_activity
+from test_utils import get_default_instance
 from paseos.radiation.radiation_model import RadiationModel
 from paseos import ActorBuilder
 import paseos
@@ -83,7 +83,7 @@ async def test_radiation_model_device_death():
 
     # Run the activity
     sim.perform_activity("Testing")
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Check sat1 died.
     assert sat1.is_dead
@@ -120,7 +120,7 @@ async def test_radiation_model_interruption():
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Check activity result, exact result is runtime dependent.
     assert test_val[0] > 4 and test_val[0] < 8

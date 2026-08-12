@@ -4,7 +4,6 @@ import asyncio
 import pytest
 import pykep as pk
 
-from test_utils import wait_for_activity
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
@@ -43,7 +42,7 @@ async def test_activity():
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Check activity result
     assert test_val[0] == 5

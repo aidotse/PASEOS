@@ -1,5 +1,5 @@
 """Simple test of starting an activity"""
-from test_utils import get_default_instance, wait_for_activity
+from test_utils import get_default_instance
 
 from paseos import SpacecraftActor
 import asyncio
@@ -58,7 +58,7 @@ async def test_activity():
 
     # Run the activity
     sim.perform_activity("Testing", activity_func_args=[test_val])
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Check activity result
     assert test_val[0] == 10
@@ -99,7 +99,7 @@ async def test_running_two_activities():
 
     # try running it
     sim.perform_activity("act1", activity_func_args=[test_value])
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     # Value should be 42 as first activity is started but then an error occurs trying the second
     assert test_value[0] == 42
@@ -150,7 +150,7 @@ async def test_activity_constraints():
         constraint_func_args=[sat1],
         termination_func_args=[test_value, test_value2],
     )
-    await wait_for_activity(sim)
+    await sim.wait_for_activity()
 
     assert test_value == test_value2
     assert sat1.battery_level_in_Ws >= 505
