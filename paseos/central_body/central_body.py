@@ -98,7 +98,7 @@ class CentralBody:
         Returns:
             bool: True if the central body blocks the sun
         """
-        logger.debug(f"Checking whether {actor} is in eclipse at {t}.")
+        logger.debug(f"Checking whether {actor} is in eclipse at {t.jd}.")
 
         # Compute central body position in solar reference frame
         r_central_body_heliocentric, _ = np.array(self._planet.eph(t))
