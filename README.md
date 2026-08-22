@@ -560,6 +560,9 @@ We assume `polyhedral_propagator` to be a custom propagator as explained in [Cus
 To correctly compute eclipses, we also need to know the orbit of the custom central body around the Sun. In this case we use the [orbital elements](https://en.wikipedia.org/wiki/Orbital_elements) one [can find online for 67P/Churyumov–Gerasimenko](https://en.wikipedia.org/wiki/67P/Churyumov–Gerasimenko).
 
 ```py
+import pickle
+
+import numpy as np
 import pykep as pk
 from paseos import ActorBuilder, SpacecraftActor
 
@@ -683,7 +686,7 @@ simulation_time_in_s = sim.simulation_time
 current_epoch = sim.local_time
 ```
 
-N.B. `sim.simulation_time` counts from `cfg.sim.start_time`, which defaults to 0 at MJD2000. With the default cfg it is therefore seconds since MJD2000, not seconds since your simulation started. Subtract `cfg.sim.start_time` if you want elapsed time.
+N.B. `sim.simulation_time` is `cfg.sim.start_time` plus the elapsed simulation time, not time since your simulation started. Since `start_time` is normally derived from an epoch (`init_sim` uses the local actor's epoch when you pass no cfg), it usually reads as seconds since MJD2000. Subtract `cfg.sim.start_time` if you want elapsed time.
 
 #### Faster than real-time execution
 
@@ -693,6 +696,8 @@ In some cases, you may be interested to simulate your spacecraft operating for a
 
 import paseos
 from paseos import load_default_cfg
+
+(...) # actor definition etc., see above
 
 cfg = load_default_cfg() # loading cfg to modify defaults
 cfg.sim.time_multiplier = 10.0 # setting the parameter so that in 1s real time, paseos models 10s having passed
@@ -1020,7 +1025,7 @@ sim.perform_activity("activity_A_with_termination_function",
 
 #### Visualization
 
-Navigate to [examples/visualization](examples/visualization) to find a jupyter notebook containing examples of how to visualize PASEOS.
+Navigate to [examples/visualization/example_jupyter.ipynb](https://github.com/aidotse/PASEOS/blob/main/examples/visualization/example_jupyter.ipynb) to find a jupyter notebook containing examples of how to visualize PASEOS.
 Visualization can be done in interactive mode or as an animation that is saved to your disc.
 In the figure below, Earth is visualized in the centre as a blue sphere with different spacecraft in orbit.
 Each spacecraft has a name and if provided, a battery level and a communications device.
@@ -1054,6 +1059,8 @@ To evaluate your results, you will likely want to track the operational paramete
 ```py
 import paseos
 from paseos import load_default_cfg
+
+(...) # actor definition etc., see above
 
 cfg = load_default_cfg() # loading cfg to modify defaults
 # Log every 0.25s. The interval is checked once per physics timestep, so it cannot be

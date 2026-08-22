@@ -239,10 +239,14 @@ class PASEOS:
 
     @property
     def simulation_time(self) -> float:
-        """Get the current simulation time of this paseos instance in seconds since start.
+        """Get the current simulation time of this paseos instance.
+
+        This is cfg.sim.start_time plus the elapsed simulation time, not elapsed
+        time on its own -- for an epoch-derived start time it reads as seconds
+        since MJD2000.
 
         Returns:
-            float: Time since start in seconds.
+            float: Simulation time in seconds.
         """
         return self._state.time
 
