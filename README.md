@@ -230,7 +230,8 @@ other_spacraft_actor = ActorBuilder.get_actor_scaffold(name="other_sat",
 ActorBuilder.set_orbit(actor=other_spacraft_actor,
                        position=[-10000000, 0, 0],
                        velocity=[0, -8000.0, 0],
-                       epoch=pk.epoch(0), central_body=earth)
+                       epoch=pk.epoch(0),
+                       central_body=pk.planet.jpl_lp("earth"))
 
 #Create GroundstationActor
 grndStation = GroundstationActor(name="grndStation", epoch=pk.epoch(0))
@@ -277,13 +278,14 @@ ActorBuilder.set_orbit(actor=sat_actor,
                        epoch=pk.epoch(0), central_body=earth)
 ```
 
-N.B. `set_orbit` creates an analytical [two-body](https://en.wikipedia.org/wiki/Two-body_problem) orbit. Perturbations such as Earth oblateness (J2) and atmospheric drag are not modelled, so propagated positions deviate from real satellite trajectories as the propagation horizon grows — for a satellite in low Earth orbit, typically hundreds of kilometers within a few hours and thousands of kilometers within a few days relative to the corresponding SGP4/TLE trajectory. If your orbit data comes from a TLE, prefer `set_TLE` below.
+N.B. `set_orbit` creates an analytical [two-body](https://en.wikipedia.org/wiki/Two-body_problem) orbit. Perturbations such as Earth oblateness (J2) and atmospheric drag are not modelled, so propagated positions deviate from real satellite trajectories as the propagation horizon grows — for a satellite in low Earth orbit, typically tens of kilometers within the first few hours, hundreds within a day and thousands within a few days relative to the corresponding SGP4/TLE trajectory. If your orbit data comes from a TLE, prefer `set_TLE` below.
 
 ##### SGP4 / Two-line element (TLE) 
 
 For using SGP4 / [Two-line element (TLE)](https://en.wikipedia.org/wiki/Two-line_element_set) you need to specify the TLE of the [SpacecraftActor](#spacecraftactor). In this case, we will use the TLE of the [Sentinel-2A](https://en.wikipedia.org/wiki/Sentinel-2) satellite from [celestrak](https://celestrak.com/).
 
 ```py
+import pykep as pk
 from paseos import ActorBuilder, SpacecraftActor
 # Define an actor of type SpacecraftActor
 sat_actor = ActorBuilder.get_actor_scaffold(name="Sentinel-2A",
@@ -327,7 +329,7 @@ You can access the orbit of a [SpacecraftActor](#spacecraftactor) with
 
 ```py
 # Position, velocity and altitude can be accessed like this
-t0 = pk.epoch("2022-06-16 00:00:00.000") # Define the time (epoch)
+t0 = pk.epoch_from_string("2022-06-16 00:00:00.000") # Define the time (epoch)
 print(sat_actor.get_position(t0)) 
 print(sat_actor.get_position_velocity(t0))
 print(sat_actor.get_altitude(t0))
@@ -366,6 +368,14 @@ from paseos import ActorBuilder, SpacecraftActor
 sat_actor = ActorBuilder.get_actor_scaffold(name="mySat",
                                        actor_type=SpacecraftActor,
                                        epoch=pk.epoch(0))
+
+# Solar panels need a central body to determine eclipses, so set an orbit first.
+ActorBuilder.set_orbit(actor=sat_actor,
+                       position=[10000000, 0, 0],
+                       velocity=[0, 8000.0, 0],
+                       epoch=pk.epoch(0),
+                       central_body=pk.planet.jpl_lp("earth"))
+
 # Add a power device
 ActorBuilder.set_power_devices(actor=sat_actor,
                                battery_level_in_Ws=100, # current level
@@ -408,8 +418,17 @@ The following parameters have to be specified for this:
 To use it, simply equip your [SpacecraftActor](#spacecraftactor) with a thermal model with:
 
 ```py
+import pykep as pk
 from paseos import SpacecraftActor, ActorBuilder
 my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch(0))
+
+# The thermal model needs a central body for albedo and IR flux, so set an orbit first.
+ActorBuilder.set_orbit(actor=my_actor,
+                       position=[10000000, 0, 0],
+                       velocity=[0, 8000.0, 0],
+                       epoch=pk.epoch(0),
+                       central_body=pk.planet.jpl_lp("earth"))
+
 ActorBuilder.set_thermal_model(
     actor=my_actor,
     actor_mass=50.0, # Setting mass to 50kg
@@ -441,6 +460,7 @@ PASEOS models three types of radiation effects.
 You can add a radiation model affecting the operations of the devices you are interested in with
 
 ```py
+    import pykep as pk
     from paseos import SpacecraftActor, ActorBuilder
     my_actor = ActorBuilder.get_actor_scaffold("my_actor", SpacecraftActor, pk.epoch(0))
     ActorBuilder.set_radiation_model(
@@ -463,7 +483,7 @@ To get a binary mask to model data corruption on the [local actor](#local-actor)
 
 ```py
 mask = paseos_instance.model_data_corruption(data_shape=your_data_shape,
-                                             exposure_time_in_s=your_time)
+                                             exposure_period_in_s=your_time)
 ```
 
 #### Custom Modelling
@@ -626,7 +646,7 @@ The next code snippet will show how to start the PASEOS simulation with a time d
 ```py
 import pykep as pk
 import paseos
-from paseos import ActorBuilder, SpacecraftActor
+from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
 #Define today as pykep epoch (16-06-22)
 #please, refer to https://esa.github.io/pykep/documentation/core.html#pykep.epoch
@@ -652,22 +672,27 @@ ActorBuilder.set_orbit(
 cfg=load_default_cfg()
 # Set simulation starting time by converting epoch to seconds
 cfg.sim.start_time=today.mjd2000 * pk.DAY2SEC
-# initialize PASEOS simulation
-sim = paseos.init_sim(local_actor)
+# initialize PASEOS simulation with the modified cfg
+sim = paseos.init_sim(local_actor, cfg)
 ```
 
-You can access the current simulation time (seconds since the start) and the current epoch like this:
+You can access the current simulation time and the current epoch like this:
 
 ```py
-time_since_start_in_s = sim.simulation_time
+simulation_time_in_s = sim.simulation_time
 current_epoch = sim.local_time
 ```
+
+N.B. `sim.simulation_time` counts from `cfg.sim.start_time`, which defaults to 0 at MJD2000. With the default cfg it is therefore seconds since MJD2000, not seconds since your simulation started. Subtract `cfg.sim.start_time` if you want elapsed time.
 
 #### Faster than real-time execution
 
 In some cases, you may be interested to simulate your spacecraft operating for an extended period. By default, PASEOS operates in real-time, thus this would take a lot of time. However, you can increase the rate of time passing (i.e. the spacecraft moving, power being charged / consumed etc.) using the `time_multiplier` parameter. Set it as follows when initializing PASEOS.
 
 ```py
+
+import paseos
+from paseos import load_default_cfg
 
 cfg = load_default_cfg() # loading cfg to modify defaults
 cfg.sim.time_multiplier = 10 # setting the parameter so that in 1s real time, paseos models 10s having passed
@@ -682,7 +707,7 @@ Alternatively, you can rely on an event-based mode where PASEOS will simulate th
 ```py
     import pykep as pk
     import paseos
-    from paseos import ActorBuilder, SpacecraftActor
+    from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
     # Define the central body as Earth by using pykep APIs.
     earth = pk.planet.jpl_lp("earth")
@@ -881,6 +906,19 @@ ActorBuilder.set_power_devices(actor=local_actor,
                                # Charging rate in W
                                charging_rate_in_W=10)
 
+# The constraint below reads the actor temperature, so a thermal model is required.
+ActorBuilder.set_thermal_model(
+    actor=local_actor,
+    actor_mass=50.0,
+    actor_initial_temperature_in_K=273.15,
+    actor_sun_absorptance=1.0,
+    actor_infrared_absorptance=1.0,
+    actor_sun_facing_area=1.0,
+    actor_central_body_facing_area=1.0,
+    actor_emissive_area=1.0,
+    actor_thermal_capacity=1000,
+)
+
 # initialize PASEOS simulation
 sim = paseos.init_sim(local_actor)
 
@@ -982,7 +1020,7 @@ sim.perform_activity("activity_A_with_termination_function",
 
 #### Visualization
 
-Navigate to paseos/visualization to find a jupyter notebook containing examples of how to visualize PASEOS.
+Navigate to [examples/visualization](examples/visualization) to find a jupyter notebook containing examples of how to visualize PASEOS.
 Visualization can be done in interactive mode or as an animation that is saved to your disc.
 In the figure below, Earth is visualized in the centre as a blue sphere with different spacecraft in orbit.
 Each spacecraft has a name and if provided, a battery level and a communications device.
@@ -1014,8 +1052,14 @@ state_of_charge = instance.monitor["state_of_charge"]
 To evaluate your results, you will likely want to track the operational parameters, such as actor battery status, currently running activity etc. of actors over the course of your simulation. By default, PASEOS will log the current actor status every 10 seconds, however you can change that rate by editing the default configuration, as explained in [How to use the cfg](#how-to-use-the-cfg). You can save the current log to a \*.csv file at any point.
 
 ```py
+import paseos
+from paseos import load_default_cfg
+
 cfg = load_default_cfg() # loading cfg to modify defaults
-cfg.io.logging_interval = 0.25  # log every 0.25 seconds
+# Log every 0.25s. The interval is checked once per physics timestep, so it cannot be
+# finer than cfg.sim.dt - lower dt as well if you want a sub-second logging rate.
+cfg.sim.dt = 0.25
+cfg.io.logging_interval = 0.25
 paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
 
 # Performing activities, running the simulation (...)
