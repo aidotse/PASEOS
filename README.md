@@ -587,7 +587,7 @@ ActorBuilder.set_central_body(my_sat, comet, (mesh_points, mesh_triangles))
 
 # Below computations will now use the mesh instead spherical approximations
 print(my_sat.is_in_eclipse())
-print(my_sat.is_in_line_of_sight(some_other_actor))
+print(my_sat.is_in_line_of_sight(some_other_actor, epoch))
 
 # You could even specify a rotation of the central body.
 # Set a rotation period of 1 second around the z axis
@@ -695,7 +695,7 @@ import paseos
 from paseos import load_default_cfg
 
 cfg = load_default_cfg() # loading cfg to modify defaults
-cfg.sim.time_multiplier = 10 # setting the parameter so that in 1s real time, paseos models 10s having passed
+cfg.sim.time_multiplier = 10.0 # setting the parameter so that in 1s real time, paseos models 10s having passed
 paseos_instance = paseos.init_sim(my_local_actor, cfg) # initialize paseos instance
 
 ```
