@@ -46,7 +46,11 @@ jobs:
           uv run --no-sync pytest -v --timeout=180 --junitxml=pytest.xml --cov-report=xml:coverage.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
-        if: github.event_name == 'pull_request'
+        # Fork PRs get a read-only GITHUB_TOKEN no matter what `permissions` asks
+        # for, so posting the comment fails and marks the whole job red on green
+        # tests. Skip it there rather than switching to pull_request_target,
+        # which would run fork code with a writable token.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         with:
           pytest-coverage-path: ./pytest-coverage.txt
           pytest-xml-coverage-path: ./coverage.xml
