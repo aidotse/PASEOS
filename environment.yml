@@ -4,18 +4,20 @@ channels:
 dependencies:
   - dotmap>=1.3.30 # core non-optional dependency
   - loguru>=0.6.0 # core non-optional dependency
-  - matplotlib>=3.6.0 # core non-optional dependency
+  - matplotlib>=3.6.0,<3.11 # core non-optional dependency; 3.11 requires numpy>=1.25
   - numpy==1.23.5 # core non-optional depedency
   - myst-parser # for markdown math in docs
-  - pykep>=2.6 # core non-optional dependency
+  - pykep>=2.6,<3 # core non-optional dependency; PASEOS uses the 2.x API
   - pyquaternion>=0.9.9 # core non-optional dependency
   - pytest # for tests
   - pytest-asyncio # for tests involving activities
+  - pytest-cov # for coverage reports in CI-equivalent test runs
+  - pytest-timeout # tests are run with --timeout to catch hangs
   - python>=3.8 # core non-optional dependency
+  - ruff # for linting and formatting
   - scikit-spatial>=6.5.0 # core non-optional dependency
   - skyfield>=1.45 # core non-optional dependency
   - sphinx # for docs
   - sphinx_rtd_theme # for docs
   - toml>=0.10.2 # core non-optional dependency
-  - tqdm>=4.64.1 # core non-optional dependency
   - trimesh>=4.0.7  # for geometric model
