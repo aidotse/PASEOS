@@ -21,8 +21,10 @@ jobs:
           pip install build twine
       - name: Build and publish
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          # (Test)PyPI no longer accepts username/password uploads; the only
+          # supported credential is an API token sent as the `__token__` user.
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
         run: |
           python -m build
           twine upload -r testpypi  dist/*
