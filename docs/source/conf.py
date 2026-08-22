@@ -27,7 +27,7 @@ copyright = "2022"
 author = "Pablo Gómez, Gabriele Meoni, Johan Östman, Vinutha Magal Shreenath"
 
 # The full version, including alpha/beta/rc tags
-release = "v0.2.0"
+release = "v0.2.1"
 
 
 # -- General configuration ---------------------------------------------------

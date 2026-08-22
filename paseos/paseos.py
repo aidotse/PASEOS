@@ -189,12 +189,14 @@ class PASEOS:
                 time_since_constraint_check += dt
                 self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
 
-                # Check if we should update the status log
-                if self._time_since_previous_log > self._cfg.io.logging_interval:
+                # Check if we should update the status log. The elapsed time has to
+                # accumulate on every step, including the one that logs -- incrementing
+                # only in the else branch cost one extra step per interval, so a 10s
+                # interval at dt=10 logged every 30s.
+                self._time_since_previous_log += dt
+                if self._time_since_previous_log >= self._cfg.io.logging_interval:
                     self.log_status()
                     self._time_since_previous_log = 0
-                else:
-                    self._time_since_previous_log += dt
 
             logger.debug("New time is: " + str(self._state.time) + " s.")
             return max(target_time - self._state.time, 0)
@@ -239,10 +241,14 @@ class PASEOS:
 
     @property
     def simulation_time(self) -> float:
-        """Get the current simulation time of this paseos instance in seconds since start.
+        """Get the current simulation time of this paseos instance.
+
+        This is cfg.sim.start_time plus the elapsed simulation time, not elapsed
+        time on its own -- for an epoch-derived start time it reads as seconds
+        since MJD2000.
 
         Returns:
-            float: Time since start in seconds.
+            float: Simulation time in seconds.
         """
         return self._state.time
 

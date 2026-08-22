@@ -62,3 +62,35 @@ jobs:
           hide-comment: false
           report-only-changed-files: false
           junitxml-path: ./pytest.xml
+
+  # The pip job is pinned to Python 3.8 by pykep's wheels, but that is exactly the
+  # version where asyncio.get_event_loop() still papers over a missing loop, so the
+  # 3.10+ path would otherwise go untested. conda gets us a modern Python and
+  # doubles as a check that environment.yml still solves.
+  build-conda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPLBACKEND: Agg
+      PYTHONUNBUFFERED: "1"
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up conda environment from environment.yml
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yml
+          activate-environment: paseos
+          miniforge-version: latest
+      # environment.yml only says python>=3.8, so guard the reason this job exists:
+      # if conda ever resolves back to <3.10 the event-loop regression test stops
+      # covering anything and CI would stay green.
+      - name: Report resolved versions and assert Python 3.10+
+        shell: bash -el {0}
+        run: |
+          python -c "import sys, pykep, numpy; print(sys.version); print(pykep.__version__, numpy.__version__)"
+          python -c "import sys; assert sys.version_info >= (3, 10), f'conda resolved {sys.version_info}, this job must run 3.10+'"
+      - name: Test with pytest
+        shell: bash -el {0}
+        run: pytest -v --timeout=180 paseos/tests/

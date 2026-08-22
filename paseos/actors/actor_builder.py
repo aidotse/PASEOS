@@ -273,10 +273,10 @@ class ActorBuilder:
         are not modelled by this orbit, so propagated positions increasingly deviate
         from real satellite trajectories as the propagation horizon grows. For a
         satellite in low Earth orbit, the deviation from the corresponding SGP4/TLE
-        trajectory typically reaches hundreds of kilometers within a few hours and
-        thousands of kilometers within a few days. If your position / velocity come
-        from a TLE, use set_TLE instead to propagate with SGP4. For higher-fidelity
-        propagators, use set_custom_orbit.
+        trajectory is typically tens of kilometers within the first few hours,
+        hundreds within a day and thousands within a few days. If your position /
+        velocity come from a TLE, use set_TLE instead to propagate with SGP4.
+        For higher-fidelity propagators, use set_custom_orbit.
 
         Args:
             actor (BaseActor): The actor to define on
