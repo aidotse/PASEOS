@@ -8,7 +8,10 @@ version = "0.2.1"
 description = "A package which simulates the space environment for operating multiple spacecraft."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+# Upper bound follows the hard numpy==1.23.5 pin below: numpy 1.23.5 has no
+# wheels for 3.12+ and its sdist does not build there, so an uncapped
+# requires-python advertises installs that cannot possibly succeed.
+requires-python = ">=3.8,<3.12"
 authors = [{ name = "Φ-lab@Sweden", email = "pablo.gomez@esa.int" }]
 keywords = ["spacecraft", "simulation", "space", "satellite", "constellation"]
 classifiers = [
@@ -19,6 +22,8 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
     "dotmap>=1.3.30",
