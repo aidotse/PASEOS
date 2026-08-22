@@ -148,9 +148,20 @@ class ActivityManager:
         # Workaround to avoid error when executed in a Jupyter notebook.
         self._paseos_instance._local_actor._current_activity = name
 
-        # Run activity and processor
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
+        # Run activity and processor. asyncio.run() refuses to nest inside an
+        # already-running loop (e.g. a Jupyter notebook), so ask whether one is
+        # running rather than using get_event_loop(): the latter raises once
+        # asyncio.run() has torn down and unset the loop, which made every
+        # perform_activity() after the first one fail on Python 3.10+.
+        try:
+            asyncio.get_running_loop()
+            loop_is_running = True
+        except RuntimeError:
+            loop_is_running = False
+
+        # Deliberately outside the except block: running the activity inside the
+        # handler would chain any RuntimeError it raises onto "no running event loop".
+        if loop_is_running:
             asyncio.gather(job())
         else:
             asyncio.run(job())
