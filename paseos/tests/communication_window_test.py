@@ -1,14 +1,15 @@
 """Test to check the communication function(s)"""
+
+import numpy as np
+import pykep as pk
+
 from paseos import (
-    SpacecraftActor,
-    GroundstationActor,
     ActorBuilder,
+    GroundstationActor,
+    SpacecraftActor,
     find_next_window,
     get_communication_window,
 )
-
-import pykep as pk
-import numpy as np
 
 
 def setup_sentinel_example(t0):

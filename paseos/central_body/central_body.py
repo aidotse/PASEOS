@@ -1,15 +1,15 @@
 """This file serves to collect functionality related to central bodies."""
 
-from math import radians, pi
+from math import pi, radians
 
+import numpy as np
+import pykep as pk
 from loguru import logger
 from pyquaternion import Quaternion
 from skspatial.objects import Sphere
-import pykep as pk
-import numpy as np
 
-from paseos.central_body.sphere_between_points import sphere_between_points
 from paseos.central_body.mesh_between_points import mesh_between_points
+from paseos.central_body.sphere_between_points import sphere_between_points
 from paseos.utils.reference_frame import ReferenceFrame
 
 

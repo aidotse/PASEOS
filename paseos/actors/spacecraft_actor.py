@@ -1,9 +1,8 @@
-from loguru import logger
 import pykep as pk
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
-from paseos.power import discharge_model
-from paseos.power import charge_model
+from paseos.power import charge_model, discharge_model
 
 
 class SpacecraftActor(BaseActor):
@@ -157,9 +156,9 @@ class SpacecraftActor(BaseActor):
             duration_in_s (float): How long the activity is performed in seconds
         """
         logger.debug(f"Charging actor {self} for {duration_in_s}s.")
-        assert (
-            duration_in_s > 0
-        ), "Charging interval has to be positive but t1 was less or equal t0."
+        assert duration_in_s > 0, (
+            "Charging interval has to be positive but t1 was less or equal t0."
+        )
 
         self = charge_model.charge(self, duration_in_s)
 

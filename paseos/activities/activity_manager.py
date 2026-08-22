@@ -1,8 +1,8 @@
-import types
 import asyncio
+import types
 
-from loguru import logger
 from dotmap import DotMap
+from loguru import logger
 
 from paseos.activities.activity_processor import ActivityProcessor
 from paseos.activities.activity_runner import ActivityRunner
@@ -25,12 +25,12 @@ class ActivityManager:
             paseos_time_multiplier (float): Multiplier for the time. At 1, it is real time.
         """
         logger.trace("Initializing ActivityManager")
-        assert (
-            paseos_update_interval > 1e-4
-        ), f"Too small paseos update interval. Should not be less than 1e-4, was {paseos_update_interval}"
-        assert (
-            paseos_time_multiplier > 1e-4
-        ), f"Too small paseos paseos_time_multiplier. Should not be less than 1e-4, was {paseos_time_multiplier}"
+        assert paseos_update_interval > 1e-4, (
+            f"Too small paseos update interval. Should not be less than 1e-4, was {paseos_update_interval}"
+        )
+        assert paseos_time_multiplier > 1e-4, (
+            f"Too small paseos paseos_time_multiplier. Should not be less than 1e-4, was {paseos_time_multiplier}"
+        )
         self._activities = DotMap(_dynamic=False)
         self._paseos_update_interval = paseos_update_interval
         self._paseos_time_multiplier = paseos_time_multiplier
@@ -104,16 +104,15 @@ class ActivityManager:
             constraint_func_args (list, optional): Arguments for the constraint function. Defaults to None.
         """
         # Check if activity exists and if it already had consumption specified
-        assert (
-            name in self._activities.keys()
-        ), f"Activity not found. Declared activities are {self._activities.keys()}"
+        assert name in self._activities.keys(), (
+            f"Activity not found. Declared activities are {self._activities.keys()}"
+        )
         activity = self._activities[name]
         logger.debug(f"Performing activity {activity}")
 
-        assert (
-            activity.power_consumption_in_watt >= 0
-        ), "Power consumption has to be positive but was specified as " + str(
-            activity.power_consumption_in_watt
+        assert activity.power_consumption_in_watt >= 0, (
+            "Power consumption has to be positive but was specified as "
+            + str(activity.power_consumption_in_watt)
         )
 
         activity_runner = ActivityRunner(

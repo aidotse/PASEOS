@@ -1,9 +1,11 @@
 """Simple test of starting an activity"""
+
+import asyncio
+
+import pytest
 from test_utils import get_default_instance, wait_for_activity
 
 from paseos import SpacecraftActor
-import asyncio
-import pytest
 
 # Below test can be used to check what happens when you formulate an invalid constraint function.
 # It is temporarily commented out as it doesn't really check right now because I could not figure

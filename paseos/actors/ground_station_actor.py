@@ -1,5 +1,5 @@
-from loguru import logger
 import pykep as pk
+from loguru import logger
 from skyfield.api import load
 
 from paseos.actors.base_actor import BaseActor

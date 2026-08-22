@@ -1,8 +1,9 @@
 """Tests whether the default cfg passes validation."""
 
-import paseos
 import pykep as pk
-from paseos import load_default_cfg, ActorBuilder, SpacecraftActor
+
+import paseos
+from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 
 
 def test_default_cfg():

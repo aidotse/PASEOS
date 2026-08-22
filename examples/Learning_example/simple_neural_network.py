@@ -1,8 +1,8 @@
-import torch
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+import torch
 from sklearn.datasets import make_circles
 from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, Dataset
 
 
 class SimpleNeuralNetwork(torch.nn.Module):

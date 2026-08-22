@@ -2,8 +2,10 @@
 
 Currently actors cannot be pickled, so we have a simple function to encode them.
 """
-from paseos import ActorBuilder, SpacecraftActor
+
 import pykep as pk
+
+from paseos import ActorBuilder, SpacecraftActor
 
 earth = pk.planet.jpl_lp("earth")  # define our central body
 

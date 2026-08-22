@@ -108,44 +108,50 @@ conda install paseos -c conda-forge
 
 ```
 
-Alternatively, on Linux you can install via `pip` using
+Alternatively, on Linux you can install the published package via `pip` or [uv](https://docs.astral.sh/uv/) using
 
 ```
 
-pip install paseos
+pip install paseos      # or: uv pip install paseos
 
 ```
 
-The pip version requires `Python 3.8.16` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). 
+This pip/uv install targets `Python 3.8` on Linux, as [pykep's 2.x pip wheels are limited to that version](https://esa.github.io/pykep/installation.html). For newer Python versions, use conda (above), which builds pykep from conda-forge.
 
 ### Building from source
 
-To build from source, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
+First clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository ([Git](https://git-scm.com/) required):
 
 ```
 git clone https://github.com/aidotse/PASEOS.git
-```
-
-To install PASEOS you can use [conda](https://docs.conda.io/en/latest/) as follows:
-
-```
 cd PASEOS
+```
+
+#### Using uv (recommended)
+
+PASEOS is developed with [uv](https://docs.astral.sh/uv/). Because the pykep 2.x pip wheels only cover `Python 3.8` (Linux), create the environment with Python 3.8:
+
+```
+uv venv --python 3.8
+uv pip install -e ".[dev]"
+```
+
+You can then run the test suite with:
+
+```
+uv run pytest
+```
+
+#### Using conda
+
+Alternatively, [conda](https://docs.conda.io/en/latest/) / [mamba](https://github.com/conda-forge/miniforge#mambaforge) works across more platforms and Python versions (pykep is built from conda-forge):
+
+```
 conda env create -f environment.yml
-```
-
-This will create a new conda environment called `PASEOS` and install the required software packages.
-To activate the new environment, you can use:
-
-```
 conda activate paseos
 ```
 
-Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as follows:
-
-```
-cd PASEOS
-pip install -e .
-```
+This creates and activates a conda environment called `paseos` with all required packages.
 
 ### Using Docker
 

@@ -1,16 +1,17 @@
+from typing import List
+
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
 import numpy as np
 from dotmap import DotMap
-from typing import List
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+from loguru import logger
 from matplotlib.artist import Artist
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
-from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.actors.ground_station_actor import GroundstationActor
+from paseos.actors.spacecraft_actor import SpacecraftActor
 from paseos.paseos import PASEOS
 from paseos.visualization.animation import Animation
 
@@ -203,7 +204,7 @@ class SpaceAnimation(Animation):
                 info_str += f"\nBattery: {battery_level:.0f}%"
 
             if actor.has_thermal_model:
-                info_str += f"\nTemp.: {actor.temperature_in_K-273.15:.2f}C"
+                info_str += f"\nTemp.: {actor.temperature_in_K - 273.15:.2f}C"
 
             # Disabled for now as fixed values atm
             # for name in actor.communication_devices.keys():
