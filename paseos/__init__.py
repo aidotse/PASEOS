@@ -30,7 +30,8 @@ def init_sim(local_actor: BaseActor, cfg: DotMap = None, starting_epoch: pk.epoc
         cfg (DotMap, optional): Configuration file. If None, default configuration will be used. Defaults to None.
         starting_epoch(pk.epoch): Starting epoch of the simulation. Will override cfg and local actor one.
     Returns:
-        PASEOS: Instance of the simulation (only one can exist, singleton)
+        PASEOS: Instance of the simulation. One instance per actor you wish to model;
+        several can coexist in the same process.
     """
     logger.debug("Initializing simulation.")
     if cfg is None:
