@@ -1,13 +1,14 @@
 """Utility for tests"""
-import sys
+
 import asyncio
+import sys
 
 sys.path.append("../..")
 
+import pykep as pk
+
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-
-import pykep as pk
 
 
 def get_default_instance() -> (paseos.PASEOS, SpacecraftActor, pk.planet):

@@ -1,12 +1,11 @@
 """This test checks whether power charging is performed correctly"""
 
+import numpy as np
+import pykep as pk
 from test_utils import get_default_instance
 
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-
-import pykep as pk
-import numpy as np
 
 
 def test_custom_power_consumption_property():

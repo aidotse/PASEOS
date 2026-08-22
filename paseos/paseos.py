@@ -1,13 +1,13 @@
-import types
 import asyncio
 import sys
+import types
 
+import pykep as pk
 from dotmap import DotMap
 from loguru import logger
-import pykep as pk
 
-from paseos.actors.base_actor import BaseActor
 from paseos.activities.activity_manager import ActivityManager
+from paseos.actors.base_actor import BaseActor
 from paseos.utils.operations_monitor import OperationsMonitor
 
 
@@ -98,97 +98,108 @@ class PASEOS:
             float: Time remaining to advance (or 0 if done)
 
         """
-        assert (
-            not self._is_advancing_time
-        ), "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
-        self._is_advancing_time = True
-
-        assert time_to_advance > 0, "Time to advance has to be positive."
         assert current_power_consumption_in_W >= 0, "Power consumption cannot be negative."
+        assert time_to_advance >= 0, "Time to advance cannot be negative."
 
-        # Check constraint function returns something
-        if constraint_function is not None:
-            assert (
-                constraint_function() is not None
-            ), "Your constraint function failed to return True or False."
+        # In real-time (async activity) mode the measured interval between updates can
+        # round to zero. Advancing by zero is a no-op, so return before touching the
+        # re-entrancy guard to avoid leaving it set.
+        if time_to_advance == 0:
+            return 0.0
 
-        logger.debug("Advancing time by " + str(time_to_advance) + " s.")
-        target_time = self._state.time + time_to_advance
-        dt = self._cfg.sim.dt
-
-        time_since_constraint_check = float("inf")
-
-        # Perform timesteps until target_time - dt reached,
-        # then final smaller or equal timestep to reach target_time
-        while self._state.time < target_time:
-            # Check constraint function
-            if (
-                constraint_function is not None
-                and time_since_constraint_check > self._cfg.sim.activity_timestep
-            ):
-                time_since_constraint_check = 0
-                if not constraint_function():
-                    logger.info("Time advancing interrupted. Constraint false.")
-                    break
-
-            if self._state.time > target_time - dt:
-                # compute final timestep to catch up
-                dt = target_time - self._state.time
-            logger.trace(f"Time {self._state.time}, advancing {dt}")
-
-            # Perform updates for local actor (e.g. charging)
-            # Each actor only updates itself
-
-            # check for device and / or activity failure
-            if self.local_actor.has_radiation_model:
-                if self.local_actor.is_dead:
-                    logger.warning(f"Tried to advance time on dead actor {self.local_actor}.")
-                    return max(target_time - self._state.time, 0)
-                if self.local_actor._radiation_model.did_device_restart(dt):
-                    logger.info(f"Actor {self.local_actor} interrupted during advance_time.")
-                    self.local_actor.set_was_interrupted()
-                    return max(target_time - self._state.time, 0)
-                if self.local_actor._radiation_model.did_device_experience_failure(dt):
-                    logger.info(f"Actor {self.local_actor} died during advance_time.")
-                    self.local_actor.set_is_dead()
-                    return max(target_time - self._state.time, 0)
-
-            # charge from current moment to time after timestep
-            if self.local_actor.has_power_model:
-                self._local_actor.charge(dt)
-
-            # Update actor temperature
-            if self.local_actor.has_thermal_model:
-                self.local_actor._thermal_model.update_temperature(
-                    dt, current_power_consumption_in_W
+        assert not self._is_advancing_time, (
+            "advance_time is already running. This function is not thread-safe. Avoid mixing (async) activities and calling it."
+        )
+        self._is_advancing_time = True
+        # Wrap the body so the guard is always released, even on an early return or an
+        # exception. Leaking it True would poison every later advance_time call.
+        try:
+            # Check constraint function returns something
+            if constraint_function is not None:
+                assert constraint_function() is not None, (
+                    "Your constraint function failed to return True or False."
                 )
 
-            # Update state of charge
-            if self.local_actor.has_power_model:
-                self.local_actor.discharge(current_power_consumption_in_W, dt)
+            logger.debug("Advancing time by " + str(time_to_advance) + " s.")
+            target_time = self._state.time + time_to_advance
+            dt = self._cfg.sim.dt
 
-            # Update user-defined properties in the actor
-            for property_name in self.local_actor.custom_properties.keys():
-                update_function = self.local_actor.get_custom_property_update_function(
-                    property_name
-                )
-                new_value = update_function(self.local_actor, dt, current_power_consumption_in_W)
-                self.local_actor.set_custom_property(property_name, new_value)
+            time_since_constraint_check = float("inf")
 
-            self._state.time += dt
-            time_since_constraint_check += dt
-            self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+            # Perform timesteps until target_time - dt reached,
+            # then final smaller or equal timestep to reach target_time
+            while self._state.time < target_time:
+                # Check constraint function
+                if (
+                    constraint_function is not None
+                    and time_since_constraint_check > self._cfg.sim.activity_timestep
+                ):
+                    time_since_constraint_check = 0
+                    if not constraint_function():
+                        logger.info("Time advancing interrupted. Constraint false.")
+                        break
 
-            # Check if we should update the status log
-            if self._time_since_previous_log > self._cfg.io.logging_interval:
-                self.log_status()
-                self._time_since_previous_log = 0
-            else:
-                self._time_since_previous_log += dt
+                if self._state.time > target_time - dt:
+                    # compute final timestep to catch up
+                    dt = target_time - self._state.time
+                logger.trace(f"Time {self._state.time}, advancing {dt}")
 
-        logger.debug("New time is: " + str(self._state.time) + " s.")
-        self._is_advancing_time = False
-        return max(target_time - self._state.time, 0)
+                # Perform updates for local actor (e.g. charging)
+                # Each actor only updates itself
+
+                # check for device and / or activity failure
+                if self.local_actor.has_radiation_model:
+                    if self.local_actor.is_dead:
+                        logger.warning(f"Tried to advance time on dead actor {self.local_actor}.")
+                        return max(target_time - self._state.time, 0)
+                    if self.local_actor._radiation_model.did_device_restart(dt):
+                        logger.info(f"Actor {self.local_actor} interrupted during advance_time.")
+                        self.local_actor.set_was_interrupted()
+                        return max(target_time - self._state.time, 0)
+                    if self.local_actor._radiation_model.did_device_experience_failure(dt):
+                        logger.info(f"Actor {self.local_actor} died during advance_time.")
+                        self.local_actor.set_is_dead()
+                        return max(target_time - self._state.time, 0)
+
+                # charge from current moment to time after timestep
+                if self.local_actor.has_power_model:
+                    self._local_actor.charge(dt)
+
+                # Update actor temperature
+                if self.local_actor.has_thermal_model:
+                    self.local_actor._thermal_model.update_temperature(
+                        dt, current_power_consumption_in_W
+                    )
+
+                # Update state of charge
+                if self.local_actor.has_power_model:
+                    self.local_actor.discharge(current_power_consumption_in_W, dt)
+
+                # Update user-defined properties in the actor
+                for property_name in self.local_actor.custom_properties.keys():
+                    update_function = self.local_actor.get_custom_property_update_function(
+                        property_name
+                    )
+                    new_value = update_function(
+                        self.local_actor, dt, current_power_consumption_in_W
+                    )
+                    self.local_actor.set_custom_property(property_name, new_value)
+
+                self._state.time += dt
+                time_since_constraint_check += dt
+                self.local_actor.set_time(pk.epoch(self._state.time * pk.SEC2DAY))
+
+                # Check if we should update the status log
+                if self._time_since_previous_log > self._cfg.io.logging_interval:
+                    self.log_status()
+                    self._time_since_previous_log = 0
+                else:
+                    self._time_since_previous_log += dt
+
+            logger.debug("New time is: " + str(self._state.time) + " s.")
+            return max(target_time - self._state.time, 0)
+        finally:
+            self._is_advancing_time = False
 
     def add_known_actor(self, actor: BaseActor):
         """Adds an actor to the simulation.
@@ -299,9 +310,9 @@ class PASEOS:
         Args:
             actor_name (str): name of the actor to remove.
         """
-        assert (
-            actor_name in self.known_actors
-        ), f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        assert actor_name in self.known_actors, (
+            f"Actor {actor_name} is not in known. Available are {self.known_actors.keys()}"
+        )
         del self._known_actors[actor_name]
 
     def remove_activity(self, name: str):

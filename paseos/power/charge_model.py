@@ -1,6 +1,7 @@
 """This file contains models of the battery charge via e.g. solar power"""
-from loguru import logger
+
 import pykep as pk
+from loguru import logger
 
 from paseos.power.power_device_type import PowerDeviceType
 

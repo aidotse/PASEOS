@@ -1,8 +1,8 @@
 import pykep as pk
 from loguru import logger
 
-from .get_communication_window import get_communication_window
 from ..actors.base_actor import BaseActor
+from .get_communication_window import get_communication_window
 
 
 def find_next_window(

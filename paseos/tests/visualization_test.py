@@ -1,12 +1,14 @@
 """Tests to check visualization."""
+
 import sys
 
 sys.path.append("../..")
 
+import pykep as pk
+from test_utils import get_default_instance
+
 from paseos import ActorBuilder, SpacecraftActor
 from paseos.visualization.space_animation import SpaceAnimation
-from test_utils import get_default_instance
-import pykep as pk
 
 
 def test_animation():

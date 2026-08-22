@@ -1,10 +1,11 @@
 """Simple test of modifying rate of time passing"""
 
 import asyncio
-import pytest
-import pykep as pk
 
+import pykep as pk
+import pytest
 from test_utils import wait_for_activity
+
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, load_default_cfg
 

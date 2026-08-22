@@ -1,13 +1,14 @@
 """This test checks whether power charging is performed correctly"""
+
 import asyncio
 
 import numpy as np
 import pytest
-
 from test_utils import get_default_instance, wait_for_activity
-from paseos.radiation.radiation_model import RadiationModel
-from paseos import ActorBuilder
+
 import paseos
+from paseos import ActorBuilder
+from paseos.radiation.radiation_model import RadiationModel
 
 
 def test_radiation_model():

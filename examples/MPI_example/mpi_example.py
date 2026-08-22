@@ -1,11 +1,11 @@
-""" This example showcases how you can run PASEOS on a high-performance computing infrastructure
+"""This example showcases how you can run PASEOS on a high-performance computing infrastructure
 using MPI (see also https://mpi4py.readthedocs.io/en/stable/tutorial.html).
 
 Please run the example with mpiexec -n 4 python mpi_example.py
 
 In the example, we model four satellites in low-Earth orbit that are only very infrequently in
 line of sight of each other. For simplicity, the modelled task here will be to count the number of
-window encounters for each satellite. 
+window encounters for each satellite.
 
 N.B. There are some simplifications in this example. Running this on a compute cluster / supercomputer
 you would want to minimize communications between ranks further. For clarity, we stay simple.
@@ -153,7 +153,7 @@ if rank == 0:
     print()
     print(f"########## Simulation completed ###########")
     print(
-        f"Simulation ran {end-start:.2f}s to simulate {simulation_time:.2f}s. {simulation_time / (end-start):.2f}x real-time."
+        f"Simulation ran {end - start:.2f}s to simulate {simulation_time:.2f}s. {simulation_time / (end - start):.2f}x real-time."
     )
 sys.stdout.flush()  # update prints to better see parallelism
 comm.Barrier()
