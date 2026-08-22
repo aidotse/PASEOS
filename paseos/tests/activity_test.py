@@ -156,3 +156,26 @@ async def test_activity_constraints():
 
     assert test_value == test_value2
     assert sat1.battery_level_in_Ws >= 505
+
+
+def test_perform_activity_twice_in_a_row():
+    """Two consecutive perform_activity calls have to work.
+
+    Deliberately a sync test: the async tests above run inside an event loop and so
+    take the asyncio.gather branch, which is why this survived. In the sync branch
+    asyncio.run() unsets the current event loop, so the old asyncio.get_event_loop()
+    lookup raised RuntimeError on the second call from Python 3.10 onwards.
+    """
+    sim, _, _ = get_default_instance()
+
+    results = []
+
+    async def func(args):
+        results.append(1)
+
+    sim.register_activity("Testing", activity_function=func, power_consumption_in_watt=10)
+
+    sim.perform_activity("Testing")
+    sim.perform_activity("Testing")
+
+    assert len(results) == 2, "Both activity runs should have executed."

@@ -83,9 +83,14 @@ jobs:
           environment-file: environment.yml
           activate-environment: paseos
           miniforge-version: latest
-      - name: Report resolved versions
+      # environment.yml only says python>=3.8, so guard the reason this job exists:
+      # if conda ever resolves back to <3.10 the event-loop regression test stops
+      # covering anything and CI would stay green.
+      - name: Report resolved versions and assert Python 3.10+
         shell: bash -el {0}
-        run: python -c "import sys, pykep, numpy; print(sys.version); print(pykep.__version__, numpy.__version__)"
+        run: |
+          python -c "import sys, pykep, numpy; print(sys.version); print(pykep.__version__, numpy.__version__)"
+          python -c "import sys; assert sys.version_info >= (3, 10), f'conda resolved {sys.version_info}, this job must run 3.10+'"
       - name: Test with pytest
         shell: bash -el {0}
         run: pytest -v --timeout=180 paseos/tests/

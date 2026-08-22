@@ -155,9 +155,15 @@ class ActivityManager:
         # perform_activity() after the first one fail on Python 3.10+.
         try:
             asyncio.get_running_loop()
+            loop_is_running = True
         except RuntimeError:
-            asyncio.run(job())
-        else:
+            loop_is_running = False
+
+        # Deliberately outside the except block: running the activity inside the
+        # handler would chain any RuntimeError it raises onto "no running event loop".
+        if loop_is_running:
             asyncio.gather(job())
+        else:
+            asyncio.run(job())
 
         logger.info(f"Activity {activity} completed.")
