@@ -108,44 +108,50 @@ conda install paseos -c conda-forge
 
 ```
 
-Alternatively, on Linux you can install via `pip` using
+Alternatively, on Linux you can install the published package via `pip` or [uv](https://docs.astral.sh/uv/) using
 
 ```
 
-pip install paseos
+pip install paseos      # or: uv pip install paseos
 
 ```
 
-The pip version requires `Python 3.8.16` due to [pykep's limited support of pip](https://esa.github.io/pykep/installation.html). 
+This pip/uv install targets `Python 3.8` on Linux, as [pykep's 2.x pip wheels are limited to that version](https://esa.github.io/pykep/installation.html). For newer Python versions, use conda (above), which builds pykep from conda-forge.
 
 ### Building from source
 
-To build from source, first of all clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository as follows ([Git](https://git-scm.com/) required):
+First clone the [GitHub](https://github.com/aidotse/PASEOS.git) repository ([Git](https://git-scm.com/) required):
 
 ```
 git clone https://github.com/aidotse/PASEOS.git
-```
-
-To install PASEOS you can use [conda](https://docs.conda.io/en/latest/) as follows:
-
-```
 cd PASEOS
+```
+
+#### Using uv (recommended)
+
+PASEOS is developed with [uv](https://docs.astral.sh/uv/). Because the pykep 2.x pip wheels only cover `Python 3.8` (Linux), create the environment with Python 3.8:
+
+```
+uv venv --python 3.8
+uv pip install -e ".[dev]"
+```
+
+You can then run the test suite with:
+
+```
+uv run pytest
+```
+
+#### Using conda
+
+Alternatively, [conda](https://docs.conda.io/en/latest/) / [mamba](https://github.com/conda-forge/miniforge#mambaforge) works across more platforms and Python versions (pykep is built from conda-forge):
+
+```
 conda env create -f environment.yml
-```
-
-This will create a new conda environment called `PASEOS` and install the required software packages.
-To activate the new environment, you can use:
-
-```
 conda activate paseos
 ```
 
-Alternatively, you can install PASEOS by using [pip](https://www.pypy.org/) as follows:
-
-```
-cd PASEOS
-pip install -e .
-```
+This creates and activates a conda environment called `paseos` with all required packages.
 
 ### Using Docker
 
@@ -270,6 +276,8 @@ ActorBuilder.set_orbit(actor=sat_actor,
                        velocity=[0, 8000.0, 0],
                        epoch=pk.epoch(0), central_body=earth)
 ```
+
+N.B. `set_orbit` creates an analytical [two-body](https://en.wikipedia.org/wiki/Two-body_problem) orbit. Perturbations such as Earth oblateness (J2) and atmospheric drag are not modelled, so propagated positions deviate from real satellite trajectories as the propagation horizon grows — for a satellite in low Earth orbit, typically hundreds of kilometers within a few hours and thousands of kilometers within a few days relative to the corresponding SGP4/TLE trajectory. If your orbit data comes from a TLE, prefer `set_TLE` below.
 
 ##### SGP4 / Two-line element (TLE) 
 
@@ -1197,7 +1205,7 @@ Distributed under the GPL-3.0 License.
 
 Created by $\Phi$[-lab@Sweden](https://www.ai.se/en/data-factory/f-lab-sweden).
 
-- Pablo Gómez - pablo.gomez at esa.int, pablo.gomez at ai.se
+- Pablo Gómez - pablo.gomez at esa.int
 - Gabriele Meoni - gabriele.meoni at esa.int, g.meoni at tudelft.nl
 - Johan Östman - johan.ostman at ai.se
 - Vinutha Magal Shreenath - vinutha at ai.se

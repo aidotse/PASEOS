@@ -44,7 +44,7 @@ class ThermalModel:
         actor_emissive_area: float,
         actor_thermal_capacity: float,
         body_solar_irradiance: float = 1360,
-        body_surface_temperature_in_K: float = 288**4,
+        body_surface_temperature_in_K: float = 288.0,
         body_emissivity: float = 0.6,
         body_reflectance: float = 0.3,
         power_consumption_to_heat_ratio: float = 0.5,

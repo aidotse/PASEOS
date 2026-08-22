@@ -1,18 +1,20 @@
-from typing import Callable, Any
+from typing import Any, Callable
 
-from loguru import logger
 import numpy as np
-from dotmap import DotMap
 import pykep as pk
+from dotmap import DotMap
+from loguru import logger
 from skyfield.api import wgs84
 
-from .base_actor import BaseActor
-from .spacecraft_actor import SpacecraftActor
-from .ground_station_actor import GroundstationActor
+from paseos.geometric_model.geometric_model import GeometricModel
+
 from ..central_body.central_body import CentralBody
-from ..thermal.thermal_model import ThermalModel
 from ..power.power_device_type import PowerDeviceType
 from ..radiation.radiation_model import RadiationModel
+from ..thermal.thermal_model import ThermalModel
+from .base_actor import BaseActor
+from .ground_station_actor import GroundstationActor
+from .spacecraft_actor import SpacecraftActor
 
 
 class ActorBuilder:
@@ -42,12 +44,12 @@ class ActorBuilder:
         Returns:
             Created actor
         """
-        assert (
-            actor_type != BaseActor
-        ), "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
-        assert (
-            actor_type == SpacecraftActor or actor_type == GroundstationActor
-        ), f"Unsupported actor_type {actor_type}, Please use SpacecraftActor or GroundstationActor."
+        assert actor_type != BaseActor, (
+            "BaseActor cannot be initiated. Please use SpacecraftActor or GroundstationActor"
+        )
+        assert actor_type == SpacecraftActor or actor_type == GroundstationActor, (
+            f"Unsupported actor_type {actor_type}, Please use SpacecraftActor or GroundstationActor."
+        )
 
         logger.trace(f"Creating an actor blueprint with name {name}")
 
@@ -75,9 +77,9 @@ class ActorBuilder:
         """
         assert latitude >= -90 and latitude <= 90, "Latitude is -90 <= lat <= 90"
         assert longitude >= -180 and longitude <= 180, "Longitude is -180 <= lat <= 180"
-        assert (
-            minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90
-        ), "0 <= minimum_altitude_angle <= 90."
+        assert minimum_altitude_angle >= 0 and minimum_altitude_angle <= 90, (
+            "0 <= minimum_altitude_angle <= 90."
+        )
         actor._skyfield_position = wgs84.latlon(
             latitude_degrees=latitude,
             longitude_degrees=longitude,
@@ -114,9 +116,9 @@ class ActorBuilder:
             the central body's inertial frame. Rotation at current actor local time is presumed to be 0.
             rotation_period (float): Rotation period in seconds. Rotation at current actor local time is presumed to be 0.
         """
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Central body only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), (
+            "Central body only supported for SpacecraftActors"
+        )
 
         # Fuzzy type check for pykep planet
         assert "pykep.planet" in str(type(pykep_planet)), "pykep_planet has to be a pykep planet."
@@ -125,13 +127,13 @@ class ActorBuilder:
 
         # Check rotation parameters
         if rotation_declination is not None:
-            assert (
-                rotation_declination >= -90 and rotation_declination <= 90
-            ), "Rotation declination has to be -90 <= dec <= 90"
+            assert rotation_declination >= -90 and rotation_declination <= 90, (
+                "Rotation declination has to be -90 <= dec <= 90"
+            )
         if rotation_right_ascension is not None:
-            assert (
-                rotation_right_ascension >= -180 and rotation_right_ascension <= 180
-            ), "Rotation right ascension has to be -180 <= ra <= 180"
+            assert rotation_right_ascension >= -180 and rotation_right_ascension <= 180, (
+                "Rotation right ascension has to be -180 <= ra <= 180"
+            )
         if rotation_period is not None:
             assert rotation_period > 0, "Rotation period has to be > 0"
 
@@ -141,12 +143,12 @@ class ActorBuilder:
             or rotation_right_ascension is not None
             or rotation_declination is not None
         ):
-            assert (
-                rotation_right_ascension is not None
-            ), "Rotation right ascension has to be set for rotation."
-            assert (
-                rotation_declination is not None
-            ), "Rotation declination has to be set. for rotation."
+            assert rotation_right_ascension is not None, (
+                "Rotation right ascension has to be set for rotation."
+            )
+            assert rotation_declination is not None, (
+                "Rotation declination has to be set. for rotation."
+            )
             assert rotation_period is not None, "Rotation period has to be set for rotation."
             assert mesh is not None, "Radius cannot only be set for mesh-defined bodies."
 
@@ -157,9 +159,9 @@ class ActorBuilder:
             assert isinstance(mesh[0], np.ndarray), "Mesh vertices have to be a numpy array."
             assert isinstance(mesh[1], np.ndarray), "Mesh triangles have to be a numpy array."
             assert len(mesh[0].shape) == 2, "Mesh vertices have to be a numpy array of shape (n,3)."
-            assert (
-                len(mesh[1].shape) == 2
-            ), "Mesh triangles have to be a numpy array of shape (n,3)."
+            assert len(mesh[1].shape) == 2, (
+                "Mesh triangles have to be a numpy array of shape (n,3)."
+            )
 
         # Check if pykep planet is either orbiting the sun or is the sunitself
         # by comparing mu values
@@ -202,22 +204,22 @@ class ActorBuilder:
         assert isinstance(epoch, pk.epoch), "epoch has to be a pykep epoch."
         assert isinstance(actor, SpacecraftActor), "Orbit only supported for SpacecraftActors"
         assert actor._orbital_parameters is None, "Actor already has an orbit."
-        assert np.isclose(
-            actor.local_time.mjd2000, epoch.mjd2000
-        ), "The initial epoch has to match actor's local time."
+        assert np.isclose(actor.local_time.mjd2000, epoch.mjd2000), (
+            "The initial epoch has to match actor's local time."
+        )
         actor._custom_orbit_propagator = propagator_func
 
         # Try evaluating position and velocity to check if the function works
         try:
             position, velocity = actor.get_position_velocity(epoch)
             assert len(position) == 3, "Position has to be list of 3 floats."
-            assert all(
-                [isinstance(val, float) for val in position]
-            ), "Position has to be list of 3 floats."
+            assert all([isinstance(val, float) for val in position]), (
+                "Position has to be list of 3 floats."
+            )
             assert len(velocity) == 3, "Velocity has to be list of 3 floats."
-            assert all(
-                [isinstance(val, float) for val in velocity]
-            ), "Velocity has to be list of 3 floats."
+            assert all([isinstance(val, float) for val in velocity]), (
+                "Velocity has to be list of 3 floats."
+            )
         except Exception as e:
             logger.error(f"Error evaluating custom orbit propagator function: {e}")
             raise RuntimeError("Error evaluating custom orbit propagator function.")
@@ -234,6 +236,10 @@ class ActorBuilder:
         https://en.wikipedia.org/wiki/Two-line_element_set .
 
         TLEs can be obtained from https://www.space-track.org/ or https://celestrak.com/NORAD/elements/
+
+        The actor will be propagated with SGP4, i.e. consistently with the model
+        that generated the TLE. Prefer this over set_orbit when your orbit data
+        comes from a TLE (see the note in set_orbit).
 
         Args:
             actor (SpacecraftActor): Actor to update.
@@ -261,7 +267,16 @@ class ActorBuilder:
         epoch: pk.epoch,
         central_body: pk.planet,
     ):
-        """Define the orbit of the actor
+        """Define the orbit of the actor as an analytical Keplerian two-body orbit.
+
+        Note that perturbations such as Earth oblateness (J2) and atmospheric drag
+        are not modelled by this orbit, so propagated positions increasingly deviate
+        from real satellite trajectories as the propagation horizon grows. For a
+        satellite in low Earth orbit, the deviation from the corresponding SGP4/TLE
+        trajectory typically reaches hundreds of kilometers within a few hours and
+        thousands of kilometers within a few days. If your position / velocity come
+        from a TLE, use set_TLE instead to propagate with SGP4. For higher-fidelity
+        propagators, use set_custom_orbit.
 
         Args:
             actor (BaseActor): The actor to define on
@@ -294,16 +309,44 @@ class ActorBuilder:
             actor (BaseActor): Actor set the position on.
             position (list): [x,y,z] position for SpacecraftActor.
         """
-        assert not isinstance(
-            actor, GroundstationActor
-        ), "Position changing not supported for GroundstationActors"
+        assert not isinstance(actor, GroundstationActor), (
+            "Position changing not supported for GroundstationActors"
+        )
 
         assert len(position) == 3, "Position has to be list of 3 floats."
-        assert all(
-            [isinstance(val, float) for val in position]
-        ), "Position has to be list of 3 floats."
+        assert all([isinstance(val, float) for val in position]), (
+            "Position has to be list of 3 floats."
+        )
         actor._position = position
         logger.debug(f"Setting position {position} on actor {actor}")
+
+    @staticmethod
+    def set_geometric_model(
+        actor: SpacecraftActor, mass: float, vertices=None, faces=None, scale: float = 1
+    ):
+        """Define geometry of the spacecraft actor. This is done in the spacecraft body reference frame, and can be
+        transformed to the inertial/PASEOS reference frame using the reference frane transformations in the attitude
+        model. When used in the attitude model, the geometric model is in the body reference frame.
+
+        Args:
+            actor (SpacecraftActor): Actor to update.
+            mass (float): Mass of the spacecraft in kg.
+            vertices (list): List of all vertices of the mesh in terms of distance (in m) from origin of body frame.
+                Coordinates of the corners of the object. If not selected, it will default to a cube that can be scaled.
+                by the scale. Uses Trimesh to create the mesh from this and the list of faces.
+            faces (list): List of the indexes of the vertices of a face. This builds the faces of the satellite by
+                defining the three vertices to form a triangular face. For a cuboid each face is split into two
+                triangles. Uses Trimesh to create the mesh from this and the list of vertices.
+            scale (float): Parameter to scale the cuboid by, defaults to 1.
+        """
+        assert mass > 0, "Mass is > 0"
+
+        actor._mass = mass
+        geometric_model = GeometricModel(
+            local_actor=actor, actor_mass=mass, vertices=vertices, faces=faces, scale=scale
+        )
+        actor._mesh = geometric_model.set_mesh()
+        actor._moment_of_inertia = geometric_model.find_moment_of_inertia
 
     @staticmethod
     def set_power_devices(
@@ -326,9 +369,9 @@ class ActorBuilder:
         """
 
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Power devices are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), (
+            "Power devices are only supported for SpacecraftActors"
+        )
 
         # If solar panel, check if the actor has a central body
         # to check eclipse
@@ -379,9 +422,9 @@ class ActorBuilder:
             failure_events_per_s (float): Complete device failure, events per second, i.e. a Single Event Latch-Up (SEL).
         """
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Radiation models are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), (
+            "Radiation models are only supported for SpacecraftActors"
+        )
 
         assert data_corruption_events_per_s >= 0, "data_corruption_events_per_s cannot be negative."
         assert restart_events_per_s >= 0, "restart_events_per_s cannot be negative."
@@ -436,9 +479,9 @@ class ActorBuilder:
             0 leads to know heat-up due to activity. Defaults to 0.5.
         """
         # check for spacecraft actor
-        assert isinstance(
-            actor, SpacecraftActor
-        ), "Thermal models are only supported for SpacecraftActors"
+        assert isinstance(actor, SpacecraftActor), (
+            "Thermal models are only supported for SpacecraftActors"
+        )
 
         # Check if the actor already had a thermal model
         if actor.has_thermal_model:
@@ -448,18 +491,18 @@ class ActorBuilder:
 
         assert actor_mass > 0, "Actor mass has to be positive."
 
-        assert (
-            0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0
-        ), "Heat ratio has to be 0 to 1."
+        assert 0 <= power_consumption_to_heat_ratio and power_consumption_to_heat_ratio <= 1.0, (
+            "Heat ratio has to be 0 to 1."
+        )
 
         logger.trace("Checking actor thermal values for sensibility.")
         assert 0 <= actor_initial_temperature_in_K, "Actor initial temperature cannot be below 0K."
-        assert (
-            0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0
-        ), "Absorptance has to be 0 to 1."
-        assert (
-            0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0
-        ), "Absorptance has to be 0 to 1."
+        assert 0 <= actor_sun_absorptance and actor_sun_absorptance <= 1.0, (
+            "Absorptance has to be 0 to 1."
+        )
+        assert 0 <= actor_infrared_absorptance and actor_infrared_absorptance <= 1.0, (
+            "Absorptance has to be 0 to 1."
+        )
         assert 0 < actor_sun_facing_area, "Sun-facing area has to be > 0."
         assert 0 < actor_central_body_facing_area, "Body-facing area has to be > 0."
         assert 0 < actor_emissive_area, "Actor emissive area has to be > 0."
@@ -469,9 +512,9 @@ class ActorBuilder:
         assert 0 < body_solar_irradiance, "Solar irradiance has to be > 0."
         assert 0 <= body_surface_temperature_in_K, "Body surface temperature cannot be below 0K."
         assert 0 <= body_emissivity and body_emissivity <= 1.0, "Body emissivity has to be 0 to 1"
-        assert (
-            0 <= body_reflectance and body_reflectance <= 1.0
-        ), "Body reflectance has to be 0 to 1"
+        assert 0 <= body_reflectance and body_reflectance <= 1.0, (
+            "Body reflectance has to be 0 to 1"
+        )
 
         actor._mass = actor_mass
         actor._thermal_model = ThermalModel(

@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# This workflow installs PASEOS with uv, runs a severe-error lint gate, and runs the test suite.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 name: Running tests
 
@@ -9,54 +9,51 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  lint_flake8:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Lint with flake8
-        run: |
-          pip install flake8
-          flake8 . --count --show-source --statistics --max-line-length=127 --ignore=E402,W503,E203
-
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # uv's standalone Python bundles tkinter, so headless matplotlib would pick an
+    # interactive backend and the visualization test's plt.show() would block.
+    env:
+      MPLBACKEND: Agg
+      PYTHONUNBUFFERED: "1"
     permissions:
       pull-requests: write
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.9
-      - name: Search for severe code errors with flake8
+          enable-cache: true
+      # pykep 2.6 (the 2.x API PASEOS uses) only ships pip wheels up to Python 3.8.
+      # conda users can run newer Python via environment.yml instead.
+      - name: Set up Python 3.8
+        run: uv python install 3.8
+      - name: Search for severe code errors with ruff
+        run: uvx ruff check . --select=E9,F63,F7,F82 --output-format=full
+      - name: Install PASEOS with dev dependencies
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          pip install flake8
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=127
-      - name: provision-with-micromamba
-        uses: mamba-org/provision-with-micromamba@main
-        with:
-          environment-file: environment.yml
-          environment-name: paseos
-          cache-downloads: true
+          uv venv --python 3.8
+          uv pip install -e ".[dev]"
       - name: Test with pytest
-        shell: bash -l {0}
+        # --no-sync so `uv run` uses the venv populated above instead of
+        # re-resolving (which would try to build pykep's broken sklearn shim).
         run: |
-          micromamba activate paseos
-          micromamba install pytest pytest-cov pytest-asyncio
-          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
+          set -e
+          set -o pipefail
+          uv run --no-sync pytest -v --timeout=180 --junitxml=pytest.xml --cov-report=xml:coverage.xml --cov-report=term-missing:skip-covered --cov=paseos paseos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
-        if: github.event_name == 'pull_request'
+        # Fork PRs get a read-only GITHUB_TOKEN no matter what `permissions` asks
+        # for, so posting the comment fails and marks the whole job red on green
+        # tests. Skip it there rather than switching to pull_request_target,
+        # which would run fork code with a writable token.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         with:
           pytest-coverage-path: ./pytest-coverage.txt
+          pytest-xml-coverage-path: ./coverage.xml
           title: Coverage Report
           badge-title: Overall Coverage
           hide-badge: false

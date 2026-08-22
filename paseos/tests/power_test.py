@@ -1,11 +1,10 @@
 """This test checks whether power charging is performed correctly"""
 
+import pykep as pk
 from test_utils import get_default_instance
 
 import paseos
 from paseos import ActorBuilder, SpacecraftActor
-
-import pykep as pk
 
 
 def test_power_charging():

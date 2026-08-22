@@ -1,9 +1,9 @@
 import csv
 
-from loguru import logger
-from dotmap import DotMap
-import pykep as pk
 import matplotlib.pyplot as plt
+import pykep as pk
+from dotmap import DotMap
+from loguru import logger
 
 from paseos.actors.base_actor import BaseActor
 
@@ -37,17 +37,17 @@ class OperationsMonitor:
             item (str): Name of item. Available are "timesteps","current_activity","state_of_charge",
             "is_in_eclipse","known_actors","position","velocity","temperature"
         """
-        assert item in (
-            list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+        )
         if item in self._log.custom_properties.keys():
             return self._log.custom_properties[item]
         return self._log[item]
 
     def plot(self, item):
-        assert item in (
-            list(self._log.keys()) + list(self._log.custom_properties.keys())
-        ), f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+        assert item in (list(self._log.keys()) + list(self._log.custom_properties.keys())), (
+            f"Untracked quantity. Available are {self._log.keys() + self._log.custom_properties.keys()}"
+        )
         if item in self._log.custom_properties.keys():
             values = self._log.custom_properties[item]
         else:

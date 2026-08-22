@@ -1,5 +1,5 @@
-from skspatial.objects import Sphere, LineSegment, Line, Point
 from loguru import logger
+from skspatial.objects import Line, LineSegment, Point, Sphere
 
 
 def sphere_between_points(point_1, point_2, sphere: Sphere, plot=False) -> bool:

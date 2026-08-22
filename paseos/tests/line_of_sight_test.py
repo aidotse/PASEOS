@@ -1,14 +1,14 @@
 """Tests to check line of sight computations."""
+
 import sys
 
 sys.path.append("../..")
 
-from paseos import SpacecraftActor, ActorBuilder, GroundstationActor
-from paseos.central_body.is_in_line_of_sight import is_in_line_of_sight
-
 import pykep as pk
-
 from test_utils import get_default_instance
+
+from paseos import ActorBuilder, GroundstationActor, SpacecraftActor
+from paseos.central_body.is_in_line_of_sight import is_in_line_of_sight
 
 
 def test_los_between_sats():

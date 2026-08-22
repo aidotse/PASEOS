@@ -18,3 +18,4 @@ dependencies:
   - sphinx_rtd_theme # for docs
   - toml>=0.10.2 # core non-optional dependency
   - tqdm>=4.64.1 # core non-optional dependency
+  - trimesh>=4.0.7  # for geometric model
