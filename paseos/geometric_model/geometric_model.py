@@ -1,5 +1,5 @@
-from loguru import logger
 import trimesh
+from loguru import logger
 
 
 class GeometricModel:

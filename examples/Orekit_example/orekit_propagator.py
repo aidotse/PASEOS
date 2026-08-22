@@ -1,16 +1,13 @@
-from org.orekit.orbits import KeplerianOrbit, PositionAngle
-from org.orekit.time import AbsoluteDate
-from org.orekit.utils import Constants
-from org.orekit.frames import FramesFactory
-from org.orekit.orbits import OrbitType
-from org.orekit.propagation.numerical import NumericalPropagator
-from org.hipparchus.ode.nonstiff import DormandPrince853Integrator
-from org.orekit.propagation import SpacecraftState
-from org.orekit.utils import IERSConventions
-from org.orekit.forces.gravity.potential import GravityFieldFactory
-from org.orekit.forces.gravity import HolmesFeatherstoneAttractionModel
-
 from orekit import JArray_double
+from org.hipparchus.ode.nonstiff import DormandPrince853Integrator
+from org.orekit.forces.gravity import HolmesFeatherstoneAttractionModel
+from org.orekit.forces.gravity.potential import GravityFieldFactory
+from org.orekit.frames import FramesFactory
+from org.orekit.orbits import KeplerianOrbit, OrbitType, PositionAngle
+from org.orekit.propagation import SpacecraftState
+from org.orekit.propagation.numerical import NumericalPropagator
+from org.orekit.time import AbsoluteDate
+from org.orekit.utils import Constants, IERSConventions
 
 
 class OrekitPropagator:

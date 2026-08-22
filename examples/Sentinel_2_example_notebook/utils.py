@@ -1,6 +1,6 @@
 import numpy as np
-import scipy
 import rasterio
+import scipy
 from skimage.measure import label, regionprops
 
 # [1] Massimetti, Francesco, et al. ""Volcanic hot-spot detection using SENTINEL-2:

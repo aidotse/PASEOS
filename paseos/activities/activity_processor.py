@@ -31,10 +31,9 @@ class ActivityProcessor:
         """
         logger.trace("Initalized ActivityProcessor.")
         assert update_interval > 0, "Update update_interval has to be positive."
-        assert (
-            power_consumption_in_watt >= 0
-        ), "Power consumption has to be positive but was specified as " + str(
-            power_consumption_in_watt
+        assert power_consumption_in_watt >= 0, (
+            "Power consumption has to be positive but was specified as "
+            + str(power_consumption_in_watt)
         )
 
         self._power_consumption_in_watt = power_consumption_in_watt

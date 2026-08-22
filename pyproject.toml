@@ -55,6 +55,11 @@ namespaces = true
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+# Notebooks were never formatted by the previous black setup (jupyter: false);
+# keep them out of ruff to avoid churning the example/tutorial notebooks.
+# Markdown is excluded too: newer ruff reformats python code blocks inside
+# .md files, which would churn the hand-written README/docs snippets.
+extend-exclude = ["*.ipynb", "*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

@@ -1,11 +1,13 @@
 """Test the ability to use a custom propagator in a paseos simulation."""
+
 import sys
 
 sys.path.append("../..")
 
 import numpy as np
 import pykep as pk
-from paseos import SpacecraftActor, ActorBuilder
+
+from paseos import ActorBuilder, SpacecraftActor
 
 
 def test_custom_propagator():

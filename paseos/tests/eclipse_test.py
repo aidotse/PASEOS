@@ -1,10 +1,10 @@
 """Test to check the eclipse function(s)"""
+
 import sys
 
 sys.path.append("../..")
 
 import pykep as pk
-
 from test_utils import get_default_instance
 
 

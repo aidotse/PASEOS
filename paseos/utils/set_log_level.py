@@ -1,5 +1,6 @@
-from loguru import logger
 import sys
+
+from loguru import logger
 
 
 def set_log_level(log_level: str):
