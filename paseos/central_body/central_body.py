@@ -220,6 +220,7 @@ class CentralBody:
         q = Quaternion(axis=self._rotation_axis, angle=angle)
         return q.rotate(point)
 
+
 def _safe_epoch_str(t) -> str:
     """String representation of a pykep epoch that cannot raise.
 
